@@ -1,3 +1,6 @@
+<!-- scriptedIllustrator_markup_uk4uPhB663kVcygT0q 
+#exit # scriptedIllustrator_markup_uk4uPhB663kVcygT0q 
+# <html style="size: letter;"> <!-- scriptedIllustrator_markup_uk4uPhB663kVcygT0q
 #!/usr/bin/env bash
 
 # Dependencies.
@@ -55,64 +58,192 @@ _document_main() {
 #b
 # NOTICE: DOCUMENT
 #__HEADER_uk4uPhB663kVcygT0q_HEADER__
-_t 'Copyright (C) 2022 Soaring Distributions LLC
+_t '
+scriptedIllustrator_markup_uk4uPhB663kVcygT0q --><!-- # --><pre style="margin-top: 0px;margin-bottom: 0px;white-space: pre-wrap;">
+Copyright (C) 2022 Soaring Distributions LLC
 See the end of the file for license conditions.
 See license.txt for ubDistBuild license conditions.
 
 
 Builds custom Linux distribution.
 
-Please contact manager mirage335 of Soaring Distributions LLC to relicense these build scripts. Default AGPLv3 license is NOT intended to discourage build services with custom modifications, ONLY desired to *encourage* contacting Soaring Distributions LLC.
+Please contact manager mirage335 of Soaring Distributions LLC to relicense 
+these build scripts. Default AGPLv3 license is NOT intended to discourage 
+build services with custom modifications, ONLY desired to *encourage* 
+contacting Soaring Distributions LLC.
 
-Specifically, Soaring Distributions LLC would prefer to see more CI services (eg. Github Actions) with long timeouts (>>6hours), and sufficient storage/bandwidth (>>100GB), rather than for displacement of such FLOSS compatible services by those only suitable for a narrower purpose possibly not immediately compatible with BIOS, EFI, LiveCD, LiveUSB, hibernation/bup, _userQemu, _userVBox, Cygwin/MSW, mixed and integrated GNU/Linux/MSW virtualization, etc (eg. possibly Vagrant Cloud, DockerCE/MSW, VPS cloud image builders). Linux LiveCD, LiveUSB, and the flexibility of hibernation/bup are especially necessary along with Cygwin/MSW to obviate such legacy issues as the inability to use WSL as a dependency (eg. due to non-availability of WSL2 for MSW server, MS track record, etc), inability to reliably run PowerShell scripts, poor quality of MSW scripting and programming syntax, etc. MSW track record of HyperV causing VMWare Workstation compatibility issues is also concerning.
+Specifically, Soaring Distributions LLC would prefer to see more CI 
+services (eg. Github Actions) with long timeouts (>>6hours), and sufficient 
+storage/bandwidth (>>100GB), rather than for displacement of such FLOSS 
+compatible services by those only suitable for a narrower purpose possibly 
+not immediately compatible with BIOS, EFI, LiveCD, LiveUSB, 
+hibernation/bup, _userQemu, _userVBox, Cygwin/MSW, mixed and integrated 
+GNU/Linux/MSW virtualization, etc (eg. possibly Vagrant Cloud, 
+DockerCE/MSW, VPS cloud image builders). Linux LiveCD, LiveUSB, and the 
+flexibility of hibernation/bup are especially necessary along with 
+Cygwin/MSW to obviate such legacy issues as the inability to use WSL as a 
+dependency (eg. due to non-availability of WSL2 for MSW server, MS track 
+record, etc), inability to reliably run PowerShell scripts, poor quality of 
+MSW scripting and programming syntax, etc. MSW track record of HyperV 
+causing VMWare Workstation compatibility issues is also concerning.
 
-Simply put, great flexibility is needed to ensure developers can use GNU/Linux with any available virtualization backend to workaround severe poor design and obvious conflicts of interest inherent to MSW. This build toolchain, as well as the AGPLv3 license, is mostly intended ONLY to protect the availability of that flexibility. *Relicensing* for any purpose not expected to immediately harm that flexibility, or which offsets any such risk, *is easy*.
+Simply put, great flexibility is needed to ensure developers can use 
+GNU/Linux with any available virtualization backend to workaround severe 
+poor design and obvious conflicts of interest inherent to MSW. This build 
+toolchain, as well as the AGPLv3 license, is mostly intended ONLY to 
+protect the availability of that flexibility. *Relicensing* for any purpose 
+not expected to immediately harm that flexibility, or which offsets any 
+such risk, *is easy*.
 
-Please contact manager mirage335 of Soaring Distributions LLC.'
-_t '
-
-
+Please contact manager mirage335 of Soaring Distributions LLC.
+<!-- # --></pre><!-- scriptedIllustrator_markup_uk4uPhB663kVcygT0q
 '
-_heading1 'Usage'
-_paragraph_begin
-_o _messagePlain_probe '_getBest clone --recursive --depth 1 git@github.com:soaringDistributions/ubDistBuild.git'
-_paragraph_end
-_paragraph_begin
 _t '
+scriptedIllustrator_markup_uk4uPhB663kVcygT0q --><!-- # --><pre style="margin-top: 0px;margin-bottom: 0px;white-space: pre-wrap;">
 
 
+<!-- # --></pre><!-- scriptedIllustrator_markup_uk4uPhB663kVcygT0q
 '
-_page
-_heading1 'Design'
-_paragraph_begin
-_t ' '
-_paragraph_end
+ '_heading1' 'Usage'
+if false; then true; # -->
+<!-- # --><h1>Usage</h1>
+<!--
+fi
+ '_paragraph_begin'
+if false; then true; # -->
+<!-- # --><p>
+<!--
+fi
+ '_o' '_messagePlain_probe' '_getBest clone --recursive --depth 1 git@github.com:soaringDistributions/ubDistBuild.git'
+if false; then true; # -->
+<!-- # --><pre style="-webkit-print-color-adjust: exact;background-color:#848484;margin-top: 0px;margin-bottom: 0px;white-space: pre-wrap;">
+<!-- # --><span style="color:#1818b2;background-color:#848484;"> _getBest clone --recursive --depth 1 git@github.com:soaringDistributions/ubDistBuild.git</span>
+<!-- # --></pre>
+<!--
+fi
+ '_paragraph_end'
+if false; then true; # -->
+<!-- # --></p>
+<!--
+fi
+ '_paragraph_begin'
+if false; then true; # -->
+<!-- # --><p>
+<!--
+fi
 _t '
+scriptedIllustrator_markup_uk4uPhB663kVcygT0q --><!-- # --><pre style="margin-top: 0px;margin-bottom: 0px;white-space: pre-wrap;">
 
 
+<!-- # --></pre><!-- scriptedIllustrator_markup_uk4uPhB663kVcygT0q
 '
-_page
-_heading1 'Safety'
-_paragraph_begin
-_t ' '
-_paragraph_end
+ '_page'
+if false; then true; # -->
+<!-- # --><div style="page-break-before: always;margin: 0;padding: 0; border-width: 0px;"> </div>
+<!--
+fi
+ '_heading1' 'Design'
+if false; then true; # -->
+<!-- # --><h1>Design</h1>
+<!--
+fi
+ '_paragraph_begin'
+if false; then true; # -->
+<!-- # --><p>
+<!--
+fi
 _t '
-
-
+scriptedIllustrator_markup_uk4uPhB663kVcygT0q --><!-- # --><pre style="margin-top: 0px;margin-bottom: 0px;white-space: pre-wrap;"> 
+<!-- # --></pre><!-- scriptedIllustrator_markup_uk4uPhB663kVcygT0q
 '
-_page
-_heading1 'Reference'
-_paragraph_begin
-_t ' '
-_paragraph_end
+ '_paragraph_end'
+if false; then true; # -->
+<!-- # --></p>
+<!--
+fi
 _t '
+scriptedIllustrator_markup_uk4uPhB663kVcygT0q --><!-- # --><pre style="margin-top: 0px;margin-bottom: 0px;white-space: pre-wrap;">
 
 
+<!-- # --></pre><!-- scriptedIllustrator_markup_uk4uPhB663kVcygT0q
 '
-_page
-_heading1 'Copyright'
-_paragraph_begin
+ '_page'
+if false; then true; # -->
+<!-- # --><div style="page-break-before: always;margin: 0;padding: 0; border-width: 0px;"> </div>
+<!--
+fi
+ '_heading1' 'Safety'
+if false; then true; # -->
+<!-- # --><h1>Safety</h1>
+<!--
+fi
+ '_paragraph_begin'
+if false; then true; # -->
+<!-- # --><p>
+<!--
+fi
 _t '
+scriptedIllustrator_markup_uk4uPhB663kVcygT0q --><!-- # --><pre style="margin-top: 0px;margin-bottom: 0px;white-space: pre-wrap;"> 
+<!-- # --></pre><!-- scriptedIllustrator_markup_uk4uPhB663kVcygT0q
+'
+ '_paragraph_end'
+if false; then true; # -->
+<!-- # --></p>
+<!--
+fi
+_t '
+scriptedIllustrator_markup_uk4uPhB663kVcygT0q --><!-- # --><pre style="margin-top: 0px;margin-bottom: 0px;white-space: pre-wrap;">
+
+
+<!-- # --></pre><!-- scriptedIllustrator_markup_uk4uPhB663kVcygT0q
+'
+ '_page'
+if false; then true; # -->
+<!-- # --><div style="page-break-before: always;margin: 0;padding: 0; border-width: 0px;"> </div>
+<!--
+fi
+ '_heading1' 'Reference'
+if false; then true; # -->
+<!-- # --><h1>Reference</h1>
+<!--
+fi
+ '_paragraph_begin'
+if false; then true; # -->
+<!-- # --><p>
+<!--
+fi
+_t '
+scriptedIllustrator_markup_uk4uPhB663kVcygT0q --><!-- # --><pre style="margin-top: 0px;margin-bottom: 0px;white-space: pre-wrap;"> 
+<!-- # --></pre><!-- scriptedIllustrator_markup_uk4uPhB663kVcygT0q
+'
+ '_paragraph_end'
+if false; then true; # -->
+<!-- # --></p>
+<!--
+fi
+_t '
+scriptedIllustrator_markup_uk4uPhB663kVcygT0q --><!-- # --><pre style="margin-top: 0px;margin-bottom: 0px;white-space: pre-wrap;">
+
+
+<!-- # --></pre><!-- scriptedIllustrator_markup_uk4uPhB663kVcygT0q
+'
+ '_page'
+if false; then true; # -->
+<!-- # --><div style="page-break-before: always;margin: 0;padding: 0; border-width: 0px;"> </div>
+<!--
+fi
+ '_heading1' 'Copyright'
+if false; then true; # -->
+<!-- # --><h1>Copyright</h1>
+<!--
+fi
+ '_paragraph_begin'
+if false; then true; # -->
+<!-- # --><p>
+<!--
+fi
+_t '
+scriptedIllustrator_markup_uk4uPhB663kVcygT0q --><!-- # --><pre style="margin-top: 0px;margin-bottom: 0px;white-space: pre-wrap;">
 This file is part of ubDistBuild.
 
 ubDistBuild is free software: you can redistribute it and/or modify
@@ -127,12 +258,22 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with ubDistBuild.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+<!-- # --></pre><!-- scriptedIllustrator_markup_uk4uPhB663kVcygT0q
 '
-_paragraph_end
+ '_paragraph_end'
+if false; then true; # -->
+<!-- # --></p>
+<!--
+fi
 _t '
+scriptedIllustrator_markup_uk4uPhB663kVcygT0q --><!-- # --><pre style="margin-top: 0px;margin-bottom: 0px;white-space: pre-wrap;">
 
 
+<!-- # --></pre><!-- scriptedIllustrator_markup_uk4uPhB663kVcygT0q
 '
+
+
+
 #__FOOTER_uk4uPhB663kVcygT0q_FOOTER__
 # NOTICE: DOCUMENT
 #y
@@ -335,3 +476,4 @@ exit 0
 __ATTACHMENT_uk4uPhB663kVcygT0q_ATTACHMENT__
 
 
+filename.html # scriptedIllustrator_markup_uk4uPhB663kVcygT0q --> </html>
