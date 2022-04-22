@@ -131,6 +131,8 @@ _create_ubDistBuild() {
 	[[ -e "$lock_open" ]]  && _messagePlain_bad 'bad: locked!' && _messageFAIL && _stop 1
 	[[ -e "$scriptLocal"/l_o ]]  && _messagePlain_bad 'bad: locked!' && _messageFAIL && _stop 1
 	
+	# TODO: FAIL if disk space insufficient.
+	
 	local imagedev
 	
 	_open
@@ -141,6 +143,7 @@ _create_ubDistBuild() {
 	
 	_messageNormal 'create: vm.img'
 	
+	# TODO: Reduce to smaller size. Useful information can be elsewhere after all, and disks can be resized with gparted .
 	export vmSize=50000
 	_createRawImage
 	

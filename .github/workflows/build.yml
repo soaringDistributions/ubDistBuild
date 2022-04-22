@@ -4,8 +4,8 @@
 # https://github.community/t/bigger-github-hosted-runners-disk-space/17267
 #  2vCPU, 7GiB RAM, 14GiB SSD
 #  16vCPU, 56GiB RAM, 112GiB SSD
-# Github Actions may have a higher capacity (presumably HDD) 'root' or 'C:\' disk, contrasted with the small 'Temp storage' SSD.
-# BuildJet may use some larger instances, at much higher price.
+# Github Actions may have a higher capacity (presumably HDD) or 'C:\' disk, contrasted with the small 'Temp storage' SSD. Apparently does not apply to Linux 'runners'.
+# BuildJet may use some larger instances, at much higher price. Apparently BuildJet instances have 61G .
 # Cloud VPS, through cloud-init and other APIs, may be much more cost effective.
 
 # ATTENTION: NOTICE: Consider replacing the current directory with a symlink to a larger filesystem, before checkout of repository.
@@ -35,6 +35,7 @@ jobs:
     #runs-on: ubuntu-latest
     #runs-on: ubuntu-20.04
     #runs-on: ubuntu-18.04
+    # Apparently both 'buildjet-2vcpu-ubuntu-2004' and 'buildjet-16vcpu-ubuntu-2004' have 61G .
     runs-on: buildjet-2vcpu-ubuntu-2004
     #runs-on: buildjet-16vcpu-ubuntu-2004
     steps:
