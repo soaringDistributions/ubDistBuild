@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='3954471406'
+export ub_setScriptChecksum_contents='368261536'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -36605,6 +36605,10 @@ _create_ubDistBuild() {
 	[[ -e "$lock_open" ]]  && _messagePlain_bad 'bad: locked!' && _messageFAIL && _stop 1
 	[[ -e "$scriptLocal"/l_o ]]  && _messagePlain_bad 'bad: locked!' && _messageFAIL && _stop 1
 	
+	! [[ $(df --block-size=1000000000 --output=avail "$scriptLocal" | tr -dc '0-9') -gt "35" ]] && _messageFAIL && _stop 1
+	
+	
+	
 	local imagedev
 	
 	_open
@@ -36615,7 +36619,7 @@ _create_ubDistBuild() {
 	
 	_messageNormal 'create: vm.img'
 	
-	export vmSize=50000
+	export vmSize=35000
 	_createRawImage
 	
 	
@@ -36897,6 +36901,7 @@ _custom_ubDistBuild() {
 
 _upload_ubDistBuild_image() {
 	cd "$scriptLocal"
+	! [[ -e "$scriptLocal"/ops.sh ]] && echo >> "$scriptLocal"/ops.sh
 	env XZ_OPT=-5 tar -cJvf "$scriptLocal"/package_image.tar.xz ./vm.img ./ops.sh
 	_rclone_limited "$scriptLocal"/package_image.tar.xz distLLC_build_ubDistBuild:
 }
@@ -36904,6 +36909,7 @@ _upload_ubDistBuild_image() {
 _upload_ubDistBuild_custom() {
 	# WARNING: May be untested.
 	#cd "$scriptLocal"
+	#! [[ -e "$scriptLocal"/ops.sh ]] && echo >> "$scriptLocal"/ops.sh
 	#env XZ_OPT=-5 tar -cJvf "$scriptLocal"/package_custom.tar.xz ./vm.img ./ops.sh
 	#_rclone_limited "$scriptLocal"/package_custom.tar.xz distLLC_build_ubDistBuild:
 	true
