@@ -428,6 +428,7 @@ _custom_ubDistBuild() {
 _upload_ubDistBuild_image() {
 	cd "$scriptLocal"
 	! [[ -e "$scriptLocal"/ops.sh ]] && echo >> "$scriptLocal"/ops.sh
+	rm -f "$scriptLocal"/package_image.tar.xz > /dev/null 2>&1
 	env XZ_OPT=-5 tar -cJvf "$scriptLocal"/package_image.tar.xz ./vm.img ./ops.sh
 	_rclone_limited "$scriptLocal"/package_image.tar.xz distLLC_build_ubDistBuild:
 }
@@ -436,6 +437,7 @@ _upload_ubDistBuild_custom() {
 	# WARNING: May be untested.
 	#cd "$scriptLocal"
 	#! [[ -e "$scriptLocal"/ops.sh ]] && echo >> "$scriptLocal"/ops.sh
+	#rm -f "$scriptLocal"/package_custom.tar.xz > /dev/null 2>&1
 	#env XZ_OPT=-5 tar -cJvf "$scriptLocal"/package_custom.tar.xz ./vm.img ./ops.sh
 	#_rclone_limited "$scriptLocal"/package_custom.tar.xz distLLC_build_ubDistBuild:
 	true
