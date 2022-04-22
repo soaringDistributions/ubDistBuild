@@ -119,6 +119,9 @@ _get_ubDistHome() {
 
 _create_ubDistBuild() {
 	_messageNormal '##### init: _create_ubDistBuild'
+	
+	mkdir -p "$scriptLocal"
+	
 	_set_ubDistBuild
 	
 	export vmImageFile="$scriptLocal"/vm.img
@@ -243,6 +246,32 @@ _create_ubDistBuild() {
 	echo 'UUID='"$ubVirtImageEFI_UUID"' /boot/efi vfat umask=0077 0 1' >> "$globalVirtFS"/etc/fstab
 	
 	
+	! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
+	
+	
+	
+	
+	
+	
+	
+	
+	_messageNormal 'chroot: config'
+	
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	imagedev=$(cat "$scriptLocal"/imagedev)
+	
+	# https://gist.github.com/varqox/42e213b6b2dde2b636ef#install-firmware
+	
+	export getMost_backend="chroot"
+	_set_getMost_backend "$@"
+	_set_getMost_backend_debian "$@"
+	_test_getMost_backend "$@"
+	
+	_getMost_backend apt-get update
+	
+	
+	_messagePlain_nominal 'ca-certificates, repositories, mirrors'
+	_getMost_backend_aptGetInstall ca-certificates
 	
 	
 	echo "default" | sudo -n tee "$globalVirtFS"/etc/hostname
@@ -273,7 +302,7 @@ CZXWXcRMTo8EmM8i4d
 	# https://docs.hetzner.com/robot/dedicated-server/operating-systems/hetzner-aptitude-mirror/
 	if wget -qO- --dns-timeout=15 --connect-timeout=15 --read-timeout=15 --timeout=15 https://mirror.hetzner.com > /dev/null
 	then
-		cat << CZXWXcRMTo8EmM8i4d | sudo -n tee "$globalVirtFS"/etc/apt/sources.list >> /dev/null
+		cat << CZXWXcRMTo8EmM8i4d | sudo -n tee -a "$globalVirtFS"/etc/apt/sources.list > /dev/null
 deb https://mirror.hetzner.com/debian/packages  bullseye           main contrib non-free
 deb https://mirror.hetzner.com/debian/packages  bullseye-updates   main contrib non-free
 deb https://mirror.hetzner.com/debian/security  bullseye-security  main contrib non-free
@@ -285,7 +314,7 @@ CZXWXcRMTo8EmM8i4d
 	fi
 	
 	
-	cat << CZXWXcRMTo8EmM8i4d | sudo -n tee "$globalVirtFS"/etc/apt/sources.list >> /dev/null
+	cat << CZXWXcRMTo8EmM8i4d | sudo -n tee -a "$globalVirtFS"/etc/apt/sources.list > /dev/null
 deb https://deb.debian.org/debian/ bullseye main contrib non-free
 deb-src https://deb.debian.org/debian/ bullseye main contrib non-free
 
@@ -302,27 +331,14 @@ deb-src http://deb.debian.org/debian bullseye-backports main contrib non-free
 
 CZXWXcRMTo8EmM8i4d
 	
-	
-	! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
-	
+	_getMost_backend apt-get update
 	
 	
-	
-	
+	_messagePlain_nominal 'ca-certificates'
+	_getMost_backend_aptGetInstall ca-certificates
 	
 	
 	
-	_messageNormal 'chroot: config'
-	
-	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
-	imagedev=$(cat "$scriptLocal"/imagedev)
-	
-	# https://gist.github.com/varqox/42e213b6b2dde2b636ef#install-firmware
-	
-	export getMost_backend="chroot"
-	_set_getMost_backend "$@"
-	_set_getMost_backend_debian "$@"
-	_test_getMost_backend "$@"
 	
 	
 	_messagePlain_nominal 'firmware-linux'

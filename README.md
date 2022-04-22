@@ -103,10 +103,10 @@ if false; then true; # -->
 <!-- # --><h1>Usage</h1>
 <!--
 fi
- '_o' '_messagePlain_probe' '_getBest clone --recursive --depth 1 git@github.com:soaringDistributions/ubDistBuild.git'
+ '_o' '_messagePlain_probe' '_gitBest clone --recursive --depth 1 git@github.com:soaringDistributions/ubDistBuild.git'
 if false; then true; # -->
 <!-- # --><pre style="-webkit-print-color-adjust: exact;background-color:#848484;margin-top: 0px;margin-bottom: 0px;white-space: pre-wrap;">
-<!-- # --><span style="color:#1818b2;background-color:#848484;"> _getBest clone --recursive --depth 1 git@github.com:soaringDistributions/ubDistBuild.git</span>
+<!-- # --><span style="color:#1818b2;background-color:#848484;"> _gitBest clone --recursive --depth 1 git@github.com:soaringDistributions/ubDistBuild.git</span>
 <!-- # --></pre>
 <!--
 fi

@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='1080398760'
+export ub_setScriptChecksum_contents='1924387196'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -36593,6 +36593,9 @@ _get_ubDistHome() {
 
 _create_ubDistBuild() {
 	_messageNormal '##### init: _create_ubDistBuild'
+	
+	mkdir -p "$scriptLocal"
+	
 	_set_ubDistBuild
 	
 	export vmImageFile="$scriptLocal"/vm.img
@@ -36798,6 +36801,7 @@ CZXWXcRMTo8EmM8i4d
 	_set_getMost_backend_debian "$@"
 	_test_getMost_backend "$@"
 	
+	_getMost_backend apt-get update
 	
 	_messagePlain_nominal 'firmware-linux'
 	_getMost_backend_aptGetInstall firmware-linux

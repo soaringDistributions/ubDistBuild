@@ -70,7 +70,7 @@ Simply put, great flexibility is needed to ensure developers can use GNU/Linux w
 
 Please contact manager mirage335 of Soaring Distributions LLC.'
 _heading1 'Usage'
-_o _messagePlain_probe '_getBest clone --recursive --depth 1 git@github.com:soaringDistributions/ubDistBuild.git'
+_o _messagePlain_probe '_gitBest clone --recursive --depth 1 git@github.com:soaringDistributions/ubDistBuild.git'
 _heading1 'Contributions'
 _t 'Due to the small scope of this project, contributors with pull requests are politely asked, but not necessarily required, to consider unambigiously assigning copyright to Soaring Distributions LLC. GPLv3 relicensing is expected most likely, though other scenarios are possibile if adequate flexibility to workaround MSW is essentially ensured.'
 _ _page
