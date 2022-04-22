@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='209490241'
+export ub_setScriptChecksum_contents='2733080507'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -36901,19 +36901,28 @@ _custom_ubDistBuild() {
 
 _upload_ubDistBuild_image() {
 	cd "$scriptLocal"
+	
 	! [[ -e "$scriptLocal"/ops.sh ]] && echo >> "$scriptLocal"/ops.sh
+	
 	rm -f "$scriptLocal"/package_image.tar.xz > /dev/null 2>&1
-	env XZ_OPT=-5 tar -cJvf "$scriptLocal"/package_image.tar.xz ./vm.img ./ops.sh
+	
+	# https://www.rootusers.com/gzip-vs-bzip2-vs-xz-performance-comparison/
+	env XZ_OPT="-3 -T0" tar -cJvf "$scriptLocal"/package_image.tar.xz ./vm.img ./ops.sh
+	
 	_rclone_limited "$scriptLocal"/package_image.tar.xz distLLC_build_ubDistBuild:
 }
 
 _upload_ubDistBuild_custom() {
-	# WARNING: May be untested.
-	#cd "$scriptLocal"
-	#! [[ -e "$scriptLocal"/ops.sh ]] && echo >> "$scriptLocal"/ops.sh
-	#rm -f "$scriptLocal"/package_custom.tar.xz > /dev/null 2>&1
-	#env XZ_OPT=-5 tar -cJvf "$scriptLocal"/package_custom.tar.xz ./vm.img ./ops.sh
-	#_rclone_limited "$scriptLocal"/package_custom.tar.xz distLLC_build_ubDistBuild:
+	cd "$scriptLocal"
+	
+	! [[ -e "$scriptLocal"/ops.sh ]] && echo >> "$scriptLocal"/ops.sh
+	
+	rm -f "$scriptLocal"/package_custom.tar.xz > /dev/null 2>&1
+	
+	# https://www.rootusers.com/gzip-vs-bzip2-vs-xz-performance-comparison/
+	env XZ_OPT="-3 -T0" tar -cJvf "$scriptLocal"/package_custom.tar.xz ./vm.img ./ops.sh
+	
+	_rclone_limited "$scriptLocal"/package_custom.tar.xz distLLC_build_ubDistBuild:
 	true
 }
 
