@@ -43,9 +43,10 @@ jobs:
       - name: users
         shell: bash
         run: |
-          sudo -u ubuntu -n bash -c 'sudo -n useradd runner --non-unique -u $UID -g $UID'
-          sudo -u ubuntu -n bash -c 'sudo -n groupadd runner --non-unique -g $UID'
-          sudo -u runner -n bash -c 'sudo -n echo $USER $UID'
+          sudo -u ubuntu -n bash -c 'sudo -n useradd runner --non-unique -u $UID -g $UID' || true
+          sudo -u ubuntu -n bash -c 'sudo -n groupadd runner --non-unique -g $UID' || true
+          sudo -u runner -n bash -c 'sudo -n echo $USER $UID' || true
+          true
       # Apparently may increase buildJet 'runner' to 77GB .
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
