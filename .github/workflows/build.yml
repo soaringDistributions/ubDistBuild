@@ -32,7 +32,7 @@ jobs:
     # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
     #  '7 GB of RAM memory'
     #  '14 GB of SSD disk space'
-    runs-on: ubuntu-latest
+    #runs-on: ubuntu-latest
     #runs-on: ubuntu-20.04
     #runs-on: ubuntu-18.04
     #runs-on: buildjet-2vcpu-ubuntu-2004
