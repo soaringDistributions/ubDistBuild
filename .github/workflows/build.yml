@@ -32,11 +32,11 @@ jobs:
     # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
     #  '7 GB of RAM memory'
     #  '14 GB of SSD disk space'
-    #runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
     #runs-on: ubuntu-20.04
     #runs-on: ubuntu-18.04
     # Apparently both 'buildjet-2vcpu-ubuntu-2004' and 'buildjet-16vcpu-ubuntu-2004' have 61G .
-    runs-on: buildjet-2vcpu-ubuntu-2004
+    #runs-on: buildjet-2vcpu-ubuntu-2004
     #runs-on: buildjet-16vcpu-ubuntu-2004
     # https://github.com/easimon/maximize-build-space
     steps:
@@ -46,6 +46,7 @@ jobs:
           sudo -u ubuntu -n bash -c 'sudo -n useradd runner --non-unique -u $UID -g $UID'
           sudo -u ubuntu -n bash -c 'sudo -n groupadd runner --non-unique -g $UID'
           sudo -u runner -n bash -c 'sudo -n echo $USER $UID'
+      # Apparently may increase buildJet 'runner' to 77GB .
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
         with:
