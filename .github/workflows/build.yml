@@ -40,6 +40,11 @@ jobs:
     #runs-on: buildjet-16vcpu-ubuntu-2004
     # https://github.com/easimon/maximize-build-space
     steps:
+      - name: users
+        shell: bash
+        run: |
+          sudo -u ubuntu -n bash -c 'sudo -n useradd runner --non-unique -u $UID -g $UID'
+          sudo -u runner -n bash -c 'sudo -n echo $USER $UID'
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
         with:
