@@ -35,8 +35,8 @@ jobs:
     #runs-on: ubuntu-latest
     #runs-on: ubuntu-20.04
     #runs-on: ubuntu-18.04
-    #runs-on: buildjet-2vcpu-ubuntu-2004
-    runs-on: buildjet-16vcpu-ubuntu-2004
+    runs-on: buildjet-2vcpu-ubuntu-2004
+    #runs-on: buildjet-16vcpu-ubuntu-2004
     steps:
       - name: _getCore_ub
         shell: bash
