@@ -36,7 +36,7 @@ jobs:
     #runs-on: ubuntu-20.04
     #runs-on: ubuntu-18.04
     #runs-on: buildjet-2vcpu-ubuntu-2004
-    #runs-on: buildjet-16vcpu-ubuntu-2004
+    runs-on: buildjet-16vcpu-ubuntu-2004
     steps:
       - name: _getCore_ub
         shell: bash
@@ -59,10 +59,10 @@ jobs:
         env:
           rclone_limited_conf_base64: ${{ secrets.rclone_limited_conf_base64 }}
         timeout-minutes: 5
-      - name: changeDisk
-        shell: bash
-        run: |
-          false
+      #- name: changeDisk
+        #shell: bash
+        #run: |
+          #false
       - uses: actions/checkout@v2
       - name: _getMinimal_cloud
         shell: bash
