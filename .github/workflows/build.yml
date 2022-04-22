@@ -1,5 +1,14 @@
 
 # WARNING: May be untested .
+# WARNING: As much as ~100GB temporary storage may be required.
+# https://github.community/t/bigger-github-hosted-runners-disk-space/17267
+#  2vCPU, 7GiB RAM, 14GiB SSD
+#  16vCPU, 56GiB RAM, 112GiB SSD
+# Github Actions may have a higher capacity (presumably HDD) 'root' or 'C:\' disk, contrasted with the small 'Temp storage' SSD.
+# BuildJet may use some larger instances, at much higher price.
+# Cloud VPS, through cloud-init and other APIs, may be much more cost effective.
+
+# ATTENTION: NOTICE: Consider replacing the current directory with a symlink to a larger filesystem, before checkout of repository.
 
 name: build
 on:
@@ -20,9 +29,14 @@ concurrency:
 
 jobs:
   build:
+    # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
+    #  '7 GB of RAM memory'
+    #  '14 GB of SSD disk space'
     runs-on: ubuntu-latest
     #runs-on: ubuntu-20.04
     #runs-on: ubuntu-18.04
+    #runs-on: buildjet-2vcpu-ubuntu-2004
+    #runs-on: buildjet-16vcpu-ubuntu-2004
     steps:
       - name: _getCore_ub
         shell: bash
@@ -66,16 +80,6 @@ jobs:
         shell: bash
         run: |
           ./_create_ubDistBuild.bat | sudo -n tee /_create_ubDistBuild.log
-      - name: _custom_ubDistBuild
-        shell: bash
-        run: |
-          ./_custom_ubDistBuild.bat | sudo -n tee /_custom_ubDistBuild.log
-        timeout-minutes: 355
-      - name: rclone
-        shell: bash
-        timeout-minutes: 355
-        run: |
-          rclone --progress --config /rclone.conf copy ./_local/vm.img distLLC_build_ubDistBuild
       - name: Setup tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3

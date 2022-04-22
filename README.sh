@@ -69,51 +69,22 @@ Specifically, Soaring Distributions LLC would prefer to see more CI services (eg
 Simply put, great flexibility is needed to ensure developers can use GNU/Linux with any available virtualization backend to workaround severe poor design and obvious conflicts of interest inherent to MSW. This build toolchain, as well as the AGPLv3 license, is mostly intended ONLY to protect the availability of that flexibility. *Relicensing* for any purpose not expected to immediately harm that flexibility, or which offsets any such risk, *is easy*.
 
 Please contact manager mirage335 of Soaring Distributions LLC.'
-_t '
-
-
-'
 _heading1 'Usage'
-_paragraph_begin
 _o _messagePlain_probe '_getBest clone --recursive --depth 1 git@github.com:soaringDistributions/ubDistBuild.git'
-_paragraph_end
-_paragraph_begin
-_t '
-
-
-'
-_page
-_heading1 'Design'
-_paragraph_begin
-_t ' '
-_paragraph_end
-_t '
-
-
-'
-_page
-_heading1 'Safety'
-_paragraph_begin
-_t ' '
-_paragraph_end
-_t '
-
-
-'
-_page
+_heading1 'Contributions'
+_t 'Due to the small scope of this project, contributors with pull requests are politely asked, but not necessarily required, to consider unambigiously assigning copyright to Soaring Distributions LLC. GPLv3 relicensing is expected most likely, though other scenarios are possibile if adequate flexibility to workaround MSW is essentially ensured.'
+_ _page
+_ _heading1 'Design'
+_ _page
+_ _heading1 'Safety'
+_ _page
 _heading1 'Reference'
-_paragraph_begin
-_t ' '
-_paragraph_end
-_t '
+_t 'https://www.kraxel.org/repos/jenkins/edk2/
 
-
-'
-_page
+https://www.kraxel.org/repos/jenkins/edk2/edk2.git-ovmf-x64-0-20200515.1447.g317d84abe3.noarch.rpm'
+_ _page
 _heading1 'Copyright'
-_paragraph_begin
-_t '
-This file is part of ubDistBuild.
+_t 'This file is part of ubDistBuild.
 
 ubDistBuild is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -126,13 +97,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
-along with ubDistBuild.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
-'
-_paragraph_end
-_t '
-
-
-'
+along with ubDistBuild.  If not, see &lt;http://www.gnu.org/licenses/&gt;.'
 #__FOOTER_uk4uPhB663kVcygT0q_FOOTER__
 # NOTICE: DOCUMENT
 #y
