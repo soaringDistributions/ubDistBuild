@@ -59,27 +59,35 @@ jobs:
         env:
           rclone_limited_conf_base64: ${{ secrets.rclone_limited_conf_base64 }}
         timeout-minutes: 5
+      - name: changeDisk
+        shell: bash
+        run: |
+          false
       - uses: actions/checkout@v2
       - name: _getMinimal_cloud
         shell: bash
         run: |
           ./ubiquitous_bash.sh _getMinimal_cloud
         timeout-minutes: 355
-      - name: _getCore_ubDistFetch
-        shell: bash
-        timeout-minutes: 355
-        run: |
-          #rclone --progress --config /rclone.conf copy distLLC_release:/ubDistFetch/core.tar.xz ./_lib/
-          ./_getCore_ubDistFetch.bat | sudo -n tee /_getCore_ubDistFetch.log
-      - name: _get_ubDistHome
-        shell: bash
-        timeout-minutes: 355
-        run: |
-          ./_get_ubDistHome.bat | sudo -n tee /_get_ubDistHome.log
+      #- name: _getCore_ubDistFetch
+        #shell: bash
+        #timeout-minutes: 355
+        #run: |
+          ##rclone --progress --config /rclone.conf copy distLLC_release:/ubDistFetch/core.tar.xz ./_lib/
+          #./_getCore_ubDistFetch.bat | sudo -n tee /_getCore_ubDistFetch.log
+      #- name: _get_ubDistHome
+        #shell: bash
+        #timeout-minutes: 355
+        #run: |
+          #./_get_ubDistHome.bat | sudo -n tee /_get_ubDistHome.log
       - name: _create_ubDistBuild
         shell: bash
         run: |
           ./_create_ubDistBuild.bat | sudo -n tee /_create_ubDistBuild.log
+      - name: _upload_ubDistBuild_image
+        shell: bash
+        run: |
+          ./_upload_ubDistBuild_image.bat | sudo -n tee /_upload_ubDistBuild_image.log
       - name: Setup tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
