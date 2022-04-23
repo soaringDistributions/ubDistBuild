@@ -250,7 +250,35 @@ _create_ubDistBuild() {
 	echo 'UUID='"$ubVirtImageEFI_UUID"' /boot/efi vfat umask=0077 0 1' >> "$globalVirtFS"/etc/fstab
 	
 	
+	hostnamectl set-hostname default
+	echo "default" | sudo -n tee "$globalVirtFS"/etc/hostname
+	cat << CZXWXcRMTo8EmM8i4d | sudo -n tee "$globalVirtFS"/etc/hosts > /dev/null
+127.0.0.1	localhost
+::1		localhost ip6-localhost ip6-loopback
+ff02::1		ip6-allnodes
+ff02::2		ip6-allrouters
+
+127.0.1.1	default
+
+CZXWXcRMTo8EmM8i4d
+	
+	
+	mkdir -p "$globalVirtFS"/etc/sddm.conf.d
+	
+	echo '[Autologin]
+User=user
+Session=plasma
+Relogin=true
+' > "$globalVirtFS"/etc/sddm.conf.d/autologin.conf
+	
+	
 	! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
+	
+	
+	
+	
+	
+	
 	
 	
 	
@@ -277,17 +305,6 @@ _create_ubDistBuild() {
 	_messagePlain_nominal 'ca-certificates, repositories, mirrors'
 	_getMost_backend_aptGetInstall ca-certificates
 	
-	
-	echo "default" | sudo -n tee "$globalVirtFS"/etc/hostname
-	cat << CZXWXcRMTo8EmM8i4d | sudo -n tee "$globalVirtFS"/etc/hosts > /dev/null
-127.0.0.1	localhost
-::1		localhost ip6-localhost ip6-loopback
-ff02::1		ip6-allnodes
-ff02::2		ip6-allrouters
-
-127.0.1.1	default
-
-CZXWXcRMTo8EmM8i4d
 	
 	
 	

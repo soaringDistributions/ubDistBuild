@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='1781035922'
+export ub_setScriptChecksum_contents='4126117344'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -9744,7 +9744,7 @@ _getMinimal_cloud() {
 	
 	# Apparently Github Actions does not have IPv6.
 	# https://github.com/actions/virtual-environments/issues/668#issuecomment-624080758
-	[[ "$CI" != "" ]] && _getMost_backend curl https://rclone.org/install.sh | _getMost_backend bash
+	[[ "$CI" != "" ]] && _getMost_backend curl -4 https://rclone.org/install.sh | _getMost_backend bash
 	
 	
 	
@@ -36756,7 +36756,34 @@ _create_ubDistBuild() {
 	echo 'UUID='"$ubVirtImageEFI_UUID"' /boot/efi vfat umask=0077 0 1' >> "$globalVirtFS"/etc/fstab
 	
 	
+	hostnamectl set-hostname default
+	echo "default" | sudo -n tee "$globalVirtFS"/etc/hostname
+	cat << CZXWXcRMTo8EmM8i4d | sudo -n tee "$globalVirtFS"/etc/hosts > /dev/null
+127.0.0.1	localhost
+::1		localhost ip6-localhost ip6-loopback
+ff02::1		ip6-allnodes
+ff02::2		ip6-allrouters
+
+127.0.1.1	default
+
+CZXWXcRMTo8EmM8i4d
+	
+	
+	mkdir -p "$globalVirtFS"/etc/sddm.conf.d
+	
+	echo '[Autologin]
+User=user
+Session=plasma
+Relogin=true' > "$globalVirtFS"/etc/sddm.conf.d/autologin.conf
+	
+	
 	! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
+	
+	
+	
+	
+	
+	
 	
 	
 	
@@ -36783,17 +36810,6 @@ _create_ubDistBuild() {
 	_messagePlain_nominal 'ca-certificates, repositories, mirrors'
 	_getMost_backend_aptGetInstall ca-certificates
 	
-	
-	echo "default" | sudo -n tee "$globalVirtFS"/etc/hostname
-	cat << CZXWXcRMTo8EmM8i4d | sudo -n tee "$globalVirtFS"/etc/hosts > /dev/null
-127.0.0.1	localhost
-::1		localhost ip6-localhost ip6-loopback
-ff02::1		ip6-allnodes
-ff02::2		ip6-allrouters
-
-127.0.1.1	default
-
-CZXWXcRMTo8EmM8i4d
 	
 	
 	
