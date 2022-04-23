@@ -563,7 +563,6 @@ _zSpecial_qemu() {
 	
 	qemuArgs+=(-device usb-tablet)
 	
-	#qemuArgs+=(-device virtio-vga,virgl=on -display gtk,gl=on)
 	
 	#qemuArgs+=(-device ich9-intel-hda -device hda-duplex)
 	
@@ -572,6 +571,7 @@ _zSpecial_qemu() {
 	
 	
 	#qemuArgs+=(-device virtio-vga,virgl=on -display gtk,gl=off)
+	##qemuArgs+=(-device virtio-vga,virgl=on -display gtk,gl=on)
 	
 	qemuArgs+=(-device qxl-vga)
 	
