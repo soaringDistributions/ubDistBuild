@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='1648989807'
+export ub_setScriptChecksum_contents='1781035922'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -9220,7 +9220,8 @@ _getMost_debian11_special_late() {
 	_getMost_backend_aptGetInstall curl
 	
 	_messagePlain_probe 'install: rclone'
-	_getMost_backend curl https://rclone.org/install.sh | _getMost_backend bash -s beta
+	#_getMost_backend curl https://rclone.org/install.sh | _getMost_backend bash -s beta
+	_getMost_backend curl https://rclone.org/install.sh | _getMost_backend bash
 }
 
 _getMost_debian11_install() {
@@ -9738,7 +9739,12 @@ _getMinimal_cloud() {
 	_getMost_backend_aptGetInstall curl
 	
 	_messagePlain_probe 'install: rclone'
-	_getMost_backend curl https://rclone.org/install.sh | _getMost_backend bash -s beta
+	#_getMost_backend curl https://rclone.org/install.sh | _getMost_backend bash -s beta
+	_getMost_backend curl https://rclone.org/install.sh | _getMost_backend bash
+	
+	# Apparently Github Actions does not have IPv6.
+	# https://github.com/actions/virtual-environments/issues/668#issuecomment-624080758
+	[[ "$CI" != "" ]] && _getMost_backend curl https://rclone.org/install.sh | _getMost_backend bash
 	
 	
 	
@@ -14874,6 +14880,10 @@ _testQEMU_x64-raspi() {
 	fi
 	
 	
+	sudo -n systemctl status binfmt-support 2>&1 | head -n 2 | grep -i 'chroot' > /dev/null && return 0
+	systemctl status binfmt-support 2>&1 | head -n 2 | grep -i 'chroot' > /dev/null && return 0
+	
+	
 	
 	if ! sudo -n cat /proc/sys/fs/binfmt_misc/* 2> /dev/null | grep qemu | grep 'arm$\|arm-static$\|arm-binfmt-P$\|arm-binfmt' > /dev/null 2>&1
 	then
@@ -14886,6 +14896,8 @@ _testQEMU_x64-raspi() {
 		echo 'binfmts does not mention qemu-armeb'
 		[[ "$INSTANCE_ID" == "" ]] && _stop 1
 	fi
+	
+	return 0
 }
 
 
@@ -16888,16 +16900,6 @@ _test_docker() {
 	#	_stop 1
 	#fi
 	
-	_permitDocker docker import "$scriptBin"/"dockerHello".tar "ubdockerhello" --change 'CMD ["/hello"]' > /dev/null 2>&1
-	if ! _permitDocker docker run "ubdockerhello" 2>&1 | grep 'hello world' > /dev/null 2>&1
-	then
-		echo 'failed ubdockerhello'
-		echo 'request: may require iptables legacy'
-		echo 'sudo -n update-alternatives --set iptables /usr/sbin/iptables-legacy'
-		echo 'sudo -n update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy'
-		_stop 1
-	fi
-	
 	if ! _discoverResource moby/contrib/mkimage.sh > /dev/null 2>&1 && ! _discoverResource docker/contrib/mkimage.sh
 	#if true
 	then
@@ -16910,6 +16912,21 @@ _test_docker() {
 	then
 		echo
 		echo 'some base images cannot be created without hello'
+	fi
+	
+	
+	
+	sudo -n systemctl status docker 2>&1 | head -n 2 | grep -i 'chroot' > /dev/null && return 0
+	systemctl status docker 2>&1 | head -n 2 | grep -i 'chroot' > /dev/null && return 0
+	
+	_permitDocker docker import "$scriptBin"/"dockerHello".tar "ubdockerhello" --change 'CMD ["/hello"]' > /dev/null 2>&1
+	if ! _permitDocker docker run "ubdockerhello" 2>&1 | grep 'hello world' > /dev/null 2>&1
+	then
+		echo 'failed ubdockerhello'
+		echo 'request: may require iptables legacy'
+		echo 'sudo -n update-alternatives --set iptables /usr/sbin/iptables-legacy'
+		echo 'sudo -n update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy'
+		_stop 1
 	fi
 }
 
@@ -22267,7 +22284,7 @@ _test_terraform() {
 #cloud
 
 
-#SSH, Force. Forcibly deletes old host key. Useful after 'rebuilding' a VPS using the same IP address, etc.
+# SSH, Force. Forcibly deletes old host key. Useful after 'rebuilding' a VPS using the same IP address, etc.
 # DANGER: Obiously, this is for brief cloud experiments with newly constructed computers for which security is either unimportant or all relavant other conditions are known.
 sshf() {
 	local currentUser
@@ -22298,6 +22315,18 @@ sshf() {
 	
 	[[ "$currentHostname" != "" ]] && ssh-keygen -R "$currentHostname" > /dev/null 2>&1
 	ssh -o "StrictHostKeyChecking no" "$@"
+}
+
+# VNC, through SSH, usually to server's actual display output, force. Expect this to work with Debian Buster x64, Raspbian, etc, as of 2022 .
+# May not be tested with Wayland (x11vnc equivalent may be necessary).
+vncf() {
+	local currentScript
+	currentScript="$scriptAbsoluteFolder"/ubiquitous_bash.sh
+	[[ ! -e "$currentScript" ]] && currentScript="$scriptAbsoluteLocation"
+	[[ ! -e "$currentScript" ]] && exit 1
+	
+	sshf "$@" echo true
+	"$currentScript" _vnc "$@"
 }
 
 
