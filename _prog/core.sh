@@ -250,7 +250,7 @@ _create_ubDistBuild() {
 	echo 'UUID='"$ubVirtImageEFI_UUID"' /boot/efi vfat umask=0077 0 1' | sudo -n tee -a "$globalVirtFS"/etc/fstab
 	
 	
-	hostnamectl set-hostname default
+	
 	echo "default" | sudo -n tee "$globalVirtFS"/etc/hostname
 	cat << CZXWXcRMTo8EmM8i4d | sudo -n tee "$globalVirtFS"/etc/hosts > /dev/null
 127.0.0.1	localhost
@@ -291,6 +291,10 @@ Relogin=true
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	imagedev=$(cat "$scriptLocal"/imagedev)
+	
+	
+	_chroot hostnamectl set-hostname default
+	
 	
 	# https://gist.github.com/varqox/42e213b6b2dde2b636ef#install-firmware
 	
@@ -564,6 +568,18 @@ _zSpecial_qemu() {
 	#qemuArgs+=(-device ich9-intel-hda -device hda-duplex)
 	
 	qemuArgs+=(-show-cursor)
+	
+	
+	
+	#qemuArgs+=(-device virtio-vga,virgl=on -display gtk,gl=off)
+	
+	qemuArgs+=(-device qxl-vga)
+	
+	#qemuArgs+=(-vga cirrus)
+	
+	#qemuArgs+=(-vga std)
+	
+	
 	
 	# hardware vt
 	if _testQEMU_hostArch_x64_hardwarevt

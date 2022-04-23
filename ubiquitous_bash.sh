@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='37628571'
+export ub_setScriptChecksum_contents='3168128186'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -7257,6 +7257,9 @@ _x11vnc_operations() {
 	[[ "$x11vnc_clip" != "" ]] && x11vncArgs+=(-clip "$x11vnc_clip")
 	[[ "$x11vnc_scale" != "" ]] && x11vncArgs+=(-scale "$x11vnc_scale")
 	[[ "$x11vnc_scale_cursor" != "" ]] && x11vncArgs+=(-cursor arrow -scale_cursor "$x11vnc_scale_cursor")
+	
+	_messagePlain_probe sudo -n loginctl unlock-sessions
+	sudo -n loginctl unlock-sessions
 	
 	_messagePlain_nominal 'Detecting and launching x11vnc.'
 	#x11vnc
@@ -36756,7 +36759,7 @@ _create_ubDistBuild() {
 	echo 'UUID='"$ubVirtImageEFI_UUID"' /boot/efi vfat umask=0077 0 1' | sudo -n tee -a "$globalVirtFS"/etc/fstab
 	
 	
-	hostnamectl set-hostname default
+	
 	echo "default" | sudo -n tee "$globalVirtFS"/etc/hostname
 	cat << CZXWXcRMTo8EmM8i4d | sudo -n tee "$globalVirtFS"/etc/hosts > /dev/null
 127.0.0.1	localhost
@@ -36797,6 +36800,10 @@ Relogin=true
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	imagedev=$(cat "$scriptLocal"/imagedev)
+	
+	
+	_chroot hostnamectl set-hostname default
+	
 	
 	# https://gist.github.com/varqox/42e213b6b2dde2b636ef#install-firmware
 	
@@ -37070,6 +37077,18 @@ _zSpecial_qemu() {
 	#qemuArgs+=(-device ich9-intel-hda -device hda-duplex)
 	
 	qemuArgs+=(-show-cursor)
+	
+	
+	
+	#qemuArgs+=(-device virtio-vga,virgl=on -display gtk,gl=off)
+	
+	qemuArgs+=(-device qxl-vga)
+	
+	#qemuArgs+=(-vga cirrus)
+	
+	#qemuArgs+=(-vga std)
+	
+	
 	
 	# hardware vt
 	if _testQEMU_hostArch_x64_hardwarevt
