@@ -385,6 +385,12 @@ CZXWXcRMTo8EmM8i4d
 	
 	
 	_messagePlain_nominal 'grub-install'
+	
+	# https://unix.stackexchange.com/questions/273329/can-i-install-grub2-on-a-flash-drive-to-boot-both-bios-and-uefi
+	#  'precondition for this to work is that you use GPT partitioning and that you have an BIOS boot partition (1 MiB is enough).'
+	#_chroot grub2-install --modules=part_msdos --target=i386-pc "$imagedev"
+
+	
 	_chroot grub-install --boot-directory=/boot --root-directory=/ --modules=part_msdos --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=debian --recheck --no-nvram --removable "$imagedev"
 	_chroot grub-install --boot-directory=/boot --root-directory=/ --modules=part_msdos --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=debian --recheck --no-nvram --removable "$imagedev""$ubVirtImagePartition"
 	
