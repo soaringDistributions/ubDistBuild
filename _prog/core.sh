@@ -435,7 +435,7 @@ _upload_ubDistBuild_image() {
 	# https://www.rootusers.com/gzip-vs-bzip2-vs-xz-performance-comparison/
 	env XZ_OPT="-3 -T0" tar -cJvf "$scriptLocal"/package_image.tar.xz ./vm.img ./ops.sh
 	
-	_rclone_limited "$scriptLocal"/package_image.tar.xz distLLC_build_ubDistBuild:
+	_rclone_limited --progress copy "$scriptLocal"/package_image.tar.xz distLLC_build_ubDistBuild:
 }
 
 _upload_ubDistBuild_custom() {
@@ -448,7 +448,7 @@ _upload_ubDistBuild_custom() {
 	# https://www.rootusers.com/gzip-vs-bzip2-vs-xz-performance-comparison/
 	env XZ_OPT="-3 -T0" tar -cJvf "$scriptLocal"/package_custom.tar.xz ./vm.img ./ops.sh
 	
-	_rclone_limited "$scriptLocal"/package_custom.tar.xz distLLC_build_ubDistBuild:
+	_rclone_limited --progress copy "$scriptLocal"/package_custom.tar.xz distLLC_build_ubDistBuild:
 	true
 }
 

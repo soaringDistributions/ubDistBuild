@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='2733080507'
+export ub_setScriptChecksum_contents='849739953'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -9840,6 +9840,9 @@ _getMinimal_cloud() {
 	_getMost_backend_aptGetInstall expect
 	
 	_getMost_backend_aptGetInstall libgtk2.0-0
+	
+	
+	_getMost_backend_aptGetInstall debootstrap
 	
 	
 	# May not be useful for anything, may cause delay or fail .
@@ -36909,7 +36912,7 @@ _upload_ubDistBuild_image() {
 	# https://www.rootusers.com/gzip-vs-bzip2-vs-xz-performance-comparison/
 	env XZ_OPT="-3 -T0" tar -cJvf "$scriptLocal"/package_image.tar.xz ./vm.img ./ops.sh
 	
-	_rclone_limited "$scriptLocal"/package_image.tar.xz distLLC_build_ubDistBuild:
+	_rclone_limited --progress copy "$scriptLocal"/package_image.tar.xz distLLC_build_ubDistBuild:
 }
 
 _upload_ubDistBuild_custom() {
@@ -36922,7 +36925,7 @@ _upload_ubDistBuild_custom() {
 	# https://www.rootusers.com/gzip-vs-bzip2-vs-xz-performance-comparison/
 	env XZ_OPT="-3 -T0" tar -cJvf "$scriptLocal"/package_custom.tar.xz ./vm.img ./ops.sh
 	
-	_rclone_limited "$scriptLocal"/package_custom.tar.xz distLLC_build_ubDistBuild:
+	_rclone_limited --progress copy "$scriptLocal"/package_custom.tar.xz distLLC_build_ubDistBuild:
 	true
 }
 
