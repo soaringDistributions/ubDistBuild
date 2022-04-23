@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='4126117344'
+export ub_setScriptChecksum_contents='37628571'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -36747,13 +36747,13 @@ _create_ubDistBuild() {
 	local ubVirtImagePartition_UUID
 	ubVirtImagePartition_UUID=$(sudo -n blkid -s UUID -o value "$imagedev""$ubVirtImagePartition" | tr -dc 'a-zA-Z0-9\-')
 	
-	echo 'UUID='"$ubVirtImagePartition_UUID"' / ext4 errors=remount-ro 0 1' > "$globalVirtFS"/etc/fstab
+	echo 'UUID='"$ubVirtImagePartition_UUID"' / ext4 errors=remount-ro 0 1' | sudo -n tee "$globalVirtFS"/etc/fstab
 	
 	
 	local ubVirtImageEFI_UUID
 	ubVirtImageEFI_UUID=$(sudo -n blkid -s UUID -o value "$imagedev""$ubVirtImageEFI" | tr -dc 'a-zA-Z0-9\-')
 	
-	echo 'UUID='"$ubVirtImageEFI_UUID"' /boot/efi vfat umask=0077 0 1' >> "$globalVirtFS"/etc/fstab
+	echo 'UUID='"$ubVirtImageEFI_UUID"' /boot/efi vfat umask=0077 0 1' | sudo -n tee -a "$globalVirtFS"/etc/fstab
 	
 	
 	hostnamectl set-hostname default
@@ -36769,12 +36769,13 @@ ff02::2		ip6-allrouters
 CZXWXcRMTo8EmM8i4d
 	
 	
-	mkdir -p "$globalVirtFS"/etc/sddm.conf.d
+	sudo -n mkdir -p "$globalVirtFS"/etc/sddm.conf.d
 	
 	echo '[Autologin]
 User=user
 Session=plasma
-Relogin=true' > "$globalVirtFS"/etc/sddm.conf.d/autologin.conf
+Relogin=true
+' | sudo -n tee "$globalVirtFS"/etc/sddm.conf.d/autologin.conf
 	
 	
 	! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
@@ -36815,8 +36816,8 @@ Relogin=true' > "$globalVirtFS"/etc/sddm.conf.d/autologin.conf
 	
 	# https://askubuntu.com/questions/135339/assign-highest-priority-to-my-local-repository
 	#  'There is no way to assign highest priority to local repository without using sources.list file. you must put them in top of "sources.list" if you want to assign highest priority to your local repo.'
-	mv "$globalVirtFS"/etc/apt/sources.list "$globalVirtFS"/etc/apt/sources.list.upstream
-	rm -f "$globalVirtFS"/etc/apt/sources.list
+	sudo -n mv "$globalVirtFS"/etc/apt/sources.list "$globalVirtFS"/etc/apt/sources.list.upstream
+	sudo -n rm -f "$globalVirtFS"/etc/apt/sources.list
 	
 	# https://wiki.debian.org/Cloud/MicrosoftAzure
 	# http://azure.archive.ubuntu.com/ubuntu
@@ -36895,6 +36896,12 @@ CZXWXcRMTo8EmM8i4d
 	_messageNormal 'chroot: bootloader'
 	
 	
+	#imagedev=$(cat "$scriptLocal"/imagedev)
+	
+	#export ubVirtImageEFI=p1
+	#export ubVirtImageSwap=p2
+	#export ubVirtImagePartition=p3
+	
 	_messagePlain_nominal 'install grub'
 	export getMost_backend="chroot"
 	_set_getMost_backend "$@"
@@ -36913,10 +36920,10 @@ CZXWXcRMTo8EmM8i4d
 	#_chroot grub2-install --modules=part_msdos --target=i386-pc "$imagedev"
 
 	
-	_chroot grub-install --boot-directory=/boot --root-directory=/ --modules=part_msdos --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=debian --recheck --no-nvram --removable "$imagedev"
-	_chroot grub-install --boot-directory=/boot --root-directory=/ --modules=part_msdos --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=debian --recheck --no-nvram --removable "$imagedev""$ubVirtImagePartition"
+	_messagePlain_probe_cmd _chroot grub-install --boot-directory=/boot --root-directory=/ --modules=part_msdos --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=debian --recheck --no-nvram --removable "$imagedev"
+	_messagePlain_probe_cmd _chroot grub-install --boot-directory=/boot --root-directory=/ --modules=part_msdos --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=debian --recheck --no-nvram --removable "$imagedev""$ubVirtImageEFI"
 	
-	_chroot grub-install --recheck "$imagedev"
+	_messagePlain_probe_cmd _chroot grub-install --boot-directory=/boot --root-directory=/ --modules=part_msdos --target=x86_64-efi --efi-directory=/boot/efi --recheck "$imagedev"
 	
 	#sudo -n mkdir -p "$globalVirtFS"/boot/efi/EFI/BOOT/
 	#sudo -n cp "$globalVirtFS"/boot/efi/EFI/debian/grubx64.efi "$globalVirtFS"/boot/efi/EFI/BOOT/bootx64.efi
