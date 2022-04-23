@@ -89,6 +89,10 @@ jobs:
         run: |
           ./ubiquitous_bash.sh _getMinimal_cloud
         timeout-minutes: 355
+      - name: _getMinimal_cloud
+        shell: bash
+        run: |
+          false
       #- name: _getCore_ubDistFetch
         #shell: bash
         #timeout-minutes: 355
