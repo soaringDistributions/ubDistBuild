@@ -450,9 +450,9 @@ CZXWXcRMTo8EmM8i4d
 	
 	_messageNormal 'chroot: rotten_install'
 	[[ ! -e "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh ]] && _messageFAIL
-	cp "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
+	sudo -n cp "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
 	[[ ! -e "$globalVirtFS"/rotten_install.sh ]] && _messageFAIL
-	chmod u+x "$globalVirtFS"/rotten_install.sh
+	sudo -n chmod u+x "$globalVirtFS"/rotten_install.sh
 	
 	! _chroot "$globalVirtFS"/rotten_install.sh _install && _messageFAIL
 	
