@@ -454,7 +454,7 @@ CZXWXcRMTo8EmM8i4d
 	[[ ! -e "$globalVirtFS"/rotten_install.sh ]] && _messageFAIL
 	chmod u+x "$globalVirtFS"/rotten_install.sh
 	
-	! "$globalVirtFS"/rotten_install.sh _install && _messageFAIL
+	! _chroot "$globalVirtFS"/rotten_install.sh _install && _messageFAIL
 	
 	
 	
