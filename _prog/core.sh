@@ -541,6 +541,28 @@ _create_ubDistBuild-bootOnce() {
 	fi
 	
 	
+	if ! "$scriptAbsoluteLocation" _create_ubDistBuild-bootOnce-qemu_sequence "$@"
+	then
+		_messageFAIL
+	fi
+	
+	if ! "$scriptAbsoluteLocation" _create_ubDistBuild-bootOnce-fsck_sequence "$@"
+	then
+		_messageFAIL
+	fi
+	
+	
+	if ! "$scriptAbsoluteLocation" _create_ubDistBuild-bootOnce-qemu_sequence "$@"
+	then
+		_messageFAIL
+	fi
+	
+	if ! "$scriptAbsoluteLocation" _create_ubDistBuild-bootOnce-fsck_sequence "$@"
+	then
+		_messageFAIL
+	fi
+	
+	
 	return 0
 }
 
