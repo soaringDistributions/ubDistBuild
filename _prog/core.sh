@@ -518,9 +518,11 @@ _create_ubDistBuild-bootOnce() {
 	
 	_messagePlain_probe sudo -n fsck -p "$imagedev""$ubVirtImageEFI"
 	sudo -n fsck -p "$imagedev""$ubVirtImageEFI"
+	sudo -n fsck -p "$imagedev""$ubVirtImageEFI"
 	[[ "$?" != "0" ]] && _messageFAIL
 	
 	_messagePlain_probe sudo -n e2fsck -p "$imagedev""$ubVirtImagePartition"
+	sudo -n e2fsck -p "$imagedev""$ubVirtImagePartition"
 	sudo -n e2fsck -p "$imagedev""$ubVirtImagePartition"
 	[[ "$?" != "0" ]] && _messageFAIL
 	
