@@ -480,7 +480,8 @@ _create_ubDistBuild-bootOnce_sequence() {
 	
 	"$scriptAbsoluteLocation" _zSpecial_qemu "$@" &
 	currentPID="$!"
-	currentPID_qemu=$(ps -ef --sort=start_time | grep qemu | grep -v grep | tr -dc '0-9')
+	sleep 6
+	currentPID_qemu=$(ps -ef --sort=start_time | grep qemu | grep -v grep | tr -dc '0-9 \n' | tail -n1 | sed 's/\ *//' | cut -f1 -d\  )
 	
 	#disown -h $currentPID
 	disown -a -h -r
@@ -489,10 +490,13 @@ _create_ubDistBuild-bootOnce_sequence() {
 	
 	_messagePlain_nominal 'wait: 480s'
 	sleep 480
+	_messagePlain_probe '$$= '$$
 	_messagePlain_probe_var currentPID
 	kill "$currentPID"
 	_messagePlain_probe_var currentPID_qemu
 	kill "$currentPID_qemu"
+	sleep 1
+	echo
 }
 _create_ubDistBuild-bootOnce() {
 	_messageNormal '##### init: _create_ubDistBuild-bootOnce'
@@ -704,10 +708,10 @@ _zSpecial_qemu() {
 	
 	if [[ "$qemuHeadless" != "true" ]]
 	then
-		_qemu_system_x86_64 "${qemuArgs[@]}" | tr -dc 'a-zA-Z0-9\n'
+		_qemu_system_x86_64 "${qemuArgs[@]}"
 		return
 	else
-		_qemu_system_x86_64 "${qemuArgs[@]}"
+		_qemu_system_x86_64 "${qemuArgs[@]}" | tr -dc 'a-zA-Z0-9\n'
 		return
 	fi
 }
