@@ -506,6 +506,26 @@ _create_ubDistBuild-bootOnce() {
 	then
 		_messageFAIL
 	fi
+	
+	
+	_messagePlain_nominal 'fsck'
+	
+	_set_ubDistBuild
+	
+	! "$scriptAbsoluteLocation" _openLoop && _messagePlain_bad 'fail: _openLoop' && _messageFAIL
+	imagedev=$(cat "$scriptLocal"/imagedev)
+	
+	
+	_messagePlain_probe sudo -n fsck -p "$imagedev""$ubVirtImageEFI"
+	sudo -n fsck -p "$imagedev""$ubVirtImageEFI"
+	[[ "$?" != "0" ]] && _messageFAIL
+	
+	_messagePlain_probe sudo -n e2fsck -p "$imagedev""$ubVirtImagePartition"
+	sudo -n e2fsck -p "$imagedev""$ubVirtImagePartition"
+	[[ "$?" != "0" ]] && _messageFAIL
+	
+	! "$scriptAbsoluteLocation" _closeLoop && _messagePlain_bad 'fail: _closeLoop' && _messageFAIL
+	
 	return 0
 }
 
