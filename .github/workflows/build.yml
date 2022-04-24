@@ -84,6 +84,8 @@ jobs:
         #run: |
           #false
       - uses: actions/checkout@v2
+        with:
+          submodules: recursive
       - name: _getMinimal_cloud
         shell: bash
         run: |
