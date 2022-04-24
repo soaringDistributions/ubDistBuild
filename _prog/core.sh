@@ -295,7 +295,11 @@ Relogin=true
 	
 	
 	
-	
+	_chroot dd if=/dev/zero of=/swapfile bs=1M count=1536
+	_chroot chmod 0600 /swapfile
+	_chroot mkswap /swapfile
+	#_chroot swapon /swapfile
+	_chroot echo '/swapfile swap swap defaults 0 0' | _chroot tee -a /etc/fstab
 	
 	
 	
@@ -463,8 +467,10 @@ _create_ubDistBuild-rotten_install() {
 	[[ ! -e "$globalVirtFS"/rotten_install.sh ]] && _messageFAIL
 	sudo -n chmod u+x "$globalVirtFS"/rotten_install.sh
 	
-	! _chroot /rotten_install.sh _install && _messageFAIL
 	
+	#echo | sudo tee "$globalVirtFS"/in_chroot
+	! _chroot /rotten_install.sh _install && _messageFAIL
+	#sudo rm -f "$globalVirtFS"/in_chroot
 	
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
@@ -472,7 +478,7 @@ _create_ubDistBuild-rotten_install() {
 }
 
 
-_create_ubDistBuild-bootOnce_sequence() {
+_create_ubDistBuild-bootOnce-qemu_sequence() {
 	export qemuHeadless="true"
 	
 	local currentPID
@@ -488,8 +494,8 @@ _create_ubDistBuild-bootOnce_sequence() {
 	disown -a -r
 	
 	
-	_messagePlain_nominal 'wait: 480s'
-	sleep 480
+	_messagePlain_nominal 'wait: 300s'
+	sleep 300
 	_messagePlain_probe '$$= '$$
 	_messagePlain_probe_var currentPID
 	kill "$currentPID"
@@ -498,16 +504,7 @@ _create_ubDistBuild-bootOnce_sequence() {
 	sleep 1
 	echo
 }
-_create_ubDistBuild-bootOnce() {
-	_messageNormal '##### init: _create_ubDistBuild-bootOnce'
-	
-	
-	if ! "$scriptAbsoluteLocation" _create_ubDistBuild-bootOnce_sequence "$@"
-	then
-		_messageFAIL
-	fi
-	
-	
+_create_ubDistBuild-bootOnce-fsck_sequence() {
 	_messagePlain_nominal 'fsck'
 	
 	_set_ubDistBuild
@@ -527,6 +524,22 @@ _create_ubDistBuild-bootOnce() {
 	[[ "$?" != "0" ]] && _messageFAIL
 	
 	! "$scriptAbsoluteLocation" _closeLoop && _messagePlain_bad 'fail: _closeLoop' && _messageFAIL
+	return 0
+}
+_create_ubDistBuild-bootOnce() {
+	_messageNormal '##### init: _create_ubDistBuild-bootOnce'
+	
+	
+	if ! "$scriptAbsoluteLocation" _create_ubDistBuild-bootOnce-qemu_sequence "$@"
+	then
+		_messageFAIL
+	fi
+	
+	if ! "$scriptAbsoluteLocation" _create_ubDistBuild-bootOnce-fsck_sequence "$@"
+	then
+		_messageFAIL
+	fi
+	
 	
 	return 0
 }
@@ -770,5 +783,9 @@ _refresh_anchors() {
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_labVBox
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_zSpecial_qemu
+	
+	
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_true
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_false
 }
 

@@ -106,6 +106,14 @@ jobs:
         #shell: bash
         #run: |
           #./_create_ubDistBuild | sudo -n tee ./_local/_create_ubDistBuild.log
+      - name: _true
+        shell: bash
+        run: |
+          ./_true | sudo -n tee ./_local/_true.log
+      - name: _false
+        shell: bash
+        run: |
+          ./_false | sudo -n tee ./_local/_false.log
       - name: _create_ubDistBuild-create
         shell: bash
         run: |
