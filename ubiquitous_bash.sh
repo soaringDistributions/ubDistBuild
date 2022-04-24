@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='1596006559'
+export ub_setScriptChecksum_contents='2050761255'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -37059,25 +37059,40 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	
 	local currentPID
 	local currentPID_qemu
+	local currentNumProc
 	
 	"$scriptAbsoluteLocation" _zSpecial_qemu "$@" &
 	currentPID="$!"
 	sleep 6
 	currentPID_qemu=$(ps -ef --sort=start_time | grep qemu | grep -v grep | tr -dc '0-9 \n' | tail -n1 | sed 's/\ *//' | cut -f1 -d\  )
 	
+	
 	#disown -h $currentPID
 	disown -a -h -r
 	disown -a -r
 	
 	
-	_messagePlain_nominal 'wait: 300s'
-	sleep 300
+	_messagePlain_nominal 'wait: 480s'
+	sleep 480
+	
+	
+	currentNumProc=$(ps -e | grep qemu-system-x86 | wc -l | tr -dc '0-9')
+	_messagePlain_probe_var currentNumProc
 	_messagePlain_probe '$$= '$$
 	_messagePlain_probe_var currentPID
 	kill "$currentPID"
 	_messagePlain_probe_var currentPID_qemu
 	kill "$currentPID_qemu"
 	sleep 1
+	
+	if [[ "$currentNumProc" == "1" ]]
+	then
+		pkill qemu-system-x86
+		sleep 3
+		pkill -KILL qemu-system-x86
+		sleep 3
+	fi
+	
 	echo
 }
 _create_ubDistBuild-bootOnce-fsck_sequence() {
