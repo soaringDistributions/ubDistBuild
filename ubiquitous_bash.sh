@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='1004038355'
+export ub_setScriptChecksum_contents='1436130264'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -3909,6 +3909,23 @@ _wait_umount() {
 	sudo -n umount "$1"
 	mountpoint "$1" > /dev/null 2>&1 || return 0
 	sleep 9
+	
+	
+	sudo -n umount "$1"
+	mountpoint "$1" > /dev/null 2>&1 || return 0
+	sleep 9
+	
+	sudo -n umount "$1"
+	mountpoint "$1" > /dev/null 2>&1 || return 0
+	sleep 9
+	
+	sudo -n umount "$1"
+	mountpoint "$1" > /dev/null 2>&1 || return 0
+	sleep 9
+	
+	sudo -n umount "$1"
+	mountpoint "$1" > /dev/null 2>&1 || return 0
+	sleep 3
 	
 	return 1
 } 
@@ -36676,8 +36693,8 @@ _get_ubDistHome() {
 
 
 
-_create_ubDistBuild() {
-	_messageNormal '##### init: _create_ubDistBuild'
+_create_ubDistBuild-create() {
+	_messageNormal '##### init: _create_ubDistBuild-create'
 	
 	mkdir -p "$scriptLocal"
 	
@@ -37005,9 +37022,18 @@ CZXWXcRMTo8EmM8i4d
 	
 	
 	
-	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	return 0
+}
+_create_ubDistBuild-rotten_install() {
+	_messageNormal '##### init: _create_ubDistBuild-rotten_install'
 	
 	_messageNormal 'chroot: rotten_install'
+	
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	imagedev=$(cat "$scriptLocal"/imagedev)
+	
+	
 	[[ ! -e "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh ]] && _messageFAIL
 	sudo -n cp "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
 	[[ ! -e "$globalVirtFS"/rotten_install.sh ]] && _messageFAIL
@@ -37018,9 +37044,55 @@ CZXWXcRMTo8EmM8i4d
 	
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	return 0
+}
+
+
+_create_ubDistBuild-bootOnce_sequence() {
+	export qemuHeadless="true"
+	
+	local currentPID
+	
+	"$scriptAbsoluteLocation" _zSpecial_qemu "$@" | tr -dc 'a-zA-Z0-9\n' &
+	currentPID="$!"
+	
+	#disown -h $currentPID
+	disown -a -h -r
+	disown -a -r
 	
 	
-	true
+	_messagePlain_nominal 'wait: 480s'
+	sleep 480
+	_messagePlain_probe_var currentPID
+	kill "$currentPID"
+}
+_create_ubDistBuild-bootOnce() {
+	_messageNormal '##### init: _create_ubDistBuild-bootOnce'
+	
+	
+	if ! "$scriptAbsoluteLocation" _create_ubDistBuild-bootOnce_sequence "$@"
+	then
+		_messageFAIL
+	fi
+	return 0
+}
+
+
+_create_ubDistBuild() {
+	if ! _create_ubDistBuild-create "$@"
+	then
+		_messageFAIL
+	fi
+	if ! _create_ubDistBuild-rotten_install "$@"
+	then
+		_messageFAIL
+	fi
+	if ! _create_ubDistBuild-bootOnce "$@"
+	then
+		_messageFAIL
+	fi
+	
+	return 0
 }
 
 
@@ -37053,19 +37125,20 @@ _upload_ubDistBuild_image() {
 	env XZ_OPT="-3 -T0" tar -cJvf "$scriptLocal"/package_image.tar.xz ./vm.img ./ops.sh
 	
 	_rclone_limited --progress copy "$scriptLocal"/package_image.tar.xz distLLC_build_ubDistBuild:
+	[[ "$?" != "0" ]] && _messageFAIL
+	
+	if ls -A -1 "$scriptLocal"/*.log
+	then
+		_rclone_limited --progress copy "$scriptLocal"/*.log distLLC_build_ubDistBuild:
+	fi
 }
 
 _upload_ubDistBuild_custom() {
 	cd "$scriptLocal"
 	
-	! [[ -e "$scriptLocal"/ops.sh ]] && echo >> "$scriptLocal"/ops.sh
+	#package_custom.tar.xz
+	# TODO
 	
-	rm -f "$scriptLocal"/package_custom.tar.xz > /dev/null 2>&1
-	
-	# https://www.rootusers.com/gzip-vs-bzip2-vs-xz-performance-comparison/
-	env XZ_OPT="-3 -T0" tar -cJvf "$scriptLocal"/package_custom.tar.xz ./vm.img ./ops.sh
-	
-	_rclone_limited --progress copy "$scriptLocal"/package_custom.tar.xz distLLC_build_ubDistBuild:
 	true
 }
 
@@ -37076,7 +37149,10 @@ _ubDistBuild() {
 	# TODO: partition, debootstrap, efi (sufficient to manually craft HOME/KDE package)
 	# TODO: rotten_install ... should copy from "_lib/ubiquitous_bash"
 	
-	_create_ubDistBuild
+	#_create_ubDistBuild
+	_create_ubDistBuild-create
+	_create_ubDistBuild-rotten_install
+	_create_ubDistBuild-bootOnce
 	
 	
 	_upload_ubDistBuild_image
@@ -37104,6 +37180,10 @@ _ubDistBuild() {
 # ATTENTION: Override with 'ops.sh' or similar.
 _zSpecial_qemu() {
 	_messagePlain_nominal 'init: _zSpecial_qemu'
+	
+	
+	[[ "$qemuHeadless" == "true" ]] && qemuArgs+=(-nographic)
+	
 	
 	qemuArgs+=(-usb)
 	
@@ -37200,6 +37280,10 @@ _refresh_anchors() {
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_ubDistHome
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-create
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-rotten_install
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-bootOnce
+	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_custom_ubDistBuild
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_upload_ubDistBuild_image

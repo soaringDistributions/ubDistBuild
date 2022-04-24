@@ -96,20 +96,32 @@ jobs:
         #timeout-minutes: 355
         #run: |
           ##rclone --progress --config /rclone.conf copy distLLC_release:/ubDistFetch/core.tar.xz ./_lib/
-          #./_getCore_ubDistFetch | sudo -n tee /_getCore_ubDistFetch.log
+          #./_getCore_ubDistFetch | sudo -n tee ./_local/_getCore_ubDistFetch.log
       #- name: _get_ubDistHome
         #shell: bash
         #timeout-minutes: 355
         #run: |
-          #./_get_ubDistHome | sudo -n tee /_get_ubDistHome.log
-      - name: _create_ubDistBuild
+          #./_get_ubDistHome | sudo -n tee ./_local/_get_ubDistHome.log
+      #- name: _create_ubDistBuild
+        #shell: bash
+        #run: |
+          #./_create_ubDistBuild | sudo -n tee ./_local/_create_ubDistBuild.log
+      - name: _create_ubDistBuild-create
         shell: bash
         run: |
-          ./_create_ubDistBuild | sudo -n tee /_create_ubDistBuild.log
+          ./_create_ubDistBuild-create | sudo -n tee ./_local/_create_ubDistBuild-create.log
+      - name: _create_ubDistBuild-rotten_install
+        shell: bash
+        run: |
+          ./_create_ubDistBuild-rotten_install | sudo -n tee ./_local/_create_ubDistBuild-rotten_install.log
+      - name: _create_ubDistBuild-bootOnce
+        shell: bash
+        run: |
+          ./_create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log
       - name: _upload_ubDistBuild_image
         shell: bash
         run: |
-          ./_upload_ubDistBuild_image | sudo -n tee /_upload_ubDistBuild_image.log
+          ./_upload_ubDistBuild_image | sudo -n tee ./_local/_upload_ubDistBuild_image.log
       - name: Setup tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
