@@ -106,6 +106,10 @@ jobs:
         #shell: bash
         #run: |
           #./_create_ubDistBuild | sudo -n tee ./_local/_create_ubDistBuild.log
+      - name: mkdir _local
+        shell: bash
+        run: |
+          mkdir -p ./_local
       - name: _true
         shell: bash
         run: |
