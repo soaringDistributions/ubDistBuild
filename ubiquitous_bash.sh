@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='3286245897'
+export ub_setScriptChecksum_contents='4210608820'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -14032,6 +14032,16 @@ _mountChRoot() {
 		sudo -n rm -f "$absolute1"/etc/resolv.conf > /dev/null 2>&1
 	fi
 	
+	
+	if [[ -e "$absolute1"/etc/resolv.conf ]] && [[ ! -e "$absolute1"/etc/resolv.conf.host ]] && [[ -e /etc/resolv.conf ]]
+	then
+		sudo -n cp -n "$absolute1"/etc/resolv.conf "$absolute1"/etc/resolv.conf.guest.bak
+		sudo -n mv -n "$absolute1"/etc/resolv.conf "$absolute1"/etc/resolv.conf.guest
+		sudo -n cp -n /etc/resolv.conf "$absolute1"/etc/resolv.conf.host
+		
+		sudo -n mf -f "$absolute1"/etc/resolv.conf.host "$absolute1"/etc/resolv.conf
+	fi
+	
 	if ! grep '8\.8\.8\.8' "$absolute1"/etc/resolv.conf > /dev/null 2>&1
 	then
 		echo 'nameserver 8.8.8.8' | sudo -n tee -a "$absolute1"/etc/resolv.conf > /dev/null 2>&1
@@ -14053,6 +14063,13 @@ _umountChRoot() {
 	
 	local absolute1
 	absolute1=$(_getAbsoluteLocation "$1")
+	
+	# && [[ -e "$absolute1"/etc/resolv.conf ]]
+	if [[ -e "$absolute1"/etc/resolv.conf.guest ]] && [[ ! -e "$absolute1"/etc/resolv.conf.host ]]
+	then
+		sudo -n mv -f "$absolute1"/etc/resolv.conf.guest "$absolute1"/etc/resolv.conf
+	fi
+	
 	
 	_wait_umount "$absolute1"/home/"$virtGuestUser"/project >/dev/null 2>&1
 	_wait_umount "$absolute1"/home/"$virtGuestUser" >/dev/null 2>&1
@@ -22293,7 +22310,7 @@ _test_terraform() {
 
 # SSH, Force. Forcibly deletes old host key. Useful after 'rebuilding' a VPS using the same IP address, etc.
 # DANGER: Obiously, this is for brief cloud experiments with newly constructed computers for which security is either unimportant or all relavant other conditions are known.
-sshf() {
+_sshf() {
 	local currentUser
 	local currentHostname
 	
@@ -22323,17 +22340,31 @@ sshf() {
 	[[ "$currentHostname" != "" ]] && ssh-keygen -R "$currentHostname" > /dev/null 2>&1
 	ssh -o "StrictHostKeyChecking no" "$@"
 }
+sshf() {
+	_sshf "$@"
+}
 
 # VNC, through SSH, usually to server's actual display output, force. Expect this to work with Debian Buster x64, Raspbian, etc, as of 2022 .
 # May not be tested with Wayland (x11vnc equivalent may be necessary).
-vncf() {
+_vncf() {
 	local currentScript
 	currentScript="$scriptAbsoluteFolder"/ubiquitous_bash.sh
 	[[ ! -e "$currentScript" ]] && currentScript="$scriptAbsoluteLocation"
 	[[ ! -e "$currentScript" ]] && exit 1
 	
-	sshf "$@" echo true
-	"$currentScript" _vnc "$@"
+	# 'root' user default
+	# Purpose is to access the GUI console (usually available through display manager as 'root' or through desktop session as 'user').
+	if [[ "$2" == "" ]] && [[ "$3" == "" ]] && [[ "$4" == "" ]] && [[ "$5" == "" ]]
+	then
+		"$currentScript" _sshf root@"$1" echo true
+		"$currentScript" _vnc root@"$1"
+	else
+		"$currentScript" _sshf "$@" echo true
+		"$currentScript" _vnc "$@"
+	fi
+}
+vncf() {
+	_vncf "$@"
 }
 
 
@@ -26160,6 +26191,16 @@ _setupUbiquitous() {
 	ln -sf "$ubcoreUBfile" "$ubHome"/bin/ubiquitous_bash.sh
 	ln -sf "$ubcoreUBfile" "$ubHome"/bin/_winehere
 	ln -sf "$ubcoreUBfile" "$ubHome"/bin/_winecfghere
+	
+	echo '#!/bin/bash
+"$HOME"/bin/ubiquitous_bash.sh _vncf "$@"' > "$ubHome"/bin/vncf
+	chmod u+x "$ubHome"/bin/vncf
+	
+	echo '#!/bin/bash
+"$HOME"/bin/ubiquitous_bash.sh _sshf "$@"' > "$ubHome"/bin/sshf
+	chmod u+x "$ubHome"/bin/vncf
+	
+	
 	
 	_setupUbiquitous_here > "$ubcoreFile"
 	_setupUbiquitous_accessories_bashrc >> "$ubcoreFile"
@@ -36807,7 +36848,9 @@ Relogin=true
 	imagedev=$(cat "$scriptLocal"/imagedev)
 	
 	
-	_chroot hostnamectl set-hostname default
+	
+	
+	
 	
 	
 	# https://gist.github.com/varqox/42e213b6b2dde2b636ef#install-firmware
@@ -36820,8 +36863,9 @@ Relogin=true
 	_getMost_backend apt-get update
 	
 	
-	_messagePlain_nominal 'ca-certificates, repositories, mirrors'
+	_messagePlain_nominal 'ca-certificates, repositories, mirrors, tasksel standard, hostnamectl'
 	_getMost_backend_aptGetInstall ca-certificates
+	
 	
 	
 	
@@ -36875,6 +36919,15 @@ CZXWXcRMTo8EmM8i4d
 	
 	_messagePlain_nominal 'ca-certificates'
 	_getMost_backend_aptGetInstall ca-certificates
+	
+	
+	
+	# ATTENTION: WARNING: tasksel
+	_chroot tasksel install standard
+	
+	
+	_getMost_backend_aptGetInstall hostnamectl
+	_chroot hostnamectl set-hostname default
 	
 	
 	
@@ -37004,6 +37057,7 @@ _upload_ubDistBuild_custom() {
 _ubDistBuild() {
 	
 	# TODO: partition, debootstrap, efi (sufficient to manually craft HOME/KDE package)
+	# TODO: rotten_install ... should copy from "_lib/ubiquitous_bash"
 	
 	_create_ubDistBuild
 	
@@ -37018,6 +37072,9 @@ _ubDistBuild() {
 	
 	_get_ubDistHome
 	
+	
+	
+# 	# NOTICE: Users and such - 'rotten_install' - must have been done already (or 'user' for KDE autologin to craft HOME/KDE package would not exist) .
 	
 	_custom_ubDistBuild
 	

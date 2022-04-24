@@ -294,7 +294,9 @@ Relogin=true
 	imagedev=$(cat "$scriptLocal"/imagedev)
 	
 	
-	_chroot hostnamectl set-hostname default
+	
+	
+	
 	
 	
 	# https://gist.github.com/varqox/42e213b6b2dde2b636ef#install-firmware
@@ -307,8 +309,9 @@ Relogin=true
 	_getMost_backend apt-get update
 	
 	
-	_messagePlain_nominal 'ca-certificates, repositories, mirrors'
+	_messagePlain_nominal 'ca-certificates, repositories, mirrors, tasksel standard, hostnamectl'
 	_getMost_backend_aptGetInstall ca-certificates
+	
 	
 	
 	
@@ -362,6 +365,15 @@ CZXWXcRMTo8EmM8i4d
 	
 	_messagePlain_nominal 'ca-certificates'
 	_getMost_backend_aptGetInstall ca-certificates
+	
+	
+	
+	# ATTENTION: WARNING: tasksel
+	_chroot tasksel install standard
+	
+	
+	_getMost_backend_aptGetInstall hostnamectl
+	_chroot hostnamectl set-hostname default
 	
 	
 	
@@ -491,6 +503,7 @@ _upload_ubDistBuild_custom() {
 _ubDistBuild() {
 	
 	# TODO: partition, debootstrap, efi (sufficient to manually craft HOME/KDE package)
+	# TODO: rotten_install ... should copy from "_lib/ubiquitous_bash"
 	
 	_create_ubDistBuild
 	
@@ -505,6 +518,9 @@ _ubDistBuild() {
 	
 	_get_ubDistHome
 	
+	
+	
+# 	# NOTICE: Users and such - 'rotten_install' - must have been done already (or 'user' for KDE autologin to craft HOME/KDE package would not exist) .
 	
 	_custom_ubDistBuild
 	
