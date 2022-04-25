@@ -237,6 +237,11 @@ _create_ubDistBuild-create() {
 	
 	_messageNormal 'os: globalVirtFS: write: fs'
 	
+	
+	sudo -n mkdir -p "$globalVirtFS"/media/bootdisc
+	sudo -n chmod 755 "$globalVirtFS"/media/bootdisc
+	
+	
 	# https://gist.github.com/varqox/42e213b6b2dde2b636ef#edit-fstab-file
 	
 	local ubVirtImagePartition_UUID
@@ -251,8 +256,6 @@ _create_ubDistBuild-create() {
 	echo 'UUID='"$ubVirtImageEFI_UUID"' /boot/efi vfat umask=0077 0 1' | sudo -n tee -a "$globalVirtFS"/etc/fstab
 	
 	echo 'LABEL=uk4uPhB663kVcygT0q /media/bootdisc iso9660 ro,nofail 0 0' | sudo -n tee -a "$globalVirtFS"/etc/fstab
-	
-	echo | sudo -n tee -a "$globalVirtFS"/etc/fstab
 	
 	
 	
@@ -563,14 +566,21 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	#disown -a -r
 	
 	
-	_messagePlain_nominal 'wait: 480s'
-	sleep 480
+	_messagePlain_nominal 'wait: 600s'
+	local currentIteration
+	while [[ "$currentIteration" -lt 600 ]] && ( pgrep qemu-system || pgrep qemu || ps -p "$currentPID" )
+	do
+		sleep 1
+		let currentIteration=currentIteration+1
+	done
+	sleep 27
 	
 	
 	# May not be necessary. Theoretically redundant.
 	local currentStopJobs
 	currentStopJobs=$(jobs -p -r 2> /dev/null)
-	[[ "$currentStopJobs" != "" ]] && kill "$currentStopJobs" > /dev/null 2>&1
+	_messagePlain_probe_var currentStopJobs
+	[[ "$currentStopJobs" != "" ]] && kill "$currentStopJobs"
 	
 	#disown -h $currentPID
 	disown -a -h -r
@@ -622,10 +632,13 @@ _create_ubDistBuild-bootOnce-fsck_sequence() {
 _create_ubDistBuild-bootOnce() {
 	_messageNormal '##### init: _create_ubDistBuild-bootOnce'
 	
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
 	sudo -n mkdir -p "$globalVirtFS"/home/user/.config/autostart
 	_chroot chown -R user:user "$globalVirtFS"/home/user/.config
 	_here_bootdisc_statup_xdg | sudo tee "$globalVirtFS"/home/user/.config/autostart/startup.desktop
+	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
 	
 	local currentIteration
@@ -754,8 +767,9 @@ _ubDistBuild() {
 
 
 # ATTENTION: Override with 'ops.sh' or similar.
-_zSpecial_qemu() {
+_zSpecial_qemu_sequence() {
 	_messagePlain_nominal 'init: _zSpecial_qemu'
+	_start
 	
 	
 	#if [[ "$qemuHeadless" == "true" ]]
@@ -876,11 +890,20 @@ _zSpecial_qemu() {
 	if [[ "$qemuHeadless" != "true" ]]
 	then
 		_qemu_system_x86_64 "${qemuArgs[@]}"
-		return
+		_stop "$?"
 	else
 		_qemu_system_x86_64 "${qemuArgs[@]}" | tr -dc 'a-zA-Z0-9\n'
-		return
+		_stop "$?"
 	fi
+	
+	_stop 0
+}
+_zSpecial_qemu() {
+	if ! "$scriptAbsoluteLocation" _zSpecial_qemu_sequence "$@"
+	then
+		_messageFAIL
+	fi
+	return 0
 }
 
 
