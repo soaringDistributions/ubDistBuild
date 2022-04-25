@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='865090815'
+export ub_setScriptChecksum_contents='1461061318'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -37145,13 +37145,23 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	currentPID_qemu=$(ps -ef --sort=start_time | grep qemu | grep -v grep | tr -dc '0-9 \n' | tail -n1 | sed 's/\ *//' | cut -f1 -d\  )
 	
 	
-	#disown -h $currentPID
-	disown -a -h -r
-	disown -a -r
+	##disown -h $currentPID
+	#disown -a -h -r
+	#disown -a -r
 	
 	
 	_messagePlain_nominal 'wait: 480s'
 	sleep 480
+	
+	
+	# May not be necessary. Theoretically redundant.
+	local currentStopJobs
+	currentStopJobs=$(jobs -p -r 2> /dev/null)
+	[[ "$currentStopJobs" != "" ]] && kill "$currentStopJobs" > /dev/null 2>&1
+	
+	#disown -h $currentPID
+	disown -a -h -r
+	disown -a -r
 	
 	
 	currentNumProc=$(ps -e | grep qemu-system-x86 | wc -l | tr -dc '0-9')
@@ -37202,7 +37212,7 @@ _create_ubDistBuild-bootOnce() {
 	
 	sudo -n mkdir -p "$globalVirtFS"/home/user/.config/autostart
 	_chroot chown -R user:user "$globalVirtFS"/home/user/.config
-	_here_bootdisc_statup_xdg | sudo tee "$globalVirtFS"/home/user/.config/autostart
+	_here_bootdisc_statup_xdg | sudo tee "$globalVirtFS"/home/user/.config/autostart/startup.desktop
 	
 	
 	local currentIteration
