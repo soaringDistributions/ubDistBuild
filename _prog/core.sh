@@ -633,7 +633,10 @@ _upload_ubDistBuild_image() {
 	
 	if ls -A -1 "$scriptLocal"/*.log
 	then
-		_rclone_limited --progress copy "$scriptLocal"/*.log distLLC_build_ubDistBuild:
+		_rclone_limited --progress copy "$scriptLocal"/_create_ubDistBuild-create.log distLLC_build_ubDistBuild:
+		_rclone_limited --progress copy "$scriptLocal"/_create_ubDistBuild-rotten_install.log distLLC_build_ubDistBuild:
+		_rclone_limited --progress copy "$scriptLocal"/_create_ubDistBuild-bootOnce.log distLLC_build_ubDistBuild:
+		_rclone_limited --progress copy "$scriptLocal"/_upload_ubDistBuild_image.log distLLC_build_ubDistBuild:
 	fi
 }
 
