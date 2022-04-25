@@ -250,6 +250,10 @@ _create_ubDistBuild-create() {
 	
 	echo 'UUID='"$ubVirtImageEFI_UUID"' /boot/efi vfat umask=0077 0 1' | sudo -n tee -a "$globalVirtFS"/etc/fstab
 	
+	echo 'LABEL=uk4uPhB663kVcygT0q /media/bootdisc iso9660 ro,nofail 0 0' | sudo -n tee -a "$globalVirtFS"/etc/fstab
+	
+	echo | sudo -n tee -a "$globalVirtFS"/etc/fstab
+	
 	
 	
 	echo "default" | sudo -n tee "$globalVirtFS"/etc/hostname
@@ -385,6 +389,67 @@ CZXWXcRMTo8EmM8i4d
 	
 	_messagePlain_nominal 'firmware-linux'
 	_getMost_backend_aptGetInstall firmware-linux
+	_getMost_backend_aptGetInstall firmware-linux-free
+	_getMost_backend_aptGetInstall firmware-linux-nonfree
+	_getMost_backend_aptGetInstall firmware-misc-nonfree
+	
+	_getMost_backend_aptGetInstall firmware-iwlwifi
+	_getMost_backend_aptGetInstall firmware-realtek
+	_getMost_backend_aptGetInstall firmware-ralink
+	_getMost_backend_aptGetInstall firmware-qcom-media
+	_getMost_backend_aptGetInstall firmware-qcom-soc
+	_getMost_backend_aptGetInstall firmware-ti-connectivity
+	_getMost_backend_aptGetInstall firmware-amd-graphics
+	_getMost_backend_aptGetInstall firmware-myricom
+	_getMost_backend_aptGetInstall firmware-ath9k-htc
+	_getMost_backend_aptGetInstall firmware-samsung
+	_getMost_backend_aptGetInstall firmware-atheros
+	_getMost_backend_aptGetInstall firmware-libertas
+	_getMost_backend_aptGetInstall firmware-netxen
+	_getMost_backend_aptGetInstall firmware-intelwimax
+	_getMost_backend_aptGetInstall firmware-brcm80211
+	_getMost_backend_aptGetInstall firmware-intel-sound
+	_getMost_backend_aptGetInstall firmware-cavium
+	_getMost_backend_aptGetInstall firmware-b43legacy-installer
+	_getMost_backend_aptGetInstall firmware-qlogic
+	_getMost_backend_aptGetInstall firmware-adi
+	_getMost_backend_aptGetInstall firmware-tomu
+	_getMost_backend_aptGetInstall firmware-zd1211
+	_getMost_backend_aptGetInstall firmware-crystalhd
+	_getMost_backend_aptGetInstall firmware-netronome
+	_getMost_backend_aptGetInstall firmware-b43-installer
+	_getMost_backend_aptGetInstall firmware-bnx2x
+	_getMost_backend_aptGetInstall firmware-ath9k-htc-dbgsym
+	_getMost_backend_aptGetInstall firmware-b43-lpphy-installer
+	_getMost_backend_aptGetInstall firmware-bnx2
+	_getMost_backend_aptGetInstall firmware-siano
+	_getMost_backend_aptGetInstall firmware-sof-signed
+	
+	_getMost_backend_aptGetInstall bladerf-firmware-fx3
+	_getMost_backend_aptGetInstall bluez-firmware
+	_getMost_backend_aptGetInstall atmel-firmware
+	
+	
+	_getMost_backend_aptGetInstall firmware-ipw2x00
+	_chroot sh -c 'echo "debconf firmware-ipw2x00/license/accepted select true" | debconf-set-selections'
+	# https://github.com/unman/notes/blob/master/apt_automation
+	
+	# ATTENTION: Obviously, broadcast TV is not a 'bootstrapping' prerequsite, this can be easily removed from default if necessary.
+	_chroot sh -c 'echo "debconf firmware-ivtv/license/accepted select true" | debconf-set-selections'
+	_getMost_backend_aptGetInstall firmware-ivtv
+	
+	
+	sudo -n cp "$scriptLib"/setup/debian/firmware-realtek_20210818-1_all.deb "$globalVirtFS"/
+	if _chroot ls -A -1 /firmware-realtek_20210818-1_all.deb > /dev/null
+	then
+		_chroot dpkg -i /firmware-realtek_20210818-1_all.deb
+	else
+		_chroot wget http://ftp.us.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-realtek_20210818-1_all.deb
+		_chroot dpkg -i ./firmware-realtek_20210818-1_all.deb
+	fi
+	
+	
+	
 	
 	_messagePlain_nominal 'tzdata, locales'
 	_getMost_backend_aptGetInstall tzdata
@@ -548,37 +613,27 @@ _create_ubDistBuild-bootOnce() {
 	_messageNormal '##### init: _create_ubDistBuild-bootOnce'
 	
 	
-	if ! "$scriptAbsoluteLocation" _create_ubDistBuild-bootOnce-qemu_sequence "$@"
-	then
-		_messageFAIL
-	fi
-	
-	if ! "$scriptAbsoluteLocation" _create_ubDistBuild-bootOnce-fsck_sequence "$@"
-	then
-		_messageFAIL
-	fi
+	sudo -n mkdir -p "$globalVirtFS"/home/user/.config/autostart
+	_chroot chown -R user:user "$globalVirtFS"/home/user/.config
+	_here_bootdisc_statup_xdg | sudo tee "$globalVirtFS"/home/user/.config/autostart
 	
 	
-	if ! "$scriptAbsoluteLocation" _create_ubDistBuild-bootOnce-qemu_sequence "$@"
-	then
-		_messageFAIL
-	fi
+	local currentIteration
 	
-	if ! "$scriptAbsoluteLocation" _create_ubDistBuild-bootOnce-fsck_sequence "$@"
-	then
-		_messageFAIL
-	fi
-	
-	
-	if ! "$scriptAbsoluteLocation" _create_ubDistBuild-bootOnce-qemu_sequence "$@"
-	then
-		_messageFAIL
-	fi
-	
-	if ! "$scriptAbsoluteLocation" _create_ubDistBuild-bootOnce-fsck_sequence "$@"
-	then
-		_messageFAIL
-	fi
+	for currentIteration in $(seq 1 4)
+	do
+		_messagePlain_probe_var currentIteration
+		
+		if ! "$scriptAbsoluteLocation" _create_ubDistBuild-bootOnce-qemu_sequence "$@"
+		then
+			_messageFAIL
+		fi
+		
+		if ! "$scriptAbsoluteLocation" _create_ubDistBuild-bootOnce-fsck_sequence "$@"
+		then
+			_messageFAIL
+		fi
+	done
 	
 	
 	return 0
@@ -693,6 +748,24 @@ _zSpecial_qemu() {
 	_messagePlain_nominal 'init: _zSpecial_qemu'
 	
 	
+	#if [[ "$qemuHeadless" == "true" ]]
+	#then
+		#_commandBootdisc
+		
+		! _prepareBootdisc && _messageFAIL
+		
+		cp "$scriptAbsoluteLocation" "$hostToGuestFiles"/
+		"$scriptBin"/.ubrgbin.sh _ubrgbin_cpA "$scriptBin" "$hostToGuestFiles"/_bin
+		
+		echo '#!/usr/bin/env bash' >> "$hostToGuestFiles"/cmd.sh
+		echo 'sleep 240' >> "$hostToGuestFiles"/cmd.sh
+		echo 'sudo -n poweroff' >> "$hostToGuestFiles"/cmd.sh
+		
+		! _writeBootdisc && _messageFAIL
+	#fi
+	
+	
+	
 	[[ "$qemuHeadless" == "true" ]] && qemuArgs+=(-nographic)
 	
 	
@@ -718,6 +791,11 @@ _zSpecial_qemu() {
 	
 	# Installation CD image.
 	#qemuUserArgs+=(-drive file="$scriptLocal"/netinst.iso,media=cdrom -boot c)
+	
+	
+	
+	
+	[[ -e "$hostToGuestISO" ]] && qemuUserArgs+=(-drive file="$hostToGuestISO",media=cdrom)
 	
 	# Boot from whichever emulated disk connected ('-boot c' for emulated disc 'cdrom')
 	qemuUserArgs+=(-boot d)
