@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='3066638190'
+export ub_setScriptChecksum_contents='2961789699'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -9300,7 +9300,16 @@ _getMost_debian11_install() {
 		_getMost_backend dpkg --add-architecture i386
 		_getMost_backend apt-get update
 	fi
-	_getMost_backend_aptGetInstall wmctrl xprintidle okular libreoffice firefox-esr xournal kwrite netcat-openbsd iperf axel unionfs-fuse samba qemu qemu-system-x86 qemu-system-arm qemu-efi-arm qemu-efi-aarch64 qemu-user-static qemu-utils dosbox wine wine32 wine64 libwine libwine:i386 fonts-wine debootstrap xclip xinput gparted bup emacs xterm mesa-utils kde-standard
+	_getMost_backend_aptGetInstall wmctrl xprintidle
+	_getMost_backend_aptGetInstall okular libreoffice firefox-esr xournal kwrite netcat-openbsd iperf axel unionfs-fuse samba
+	_getMost_backend_aptGetInstall qemu
+	_getMost_backend_aptGetInstall qemu-system-x86
+	_getMost_backend_aptGetInstall qemu-system-arm
+	_getMost_backend_aptGetInstall qemu-efi-arm qemu-efi-aarch64 qemu-user-static qemu-utils
+	_getMost_backend_aptGetInstall dosbox
+	_getMost_backend_aptGetInstall wine wine32 wine64 libwine libwine:i386 fonts-wine
+	_getMost_backend_aptGetInstall debootstrap xclip xinput gparted bup emacs xterm mesa-utils
+	_getMost_backend_aptGetInstall kde-standard
 	_getMost_backend_aptGetInstall chromium
 	_getMost_backend_aptGetInstall openjdk-11-jdk openjdk-11-jre
 	
@@ -9873,6 +9882,8 @@ _getMinimal_cloud() {
 	
 	
 	_getMost_backend_aptGetInstall debootstrap
+	
+	_getMost_backend_aptGetInstall qemu-system-x86
 	
 	
 	# May not be useful for anything, may cause delay or fail .
@@ -37055,6 +37066,8 @@ _create_ubDistBuild-rotten_install() {
 
 
 _create_ubDistBuild-bootOnce-qemu_sequence() {
+	! type qemu-system-x86_64 > /dev/null 2>&1 && _stop 1
+	
 	export qemuHeadless="true"
 	
 	local currentPID
@@ -37094,6 +37107,7 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	fi
 	
 	echo
+	return 0
 }
 _create_ubDistBuild-bootOnce-fsck_sequence() {
 	_messagePlain_nominal 'fsck'
@@ -37367,6 +37381,35 @@ _zSpecial_qemu() {
 	fi
 }
 
+
+
+
+
+
+_chroot_test() {
+	_messageNormal 'chroot: config'
+	
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	
+	
+	sudo mkdir -p "$globalVirtFS"/tmp/test_"$ubiquitiousBashIDnano"
+	cp -a "$scriptLib"/ubiquitous_bash "$globalVirtFS"/tmp/test_"$ubiquitousBashIDnano"/
+	
+	_chroot chown -R root:root /tmp/test_"$ubiquitiousBashIDnano"/
+	
+	_chroot /tmp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test
+	
+	
+	# DANGER: Rare case of 'rm -rf' , called through '_chroot' instead of '_safeRMR' . If not called through '_chroot', very dangerous!
+	_chroot rm -rf /tmp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test
+	
+	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	return 0
+}
+
+
+
 _refresh_anchors() {
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_getCore_ubDistFetch
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_ubDistHome
@@ -37403,6 +37446,7 @@ _refresh_anchors() {
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_true
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_false
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_chroot_test
 }
 
 

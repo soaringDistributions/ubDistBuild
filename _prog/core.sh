@@ -479,6 +479,8 @@ _create_ubDistBuild-rotten_install() {
 
 
 _create_ubDistBuild-bootOnce-qemu_sequence() {
+	! type qemu-system-x86_64 > /dev/null 2>&1 && _stop 1
+	
 	export qemuHeadless="true"
 	
 	local currentPID
@@ -518,6 +520,7 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	fi
 	
 	echo
+	return 0
 }
 _create_ubDistBuild-bootOnce-fsck_sequence() {
 	_messagePlain_nominal 'fsck'
@@ -791,6 +794,35 @@ _zSpecial_qemu() {
 	fi
 }
 
+
+
+
+
+
+_chroot_test() {
+	_messageNormal 'chroot: config'
+	
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	
+	
+	sudo mkdir -p "$globalVirtFS"/tmp/test_"$ubiquitiousBashIDnano"
+	cp -a "$scriptLib"/ubiquitous_bash "$globalVirtFS"/tmp/test_"$ubiquitousBashIDnano"/
+	
+	_chroot chown -R root:root /tmp/test_"$ubiquitiousBashIDnano"/
+	
+	_chroot /tmp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test
+	
+	
+	# DANGER: Rare case of 'rm -rf' , called through '_chroot' instead of '_safeRMR' . If not called through '_chroot', very dangerous!
+	_chroot rm -rf /tmp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test
+	
+	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	return 0
+}
+
+
+
 _refresh_anchors() {
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_getCore_ubDistFetch
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_ubDistHome
@@ -827,5 +859,6 @@ _refresh_anchors() {
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_true
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_false
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_chroot_test
 }
 
