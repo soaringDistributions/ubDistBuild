@@ -576,6 +576,7 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 		sleep 1
 		let currentIteration=currentIteration+1
 	done
+	_messagePlain_probe_var currentIteration
 	sleep 27
 	
 	
@@ -776,8 +777,8 @@ _zSpecial_qemu_sequence() {
 	_start
 	
 	
-	#if [[ "$qemuHeadless" == "true" ]]
-	#then
+	if [[ "$qemuHeadless" == "true" ]]
+	then
 		#_commandBootdisc
 		
 		! _prepareBootdisc && _messageFAIL
@@ -790,7 +791,7 @@ _zSpecial_qemu_sequence() {
 		echo 'sudo -n poweroff' >> "$hostToGuestFiles"/cmd.sh
 		
 		! _writeBootdisc && _messageFAIL
-	#fi
+	fi
 	
 	
 	
