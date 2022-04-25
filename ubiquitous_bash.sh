@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='898354435'
+export ub_setScriptChecksum_contents='1517432743'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -37228,6 +37228,7 @@ _upload_ubDistBuild_image() {
 		_rclone_limited --progress --ignore-size copy "$scriptLocal"/_create_ubDistBuild-bootOnce.log distLLC_build_ubDistBuild:
 		_rclone_limited --progress --ignore-size copy "$scriptLocal"/_upload_ubDistBuild_image.log distLLC_build_ubDistBuild:
 	fi
+	return 0
 }
 
 _upload_ubDistBuild_custom() {
@@ -37393,19 +37394,19 @@ _chroot_test() {
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
 	
-	sudo -n mkdir -p "$globalVirtFS"/tmp/test_"$ubiquitiousBashIDnano"
-	sudo -n cp -a "$scriptLib"/ubiquitous_bash "$globalVirtFS"/tmp/test_"$ubiquitousBashIDnano"/
+	sudo -n mkdir -p "$globalVirtFS"/root/temp/test_"$ubiquitiousBashIDnano"
+	sudo -n cp -a "$scriptLib"/ubiquitous_bash "$globalVirtFS"/root/temp/test_"$ubiquitousBashIDnano"/
 	
-	_chroot chown -R root:root /tmp/test_"$ubiquitiousBashIDnano"/
+	_chroot chown -R root:root /root/temp/test_"$ubiquitiousBashIDnano"/
 	
-	if ! _chroot /tmp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test
+	if ! _chroot /root/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test
 	then
 		_messageFAIL
 	fi
 	
 	
 	# DANGER: Rare case of 'rm -rf' , called through '_chroot' instead of '_safeRMR' . If not called through '_chroot', very dangerous!
-	_chroot rm -rf /tmp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test
+	_chroot rm -rf /root/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test
 	
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
