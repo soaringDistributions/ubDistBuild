@@ -890,21 +890,29 @@ _zSpecial_qemu_sequence() {
 	_messagePlain_probe _qemu_system_x86_64 "${qemuArgs[@]}"
 	
 	
+	local currentExitStatus
+	
 	if [[ "$qemuHeadless" != "true" ]]
 	then
 		_qemu_system_x86_64 "${qemuArgs[@]}"
-		_stop "$?"
+		currentExitStatus="$?"
 	else
 		_qemu_system_x86_64 "${qemuArgs[@]}" | tr -dc 'a-zA-Z0-9\n'
-		_stop "$?"
+		currentExitStatus="$?"
 	fi
 	
-	_stop 0
+	
+	if ! _safeRMR "$instancedVirtDir"
+	then
+		_messageFAIL
+	fi
+	
+	_stop "$currentExitStatus"
 }
 _zSpecial_qemu() {
 	if ! "$scriptAbsoluteLocation" _zSpecial_qemu_sequence "$@"
 	then
-		_messageFAIL
+		_stop 1
 	fi
 	return 0
 }
