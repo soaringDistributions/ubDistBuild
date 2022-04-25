@@ -800,7 +800,8 @@ _zSpecial_qemu() {
 
 
 _chroot_test() {
-	_messageNormal 'chroot: config'
+	_messageNormal '##### init: _chroot_test'
+	echo
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
