@@ -640,6 +640,7 @@ _create_ubDistBuild-bootOnce() {
 	sudo -n mkdir -p "$globalVirtFS"/home/user/.config/autostart
 	_here_bootdisc_statup_xdg | sudo tee "$globalVirtFS"/home/user/.config/autostart/startup.desktop > /dev/null
 	_chroot chown -R user:user /home/user/.config
+	_chroot chmod 555 /home/user/.config/autostart/startup.desktop
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
