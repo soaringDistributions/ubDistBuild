@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='2826654020'
+export ub_setScriptChecksum_contents='2596017123'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -37155,7 +37155,10 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	
 	_messagePlain_nominal 'wait: 600s'
 	local currentIteration
-	while [[ "$currentIteration" -lt 600 ]] && ( pgrep qemu-system || pgrep qemu || ps -p "$currentPID" )
+	pgrep qemu-system
+	pgrep qemu
+	ps -p "$currentPID"
+	while [[ "$currentIteration" -lt 600 ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
 	do
 		sleep 1
 		let currentIteration=currentIteration+1
@@ -37222,8 +37225,8 @@ _create_ubDistBuild-bootOnce() {
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
 	sudo -n mkdir -p "$globalVirtFS"/home/user/.config/autostart
-	_chroot chown -R user:user "$globalVirtFS"/home/user/.config
 	_here_bootdisc_statup_xdg | sudo tee "$globalVirtFS"/home/user/.config/autostart/startup.desktop
+	_chroot chown -R user:user /home/user/.config
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	

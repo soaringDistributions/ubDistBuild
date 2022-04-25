@@ -568,7 +568,10 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	
 	_messagePlain_nominal 'wait: 600s'
 	local currentIteration
-	while [[ "$currentIteration" -lt 600 ]] && ( pgrep qemu-system || pgrep qemu || ps -p "$currentPID" )
+	pgrep qemu-system
+	pgrep qemu
+	ps -p "$currentPID"
+	while [[ "$currentIteration" -lt 600 ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
 	do
 		sleep 1
 		let currentIteration=currentIteration+1
@@ -635,8 +638,8 @@ _create_ubDistBuild-bootOnce() {
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
 	sudo -n mkdir -p "$globalVirtFS"/home/user/.config/autostart
-	_chroot chown -R user:user "$globalVirtFS"/home/user/.config
 	_here_bootdisc_statup_xdg | sudo tee "$globalVirtFS"/home/user/.config/autostart/startup.desktop
+	_chroot chown -R user:user /home/user/.config
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
