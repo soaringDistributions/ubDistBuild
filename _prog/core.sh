@@ -805,12 +805,15 @@ _chroot_test() {
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
 	
-	sudo mkdir -p "$globalVirtFS"/tmp/test_"$ubiquitiousBashIDnano"
-	cp -a "$scriptLib"/ubiquitous_bash "$globalVirtFS"/tmp/test_"$ubiquitousBashIDnano"/
+	sudo -n mkdir -p "$globalVirtFS"/tmp/test_"$ubiquitiousBashIDnano"
+	sudo -n cp -a "$scriptLib"/ubiquitous_bash "$globalVirtFS"/tmp/test_"$ubiquitousBashIDnano"/
 	
 	_chroot chown -R root:root /tmp/test_"$ubiquitiousBashIDnano"/
 	
-	_chroot /tmp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test
+	if ! _chroot /tmp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test
+	then
+		_messageFAIL
+	fi
 	
 	
 	# DANGER: Rare case of 'rm -rf' , called through '_chroot' instead of '_safeRMR' . If not called through '_chroot', very dangerous!
