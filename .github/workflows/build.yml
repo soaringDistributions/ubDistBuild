@@ -126,7 +126,7 @@ jobs:
         shell: bash
         run: |
           ./_create_ubDistBuild-rotten_install | sudo -n tee ./_local/_create_ubDistBuild-rotten_install.log
-      - name: _create_ubDistBuild-rotten_install
+      - name: _chroot_test
         shell: bash
         run: |
           ./_chroot_test | sudo -n tee ./_local/_chroot_test.log
