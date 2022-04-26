@@ -658,7 +658,7 @@ _autoinstall() {
 
 
 _enter() {
-	_install "$@"
+	_autoinstall "$@"
 }
 
 _test_prog() {
