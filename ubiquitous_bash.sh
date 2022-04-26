@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='70493280'
+export ub_setScriptChecksum_contents='4080853736'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -36878,6 +36878,7 @@ Relogin=true
 	
 	sudo -n mkdir -p "$globalVirtFS"/root
 	sudo -n cp -f "$scriptLib"/setup/nvidia/_get_nvidia.sh "$globalVirtFS"/root/
+	sudo -n chmod 755 "$scriptLib"/setup/nvidia/_get_nvidia.sh
 	
 	
 	
@@ -37107,12 +37108,20 @@ CZXWXcRMTo8EmM8i4d
 	#sudo -n mkdir -p "$globalVirtFS"/boot/efi/EFI/BOOT/
 	#sudo -n cp "$globalVirtFS"/boot/efi/EFI/debian/grubx64.efi "$globalVirtFS"/boot/efi/EFI/BOOT/bootx64.efi
 	
+	# https://linuxconfig.org/how-to-disable-blacklist-nouveau-nvidia-driver-on-ubuntu-20-04-focal-fossa-linux
+	# https://askubuntu.com/questions/747314/is-nomodeset-still-required
+	echo 'GRUB_CMDLINE_LINUX="nouveau.modeset=0"' | sudo tee -a "$globalVirtFS"/etc/default/grub
+	echo 'blacklist nouveau' | sudo tee "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
+	echo 'options nouveau modeset=0' | sudo tee -a "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
 	
-	echo 'GRUB_CMDLINE_LINUX="quiet nouveau.modeset=0"' | sudo tee -a "$globalVirtFS"/etc/default/grub
+	
 	
 	
 	_messagePlain_nominal 'update-grub'
 	_chroot update-grub
+	
+	_messagePlain_nominal 'update-initramfs'
+	_chroot update-initramfs -u
 	
 	
 	
@@ -37245,7 +37254,7 @@ _create_ubDistBuild-bootOnce() {
 	_chroot chown -R user:user /home/user/.config
 	_chroot chmod 555 /home/user/.config/autostart/startup.desktop
 	
-	echo '@reboot /media/bootdisc/rootnix.sh > /dev/null 2>&1' | _chroot crontab '-'
+	echo '@reboot /media/bootdisc/rootnix.sh > /var/log/rootnix.log 2>&1' | _chroot crontab '-'
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
@@ -37266,6 +37275,15 @@ _create_ubDistBuild-bootOnce() {
 			_messageFAIL
 		fi
 	done
+	
+	
+	_messageNormal '##### init: _create_ubDistBuild-bootOnce'
+	
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	
+	echo '@reboot /root/_get_nvidia.sh _autoinstall > /var/log/_get_nvidia.log 2>&1' | _chroot crontab '-'
+	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
 	
 	return 0

@@ -476,6 +476,15 @@ true
 
 
 
+export currentVersion=510.60.02
+
+
+
+
+
+
+
+
 _detect_installed_nvidia() {
 	_messageNormal 'init: _detect_installed_nvidia'
 	
@@ -557,8 +566,6 @@ _install_nvidia() {
 _install() {
 	_mustBeRoot
 	
-	export currentVersion=510.60.02
-	
 	_detect_nvidia "$@"
 	
 	_fetch_nvidia "$@"
@@ -567,7 +574,70 @@ _install() {
 }
 
 
+
+
+_detect_virtualization() {
+	! lspci | grep -i vmware && ! lspci | grep -i virtualbox && ! cat /proc/cpuinfo | grep -i model | grep -i qemu && ! sudo -n lspci | grep -i vmware && ! sudo -n lspci | grep -i virtualbox && return 0
+	
+	_messageFAIL
+	_stop 1
+	exit 1
+	exit
+	return 1
+	return
+}
+_detect_chroot() {
+	# https://unix.stackexchange.com/questions/14345/how-do-i-tell-im-running-in-a-chroot
+	if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]
+	then
+		_messageFAIL
+		_stop 1
+		exit 1
+		exit
+		return 1
+		return
+	fi
+	
+	if systemctl status sddm 2>&1 | head -n 2 | grep -i 'chroot'
+	then
+		_messageFAIL
+		_stop 1
+		exit 1
+		exit
+		return 1
+		return
+	fi
+	
+	return 0
+}
 _autoinstall() {
+	# WARNING: DANGER: NOTICE: Do NOT autoinstall during build scripts. Distribution may NOT be allowed.
+	# That said, internal use is not distribution. For *strictly* internal builds, postprocessing the image by deliberately calling '_install' may be possible.
+	
+	if ! _detect_virtualization "$@"
+	then
+		_messageFAIL
+		_stop 1
+		exit 1
+		exit
+		return 1
+		return
+	fi
+	
+	if ! _detect_chroot "$@"
+	then
+		_messageFAIL
+		_stop 1
+		exit 1
+		exit
+		return 1
+		return
+	fi
+	
+	
+	
+	
+	
 	_detect_installed_nvidia "$@"
 	
 	_install "$@"
