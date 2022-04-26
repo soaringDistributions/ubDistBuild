@@ -575,6 +575,7 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	
 	_messagePlain_nominal 'wait: 600s'
 	local currentIterationWait
+	currentIterationWait=0
 	pgrep qemu-system
 	pgrep qemu
 	ps -p "$currentPID"
