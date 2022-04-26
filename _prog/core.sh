@@ -687,7 +687,8 @@ _create_ubDistBuild-bootOnce() {
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
-	echo '@reboot /root/_get_nvidia.sh _autoinstall > /var/log/_get_nvidia.log 2>&1' | _chroot crontab '-'
+	# https://stackoverflow.com/questions/8579330/appending-to-crontab-with-a-shell-script-on-ubuntu
+	( _chroot crontab -l ; echo '@reboot /root/_get_nvidia.sh _autoinstall > /var/log/_get_nvidia.log 2>&1' ) | _chroot crontab '-'
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
@@ -717,15 +718,13 @@ _create_ubDistBuild() {
 
 
 _custom_ubDistBuild() {
-	# TODO: Users, sudoers, etc, customization.
-	
-	# TODO: display manager autologin
-	
 	# TODO: copy in all software
 	
 	# TODO: copy in home dir config from package
 	
 	# TODO: _setup for all infrastructure/installations
+	
+	# TODO: live, live-more, etc
 	
 	true
 }
@@ -767,9 +766,6 @@ _upload_ubDistBuild_custom() {
 
 
 _ubDistBuild() {
-	
-	# TODO: partition, debootstrap, efi (sufficient to manually craft HOME/KDE package)
-	# TODO: rotten_install ... should copy from "_lib/ubiquitous_bash"
 	
 	#_create_ubDistBuild
 	_create_ubDistBuild-create

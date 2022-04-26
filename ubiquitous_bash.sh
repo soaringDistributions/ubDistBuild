@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='2335832966'
+export ub_setScriptChecksum_contents='480601571'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -37281,7 +37281,8 @@ _create_ubDistBuild-bootOnce() {
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
-	echo '@reboot /root/_get_nvidia.sh _autoinstall > /var/log/_get_nvidia.log 2>&1' | _chroot crontab '-'
+	# https://stackoverflow.com/questions/8579330/appending-to-crontab-with-a-shell-script-on-ubuntu
+	( _chroot crontab -l ; echo '@reboot /root/_get_nvidia.sh _autoinstall > /var/log/_get_nvidia.log 2>&1' ) | _chroot crontab '-'
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
@@ -37311,15 +37312,13 @@ _create_ubDistBuild() {
 
 
 _custom_ubDistBuild() {
-	# TODO: Users, sudoers, etc, customization.
-	
-	# TODO: display manager autologin
-	
 	# TODO: copy in all software
 	
 	# TODO: copy in home dir config from package
 	
 	# TODO: _setup for all infrastructure/installations
+	
+	# TODO: live, live-more, etc
 	
 	true
 }
@@ -37361,9 +37360,6 @@ _upload_ubDistBuild_custom() {
 
 
 _ubDistBuild() {
-	
-	# TODO: partition, debootstrap, efi (sufficient to manually craft HOME/KDE package)
-	# TODO: rotten_install ... should copy from "_lib/ubiquitous_bash"
 	
 	#_create_ubDistBuild
 	_create_ubDistBuild-create
