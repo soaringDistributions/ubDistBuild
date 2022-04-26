@@ -340,7 +340,8 @@ Relogin=true
 	#[[ "$CI" != "" ]]
 	
 	# https://docs.hetzner.com/robot/dedicated-server/operating-systems/hetzner-aptitude-mirror/
-	if wget -qO- --dns-timeout=15 --connect-timeout=15 --read-timeout=15 --timeout=15 https://mirror.hetzner.com > /dev/null
+	# ATTENTION: Disabled by default (ie. 'if false').
+	if false && wget -qO- --dns-timeout=15 --connect-timeout=15 --read-timeout=15 --timeout=15 https://mirror.hetzner.com > /dev/null
 	then
 		cat << CZXWXcRMTo8EmM8i4d | sudo -n tee -a "$globalVirtFS"/etc/apt/sources.list > /dev/null
 deb https://mirror.hetzner.com/debian/packages  bullseye           main contrib non-free
