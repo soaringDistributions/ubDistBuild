@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='1838306276'
+export ub_setScriptChecksum_contents='1490797725'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -37164,16 +37164,16 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	
 	
 	_messagePlain_nominal 'wait: 600s'
-	local currentIteration
+	local currentIterationWait
 	pgrep qemu-system
 	pgrep qemu
 	ps -p "$currentPID"
-	while [[ "$currentIteration" -lt 600 ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
+	while [[ "$currentIterationWait" -lt 600 ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
 	do
 		sleep 1
-		let currentIteration=currentIteration+1
+		let currentIterationWait=currentIterationWait+1
 	done
-	_messagePlain_probe_var currentIteration
+	_messagePlain_probe_var currentIterationWait
 	sleep 27
 	
 	

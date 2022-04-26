@@ -570,16 +570,16 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	
 	
 	_messagePlain_nominal 'wait: 600s'
-	local currentIteration
+	local currentIterationWait
 	pgrep qemu-system
 	pgrep qemu
 	ps -p "$currentPID"
-	while [[ "$currentIteration" -lt 600 ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
+	while [[ "$currentIterationWait" -lt 600 ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
 	do
 		sleep 1
-		let currentIteration=currentIteration+1
+		let currentIterationWait=currentIterationWait+1
 	done
-	_messagePlain_probe_var currentIteration
+	_messagePlain_probe_var currentIterationWait
 	sleep 27
 	
 	
