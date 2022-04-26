@@ -815,7 +815,7 @@ _zSpecial_qemu_sequence() {
 		"$scriptBin"/.ubrgbin.sh _ubrgbin_cpA "$scriptBin" "$hostToGuestFiles"/_bin
 		
 		echo '#!/usr/bin/env bash' >> "$hostToGuestFiles"/cmd.sh
-		echo 'sleep 240' >> "$hostToGuestFiles"/cmd.sh
+		echo 'sleep 90' >> "$hostToGuestFiles"/cmd.sh
 		echo 'sudo -n poweroff' >> "$hostToGuestFiles"/cmd.sh
 		
 		! _writeBootdisc && _messageFAIL
