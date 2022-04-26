@@ -476,6 +476,25 @@ true
 
 
 
+_detect_installed_nvidia() {
+	_messageNormal 'init: _detect_installed_nvidia'
+	
+	# https://askubuntu.com/questions/271613/am-i-using-the-nouveau-driver-or-the-proprietary-nvidia-driver
+	#  'Nvidia's (restricted) module name is nvidia . Not nvidiafb or something similar.'
+	
+	modprobe -l | grep -v -i 'nvidiafb' | grep 'nvidia' && return 0
+	
+	lsmod | cut -f1 -d\  | grep -v -i 'nvidiafb' | grep 'nvidia' && return 0
+	
+	dpkg -l | grep -v -i 'nvidiafb' | grep 'nvidia' && return 0
+	
+	lspci -nnk | grep -iA2 vga | grep -v -i 'nvidiafb' | grep 'nvidia' && return 0
+	
+	
+	_messagePlain_good 'missing: nvidia: driver not installed'
+	_stop 0
+}
+
 
 _detect_nvidia() {
 	_messageNormal 'init: _detect_nvidia'
@@ -511,14 +530,25 @@ _fetch_nvidia() {
 
 
 _install_nvidia() {
+	_messageNormal 'init: _install_nvidia'
 	# https://ubuntu.com/blog/how-to-sign-things-for-secure-boot
 	# https://download.nvidia.com/XFree86/Linux-x86_64/384.111/README/installdriver.html
 	
+	
+	sleep 45
+	systemctl stop gdm3
+	systemctl stop sddm
+	sleep 3
 	sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s
+	sleep 3
+	systemctl stop gdm3
+	systemctl start sddm
 }
 
 
-_enter() {
+
+
+_install() {
 	_mustBeRoot
 	
 	export currentVersion=510.60.02
@@ -531,6 +561,11 @@ _enter() {
 }
 
 
+_autoinstall() {
+	_detect_installed_nvidia "$@"
+	
+	_install "$@"
+}
 
 
 
@@ -544,8 +579,9 @@ _enter() {
 
 
 
-
-
+_enter() {
+	_install "$@"
+}
 
 _test_prog() {
 	true

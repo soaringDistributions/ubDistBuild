@@ -283,7 +283,7 @@ Relogin=true
 	
 	
 	sudo -n mkdir -p "$globalVirtFS"/root
-	sudo -n cp -f "$scriptLib"/setup/_get_nvidia.sh "$globalVirtFS"/root/
+	sudo -n cp -f "$scriptLib"/setup/nvidia/_get_nvidia.sh "$globalVirtFS"/root/
 	
 	
 	
