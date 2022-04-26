@@ -534,15 +534,21 @@ _install_nvidia() {
 	# https://ubuntu.com/blog/how-to-sign-things-for-secure-boot
 	# https://download.nvidia.com/XFree86/Linux-x86_64/384.111/README/installdriver.html
 	
+	local currentExitStatus
 	
 	sleep 45
 	systemctl stop gdm3
 	systemctl stop sddm
 	sleep 3
 	sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s
+	currentExitStatus="$?"
 	sleep 3
 	systemctl stop gdm3
 	systemctl start sddm
+	sleep 6
+	systemctl status sddm
+	
+	return "$currentExitStatus"
 }
 
 
