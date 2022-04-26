@@ -280,15 +280,15 @@ Relogin=true
 ' | sudo -n tee "$globalVirtFS"/etc/sddm.conf.d/autologin.conf
 	
 	
+	
+	
+	sudo -n mkdir -p "$globalVirtFS"/root
+	sudo -n cp -f "$scriptLib"/setup/_get_nvidia.sh "$globalVirtFS"/root/
+	
+	
+	
+	
 	! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	
 	
@@ -512,6 +512,9 @@ CZXWXcRMTo8EmM8i4d
 	#sudo -n cp "$globalVirtFS"/boot/efi/EFI/debian/grubx64.efi "$globalVirtFS"/boot/efi/EFI/BOOT/bootx64.efi
 	
 	
+	echo 'GRUB_CMDLINE_LINUX="quiet nouveau.modeset=0"' | sudo tee -a "$globalVirtFS"/etc/default/grub
+	
+	
 	_messagePlain_nominal 'update-grub'
 	_chroot update-grub
 	
@@ -642,6 +645,8 @@ _create_ubDistBuild-bootOnce() {
 	_here_bootdisc_statup_xdg | sudo tee "$globalVirtFS"/home/user/.config/autostart/startup.desktop > /dev/null
 	_chroot chown -R user:user /home/user/.config
 	_chroot chmod 555 /home/user/.config/autostart/startup.desktop
+	
+	echo '@reboot /media/bootdisc/rootnix.sh > /dev/null 2>&1' | _chroot crontab '-'
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
