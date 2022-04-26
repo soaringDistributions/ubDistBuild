@@ -611,6 +611,8 @@ _detect_chroot() {
 	return 0
 }
 _autoinstall() {
+	_mustBeRoot
+	
 	# WARNING: DANGER: NOTICE: Do NOT autoinstall during build scripts. Distribution may NOT be allowed.
 	# That said, internal use is not distribution. For *strictly* internal builds, postprocessing the image by deliberately calling '_install' may be possible.
 	
