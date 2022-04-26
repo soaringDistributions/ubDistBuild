@@ -516,7 +516,7 @@ CZXWXcRMTo8EmM8i4d
 	
 	# https://linuxconfig.org/how-to-disable-blacklist-nouveau-nvidia-driver-on-ubuntu-20-04-focal-fossa-linux
 	# https://askubuntu.com/questions/747314/is-nomodeset-still-required
-	echo 'GRUB_CMDLINE_LINUX="nouveau.modeset=0"' | sudo tee -a "$globalVirtFS"/etc/default/grub
+	#echo 'GRUB_CMDLINE_LINUX="nouveau.modeset=0"' | sudo tee -a "$globalVirtFS"/etc/default/grub
 	echo 'blacklist nouveau' | sudo tee "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
 	echo 'options nouveau modeset=0' | sudo tee -a "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
 	
