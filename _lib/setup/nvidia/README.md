@@ -2,6 +2,7 @@
 ```
 
 # Two scripts, available from short URLs. May quickly install useful software and configuration to desktop with NVIDIA hardware.
+# https://wiki.gentoo.org/wiki/NVIDIA/nvidia-drivers#Kernel_compatibility
 #wget https://raw.githubusercontent.com/soaringDistributions/ubDistBuild/main/_lib/setup/nvidia/_get_nvidia.sh
 
 wget https://bit.ly/getNvSh

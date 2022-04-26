@@ -932,7 +932,7 @@ _zSpecial_qemu_sequence() {
 	fi
 	
 	
-	if ! _safeRMR "$instancedVirtDir"
+	if [[ -e "$instancedVirtDir" ]] && ! _safeRMR "$instancedVirtDir"
 	then
 		_messageFAIL
 	fi
