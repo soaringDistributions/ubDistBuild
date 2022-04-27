@@ -10,7 +10,7 @@
 
 # ATTENTION: NOTICE: Consider replacing the current directory with a symlink to a larger filesystem, before checkout of repository.
 
-name: build
+name: experiment
 on:
   #push:
   workflow_dispatch:
@@ -28,7 +28,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  experiment:
     # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
     #  '7 GB of RAM memory'
     #  '14 GB of SSD disk space'
@@ -139,7 +139,7 @@ jobs:
         #run: |
           #./_upload_ubDistBuild_image | sudo -n tee ./_local/_upload_ubDistBuild_image.log
       - name: Setup tmate session
-        if: ${{ failure() }}
+        #if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
         # ssh -i <path-to-key> <tmate-connection-string>
         with:
