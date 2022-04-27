@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='3957546729'
+export ub_setScriptChecksum_contents='3679646659'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -36736,7 +36736,7 @@ _create_ubDistBuild-create() {
 	[[ -e "$lock_open" ]]  && _messagePlain_bad 'bad: locked!' && _messageFAIL && _stop 1
 	[[ -e "$scriptLocal"/l_o ]]  && _messagePlain_bad 'bad: locked!' && _messageFAIL && _stop 1
 	
-	! [[ $(df --block-size=1000000000 --output=avail "$scriptLocal" | tr -dc '0-9') -gt "35" ]] && _messageFAIL && _stop 1
+	! [[ $(df --block-size=1000000000 --output=avail "$scriptLocal" | tr -dc '0-9') -gt "45" ]] && _messageFAIL && _stop 1
 	
 	
 	
@@ -36750,7 +36750,7 @@ _create_ubDistBuild-create() {
 	
 	_messageNormal 'create: vm.img'
 	
-	export vmSize=35000
+	export vmSize=45000
 	_createRawImage
 	
 	
@@ -36773,14 +36773,22 @@ _create_ubDistBuild-create() {
 	
 	
 	
+	# ATTENTION: NOTICE: Larger EFI partition may be more compatible. Larger Swap partition may be more useful for hibernation.
+	
 	sudo -n parted --script "$scriptLocal"/vm.img 'mkpart EFI fat32 '"1"'MiB '"513"'MiB'
+	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart EFI fat32 '"1"'MiB '"33"'MiB'
+	
 	sudo -n parted --script "$scriptLocal"/vm.img 'set 1 msftdata on'
 	sudo -n parted --script "$scriptLocal"/vm.img 'set 1 boot on'
 	sudo -n parted --script "$scriptLocal"/vm.img 'set 1 esp on'
 	
-	sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"513"'MiB '"5633"'MiB'
+	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"513"'MiB '"5633"'MiB'
+	sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"513"'MiB '"3073"'MiB'
+	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"33"'MiB '"97"'MiB'
 	
-	sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"5633"'MiB '"34999"'MiB'
+	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"5633"'MiB '"44999"'MiB'
+	sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"3073"'MiB '"44999"'MiB'
+	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"97"'MiB '"44999"'MiB'
 	
 	
 	sudo -n parted --script "$scriptLocal"/vm.img 'unit MiB print'
@@ -36855,6 +36863,12 @@ _create_ubDistBuild-create() {
 	echo 'UUID='"$ubVirtImagePartition_UUID"' / ext4 errors=remount-ro 0 1' | sudo -n tee "$globalVirtFS"/etc/fstab
 	
 	
+	local ubVirtImageSwap_UUID
+	ubVirtImageSwap_UUID=$(sudo -n blkid -s UUID -o value "$imagedev""$ubVirtImageSwap" | tr -dc 'a-zA-Z0-9\-')
+	
+	echo 'UUID='"$ubVirtImageSwap_UUID"' swap swap defaults 0 0'
+	
+	
 	local ubVirtImageEFI_UUID
 	ubVirtImageEFI_UUID=$(sudo -n blkid -s UUID -o value "$imagedev""$ubVirtImageEFI" | tr -dc 'a-zA-Z0-9\-')
 	
@@ -36910,12 +36924,12 @@ Relogin=true
 	imagedev=$(cat "$scriptLocal"/imagedev)
 	
 	
-	
-	_chroot dd if=/dev/zero of=/swapfile bs=1M count=1536
+	_chroot dd if=/dev/zero of=/swapfile bs=1 count=1
+	#_chroot dd if=/dev/zero of=/swapfile bs=1M count=1536
 	_chroot chmod 0600 /swapfile
-	_chroot mkswap /swapfile
+	#_chroot mkswap /swapfile
 	#_chroot swapon /swapfile
-	_chroot echo '/swapfile swap swap defaults 0 0' | _chroot tee -a /etc/fstab
+	#_chroot echo '/swapfile swap swap defaults 0 0' | _chroot tee -a /etc/fstab
 	
 	
 	
