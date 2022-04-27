@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='3679646659'
+export ub_setScriptChecksum_contents='750187125'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -9484,6 +9484,8 @@ _getMost_debian11_install() {
 	
 	_getMost_backend_aptGetInstall pavucontrol
 	_getMost_backend_aptGetInstall filelight
+	
+	_getMost_backend_aptGetInstall obs-studio
 	
 	
 	_getMost_debian11_special_late
@@ -36825,7 +36827,7 @@ _create_ubDistBuild-create() {
 	imagepart="$imagedev""$ubVirtImageSwap"
 	loopdevfs=$(sudo -n blkid -s TYPE -o value "$imagepart" | tr -dc 'a-zA-Z0-9')
 	[[ "$loopdevfs" == "ext4" ]] && _stop 1
-	#sudo -n mkswap "$imagepart" || _stop 1
+	sudo -n mkswap "$imagepart" || _stop 1
 	
 	#"$scriptAbsoluteLocation" _umountImage || _stop 1
 	! "$scriptAbsoluteLocation" _closeLoop && _messagePlain_bad 'fail: _closeLoop' && _messageFAIL
@@ -36866,7 +36868,7 @@ _create_ubDistBuild-create() {
 	local ubVirtImageSwap_UUID
 	ubVirtImageSwap_UUID=$(sudo -n blkid -s UUID -o value "$imagedev""$ubVirtImageSwap" | tr -dc 'a-zA-Z0-9\-')
 	
-	echo 'UUID='"$ubVirtImageSwap_UUID"' swap swap defaults 0 0'
+	echo 'UUID='"$ubVirtImageSwap_UUID"' swap swap defaults 0 0' | sudo -n tee "$globalVirtFS"/etc/fstab
 	
 	
 	local ubVirtImageEFI_UUID
