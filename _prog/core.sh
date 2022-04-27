@@ -819,10 +819,13 @@ _create_ubDistBuild() {
 
 _custom_ubDistBuild() {
 	# TODO: copy in all software
+		# _custom_core from rotten_install
 	
 	# TODO: copy in home dir config from package
+		# _custom_kde from rotten_install
 	
 	# TODO: _setup for all infrastructure/installations
+		# _custom_core from rotten_install  ?  probably not ... these are tests which rotten_install may not normally run
 	
 	# TODO: live, live-more, etc
 	
