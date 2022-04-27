@@ -1,0 +1,7 @@
+[Desktop Entry]
+Comment=Enter FreeCAD Model filename:
+Icon=freecad
+Name[en_US]=FreeCAD Model
+Name=FreeCAD Model
+Type=Link
+URL[$e]=file:$HOME/.local/share/templates/FreeCAD Model.FCStd

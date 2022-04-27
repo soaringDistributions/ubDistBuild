@@ -1,0 +1,139 @@
+
+NOTICE: Such generic suggested changes are of severely non-trivial health and mistake prevention benefit, *especially* for VR, VR overlay panel, PanelBoard, ~65inch triple monitor, triple projector, etc, users.
+
+Dark mode in particular may prevent 'welders flash' eye surface irritation, severe Circadian Rhythm Disruption, etc. Visibility of seconds in clock is essential where unnoticed computer failure could cause user to crash a tool or vehicle. Expandable folders are essential to browse related documents or to develop software with the flexibility of desktop applications instead of an IDE. Significant workarounds (eg. of LibreOffice Icon near invisibility, VNC/RDP delays, etc) are specified.
+
+One size fits all, mostly, defaults. Customization (eg. left-handedness, large font for developer prolonged text reading, etc) begins from this, NOT vice versa.
+
+*) Wallpaper Type   Plain Color (SEVERE VNC/RDP delays without this)   b 28 #00001c (VM/VPS)   r 20 g 17 #141100 (lodging/desktop)
+
+*) Clock 24h, EDT or UTC
+*) Seconds Visible
+*) Date ISO Long
+*) Visible   Notifications, Audio, Network
+*) Relevant   Media Player
+*) Netspeed Widget   download speed first   0.2s   Bits/s   w b/s   r kb/s   y Mb/s   g Gb/s
+*) System Load Viewer   CPU, Memory   Bar   0.3   Set Colors Manually   b User   g IOWait   r Sys   y Nice
+*) Task Manager (NOT Icons-only)   Do not group   Sort Manually   From current screen/desktop/activity
+*) 18 virtual desktops   Show only current screens   Desktop number
+*) Dolphin File Manager   Firefox/Chromium   KWrite/Kate   Konsole   Spectacle   System Settings   pavucontrol
+
+*) Dolphin File Manager Config
+ *) Alt+. (Show Hidden Files)
+ *) Hide Places
+ *) Up | Back Fwd Icons Compact Details Home   <uri>   | Open Terminal   Terminal
+ *) Preferences
+  *) > General
+   *) Remember display style for each folder
+   *) Sorting mode: Natural
+   *) Previews (mostly disable)
+   *) When opening an executable file: Run script
+   *) Show zoom slider
+   *) Show space information
+  *) > Startup
+   *) Show on startup: /home/user
+  *) > View Modes
+   *) > Details
+    *) Expandable
+    *) Folder size displays: Number of items
+  *) Services (mostly Disable)
+ *) Minimum Zoom
+
+*) Kate/KWrite Config
+ *) Tabulators   Tab width: 8 characters   Indentation width: 8 characters
+ *) Encoding UTF-8   End of Line: UNIX   Remove trailing spaces: Never   Append newline at end of file on save (yes)
+ *) > Color Themes   /home/user/.ubcore/ubiquitous_bash/_lib/desktop/kwrite/Breeze Dark - Contrast.theme
+  *) Default theme for kwrite: Breeze Dark - Contrast
+  *) Accept any 'overwrite' prompt.
+ *) > Borders (MSW)
+  *) Code block folding
+   *) Show arrows to collapse code blocks
+   *) Show preview of folded blocks on hover
+  *) Left side
+   *) Show marks
+   *) Show Line Numbers
+  *) Scrollbars
+   *) Show marks
+   *) Show preview when hovering over scrollbar
+  *) Scrollbars visibility: Always On
+  *) Minimap: (yes)
+ *) > Borders (UNIX)
+  *) Show folding markers (yes)
+   *) Show preview of folded code (yes)
+  *) Show icon border (yes)
+  *) Show line numbers (yes)
+  *) Show line modification markers (yes)
+  *) Show scrollbar marks (yes)
+  *) Show text preview on scrollbar
+  *) Show scrollbar mini-map
+  *) Minimap width: 60
+  *) Scrollbars visibility: Always On
+
+*) System Settings
+ *) Global Theme   Breeze, THEN, Breeze Dark
+ *) Plasma Style   Breeze Dark
+ *) Application Style   Breeze
+ *) Window Decorations   Breeze
+ *) Colors   Breeze Dark
+ *) Icons   Breeze
+ *) Cursors   Breeze
+ *) > Workspace Behavior
+  *) > General Behavior
+   *) Animation speed   Instant
+   *) Click behavior   Double-click to open files and folders
+   *) Desktop Effects (mostly disable) ... Alt-Tab to Present Windows may be helpful for developer desktops
+  *) > Screen Edges (disable the 'Present Windows' and 'Toggle window switching' gestures)
+  *) > Screen Locking (disable... unless strictly for very sensitive physical desktops with documented passwords)
+  *) > Virtual Desktops
+   *) desktops 18   rows 3
+   *) Work 1-4   Official 5-6   Media 7   Entertainment 8   Comm 9-10   Ad-Hoc 11-12   Dev 13-16   Daemon 17-18
+  *) > Activities
+   *) Remember opened documents: Do not remember
+  *) > Window Behavior
+   *) Click to focus   Focus follows mouse (mouse precedence)
+   *) Delay focus by: 0ms
+   *) Window geometry: Display when moving or resizing
+  *) > Window Rules   /home/user/.ubcore/ubiquitous_bash/_lib/desktop/kwin-rules/dev/_ref/export/
+   *) Do NOT import (except for developer workstation)   audacious
+   *) Disable LATER if necessary to remove transparency effects to reduce VNC/RDP delays.
+  *) > Custom Shortcuts
+   *) resetPlasma   /home/user/.ubcore/ubiquitous_bash/ubiquitous_bash.sh _reset_KDE
+  *) > Startup and Shutdown
+   *) LATER some laptops may benefit from disabling screen services
+   *) Start with an empty session
+   *) LATER some may benefit from disabling Splash Screen ... track record of delays if not issues
+  *) > Regional Settings
+   *) Time Zone
+  *) > Applications
+   *) Default Applications   Firefox
+   *) > File Associations
+    *) KMenuEdit to add files from /home/user/.ubcore/ubiquitous_bash/_lib/desktop/ .
+    *) Bash *.bat *.BAT , as would be requested by '_setupUbiquitous' .
+     *) association: *.bat
+      *) konsole --workdir %d -e /bin/bash %f
+      *) /bin/bash ('Advanced Options -> Run in terminal')
+    *) Any file association requested by 'core' or other software.
+     *) freecad-a2plus , _pcb_color , etc
+   *) Launch Feedback   Cursor   No Feedback   Stop animation after: 1 secs
+  *) > Display and Monitor   Scale method: Crisp   Rendering backend: XRender   Tearing prevention Automatic
+   *) LATER some desktop hardware may benefit from   Rendering backend: OpenGL 3.1   Scale method: Accurate
+  *) > Power Management (mostly disable)
+  *) > Removable Storage
+   *) Download Photos with Gwenview  Storage Volume   ?   (may be convenient to disable or deliberately misconfigure)
+
+*) KWalletManager   BLANK password ... WiFi/network , remote access , etc , must work without user intervention
+
+*) templates from 'core' and other software   /home/user/.local/share/templates/   ubDistBuild/_lib/setup/kde/from_other
+ *) FreeCAD Model
+ *) FreeCAD _resize
+ *) diagram_PCB.pcb
+ *) example.lbom.txt
+ *) kit_example.lbom.txt
+
+*) kwrite/kate syntax for bom_designer   ubDistBuild/_lib/setup/kde/from_other
+
+
+
+
+
+

@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='480601571'
+export ub_setScriptChecksum_contents='431477679'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -9479,6 +9479,11 @@ _getMost_debian11_install() {
 	_getMost_backend_aptGetInstall synaptic
 	
 	_getMost_backend_aptGetInstall cifs-utils
+	
+	
+	
+	_getMost_backend_aptGetInstall pavucontrol
+	_getMost_backend_aptGetInstall filelight
 	
 	
 	_getMost_debian11_special_late
@@ -22394,7 +22399,7 @@ _vncf() {
 	
 	# 'root' user default
 	# Purpose is to access the GUI console (usually available through display manager as 'root' or through desktop session as 'user').
-	if [[ "$2" == "" ]] && [[ "$3" == "" ]] && [[ "$4" == "" ]] && [[ "$5" == "" ]]
+	if [[ "$1" != *"@"* ]] && [[ "$2" == "" ]] && [[ "$3" == "" ]] && [[ "$4" == "" ]] && [[ "$5" == "" ]]
 	then
 		"$currentScript" _sshf root@"$1" echo true
 		"$currentScript" _vnc root@"$1"
@@ -23145,9 +23150,14 @@ _x11_clipboard_imageToHTML() {
 
 #KDE can lockup for many reasons, including xrandr, xsetwacom operations. Resetting the driving applications can be an effective workaround to improve reliability.
 _reset_KDE() {
+	#kquitapp plasmashell ; sleep 0.5 ; pkill plasmashell ; sleep 0.1 ; pkill -KILL plasmashell ; sleep 0.1 ; plasmashell & exit
+	
 	if pgrep plasmashell
 	then
-		kquitapp plasmashell ; sleep 3 ; plasmashell &
+		#kquitapp plasmashell ; sleep 3 ; plasmashell &
+		kquitapp plasmashell ; sleep 0.5 ; pkill plasmashell ; sleep 0.1 ; pkill -KILL plasmashell ; sleep 0.1
+		
+		plasmashell &
 	fi
 	disown -a -h -r
 	disown -a -r
@@ -36849,7 +36859,10 @@ _create_ubDistBuild-create() {
 	
 	echo 'UUID='"$ubVirtImageEFI_UUID"' /boot/efi vfat umask=0077 0 1' | sudo -n tee -a "$globalVirtFS"/etc/fstab
 	
-	echo 'LABEL=uk4uPhB663kVcygT0q /media/bootdisc iso9660 ro,nofail 0 0' | sudo -n tee -a "$globalVirtFS"/etc/fstab
+	if ! sudo -n cat "$globalVirtFS"/etc/fstab | grep 'uk4uPhB663kVcygT0q' | grep 'bootdisc' > /dev/null 2>&1
+	then
+		echo 'LABEL=uk4uPhB663kVcygT0q /media/bootdisc iso9660 ro,nofail 0 0' | sudo -n tee -a "$globalVirtFS"/etc/fstab
+	fi
 	
 	
 	
@@ -36878,7 +36891,7 @@ Relogin=true
 	
 	sudo -n mkdir -p "$globalVirtFS"/root
 	sudo -n cp -f "$scriptLib"/setup/nvidia/_get_nvidia.sh "$globalVirtFS"/root/
-	sudo -n chmod 755 "$scriptLib"/setup/nvidia/_get_nvidia.sh
+	sudo -n chmod 755 "$globalVirtFS"/root/_get_nvidia.sh
 	
 	
 	
@@ -37155,6 +37168,79 @@ _create_ubDistBuild-rotten_install() {
 	return 0
 }
 
+# WARNING: No production use.
+_create_ubDistBuild-rotten_install-bootOnce() {
+	_messageNormal '##### init: _create_ubDistBuild-rotten_install'
+	
+	_messageNormal 'chroot: rotten_install: bootOnce'
+	
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	imagedev=$(cat "$scriptLocal"/imagedev)
+	
+	
+	[[ ! -e "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh ]] && _messageFAIL
+	sudo -n cp "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
+	[[ ! -e "$globalVirtFS"/rotten_install.sh ]] && _messageFAIL
+	sudo -n chmod u+x "$globalVirtFS"/rotten_install.sh
+	
+	
+	#echo | sudo tee "$globalVirtFS"/in_chroot
+	! _chroot /rotten_install.sh _custom_bootOnce && _messageFAIL
+	#sudo rm -f "$globalVirtFS"/in_chroot
+	
+	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	return 0
+}
+# WARNING: No production use.
+_create_ubDistBuild-rotten_install-kde() {
+	_messageNormal '##### init: _create_ubDistBuild-rotten_install'
+	
+	_messageNormal 'chroot: rotten_install: kde'
+	
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	imagedev=$(cat "$scriptLocal"/imagedev)
+	
+	
+	[[ ! -e "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh ]] && _messageFAIL
+	sudo -n cp "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
+	[[ ! -e "$globalVirtFS"/rotten_install.sh ]] && _messageFAIL
+	sudo -n chmod u+x "$globalVirtFS"/rotten_install.sh
+	
+	
+	#echo | sudo tee "$globalVirtFS"/in_chroot
+	! _chroot /rotten_install.sh _custom_kde && _messageFAIL
+	#sudo rm -f "$globalVirtFS"/in_chroot
+	
+	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	return 0
+}
+# WARNING: No production use.
+_create_ubDistBuild-rotten_install-core() {
+	_messageNormal '##### init: _create_ubDistBuild-rotten_install'
+	
+	_messageNormal 'chroot: rotten_install: core'
+	
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	imagedev=$(cat "$scriptLocal"/imagedev)
+	
+	
+	[[ ! -e "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh ]] && _messageFAIL
+	sudo -n cp "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
+	[[ ! -e "$globalVirtFS"/rotten_install.sh ]] && _messageFAIL
+	sudo -n chmod u+x "$globalVirtFS"/rotten_install.sh
+	
+	
+	#echo | sudo tee "$globalVirtFS"/in_chroot
+	! _chroot /rotten_install.sh _custom_core && _messageFAIL
+	#sudo rm -f "$globalVirtFS"/in_chroot
+	
+	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	return 0
+}
+
 
 _create_ubDistBuild-bootOnce-qemu_sequence() {
 	! type qemu-system-x86_64 > /dev/null 2>&1 && _stop 1
@@ -37247,16 +37333,39 @@ _create_ubDistBuild-bootOnce-fsck_sequence() {
 _create_ubDistBuild-bootOnce() {
 	_messageNormal '##### init: _create_ubDistBuild-bootOnce'
 	
-	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
-	sudo -n mkdir -p "$globalVirtFS"/home/user/.config/autostart
-	_here_bootdisc_statup_xdg | sudo tee "$globalVirtFS"/home/user/.config/autostart/startup.desktop > /dev/null
-	_chroot chown -R user:user /home/user/.config
-	_chroot chmod 555 /home/user/.config/autostart/startup.desktop
+	#! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
-	echo '@reboot /media/bootdisc/rootnix.sh > /var/log/rootnix.log 2>&1' | _chroot crontab '-'
 	
-	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	#_create_ubDistBuild-rotten_install-bootOnce
+	
+	
+	## ATTENTION: NOTICE: Resets any changes to crontab (ie. by rotten_install ).
+	##echo | _chroot crontab '-'
+	##echo | sudo -n -u user bash -c "crontab -"
+	##echo '@reboot cd '/home/user'/ ; '/home/user'/rottenScript.sh _run' | sudo -n -u user bash -c "crontab -"
+	
+	##sudo -n mkdir -p "$globalVirtFS"/home/user/.config/autostart
+	##_here_bootdisc_statup_xdg | sudo tee "$globalVirtFS"/home/user/.config/autostart/startup.desktop > /dev/null
+	##_chroot chown -R user:user /home/user/.config
+	##_chroot chmod 555 /home/user/.config/autostart/startup.desktop
+	
+	
+	##sudo -n mkdir -p "$globalVirtFS"/home/user/___quick
+	##echo 'sudo -n mount -t fuse.vmhgfs-fuse -o allow_other,uid=$(id -u "$USER"),gid=$(id -g "$USER") .host: "$HOME"/___quick' | sudo tee "$globalVirtFS"/home/user/___quick/mount.sh
+	##_chroot chown -R user:user /home/user/___quick
+	##_chroot chmod 755 /home/user/___quick/mount.sh
+	
+	##( _chroot crontab -l ; echo '@reboot /media/bootdisc/rootnix.sh > /var/log/rootnix.log 2>&1' ) | _chroot crontab '-'
+	
+	##( _chroot sudo -n -u user bash -c "crontab -l" ; echo '@reboot cd /home/'"$custom_user"'/.ubcore/ubiquitous_bash/lean.sh _unix_renice_execDaemon' ) | _chroot sudo -n -u user bash -c "crontab -"
+	
+	#! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	
+	
+	
+	
+	
 	
 	
 	local currentIteration
@@ -37282,6 +37391,7 @@ _create_ubDistBuild-bootOnce() {
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
 	# https://stackoverflow.com/questions/8579330/appending-to-crontab-with-a-shell-script-on-ubuntu
+	
 	( _chroot crontab -l ; echo '@reboot /root/_get_nvidia.sh _autoinstall > /var/log/_get_nvidia.log 2>&1' ) | _chroot crontab '-'
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL

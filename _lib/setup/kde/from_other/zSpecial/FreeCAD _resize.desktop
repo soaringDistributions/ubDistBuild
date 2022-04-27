@@ -1,0 +1,7 @@
+[Desktop Entry]
+Comment=Enter FreeCAD _resize filename:
+Icon=freecad
+Name[en_US]=FreeCAD _resize
+Name=FreeCAD _resize
+Type=Link
+URL[$e]=file:$HOME/.local/share/templates/FreeCAD _resize.FCStd

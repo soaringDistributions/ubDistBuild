@@ -1,0 +1,7 @@
+[Desktop Entry]
+Comment=Enter ModelOrBundleName.lbom.txt:
+Icon=text-markdown
+Name=example.lbom.txt
+Type=Link
+URL[$e]=file:$HOME/.local/share/templates/example.lbom.txt
+#MimeType=text/lbom;
