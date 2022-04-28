@@ -261,7 +261,7 @@ _create_ubDistBuild-create() {
 	local ubVirtImageSwap_UUID
 	ubVirtImageSwap_UUID=$(sudo -n blkid -s UUID -o value "$imagedev""$ubVirtImageSwap" | tr -dc 'a-zA-Z0-9\-')
 	
-	echo 'UUID='"$ubVirtImageSwap_UUID"' swap swap defaults 0 0' | sudo -n tee "$globalVirtFS"/etc/fstab
+	echo 'UUID='"$ubVirtImageSwap_UUID"' swap swap defaults 0 0' | sudo -n tee -a "$globalVirtFS"/etc/fstab
 	
 	
 	local ubVirtImageEFI_UUID
