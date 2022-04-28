@@ -206,7 +206,10 @@ _create_ubDistBuild-create() {
 	local imagepart
 	local loopdevfs
 	
-	
+	# Compression from btrfs may free up ~8GB . Some performance degradation may result if files with many random writes (eg. COW VM images) are used with btrfs .
+	# https://www.phoronix.com/scan.php?page=article&item=btrfs-zstd-compress&num=4
+	# https://btrfs.wiki.kernel.org/index.php/Compression
+	# https://unix.stackexchange.com/questions/394973/why-would-i-want-to-disable-copy-on-write-while-creating-qemu-images
 	# https://gist.github.com/niflostancu/03810a8167edc533b1712551d4f90a14
 	
 	
@@ -218,7 +221,8 @@ _create_ubDistBuild-create() {
 	imagepart="$imagedev""$ubVirtImagePartition"
 	loopdevfs=$(sudo -n blkid -s TYPE -o value "$imagepart" | tr -dc 'a-zA-Z0-9')
 	[[ "$loopdevfs" == "ext4" ]] && _stop 1
-	sudo -n mkfs.ext4 -e remount-ro -E lazy_itable_init=0,lazy_journal_init=0 -m 0 "$imagepart" || _stop 1
+	#sudo -n mkfs.ext4 -e remount-ro -E lazy_itable_init=0,lazy_journal_init=0 -m 0 "$imagepart" || _stop 1
+	sudo -n mkfs.btrfs --checksum xxhash -M -d single "$imagepart" || _stop 1
 	
 	imagepart="$imagedev""$ubVirtImageSwap"
 	loopdevfs=$(sudo -n blkid -s TYPE -o value "$imagepart" | tr -dc 'a-zA-Z0-9')
@@ -258,7 +262,8 @@ _create_ubDistBuild-create() {
 	local ubVirtImagePartition_UUID
 	ubVirtImagePartition_UUID=$(sudo -n blkid -s UUID -o value "$imagedev""$ubVirtImagePartition" | tr -dc 'a-zA-Z0-9\-')
 	
-	echo 'UUID='"$ubVirtImagePartition_UUID"' / ext4 errors=remount-ro 0 1' | sudo -n tee "$globalVirtFS"/etc/fstab
+	#echo 'UUID='"$ubVirtImagePartition_UUID"' / ext4 errors=remount-ro 0 1' | sudo -n tee "$globalVirtFS"/etc/fstab
+	echo 'UUID='"$ubVirtImagePartition_UUID"' / btrfs defaults,compress=zstd:1 0 1' | sudo -n tee "$globalVirtFS"/etc/fstab
 	
 	
 	# initramfs-update, from chroot, may not enable hibernation/resume... may be device specific
@@ -410,6 +415,14 @@ CZXWXcRMTo8EmM8i4d
 	_getMost_backend_aptGetInstall hostnamectl
 	_chroot hostnamectl set-hostname default
 	
+	
+	
+	_getMost_backend_aptGetInstall btrfs-tools
+	_getMost_backend_aptGetInstall btrfs-progs
+	_getMost_backend_aptGetInstall btrfs-compsize
+	_getMost_backend_aptGetInstall zstd
+	
+	_getMost_backend_aptGetInstall libwxgtk3.0-gtk3-0v5
 	
 	
 	
