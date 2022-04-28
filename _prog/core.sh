@@ -170,20 +170,20 @@ _create_ubDistBuild-create() {
 	
 	# ATTENTION: NOTICE: Larger EFI partition may be more compatible. Larger Swap partition may be more useful for hibernation.
 	
-	sudo -n parted --script "$scriptLocal"/vm.img 'mkpart EFI fat32 '"1"'MiB '"513"'MiB'
-	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart EFI fat32 '"1"'MiB '"33"'MiB'
+	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart EFI fat32 '"1"'MiB '"513"'MiB'
+	sudo -n parted --script "$scriptLocal"/vm.img 'mkpart EFI fat32 '"1"'MiB '"73"'MiB'
 	
 	sudo -n parted --script "$scriptLocal"/vm.img 'set 1 msftdata on'
 	sudo -n parted --script "$scriptLocal"/vm.img 'set 1 boot on'
 	sudo -n parted --script "$scriptLocal"/vm.img 'set 1 esp on'
 	
 	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"513"'MiB '"5633"'MiB'
-	sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"513"'MiB '"3073"'MiB'
-	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"33"'MiB '"97"'MiB'
+	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"513"'MiB '"3073"'MiB'
+	sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"73"'MiB '"97"'MiB'
 	
 	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"5633"'MiB '"44999"'MiB'
-	sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"3073"'MiB '"44999"'MiB'
-	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"97"'MiB '"44999"'MiB'
+	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"3073"'MiB '"44999"'MiB'
+	sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"97"'MiB '"44999"'MiB'
 	
 	
 	sudo -n parted --script "$scriptLocal"/vm.img 'unit MiB print'
@@ -205,6 +205,9 @@ _create_ubDistBuild-create() {
 	
 	local imagepart
 	local loopdevfs
+	
+	
+	# https://gist.github.com/niflostancu/03810a8167edc533b1712551d4f90a14
 	
 	
 	imagepart="$imagedev""$ubVirtImageEFI"
@@ -258,10 +261,12 @@ _create_ubDistBuild-create() {
 	echo 'UUID='"$ubVirtImagePartition_UUID"' / ext4 errors=remount-ro 0 1' | sudo -n tee "$globalVirtFS"/etc/fstab
 	
 	
+	# initramfs-update, from chroot, may not enable hibernation/resume... may be device specific
+	
 	local ubVirtImageSwap_UUID
 	ubVirtImageSwap_UUID=$(sudo -n blkid -s UUID -o value "$imagedev""$ubVirtImageSwap" | tr -dc 'a-zA-Z0-9\-')
 	
-	echo 'UUID='"$ubVirtImageSwap_UUID"' swap swap defaults 0 0' | sudo -n tee -a "$globalVirtFS"/etc/fstab
+	echo '#UUID='"$ubVirtImageSwap_UUID"' swap swap defaults 0 0' | sudo -n tee -a "$globalVirtFS"/etc/fstab
 	
 	
 	local ubVirtImageEFI_UUID
