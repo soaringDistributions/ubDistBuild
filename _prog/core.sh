@@ -131,7 +131,7 @@ _create_ubDistBuild-create() {
 	[[ -e "$lock_open" ]]  && _messagePlain_bad 'bad: locked!' && _messageFAIL && _stop 1
 	[[ -e "$scriptLocal"/l_o ]]  && _messagePlain_bad 'bad: locked!' && _messageFAIL && _stop 1
 	
-	! [[ $(df --block-size=1000000000 --output=avail "$scriptLocal" | tr -dc '0-9') -gt "35" ]] && _messageFAIL && _stop 1
+	! [[ $(df --block-size=1000000000 --output=avail "$scriptLocal" | tr -dc '0-9') -gt "25" ]] && _messageFAIL && _stop 1
 	
 	
 	
@@ -145,7 +145,7 @@ _create_ubDistBuild-create() {
 	
 	_messageNormal 'create: vm.img'
 	
-	export vmSize=35000
+	export vmSize=23296
 	_createRawImage
 	
 	
@@ -181,9 +181,9 @@ _create_ubDistBuild-create() {
 	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"513"'MiB '"3073"'MiB'
 	sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"73"'MiB '"97"'MiB'
 	
-	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"5633"'MiB '"34999"'MiB'
-	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"3073"'MiB '"34999"'MiB'
-	sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"97"'MiB '"34999"'MiB'
+	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"5633"'MiB '"23295"'MiB'
+	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"3073"'MiB '"23295"'MiB'
+	sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"97"'MiB '"23295"'MiB'
 	
 	
 	sudo -n parted --script "$scriptLocal"/vm.img 'unit MiB print'
