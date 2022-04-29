@@ -131,7 +131,7 @@ _create_ubDistBuild-create() {
 	[[ -e "$lock_open" ]]  && _messagePlain_bad 'bad: locked!' && _messageFAIL && _stop 1
 	[[ -e "$scriptLocal"/l_o ]]  && _messagePlain_bad 'bad: locked!' && _messageFAIL && _stop 1
 	
-	! [[ $(df --block-size=1000000000 --output=avail "$scriptLocal" | tr -dc '0-9') -gt "45" ]] && _messageFAIL && _stop 1
+	! [[ $(df --block-size=1000000000 --output=avail "$scriptLocal" | tr -dc '0-9') -gt "35" ]] && _messageFAIL && _stop 1
 	
 	
 	
@@ -145,7 +145,7 @@ _create_ubDistBuild-create() {
 	
 	_messageNormal 'create: vm.img'
 	
-	export vmSize=45000
+	export vmSize=35000
 	_createRawImage
 	
 	
@@ -752,9 +752,12 @@ _create_ubDistBuild-bootOnce-fsck_sequence() {
 	sudo -n fsck -p "$imagedev""$ubVirtImageEFI"
 	[[ "$?" != "0" ]] && _messageFAIL
 	
-	_messagePlain_probe sudo -n e2fsck -p "$imagedev""$ubVirtImagePartition"
-	sudo -n e2fsck -p "$imagedev""$ubVirtImagePartition"
-	sudo -n e2fsck -p "$imagedev""$ubVirtImagePartition"
+	#_messagePlain_probe sudo -n e2fsck -p "$imagedev""$ubVirtImagePartition"
+	#sudo -n e2fsck -p "$imagedev""$ubVirtImagePartition"
+	#sudo -n e2fsck -p "$imagedev""$ubVirtImagePartition"
+	_messagePlain_probe sudo -n fsck -p "$imagedev""$ubVirtImagePartition"
+	sudo -n fsck -p "$imagedev""$ubVirtImagePartition"
+	sudo -n fsck -p "$imagedev""$ubVirtImagePartition"
 	[[ "$?" != "0" ]] && _messageFAIL
 	
 	! "$scriptAbsoluteLocation" _closeLoop && _messagePlain_bad 'fail: _closeLoop' && _messageFAIL
@@ -1032,7 +1035,13 @@ _zSpecial_qemu_sequence() {
 	if _testQEMU_hostArch_x64_hardwarevt
 	then
 		_messagePlain_good 'found: kvm'
-		qemuArgs+=(-machine accel=kvm)
+		if [[ "$qemuHeadless" == "true" ]]
+		then
+			# Apparently, qemu kvm, can be unreliable if nested (eg. within VMWare Workstation VM).
+			_messagePlain_good 'ignored: kvm'
+		else
+			qemuArgs+=(-machine accel=kvm)
+		fi
 	else
 		_messagePlain_warn 'missing: kvm'
 	fi

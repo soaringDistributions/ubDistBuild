@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='1990992828'
+export ub_setScriptChecksum_contents='2703454968'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -13227,8 +13227,18 @@ _mountImageFS_sequence() {
 	
 	_mountImageFS_procedure_blkid "$current_imagedev" "$current_imagepart" "$currentDestinationDir" || _stop 1
 	
+	local loopdevfs
+	loopdevfs=$(sudo -n blkid -s TYPE -o value "$2" | tr -dc 'a-zA-Z0-9')
 	
-	sudo -n mount "$current_imagepart" "$currentDestinationDir" || _stop 1
+	
+	if [[ "$loopdevfs" == "btrfs" ]]
+	then
+		sudo -n mount -o compress=zstd:9 "$current_imagepart" "$currentDestinationDir" || _stop 1
+	else
+		sudo -n mount "$current_imagepart" "$currentDestinationDir" || _stop 1
+	fi
+	
+	
 	sleep 1
 	
 	! mountpoint "$currentDestinationDir" > /dev/null 2>&1 && sleep 3
@@ -36945,7 +36955,7 @@ _create_ubDistBuild-create() {
 	[[ -e "$lock_open" ]]  && _messagePlain_bad 'bad: locked!' && _messageFAIL && _stop 1
 	[[ -e "$scriptLocal"/l_o ]]  && _messagePlain_bad 'bad: locked!' && _messageFAIL && _stop 1
 	
-	! [[ $(df --block-size=1000000000 --output=avail "$scriptLocal" | tr -dc '0-9') -gt "45" ]] && _messageFAIL && _stop 1
+	! [[ $(df --block-size=1000000000 --output=avail "$scriptLocal" | tr -dc '0-9') -gt "35" ]] && _messageFAIL && _stop 1
 	
 	
 	
@@ -36959,7 +36969,7 @@ _create_ubDistBuild-create() {
 	
 	_messageNormal 'create: vm.img'
 	
-	export vmSize=45000
+	export vmSize=35000
 	_createRawImage
 	
 	
@@ -37566,9 +37576,12 @@ _create_ubDistBuild-bootOnce-fsck_sequence() {
 	sudo -n fsck -p "$imagedev""$ubVirtImageEFI"
 	[[ "$?" != "0" ]] && _messageFAIL
 	
-	_messagePlain_probe sudo -n e2fsck -p "$imagedev""$ubVirtImagePartition"
-	sudo -n e2fsck -p "$imagedev""$ubVirtImagePartition"
-	sudo -n e2fsck -p "$imagedev""$ubVirtImagePartition"
+	#_messagePlain_probe sudo -n e2fsck -p "$imagedev""$ubVirtImagePartition"
+	#sudo -n e2fsck -p "$imagedev""$ubVirtImagePartition"
+	#sudo -n e2fsck -p "$imagedev""$ubVirtImagePartition"
+	_messagePlain_probe sudo -n fsck -p "$imagedev""$ubVirtImagePartition"
+	sudo -n fsck -p "$imagedev""$ubVirtImagePartition"
+	sudo -n fsck -p "$imagedev""$ubVirtImagePartition"
 	[[ "$?" != "0" ]] && _messageFAIL
 	
 	! "$scriptAbsoluteLocation" _closeLoop && _messagePlain_bad 'fail: _closeLoop' && _messageFAIL
@@ -37846,7 +37859,13 @@ _zSpecial_qemu_sequence() {
 	if _testQEMU_hostArch_x64_hardwarevt
 	then
 		_messagePlain_good 'found: kvm'
-		qemuArgs+=(-machine accel=kvm)
+		if [[ "$qemuHeadless" == "true" ]]
+		then
+			# Apparently, qemu kvm, can be unreliable if nested (eg. within VMWare Workstation VM).
+			_messagePlain_good 'ignored: kvm'
+		else
+			qemuArgs+=(-machine accel=kvm)
+		fi
 	else
 		_messagePlain_warn 'missing: kvm'
 	fi
