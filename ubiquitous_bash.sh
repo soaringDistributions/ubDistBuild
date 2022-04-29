@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='24773646'
+export ub_setScriptChecksum_contents='2545878961'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -37648,13 +37648,18 @@ _create_ubDistBuild-bootOnce() {
 	done
 	
 	
-	_messageNormal '##### init: _create_ubDistBuild-bootOnce'
+	_messageNormal '##### _create_ubDistBuild-bootOnce: chroot'
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
 	# https://stackoverflow.com/questions/8579330/appending-to-crontab-with-a-shell-script-on-ubuntu
 	
 	( _chroot crontab -l ; echo '@reboot /root/_get_nvidia.sh _autoinstall > /var/log/_get_nvidia.log 2>&1' ) | _chroot crontab '-'
+	
+	
+	# Apparently, if defrag is run once with compression, rootfs usage may reduce from ~6.6GB to ~5.9GB . However, running again may expand usage back to ~6.6GB.
+	# https://github.com/kdave/btrfs-progs/issues/184
+	#btrfs filesystem defrag -r -czstd /
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
