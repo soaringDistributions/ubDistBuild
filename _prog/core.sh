@@ -181,9 +181,9 @@ _create_ubDistBuild-create() {
 	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"513"'MiB '"3073"'MiB'
 	sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"73"'MiB '"97"'MiB'
 	
-	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"5633"'MiB '"44999"'MiB'
-	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"3073"'MiB '"44999"'MiB'
-	sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"97"'MiB '"44999"'MiB'
+	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"5633"'MiB '"34999"'MiB'
+	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"3073"'MiB '"34999"'MiB'
+	sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"97"'MiB '"34999"'MiB'
 	
 	
 	sudo -n parted --script "$scriptLocal"/vm.img 'unit MiB print'
