@@ -578,6 +578,10 @@ _create_ubDistBuild-rotten_install() {
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	imagedev=$(cat "$scriptLocal"/imagedev)
 	
+	[[ ! -e "$scriptLib"/ubiquitous_bash/_lib/custom/package_kde.tar.xz ]] && _messageFAIL
+	sudo -n cp "$scriptLib"/ubiquitous_bash/_lib/custom/package_kde.tar.xz "$globalVirtFS"/package_kde.tar.xz
+	[[ ! -e "$globalVirtFS"/package_kde.tar.xz ]] && _messageFAIL
+	sudo -n chmod 644 "$globalVirtFS"/package_kde.tar.xz
 	
 	[[ ! -e "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh ]] && _messageFAIL
 	sudo -n cp "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
