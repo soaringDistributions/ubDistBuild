@@ -164,6 +164,8 @@ One size fits all, mostly, defaults. Customization (eg. left-handedness, large f
 *) LWin F1-F12 Taskbar specific window selection shortcuts (REQUIRED for voice commands through VoiceAttack)
 
 
+*) Keyboard Repeat   Delay: 325ms   Rate: 50.00 repeats/s   (although 50 may be maximum, this is NOT just as fast as possible, and should remain 50 unless otherwise well proven)
+
 
 -
 
