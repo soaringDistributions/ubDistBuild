@@ -21,6 +21,15 @@ One size fits all, mostly, defaults. Customization (eg. left-handedness, large f
 *) 18 virtual desktops   Show only current screens   Desktop number   (see names elsewhere)
 *) Dolphin File Manager   Firefox/Chromium   KWrite/Kate   Konsole   Spectacle   System Settings   pavucontrol
 
+*) Filesystem Icons - usually may be OMITTED
+ *) Disk (only if internal disk storage substantially complicated)
+ *) Device Manager (only to show ALL devices if non-USB removable SATA brackets are often used)
+ *) core/infrastructure/ssh (only if '_slide', '_index', CoreAutoSSH logical networks, sftp, ssh, vnc, rdp, etc)
+ *) templates (only if unusual, prefer core/installations, core/infrastructure, etc)
+ !) project, Downloads (if not part of KDE menu)
+ *) tasks (instead would now usually be at most just a symlink to a script for ' /usr/bin/xset dpms force suspend ' )
+ *) palette (developer workstations only... only if multiple projects in different folders will often share similar code snippets, etc)
+
 *) Dolphin File Manager Config
 
  *) Hide Places
