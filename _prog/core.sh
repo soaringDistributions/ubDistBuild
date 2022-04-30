@@ -1137,7 +1137,7 @@ _chroot_test() {
 _create_kde() {
 	rm -f "$scriptLocal"/package_kde.tar.xz > /dev/null 2>&1
 	#-T0
-	env XZ_OPT="-e9" tar --exclude='./folder' --exclude='./.config/chromium' -cJvf "$scriptLocal"/package_kde.tar.xz "$HOME"./config "$HOME"/.kde "$HOME"/.local
+	env XZ_OPT="-e9" tar --exclude='./folder' --exclude='./.config/chromium' -cJvf "$scriptLocal"/package_kde.tar.xz "$HOME"/.config "$HOME"/.kde "$HOME"/.local
 }
 
 
