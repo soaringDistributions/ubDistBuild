@@ -1167,6 +1167,7 @@ _refresh_anchors() {
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_openChRoot
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_closeChRoot
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_closeVBoxRaw
 	
 	
 	
