@@ -1135,6 +1135,8 @@ _chroot_test() {
 
 # WARNING: DANGER: No production use. Developer function. Creates a package from "$HOME" KDE and related configuration.
 _create_kde() {
+	mkdir -p "$scriptLocal"
+	
 	cd "$HOME"
 	
 	
