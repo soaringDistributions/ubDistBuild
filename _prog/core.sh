@@ -579,12 +579,12 @@ _create_ubDistBuild-rotten_install() {
 	imagedev=$(cat "$scriptLocal"/imagedev)
 	
 	[[ ! -e "$scriptLib"/ubiquitous_bash/_lib/custom/package_kde.tar.xz ]] && _messageFAIL
-	sudo -n cp "$scriptLib"/ubiquitous_bash/_lib/custom/package_kde.tar.xz "$globalVirtFS"/package_kde.tar.xz
+	sudo -n cp -f "$scriptLib"/ubiquitous_bash/_lib/custom/package_kde.tar.xz "$globalVirtFS"/package_kde.tar.xz
 	[[ ! -e "$globalVirtFS"/package_kde.tar.xz ]] && _messageFAIL
 	sudo -n chmod 644 "$globalVirtFS"/package_kde.tar.xz
 	
 	[[ ! -e "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh ]] && _messageFAIL
-	sudo -n cp "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
+	sudo -n cp -f "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
 	[[ ! -e "$globalVirtFS"/rotten_install.sh ]] && _messageFAIL
 	sudo -n chmod u+x "$globalVirtFS"/rotten_install.sh
 	
@@ -613,7 +613,7 @@ _create_ubDistBuild-rotten_install-bootOnce() {
 	
 	
 	[[ ! -e "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh ]] && _messageFAIL
-	sudo -n cp "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
+	sudo -n cp -f "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
 	[[ ! -e "$globalVirtFS"/rotten_install.sh ]] && _messageFAIL
 	sudo -n chmod u+x "$globalVirtFS"/rotten_install.sh
 	
@@ -637,7 +637,7 @@ _create_ubDistBuild-rotten_install-kde() {
 	
 	
 	[[ ! -e "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh ]] && _messageFAIL
-	sudo -n cp "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
+	sudo -n cp -f "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
 	[[ ! -e "$globalVirtFS"/rotten_install.sh ]] && _messageFAIL
 	sudo -n chmod u+x "$globalVirtFS"/rotten_install.sh
 	
@@ -661,7 +661,7 @@ _create_ubDistBuild-rotten_install-core() {
 	
 	
 	[[ ! -e "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh ]] && _messageFAIL
-	sudo -n cp "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
+	sudo -n cp -f "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
 	[[ ! -e "$globalVirtFS"/rotten_install.sh ]] && _messageFAIL
 	sudo -n chmod u+x "$globalVirtFS"/rotten_install.sh
 	
