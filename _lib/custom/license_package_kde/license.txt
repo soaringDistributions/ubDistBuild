@@ -1,0 +1,3 @@
+http://creativecommons.org/publicdomain/zero/1.0/
+To the extent possible under law, Soaring Distributions LLC has waived all copyright and related or neighboring rights to package_kde.tar.xz. This work is published from: United States.
+Also see CC0_license.txt for details.
