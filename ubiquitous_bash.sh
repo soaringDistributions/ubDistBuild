@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='2545878961'
+export ub_setScriptChecksum_contents='3255207331'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -9542,6 +9542,21 @@ _getMost_debian11_install() {
 	_getMost_backend_aptGetInstall filelight
 	
 	_getMost_backend_aptGetInstall obs-studio
+	
+	
+	
+	_getMost_backend_aptGetInstall lepton-eda
+	_getMost_backend_aptGetInstall pcb
+	_getMost_backend_aptGetInstall pcb-rnd
+	_getMost_backend_aptGetInstall gerbv
+	_getMost_backend_aptGetInstall electronics-pcb
+	_getMost_backend_aptGetInstall pcb2gcode
+	
+	_getMost_backend_aptGetInstall kicad
+	
+	_getMost_backend_aptGetInstall electric
+	
+	_getMost_backend_aptGetInstall freecad
 	
 	
 	_getMost_debian11_special_late
@@ -23376,13 +23391,26 @@ _x11_clipboard_imageToHTML() {
 _reset_KDE() {
 	#kquitapp plasmashell ; sleep 0.5 ; pkill plasmashell ; sleep 0.1 ; pkill -KILL plasmashell ; sleep 0.1 ; plasmashell & exit
 	
-	if pgrep plasmashell
-	then
+	#if pgrep plasmashell
+	#then
 		#kquitapp plasmashell ; sleep 3 ; plasmashell &
-		kquitapp plasmashell ; sleep 0.5 ; pkill plasmashell ; sleep 0.1 ; pkill -KILL plasmashell ; sleep 0.1
+		if type kquitapp > /dev/null 2>&1
+		then
+			kquitapp plasmashell
+		else
+			pkill plasmashell
+			killall plasmashell
+		fi
+		sleep 0.5
+		pkill plasmashell
+		killall plasmashell
+		sleep 0.1
+		pkill -KILL plasmashell
+		killall plasmashell
+		sleep 0.1
 		
 		plasmashell &
-	fi
+	#fi
 	disown -a -h -r
 	disown -a -r
 }
@@ -37956,6 +37984,19 @@ _chroot_test() {
 
 
 
+
+
+
+
+
+
+# WARNING: DANGER: No production use. Developer function. Creates a package from "$HOME" KDE and related configuration.
+_create_kde() {
+	#-T0
+	env XZ_OPT="-e9" tar --exclude='./folder' --exclude='./.config/chromium' -cJvf "$scriptLocal"/package_kde.tar.xz ./.config ./.kde ./.local
+}
+
+
 _refresh_anchors() {
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_getCore_ubDistFetch
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_ubDistHome
@@ -37988,6 +38029,10 @@ _refresh_anchors() {
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_labVBox
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_zSpecial_qemu
+	
+	
+	
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_kde
 	
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_true

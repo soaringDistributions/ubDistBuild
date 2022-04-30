@@ -1127,6 +1127,19 @@ _chroot_test() {
 
 
 
+
+
+
+
+
+
+# WARNING: DANGER: No production use. Developer function. Creates a package from "$HOME" KDE and related configuration.
+_create_kde() {
+	#-T0
+	env XZ_OPT="-e9" tar --exclude='./folder' --exclude='./.config/chromium' -cJvf "$scriptLocal"/package_kde.tar.xz ./.config ./.kde ./.local
+}
+
+
 _refresh_anchors() {
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_getCore_ubDistFetch
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_ubDistHome
@@ -1159,6 +1172,10 @@ _refresh_anchors() {
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_labVBox
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_zSpecial_qemu
+	
+	
+	
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_kde
 	
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_true

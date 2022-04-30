@@ -5,26 +5,29 @@ Dark mode in particular may prevent 'welders flash' eye surface irritation, seve
 
 One size fits all, mostly, defaults. Customization (eg. left-handedness, large font for developer prolonged text reading, etc) begins from this, NOT vice versa.
 
-*) Wallpaper Type   Plain Color (SEVERE VNC/RDP delays without this)   b 28 #00001c (VM/VPS)   r 20 g 17 #141100 (lodging/desktop)
+*) Wallpaper Type   Plain Color (SEVERE VNC/RDP delays without this)   b 28 #00001c (VM/VPS)   r 20 g 17 #141100 (lodging/desktop)   r 22 b 22 #160016 (request)
 
-*) Clock 24h, EDT or UTC
-*) Seconds Visible
-*) Date ISO Long
+*) Clock
+ *) Show seconds
+ *) Show local time zone
+ *) Time display: 24-hour
+ *) Date ISO Long
 *) Visible   Notifications, Audio, Network
 *) Relevant   Media Player
+*) Clipboard   do NOT save
 *) Netspeed Widget   download speed first   0.2s   Bits/s   w b/s   r kb/s   y Mb/s   g Gb/s
 *) System Load Viewer   CPU, Memory   Bar   0.3   Set Colors Manually   b User   g IOWait   r Sys   y Nice
 *) Task Manager (NOT Icons-only)   Do not group   Sort Manually   From current screen/desktop/activity
-*) 18 virtual desktops   Show only current screens   Desktop number
+*) 18 virtual desktops   Show only current screens   Desktop number   (see names elsewhere)
 *) Dolphin File Manager   Firefox/Chromium   KWrite/Kate   Konsole   Spectacle   System Settings   pavucontrol
 
 *) Dolphin File Manager Config
- *) Alt+. (Show Hidden Files)
+
  *) Hide Places
  *) Up | Back Fwd Icons Compact Details Home   <uri>   | Open Terminal   Terminal
  *) Preferences
   *) > General
-   *) Remember display style for each folder
+   *) Use common display style for all folders
    *) Sorting mode: Natural
    *) Previews (mostly disable)
    *) When opening an executable file: Run script
@@ -38,8 +41,10 @@ One size fits all, mostly, defaults. Customization (eg. left-handedness, large f
     *) Folder size displays: Number of items
   *) Services (mostly Disable)
  *) Minimum Zoom
+ *) Alt+. (Show Hidden Files)
 
 *) Kate/KWrite Config
+ *) Font to 11
  *) Tabulators   Tab width: 8 characters   Indentation width: 8 characters
  *) Encoding UTF-8   End of Line: UNIX   Remove trailing spaces: Never   Append newline at end of file on save (yes)
  *) > Color Themes   /home/user/.ubcore/ubiquitous_bash/_lib/desktop/kwrite/Breeze Dark - Contrast.theme
@@ -82,6 +87,7 @@ One size fits all, mostly, defaults. Customization (eg. left-handedness, large f
    *) Animation speed   Instant
    *) Click behavior   Double-click to open files and folders
    *) Desktop Effects (mostly disable) ... Alt-Tab to Present Windows may be helpful for developer desktops
+    *) Invert (enable)
   *) > Screen Edges (disable the 'Present Windows' and 'Toggle window switching' gestures)
   *) > Screen Locking (disable... unless strictly for very sensitive physical desktops with documented passwords)
   *) > Virtual Desktops
@@ -93,7 +99,8 @@ One size fits all, mostly, defaults. Customization (eg. left-handedness, large f
    *) Click to focus   Focus follows mouse (mouse precedence)
    *) Delay focus by: 0ms
    *) Window geometry: Display when moving or resizing
-  *) > Window Rules   /home/user/.ubcore/ubiquitous_bash/_lib/desktop/kwin-rules/dev/_ref/export/
+  *) > Window Rules   /home/user/.ubcore/ubiquitous_bash/_lib/desktop/kwin-rules/dev/
+   *) .../_ref/export has default window size rules mostly for very large displays
    *) Do NOT import (except for developer workstation)   audacious
    *) Disable LATER if necessary to remove transparency effects to reduce VNC/RDP delays.
   *) > Custom Shortcuts
@@ -114,8 +121,11 @@ One size fits all, mostly, defaults. Customization (eg. left-handedness, large f
       *) /bin/bash ('Advanced Options -> Run in terminal')
     *) Any file association requested by 'core' or other software.
      *) freecad-a2plus , _pcb_color , etc
-   *) Launch Feedback   Cursor   No Feedback   Stop animation after: 1 secs
-  *) > Display and Monitor   Scale method: Crisp   Rendering backend: XRender   Tearing prevention Automatic
+   *) Launch Feedback   Cursor: No Feedback   Stop animation after: 1 secs
+  *) > Display and Monitor
+   *) Resolution: 1280x960   Refresh rate: 60 Hz
+   *) Scale method: Crisp   Rendering backend: XRender   Tearing prevention Automatic
+    *) Desktop Effects and related settings may reset after this.
    *) LATER some desktop hardware may benefit from   Rendering backend: OpenGL 3.1   Scale method: Accurate
   *) > Power Management (mostly disable)
   *) > Removable Storage
@@ -130,7 +140,23 @@ One size fits all, mostly, defaults. Customization (eg. left-handedness, large f
  *) example.lbom.txt
  *) kit_example.lbom.txt
 
-*) kwrite/kate syntax for bom_designer   ubDistBuild/_lib/setup/kde/from_other
+*) kwrite/kate syntax for bom_designer   ubDistBuild/_lib/setup/kde/from_other   /home/user/.local/share/katepart5/syntax/
+
+
+
+*) Shift+Del ... System Settings > Shortcuts > File > Shift+Del   toggle enabled/disabled to reassign
+
+*) Alt+Number Virtual Desktop switching shortcuts (REQUIRED for voice commands through VoiceAttack) ... > Shortcuts > KWin
+ *) LAlt 0-9 (ie. 1-9, 0 for 10)
+  *) LAlt LWin 0-9 (alternate virtual desktops, usually 11-18, see PanelBoard for specification)
+
+*) Alt+` Virtual Desktop 5 switch
+
+*) LWin F1-F12 Taskbar specific window selection shortcuts (REQUIRED for voice commands through VoiceAttack)
+
+
+
+-
 
 
 
