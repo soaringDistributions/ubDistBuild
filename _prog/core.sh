@@ -630,8 +630,8 @@ _create_ubDistBuild-rotten_install-kde() {
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	imagedev=$(cat "$scriptLocal"/imagedev)
 	
-	[[ ! -e "$scriptLib"/_lib/custom/package_kde.tar.xz ]] && _messageFAIL
-	sudo -n cp -f "$scriptLib"/_lib/custom/package_kde.tar.xz "$globalVirtFS"/package_kde.tar.xz
+	[[ ! -e "$scriptLib"/custom/package_kde.tar.xz ]] && _messageFAIL
+	sudo -n cp -f "$scriptLib"/custom/package_kde.tar.xz "$globalVirtFS"/package_kde.tar.xz
 	[[ ! -e "$globalVirtFS"/package_kde.tar.xz ]] && _messageFAIL
 	sudo -n chmod 644 "$globalVirtFS"/package_kde.tar.xz
 	
