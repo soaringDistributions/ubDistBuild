@@ -15,8 +15,8 @@ One size fits all, mostly, defaults. Customization (eg. left-handedness, large f
 *) Visible   Notifications, Audio, Network
 *) Relevant   Media Player
 *) Clipboard   do NOT save
-*) Netspeed Widget   download speed first   0.2s   Bits/s   w b/s   r kb/s   y Mb/s   g Gb/s
-*) System Load Viewer   CPU, Memory   Bar   0.3   Set Colors Manually   b User   g IOWait   r Sys   y Nice
+*) Netspeed Widget   download speed first   0.3s OR 5s   Bits/s   w b/s   r kb/s   y Mb/s   g Gb/s
+*) System Load Viewer   CPU, Memory   Bar   0.2s OR 3s   Set Colors Manually   b User   g IOWait   r Sys   y Nice
 *) Task Manager (NOT Icons-only)   Do not group   Sort Manually   From current screen/desktop/activity
 *) 18 virtual desktops   Show only current screens   Desktop number   (see names elsewhere)
 *) Dolphin File Manager   Firefox/Chromium   KWrite/Kate   Konsole   Spectacle   System Settings   pavucontrol
@@ -165,6 +165,13 @@ One size fits all, mostly, defaults. Customization (eg. left-handedness, large f
 
 
 *) Keyboard Repeat   Delay: 325ms   Rate: 50.00 repeats/s   (although 50 may be maximum, this is NOT just as fast as possible, and should remain 50 unless otherwise well proven)
+
+
+
+
+*) Konsole > Edit Current Profile
+ *) Profile name  Default (set profile name, do not create new profile)
+ *) Color scheme & font Linux Colors (instead of Breeze)
 
 
 -

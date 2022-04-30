@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='3926256944'
+export ub_setScriptChecksum_contents='3745683290'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -37438,7 +37438,7 @@ _create_ubDistBuild-rotten_install() {
 	[[ ! -e "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh ]] && _messageFAIL
 	sudo -n cp -f "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
 	[[ ! -e "$globalVirtFS"/rotten_install.sh ]] && _messageFAIL
-	sudo -n chmod u+x "$globalVirtFS"/rotten_install.sh
+	sudo -n chmod 700 "$globalVirtFS"/rotten_install.sh
 	
 	
 	#echo | sudo tee "$globalVirtFS"/in_chroot
@@ -37467,7 +37467,7 @@ _create_ubDistBuild-rotten_install-bootOnce() {
 	[[ ! -e "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh ]] && _messageFAIL
 	sudo -n cp -f "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
 	[[ ! -e "$globalVirtFS"/rotten_install.sh ]] && _messageFAIL
-	sudo -n chmod u+x "$globalVirtFS"/rotten_install.sh
+	sudo -n chmod 700 "$globalVirtFS"/rotten_install.sh
 	
 	
 	#echo | sudo tee "$globalVirtFS"/in_chroot
@@ -37496,11 +37496,11 @@ _create_ubDistBuild-rotten_install-kde() {
 	[[ ! -e "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh ]] && _messageFAIL
 	sudo -n cp -f "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
 	[[ ! -e "$globalVirtFS"/rotten_install.sh ]] && _messageFAIL
-	sudo -n chmod u+x "$globalVirtFS"/rotten_install.sh
+	sudo -n chmod 700 "$globalVirtFS"/rotten_install.sh
 	
 	
 	#echo | sudo tee "$globalVirtFS"/in_chroot
-	! _chroot /rotten_install.sh _custom_kde && _messageFAIL
+	! _chroot /rotten_install.sh _custom_kde_drop && _messageFAIL
 	#sudo rm -f "$globalVirtFS"/in_chroot
 	
 	
@@ -37520,11 +37520,11 @@ _create_ubDistBuild-rotten_install-core() {
 	[[ ! -e "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh ]] && _messageFAIL
 	sudo -n cp -f "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
 	[[ ! -e "$globalVirtFS"/rotten_install.sh ]] && _messageFAIL
-	sudo -n chmod u+x "$globalVirtFS"/rotten_install.sh
+	sudo -n chmod 700 "$globalVirtFS"/rotten_install.sh
 	
 	
 	#echo | sudo tee "$globalVirtFS"/in_chroot
-	! _chroot /rotten_install.sh _custom_core && _messageFAIL
+	! _chroot /rotten_install.sh _custom_core_drop && _messageFAIL
 	#sudo rm -f "$globalVirtFS"/in_chroot
 	
 	
@@ -37559,12 +37559,13 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	pgrep qemu-system
 	pgrep qemu
 	ps -p "$currentPID"
-	while [[ "$currentIterationWait" -lt 600 ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
+	while [[ "$currentIterationWait" -lt 1200 ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
 	do
 		sleep 1
 		let currentIterationWait=currentIterationWait+1
 	done
 	_messagePlain_probe_var currentIterationWait
+	[[ "$currentIterationWait" -ge 1199 ]] && _messagePlain_bad 'bad: fail: bootdisc: poweroff'
 	sleep 27
 	
 	
@@ -37664,7 +37665,7 @@ _create_ubDistBuild-bootOnce() {
 	
 	local currentIteration
 	
-	for currentIteration in $(seq 1 4)
+	for currentIteration in $(seq 1 3)
 	do
 		_messagePlain_probe_var currentIteration
 		
@@ -37817,7 +37818,9 @@ _zSpecial_qemu_sequence() {
 		"$scriptBin"/.ubrgbin.sh _ubrgbin_cpA "$scriptBin" "$hostToGuestFiles"/_bin
 		
 		echo '#!/usr/bin/env bash' >> "$hostToGuestFiles"/cmd.sh
-		echo 'sleep 90' >> "$hostToGuestFiles"/cmd.sh
+		echo 'sudo -n update-grub' >> "$hostToGuestFiles"/cmd.sh
+		echo 'while pgrep cc1 ; do sleep 3 ; done' >> "$hostToGuestFiles"/cmd.sh
+		echo 'sleep 45' >> "$hostToGuestFiles"/cmd.sh
 		echo 'sudo -n poweroff' >> "$hostToGuestFiles"/cmd.sh
 		
 		! _writeBootdisc && _messageFAIL
