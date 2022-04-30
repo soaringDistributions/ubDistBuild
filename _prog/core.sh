@@ -1135,9 +1135,11 @@ _chroot_test() {
 
 # WARNING: DANGER: No production use. Developer function. Creates a package from "$HOME" KDE and related configuration.
 _create_kde() {
+	cd "$HOME"
+	
 	rm -f "$scriptLocal"/package_kde.tar.xz > /dev/null 2>&1
 	#-T0
-	env XZ_OPT="-e9" tar --exclude='./folder' --exclude='./.config/chromium' -cJvf "$scriptLocal"/package_kde.tar.xz "$HOME"/.config "$HOME"/.kde "$HOME"/.local
+	env XZ_OPT="-e9" tar --exclude='./folder' --exclude='./.config/chromium' -cJvf "$scriptLocal"/package_kde.tar.xz ./.config ./.kde ./.local
 }
 
 
