@@ -696,7 +696,7 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	#disown -a -r
 	
 	
-	_messagePlain_nominal 'wait: 600s'
+	_messagePlain_nominal 'wait: 1200s'
 	local currentIterationWait
 	currentIterationWait=0
 	pgrep qemu-system
