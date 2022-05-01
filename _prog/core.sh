@@ -966,8 +966,8 @@ _zSpecial_qemu_sequence() {
 		
 		echo '#!/usr/bin/env bash' >> "$hostToGuestFiles"/cmd.sh
 		echo 'sudo -n update-grub' >> "$hostToGuestFiles"/cmd.sh
-		echo 'while pgrep cc1 ; do sleep 3 ; done' >> "$hostToGuestFiles"/cmd.sh
-		echo 'sleep 45' >> "$hostToGuestFiles"/cmd.sh
+		echo 'while ! pgrep cc1 && ! pgrep packagekit && sleep 9 && ! pgrep cc1 && ! pgrep packagekit && sleep 9 && ! pgrep cc1 && ! pgrep packagekit ; do sleep 9 ; done' >> "$hostToGuestFiles"/cmd.sh
+		echo 'sleep 90' >> "$hostToGuestFiles"/cmd.sh
 		echo 'sudo -n poweroff' >> "$hostToGuestFiles"/cmd.sh
 		
 		! _writeBootdisc && _messageFAIL
