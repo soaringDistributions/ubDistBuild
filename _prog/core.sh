@@ -838,6 +838,7 @@ _create_ubDistBuild-bootOnce() {
 	#btrfs filesystem defrag -r -czstd /
 	
 	
+	_chroot dpkg -l | sudo tee "$globalVirtFS"/dpkg
 	
 	echo | sudo tee "$globalVirtFS"/regenerate
 	
@@ -966,7 +967,7 @@ _zSpecial_qemu_sequence() {
 		
 		echo '#!/usr/bin/env bash' >> "$hostToGuestFiles"/cmd.sh
 		echo 'sudo -n update-grub' >> "$hostToGuestFiles"/cmd.sh
-		echo 'while ! pgrep cc1 && ! pgrep packagekit && sleep 9 && ! pgrep cc1 && ! pgrep packagekit && sleep 9 && ! pgrep cc1 && ! pgrep packagekit ; do sleep 9 ; done' >> "$hostToGuestFiles"/cmd.sh
+		echo 'while ! pgrep cc1 && ! pgrep packagekit && sleep 27 && ! pgrep cc1 && ! pgrep packagekit && sleep 27 && ! pgrep cc1 && ! pgrep packagekit ; do sleep 27 ; done' >> "$hostToGuestFiles"/cmd.sh
 		echo 'sleep 90' >> "$hostToGuestFiles"/cmd.sh
 		echo 'sudo -n poweroff' >> "$hostToGuestFiles"/cmd.sh
 		
