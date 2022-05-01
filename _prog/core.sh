@@ -837,6 +837,10 @@ _create_ubDistBuild-bootOnce() {
 	# https://github.com/kdave/btrfs-progs/issues/184
 	#btrfs filesystem defrag -r -czstd /
 	
+	
+	
+	echo > | sudo tee "$globalVirtFS"/regenerate
+	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
 	
