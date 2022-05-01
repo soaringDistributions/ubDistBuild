@@ -551,9 +551,9 @@ CZXWXcRMTo8EmM8i4d
 	
 	# https://linuxconfig.org/how-to-disable-blacklist-nouveau-nvidia-driver-on-ubuntu-20-04-focal-fossa-linux
 	# https://askubuntu.com/questions/747314/is-nomodeset-still-required
-	#echo 'GRUB_CMDLINE_LINUX="nouveau.modeset=0"' | sudo tee -a "$globalVirtFS"/etc/default/grub
-	echo 'blacklist nouveau' | sudo tee "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
-	echo 'options nouveau modeset=0' | sudo tee -a "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
+	#echo 'GRUB_CMDLINE_LINUX="nouveau.modeset=0"' | sudo -n tee -a "$globalVirtFS"/etc/default/grub
+	echo 'blacklist nouveau' | sudo -n tee "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
+	echo 'options nouveau modeset=0' | sudo -n tee -a "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
 	
 	
 	
@@ -584,7 +584,7 @@ _create_ubDistBuild-rotten_install() {
 	sudo -n chmod 700 "$globalVirtFS"/rotten_install.sh
 	
 	
-	#echo | sudo tee "$globalVirtFS"/in_chroot
+	#echo | sudo -n tee "$globalVirtFS"/in_chroot
 	! _chroot /rotten_install.sh _install && _messageFAIL
 	#sudo rm -f "$globalVirtFS"/in_chroot
 	
@@ -613,7 +613,7 @@ _create_ubDistBuild-rotten_install-bootOnce() {
 	sudo -n chmod 700 "$globalVirtFS"/rotten_install.sh
 	
 	
-	#echo | sudo tee "$globalVirtFS"/in_chroot
+	#echo | sudo -n tee "$globalVirtFS"/in_chroot
 	! _chroot /rotten_install.sh _custom_bootOnce && _messageFAIL
 	#sudo rm -f "$globalVirtFS"/in_chroot
 	
@@ -642,7 +642,7 @@ _create_ubDistBuild-rotten_install-kde() {
 	sudo -n chmod 700 "$globalVirtFS"/rotten_install.sh
 	
 	
-	#echo | sudo tee "$globalVirtFS"/in_chroot
+	#echo | sudo -n tee "$globalVirtFS"/in_chroot
 	! _chroot /rotten_install.sh _custom_kde_drop && _messageFAIL
 	#sudo rm -f "$globalVirtFS"/in_chroot
 	
@@ -666,7 +666,7 @@ _create_ubDistBuild-rotten_install-core() {
 	sudo -n chmod 700 "$globalVirtFS"/rotten_install.sh
 	
 	
-	#echo | sudo tee "$globalVirtFS"/in_chroot
+	#echo | sudo -n tee "$globalVirtFS"/in_chroot
 	! _chroot /rotten_install.sh _custom_core_drop && _messageFAIL
 	#sudo rm -f "$globalVirtFS"/in_chroot
 	
@@ -784,13 +784,13 @@ _create_ubDistBuild-bootOnce() {
 	##echo '@reboot cd '/home/user'/ ; '/home/user'/rottenScript.sh _run' | sudo -n -u user bash -c "crontab -"
 	
 	##sudo -n mkdir -p "$globalVirtFS"/home/user/.config/autostart
-	##_here_bootdisc_statup_xdg | sudo tee "$globalVirtFS"/home/user/.config/autostart/startup.desktop > /dev/null
+	##_here_bootdisc_statup_xdg | sudo -n tee "$globalVirtFS"/home/user/.config/autostart/startup.desktop > /dev/null
 	##_chroot chown -R user:user /home/user/.config
 	##_chroot chmod 555 /home/user/.config/autostart/startup.desktop
 	
 	
 	##sudo -n mkdir -p "$globalVirtFS"/home/user/___quick
-	##echo 'sudo -n mount -t fuse.vmhgfs-fuse -o allow_other,uid=$(id -u "$USER"),gid=$(id -g "$USER") .host: "$HOME"/___quick' | sudo tee "$globalVirtFS"/home/user/___quick/mount.sh
+	##echo 'sudo -n mount -t fuse.vmhgfs-fuse -o allow_other,uid=$(id -u "$USER"),gid=$(id -g "$USER") .host: "$HOME"/___quick' | sudo -n tee "$globalVirtFS"/home/user/___quick/mount.sh
 	##_chroot chown -R user:user /home/user/___quick
 	##_chroot chmod 755 /home/user/___quick/mount.sh
 	
@@ -838,9 +838,9 @@ _create_ubDistBuild-bootOnce() {
 	#btrfs filesystem defrag -r -czstd /
 	
 	
-	_chroot dpkg -l | sudo tee "$globalVirtFS"/dpkg
+	_chroot dpkg -l | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
 	
-	echo | sudo tee "$globalVirtFS"/regenerate
+	echo | sudo -n tee "$globalVirtFS"/regenerate > /dev/null
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
