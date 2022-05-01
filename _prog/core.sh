@@ -839,7 +839,7 @@ _create_ubDistBuild-bootOnce() {
 	
 	
 	
-	echo > | sudo tee "$globalVirtFS"/regenerate
+	echo | sudo tee "$globalVirtFS"/regenerate
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
