@@ -172,6 +172,10 @@ One size fits all, mostly, defaults. Customization (eg. left-handedness, large f
 *) Konsole > Edit Current Profile
  *) Profile name  Default (set profile name, do not create new profile)
  *) Color scheme & font Linux Colors (instead of Breeze)
+ *) Scrollback: 30000 lines (30000 lines * 10000 bytes == 300MB RAM , expected worst reasonable case)
+
+
+*) KSysGuard   Name   Window Title   TTY   PID   Username   Niceness   CPU % ^   IO Write   IO Read   Upload   Download   Memory   Shared Mem   Relative Start Time   Command
 
 
 -
