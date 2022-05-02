@@ -707,19 +707,19 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	#disown -a -r
 	
 	
-	_messagePlain_nominal 'wait: 1200s'
+	_messagePlain_nominal 'wait: 1800s'
 	local currentIterationWait
 	currentIterationWait=0
 	pgrep qemu-system
 	pgrep qemu
 	ps -p "$currentPID"
-	while [[ "$currentIterationWait" -lt 1200 ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
+	while [[ "$currentIterationWait" -lt 1800 ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
 	do
 		sleep 1
 		let currentIterationWait=currentIterationWait+1
 	done
 	_messagePlain_probe_var currentIterationWait
-	[[ "$currentIterationWait" -ge 1199 ]] && _messagePlain_bad 'bad: fail: bootdisc: poweroff'
+	[[ "$currentIterationWait" -ge 1800 ]] && _messagePlain_bad 'bad: fail: bootdisc: poweroff'
 	sleep 27
 	
 	
@@ -811,7 +811,7 @@ _create_ubDistBuild-bootOnce() {
 	
 	##( _chroot sudo -n -u user bash -c "crontab -l" ; echo '@reboot cd /home/'"$custom_user"'/.ubcore/ubiquitous_bash/lean.sh _unix_renice_execDaemon' ) | _chroot sudo -n -u user bash -c "crontab -"
 	
-	sudo -n /sbin/vboxconfig
+	_chroot /sbin/vboxconfig
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
