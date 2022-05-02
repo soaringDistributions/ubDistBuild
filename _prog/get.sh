@@ -4,7 +4,8 @@
 
 
 _get_extract_ubDistBuild() {
-	pv | xz -d | tar --overwrite xvf
+	# https://unix.stackexchange.com/questions/85194/how-to-download-an-archive-and-extract-it-without-saving-the-archive-to-disk
+	pv | xz -d | tar xv --overwrite
 }
 
 
@@ -37,7 +38,7 @@ _get_vmImg_ubDistBuild_sequence() {
 	
 	
 	# https://unix.stackexchange.com/questions/85194/how-to-download-an-archive-and-extract-it-without-saving-the-archive-to-disk
-	_messagePlain_probe 'wget | pv | xz -d | tar xvf'
+	_messagePlain_probe 'wget | pv | xz -d | tar xv'
 	wget -qO- --user u298813-sub10 --password OJgZTe0yNilixhRy https://u298813-sub10.your-storagebox.de/zSpecial/build_ubDistBuild/dump/package_image.tar.xz | _get_extract_ubDistBuild
 	
 	
@@ -85,8 +86,8 @@ _get_core_ubDistFetch_sequence() {
 	
 	
 	# https://unix.stackexchange.com/questions/85194/how-to-download-an-archive-and-extract-it-without-saving-the-archive-to-disk
-	_messagePlain_probe 'wget | pv | xz -d | tar xvf'
-	wget -qO- --user u298813-sub10 --password OJgZTe0yNilixhRy https://u298813-sub10.your-storagebox.de/zSpecial/build_ubDistBuild/dump/package_image.tar.xz | _get_extract_ubDistBuild
+	_messagePlain_probe 'wget | pv | xz -d | tar xv'
+	wget -qO- --user u298813-sub10 --password OJgZTe0yNilixhRy https://u298813-sub10.your-storagebox.de/zSpecial/build_ubDistFetch/dump/core.tar.xz | _get_extract_ubDistBuild
 	
 	
 	
