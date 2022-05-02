@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='2905491302'
+export ub_setScriptChecksum_contents='2257210238'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -37447,6 +37447,12 @@ _create_ubDistBuild-rotten_install() {
 	sudo -n chmod 700 "$globalVirtFS"/rotten_install.sh
 	
 	
+	[[ ! -e "$scriptLib"/custom/package_kde.tar.xz ]] && _messageFAIL
+	sudo -n cp -f "$scriptLib"/custom/package_kde.tar.xz "$globalVirtFS"/package_kde.tar.xz
+	[[ ! -e "$globalVirtFS"/package_kde.tar.xz ]] && _messageFAIL
+	sudo -n chmod 644 "$globalVirtFS"/package_kde.tar.xz
+	
+	
 	#echo | sudo -n tee "$globalVirtFS"/in_chroot
 	! _chroot /rotten_install.sh _install && _messageFAIL
 	#sudo rm -f "$globalVirtFS"/in_chroot
@@ -37521,6 +37527,14 @@ _create_ubDistBuild-rotten_install-core() {
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	imagedev=$(cat "$scriptLocal"/imagedev)
+	
+	if [[ -e "$scriptLocal"/core.tar.xz ]]
+	then
+		[[ ! -e "$scriptLocal"/core.tar.xz ]] && _messageFAIL
+		sudo -n cp -f "$scriptLocal"/core.tar.xz "$globalVirtFS"/core.tar.xz
+		[[ ! -e "$globalVirtFS"/core.tar.xz ]] && _messageFAIL
+		sudo -n chmod 644 "$globalVirtFS"/core.tar.xz
+	fi
 	
 	
 	[[ ! -e "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh ]] && _messageFAIL
@@ -37998,6 +38012,8 @@ _ubDistBuild() {
 	#_create_ubDistBuild-rotten_install
 	#_create_ubDistBuild-bootOnce
 	
+	rm -f "$scriptLocal"/core.tar.xz > /dev/null 2>&1
+	
 	
 	_upload_ubDistBuild_image
 	
@@ -38035,6 +38051,9 @@ _create_kde() {
 _refresh_anchors() {
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_core_ubDistFetch
+	
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-rotten_install-kde
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-rotten_install-core
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-create
@@ -38194,8 +38213,8 @@ _get_core_ubDistFetch_sequence() {
 	
 	
 	# https://unix.stackexchange.com/questions/85194/how-to-download-an-archive-and-extract-it-without-saving-the-archive-to-disk
-	_messagePlain_probe 'wget | pv | xz -d | tar xv'
-	wget -qO- --user u298813-sub10 --password OJgZTe0yNilixhRy https://u298813-sub10.your-storagebox.de/zSpecial/build_ubDistFetch/dump/core.tar.xz | _get_extract_ubDistBuild
+	_messagePlain_probe 'wget'
+	wget --user u298813-sub10 --password OJgZTe0yNilixhRy https://u298813-sub10.your-storagebox.de/zSpecial/build_ubDistFetch/dump/core.tar.xz
 	
 	
 	

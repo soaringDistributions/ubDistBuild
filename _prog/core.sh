@@ -572,6 +572,12 @@ _create_ubDistBuild-rotten_install() {
 	sudo -n chmod 700 "$globalVirtFS"/rotten_install.sh
 	
 	
+	[[ ! -e "$scriptLib"/custom/package_kde.tar.xz ]] && _messageFAIL
+	sudo -n cp -f "$scriptLib"/custom/package_kde.tar.xz "$globalVirtFS"/package_kde.tar.xz
+	[[ ! -e "$globalVirtFS"/package_kde.tar.xz ]] && _messageFAIL
+	sudo -n chmod 644 "$globalVirtFS"/package_kde.tar.xz
+	
+	
 	#echo | sudo -n tee "$globalVirtFS"/in_chroot
 	! _chroot /rotten_install.sh _install && _messageFAIL
 	#sudo rm -f "$globalVirtFS"/in_chroot
@@ -646,6 +652,14 @@ _create_ubDistBuild-rotten_install-core() {
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	imagedev=$(cat "$scriptLocal"/imagedev)
+	
+	if [[ -e "$scriptLocal"/core.tar.xz ]]
+	then
+		[[ ! -e "$scriptLocal"/core.tar.xz ]] && _messageFAIL
+		sudo -n cp -f "$scriptLocal"/core.tar.xz "$globalVirtFS"/core.tar.xz
+		[[ ! -e "$globalVirtFS"/core.tar.xz ]] && _messageFAIL
+		sudo -n chmod 644 "$globalVirtFS"/core.tar.xz
+	fi
 	
 	
 	[[ ! -e "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh ]] && _messageFAIL
@@ -1123,6 +1137,8 @@ _ubDistBuild() {
 	#_create_ubDistBuild-rotten_install
 	#_create_ubDistBuild-bootOnce
 	
+	rm -f "$scriptLocal"/core.tar.xz > /dev/null 2>&1
+	
 	
 	_upload_ubDistBuild_image
 	
@@ -1160,6 +1176,9 @@ _create_kde() {
 _refresh_anchors() {
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_core_ubDistFetch
+	
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-rotten_install-kde
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-rotten_install-core
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-create

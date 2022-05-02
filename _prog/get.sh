@@ -86,8 +86,8 @@ _get_core_ubDistFetch_sequence() {
 	
 	
 	# https://unix.stackexchange.com/questions/85194/how-to-download-an-archive-and-extract-it-without-saving-the-archive-to-disk
-	_messagePlain_probe 'wget | pv | xz -d | tar xv'
-	wget -qO- --user u298813-sub10 --password OJgZTe0yNilixhRy https://u298813-sub10.your-storagebox.de/zSpecial/build_ubDistFetch/dump/core.tar.xz | _get_extract_ubDistBuild
+	_messagePlain_probe 'wget'
+	wget --user u298813-sub10 --password OJgZTe0yNilixhRy https://u298813-sub10.your-storagebox.de/zSpecial/build_ubDistFetch/dump/core.tar.xz
 	
 	
 	
