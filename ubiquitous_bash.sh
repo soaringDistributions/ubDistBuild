@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='2257210238'
+export ub_setScriptChecksum_contents='4136413255'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -37531,9 +37531,13 @@ _create_ubDistBuild-rotten_install-core() {
 	if [[ -e "$scriptLocal"/core.tar.xz ]]
 	then
 		[[ ! -e "$scriptLocal"/core.tar.xz ]] && _messageFAIL
-		sudo -n cp -f "$scriptLocal"/core.tar.xz "$globalVirtFS"/core.tar.xz
-		[[ ! -e "$globalVirtFS"/core.tar.xz ]] && _messageFAIL
-		sudo -n chmod 644 "$globalVirtFS"/core.tar.xz
+		#sudo -n cp -f "$scriptLocal"/core.tar.xz "$globalVirtFS"/core.tar.xz
+		#[[ ! -e "$globalVirtFS"/core.tar.xz ]] && _messageFAIL
+		#sudo -n chmod 644 "$globalVirtFS"/core.tar.xz
+		
+		
+		tar -xvf "$scriptLocal"/core.tar.xz -C "$globalVirtFS"/home/user/
+		_chroot chown -R user:user /home/user/core
 	fi
 	
 	
@@ -38132,7 +38136,7 @@ _main() {
 
 _get_extract_ubDistBuild() {
 	# https://unix.stackexchange.com/questions/85194/how-to-download-an-archive-and-extract-it-without-saving-the-archive-to-disk
-	pv | xz -d | tar xv --overwrite
+	pv | xz -d | tar xv --overwrite "$@"
 }
 
 
@@ -38167,6 +38171,7 @@ _get_vmImg_ubDistBuild_sequence() {
 	# https://unix.stackexchange.com/questions/85194/how-to-download-an-archive-and-extract-it-without-saving-the-archive-to-disk
 	_messagePlain_probe 'wget | pv | xz -d | tar xv'
 	wget -qO- --user u298813-sub10 --password OJgZTe0yNilixhRy https://u298813-sub10.your-storagebox.de/zSpecial/build_ubDistBuild/dump/package_image.tar.xz | _get_extract_ubDistBuild
+	[[ "$?" != "0" ]] && _messageFAIL
 	
 	
 	
@@ -38209,14 +38214,13 @@ _get_core_ubDistFetch_sequence() {
 	#then
 		## https://rclone.org/commands/rclone_cat/
 		#_rclone_limited cat distLLC_release:/ubDistFetch/core.tar.xz | _get_extract_ubDistBuild
+		#[[ "$?" != "0" ]] && _messageFAIL
 	#fi
-	
 	
 	# https://unix.stackexchange.com/questions/85194/how-to-download-an-archive-and-extract-it-without-saving-the-archive-to-disk
 	_messagePlain_probe 'wget'
 	wget --user u298813-sub10 --password OJgZTe0yNilixhRy https://u298813-sub10.your-storagebox.de/zSpecial/build_ubDistFetch/dump/core.tar.xz
-	
-	
+	[[ "$?" != "0" ]] && _messageFAIL
 	
 	cd "$PWD"
 }

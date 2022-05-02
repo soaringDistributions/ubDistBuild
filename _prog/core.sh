@@ -656,9 +656,13 @@ _create_ubDistBuild-rotten_install-core() {
 	if [[ -e "$scriptLocal"/core.tar.xz ]]
 	then
 		[[ ! -e "$scriptLocal"/core.tar.xz ]] && _messageFAIL
-		sudo -n cp -f "$scriptLocal"/core.tar.xz "$globalVirtFS"/core.tar.xz
-		[[ ! -e "$globalVirtFS"/core.tar.xz ]] && _messageFAIL
-		sudo -n chmod 644 "$globalVirtFS"/core.tar.xz
+		#sudo -n cp -f "$scriptLocal"/core.tar.xz "$globalVirtFS"/core.tar.xz
+		#[[ ! -e "$globalVirtFS"/core.tar.xz ]] && _messageFAIL
+		#sudo -n chmod 644 "$globalVirtFS"/core.tar.xz
+		
+		
+		tar -xvf "$scriptLocal"/core.tar.xz -C "$globalVirtFS"/home/user/
+		_chroot chown -R user:user /home/user/core
 	fi
 	
 	

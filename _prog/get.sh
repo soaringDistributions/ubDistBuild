@@ -5,7 +5,7 @@
 
 _get_extract_ubDistBuild() {
 	# https://unix.stackexchange.com/questions/85194/how-to-download-an-archive-and-extract-it-without-saving-the-archive-to-disk
-	pv | xz -d | tar xv --overwrite
+	pv | xz -d | tar xv --overwrite "$@"
 }
 
 
@@ -40,6 +40,7 @@ _get_vmImg_ubDistBuild_sequence() {
 	# https://unix.stackexchange.com/questions/85194/how-to-download-an-archive-and-extract-it-without-saving-the-archive-to-disk
 	_messagePlain_probe 'wget | pv | xz -d | tar xv'
 	wget -qO- --user u298813-sub10 --password OJgZTe0yNilixhRy https://u298813-sub10.your-storagebox.de/zSpecial/build_ubDistBuild/dump/package_image.tar.xz | _get_extract_ubDistBuild
+	[[ "$?" != "0" ]] && _messageFAIL
 	
 	
 	
@@ -82,14 +83,13 @@ _get_core_ubDistFetch_sequence() {
 	#then
 		## https://rclone.org/commands/rclone_cat/
 		#_rclone_limited cat distLLC_release:/ubDistFetch/core.tar.xz | _get_extract_ubDistBuild
+		#[[ "$?" != "0" ]] && _messageFAIL
 	#fi
-	
 	
 	# https://unix.stackexchange.com/questions/85194/how-to-download-an-archive-and-extract-it-without-saving-the-archive-to-disk
 	_messagePlain_probe 'wget'
 	wget --user u298813-sub10 --password OJgZTe0yNilixhRy https://u298813-sub10.your-storagebox.de/zSpecial/build_ubDistFetch/dump/core.tar.xz
-	
-	
+	[[ "$?" != "0" ]] && _messageFAIL
 	
 	cd "$PWD"
 }
