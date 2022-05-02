@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='645424483'
+export ub_setScriptChecksum_contents='3964708106'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -36863,6 +36863,11 @@ _package() {
 
 
 
+_test_prog() {
+	_getDep pv
+}
+
+
 
 ##### Core
 
@@ -36967,18 +36972,6 @@ _set_ubDistBuild() {
 }
 # ATTENTION: NOTICE: Most stuff from 'ops.sh' from kit is here.
 type _set_ubDistBuild > /dev/null 2>&1 && _set_ubDistBuild
-
-
-
-
-_getCore_ubDistFetch() {
-	_rclone_limited --progress copy distLLC_release:/ubDistFetch/core.tar.xz ./_lib/
-}
-
-_get_ubDistHome() {
-	_rclone_limited --progress copy distLLC_release:/ubDistHome/ubDistHome.tar.xz ./_lib/
-}
-
 
 
 
@@ -37736,12 +37729,6 @@ _create_ubDistBuild() {
 
 
 _custom_ubDistBuild() {
-	# TODO: copy in all software
-		# _custom_core from rotten_install
-	
-	# TODO: copy in home dir config from package
-		# _custom_kde from rotten_install
-	
 	# TODO: _setup for all infrastructure/installations
 		# _custom_core from rotten_install  ?  probably not ... these are tests which rotten_install may not normally run
 	
@@ -37784,36 +37771,6 @@ _upload_ubDistBuild_custom() {
 	true
 }
 
-
-
-_ubDistBuild() {
-	
-	#_create_ubDistBuild
-	_create_ubDistBuild-create
-	_create_ubDistBuild-rotten_install
-	_create_ubDistBuild-bootOnce
-	
-	
-	_upload_ubDistBuild_image
-	
-	
-	
-	
-	
-	_getCore_ubDistFetch
-	
-	_get_ubDistHome
-	
-	
-	
-# 	# NOTICE: Users and such - 'rotten_install' - must have been done already (or 'user' for KDE autologin to craft HOME/KDE package would not exist) .
-	
-	_custom_ubDistBuild
-	
-	
-	# TODO: rclone upload image
-	
-}
 
 
 # ATTENTION: Override with 'ops.sh' or similar.
@@ -38005,7 +37962,23 @@ _chroot_test() {
 
 
 
-
+_ubDistBuild() {
+	
+	_create_ubDistBuild
+	#_create_ubDistBuild-create
+	#_create_ubDistBuild-rotten_install
+	#_create_ubDistBuild-bootOnce
+	
+	
+	_upload_ubDistBuild_image
+	
+	
+	
+	_custom_ubDistBuild
+	
+	
+	
+}
 
 
 
@@ -38031,8 +38004,8 @@ _create_kde() {
 
 
 _refresh_anchors() {
-	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_getCore_ubDistFetch
-	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_ubDistHome
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_core_ubDistFetch
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-create
@@ -38103,6 +38076,106 @@ _main() {
 	
 	_stop
 }
+
+
+
+
+
+
+_get_extract_ubDistBuild() {
+	pv | xz -d | tar --overwrite xvf
+}
+
+
+
+_get_vmImg_ubDistBuild_sequence() {
+	_messageNormal 'init: _get_vmImg'
+	
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+	
+	
+	mkdir -p "$scriptLocal"
+	
+	# Only extracted vm img.
+	rm -f "$scriptLocal"/package_image.tar.xz
+	
+	if [[ -e "$scriptLocal"/vm.img ]]
+	then
+		_messagePlain_good 'good: exists: vm.img'
+		return 0
+	fi
+	
+	if [[ -e "$scriptLocal"/ops.sh ]]
+	then
+		mv -n "$scriptLocal"/ops.sh "$scriptLocal"/ops.sh.bak
+	fi
+	
+	cd "$scriptLocal"
+	
+	
+	
+	# https://unix.stackexchange.com/questions/85194/how-to-download-an-archive-and-extract-it-without-saving-the-archive-to-disk
+	_messagePlain_probe 'wget | pv | xz -d | tar xvf'
+	wget -qO- --user u298813-sub10 --password OJgZTe0yNilixhRy https://u298813-sub10.your-storagebox.de/zSpecial/build_ubDistBuild/dump/package_image.tar.xz | _get_extract_ubDistBuild
+	
+	
+	
+	cd "$PWD"
+}
+_get_vmImg_ubDistBuild() {
+	"$scriptAbsoluteLocation" _get_vmImg_ubDistBuild_sequence "$@"
+}
+
+
+
+
+_get_core_ubDistFetch_sequence() {
+	_messageNormal 'init: _get_core'
+	
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+	
+	
+	mkdir -p "$scriptLocal"
+	
+	# Only newest core .
+	rm -f "$scriptLocal"/core.tar.xz > /dev/null 2>&1
+	
+	if [[ -e "$scriptLocal"/core.tar.xz ]]
+	then
+		_messagePlain_good 'good: exists: core.tar.xz'
+		return 0
+	fi
+	
+	if [[ -e "$scriptLocal"/ops.sh ]]
+	then
+		mv -n "$scriptLocal"/ops.sh "$scriptLocal"/ops.sh.bak
+	fi
+	
+	cd "$scriptLocal"
+	
+	
+	#if ( [[ -e /rclone.conf ]] && grep distLLC_release /rclone.conf ) || ( [[ -e "$scriptLocal"/rclone_limited/rclone.conf ]] && grep distLLC_release "$scriptLocal"/rclone_limited/rclone.conf )
+	#then
+		## https://rclone.org/commands/rclone_cat/
+		#_rclone_limited cat distLLC_release:/ubDistFetch/core.tar.xz | _get_extract_ubDistBuild
+	#fi
+	
+	
+	# https://unix.stackexchange.com/questions/85194/how-to-download-an-archive-and-extract-it-without-saving-the-archive-to-disk
+	_messagePlain_probe 'wget | pv | xz -d | tar xvf'
+	wget -qO- --user u298813-sub10 --password OJgZTe0yNilixhRy https://u298813-sub10.your-storagebox.de/zSpecial/build_ubDistBuild/dump/package_image.tar.xz | _get_extract_ubDistBuild
+	
+	
+	
+	cd "$PWD"
+}
+_get_core_ubDistFetch() {
+	"$scriptAbsoluteLocation" _get_core_ubDistFetch_sequence "$@"
+}
+
+
 
 #currentReversePort=""
 #currentMatchingReversePorts=""
@@ -41137,6 +41210,9 @@ _compile_bash_installation_prog() {
 
 _compile_bash_program_prog() {	
 	export includeScriptList
+	
+	includeScriptList+=( get.sh )
+	
 	true
 }
 

@@ -27,6 +27,21 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Adding 'core' and 'live' images could be separate jobs if necessary.
+# Conveniently separable code for 'experiment', and may add additional build time.
+# Disadvantage of downloading back from rclone, and duplicating such preparation as deleting files from CI.
+# Better to just copy relevant markup to separate CI config files, which would be the desired end result anyway.
+# https://docs.github.com/en/actions/using-jobs/using-jobs-in-a-workflow
+# https://stackoverflow.com/questions/68187987/github-actions-job-timeout
+#  'Each job in a workflow can run for up to 6 hours'
+  #core:
+    #if: ${{ always() }}
+    #needs: [build]
+  #live:
+    #if: ${{ always() }}
+    #needs: [build, core]
+
+
 jobs:
   build:
     # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
