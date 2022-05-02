@@ -14,6 +14,8 @@ wget https://bit.ly/rotInsSh
 chmod u+x rotInsSh
 ./rotInsSh _install_and_run
 
+# optional
+./rotInsSh _custom_core_drop
 
 ```
 
