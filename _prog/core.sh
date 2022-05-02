@@ -939,7 +939,7 @@ _zSpecial_qemu_sequence() {
 	return 1
 } ' >> "$hostToGuestFiles"/cmd.sh
 		
-		# Commenting this may reduce 'currentIterationWait' by ~300s , possibly improving opportunity to successfully compile through slow qemu without kvm.
+		# Commenting this may reduce first iteration 'currentIterationWait' by ~300s , possibly improving opportunity to successfully compile through slow qemu without kvm.
 		#echo 'while _detect_process_compile && sleep 27 && _detect_process_compile && sleep 27 && _detect_process_compile ; do sleep 27 ; done' >> "$hostToGuestFiles"/cmd.sh
 		
 		echo 'sleep 15' >> "$hostToGuestFiles"/cmd.sh
