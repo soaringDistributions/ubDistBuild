@@ -549,7 +549,7 @@ _install_nvidia() {
 	systemctl stop gdm3
 	systemctl stop sddm
 	sleep 3
-	sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s
+	sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s --dkms
 	currentExitStatus="$?"
 	sleep 3
 	systemctl stop gdm3
