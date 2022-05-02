@@ -577,6 +577,10 @@ _create_ubDistBuild-rotten_install() {
 	[[ ! -e "$globalVirtFS"/package_kde.tar.xz ]] && _messageFAIL
 	sudo -n chmod 644 "$globalVirtFS"/package_kde.tar.xz
 	
+	sudo -n cp -f "$scriptAbsoluteLocation" "$globalVirtFS"/ubiquitous_bash.sh
+	[[ ! -e "$globalVirtFS"/ubiquitous_bash.sh ]] && _messageFAIL
+	sudo -n chmod 755 "$globalVirtFS"/ubiquitous_bash.sh
+	
 	
 	#echo | sudo -n tee "$globalVirtFS"/in_chroot
 	! _chroot /rotten_install.sh _install && _messageFAIL
