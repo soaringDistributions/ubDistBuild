@@ -1150,6 +1150,7 @@ _ubDistBuild() {
 	#_create_ubDistBuild-create
 	#_create_ubDistBuild-rotten_install
 	#_create_ubDistBuild-bootOnce
+	#_create_ubDistBuild-rotten_install-core
 	
 	rm -f "$scriptLocal"/core.tar.xz > /dev/null 2>&1
 	

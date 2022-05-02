@@ -118,26 +118,18 @@ jobs:
         shell: bash
         run: |
           ! ./_false | sudo -n tee ./_local/_false.log
-      #- name: _create_ubDistBuild-create
+      - name: _get_vmImg_ubDistBuild
+        shell: bash
+        run: |
+          ./_get_vmImg_ubDistBuild | sudo -n tee ./_local/_get_vmImg_ubDistBuild.log
+      #- name: _create_ubDistBuild-rotten_install-core
         #shell: bash
         #run: |
-          #./_create_ubDistBuild-create | sudo -n tee ./_local/_create_ubDistBuild-create.log
-      #- name: _create_ubDistBuild-rotten_install
-        #shell: bash
-        #run: |
-          #./_create_ubDistBuild-rotten_install | sudo -n tee ./_local/_create_ubDistBuild-rotten_install.log
+          #./_create_ubDistBuild-rotten_install-core | sudo -n tee ./_create_ubDistBuild-rotten_install-core
       #- name: _chroot_test
         #shell: bash
         #run: |
           #./_chroot_test | sudo -n tee ./_local/_chroot_test.log
-      #- name: _create_ubDistBuild-bootOnce
-        #shell: bash
-        #run: |
-          #./_create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log
-      #- name: _upload_ubDistBuild_image
-        #shell: bash
-        #run: |
-          #./_upload_ubDistBuild_image | sudo -n tee ./_local/_upload_ubDistBuild_image.log
       - name: Setup tmate session
         #if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
