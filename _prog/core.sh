@@ -760,6 +760,8 @@ _create_ubDistBuild-bootOnce() {
 	_messageNormal '##### init: _create_ubDistBuild-bootOnce'
 	
 	
+	_messageNormal 'chroot'
+	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
 	# WARNING: Do NOT use twice. Usually already effectively called by '_create_ubDistBuild-rotten_install' .
@@ -794,7 +796,7 @@ _create_ubDistBuild-bootOnce() {
 	
 	
 	
-	
+	_messageNormal 'qemu'
 	
 	local currentIteration
 	
