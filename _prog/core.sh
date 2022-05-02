@@ -648,7 +648,8 @@ _create_ubDistBuild-rotten_install-kde() {
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0
 }
-# WARNING: No production use.
+
+
 _create_ubDistBuild-rotten_install-core() {
 	_messageNormal '##### init: _create_ubDistBuild-rotten_install'
 	
@@ -873,6 +874,11 @@ _create_ubDistBuild() {
 		_messageFAIL
 	fi
 	if ! _create_ubDistBuild-bootOnce "$@"
+	then
+		_messageFAIL
+	fi
+	
+	if ! _create_ubDistBuild-rotten_install-core "$@"
 	then
 		_messageFAIL
 	fi
@@ -1192,6 +1198,7 @@ _refresh_anchors() {
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-create
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-rotten_install
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-bootOnce
+	#cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-rotten_install-core
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_custom_ubDistBuild
 	
