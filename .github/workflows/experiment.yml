@@ -125,7 +125,7 @@ jobs:
       #- name: _create_ubDistBuild-rotten_install-core
         #shell: bash
         #run: |
-          #./_create_ubDistBuild-rotten_install-core | sudo -n tee ./_create_ubDistBuild-rotten_install-core
+          #./_create_ubDistBuild-rotten_install-core | sudo -n tee ./_create_ubDistBuild-rotten_install-core.log
       #- name: _chroot_test
         #shell: bash
         #run: |
@@ -136,6 +136,6 @@ jobs:
         # ssh -i <path-to-key> <tmate-connection-string>
         with:
           limit-access-to-actor: true
-        timeout-minutes: 25
+        timeout-minutes: 355
 
 
