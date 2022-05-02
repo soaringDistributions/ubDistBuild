@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='3301278918'
+export ub_setScriptChecksum_contents='2258155318'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -37788,10 +37788,27 @@ _zSpecial_qemu_sequence() {
 		cp "$scriptAbsoluteLocation" "$hostToGuestFiles"/
 		"$scriptBin"/.ubrgbin.sh _ubrgbin_cpA "$scriptBin" "$hostToGuestFiles"/_bin
 		
+		
+		# A rather complicated issue with VirtualBox vboxdrv kernel module.
+		# Module vboxdrv build may be attempted for running kernel of ChRoot host.
+		# Sevice vboxdrv will attempt to build, may timeout in ~5 minutes (due to slow qemu without kvm), fail, every boot.
+		# Since this should not take much time or power for modern CPUs, and should only affect the ability run VirtualBox guests on first boot (ie. does not affect guest additions), this is expected at most a minor inconvenience.
+		
+		# sudo -n systemctl status vboxdrv
 		echo '#!/usr/bin/env bash' >> "$hostToGuestFiles"/cmd.sh
 		echo 'sudo -n update-grub' >> "$hostToGuestFiles"/cmd.sh
-		echo 'while ! pgrep cc1 && ! pgrep packagekit && sleep 27 && ! pgrep cc1 && ! pgrep packagekit && sleep 27 && ! pgrep cc1 && ! pgrep packagekit ; do sleep 27 ; done' >> "$hostToGuestFiles"/cmd.sh
-		echo 'sleep 90' >> "$hostToGuestFiles"/cmd.sh
+		echo '_detect_process_compile() {
+	pgrep cc1 && return 0
+	pgrep apt && return 0
+	pgrep dpkg && return 0
+	top -b -n1 | tail -n+8 | head -n1 | grep packagekit && return 0
+	sudo -n systemctl status vboxdrv | grep loading && return 0
+	return 1
+} ' >> "$hostToGuestFiles"/cmd.sh
+		echo 'while _detect_process_compile && sleep 27 && _detect_process_compile && sleep 27 && _detect_process_compile ; do sleep 27 ; done' >> "$hostToGuestFiles"/cmd.sh
+		echo 'sleep 60' >> "$hostToGuestFiles"/cmd.sh
+		echo '! lsmod | grep -i vboxdrv && sudo -n /sbin/vboxconfig' >> "$hostToGuestFiles"/cmd.sh
+		echo 'sleep 30' >> "$hostToGuestFiles"/cmd.sh
 		echo 'sudo -n poweroff' >> "$hostToGuestFiles"/cmd.sh
 		
 		! _writeBootdisc && _messageFAIL
