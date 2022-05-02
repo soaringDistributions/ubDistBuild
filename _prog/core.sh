@@ -938,10 +938,13 @@ _zSpecial_qemu_sequence() {
 	sudo -n systemctl status vboxdrv | grep loading && return 0
 	return 1
 } ' >> "$hostToGuestFiles"/cmd.sh
-		echo 'while _detect_process_compile && sleep 27 && _detect_process_compile && sleep 27 && _detect_process_compile ; do sleep 27 ; done' >> "$hostToGuestFiles"/cmd.sh
-		echo 'sleep 60' >> "$hostToGuestFiles"/cmd.sh
+		
+		# Commenting this may reduce 'currentIterationWait' by ~300s , possibly improving opportunity to successfully compile through slow qemu without kvm.
+		#echo 'while _detect_process_compile && sleep 27 && _detect_process_compile && sleep 27 && _detect_process_compile ; do sleep 27 ; done' >> "$hostToGuestFiles"/cmd.sh
+		
+		echo 'sleep 15' >> "$hostToGuestFiles"/cmd.sh
 		echo '! sudo -n lsmod | grep -i vboxdrv && sudo -n /sbin/vboxconfig' >> "$hostToGuestFiles"/cmd.sh
-		echo 'sleep 30' >> "$hostToGuestFiles"/cmd.sh
+		echo 'sleep 75' >> "$hostToGuestFiles"/cmd.sh
 		echo 'sudo -n poweroff' >> "$hostToGuestFiles"/cmd.sh
 		
 		! _writeBootdisc && _messageFAIL
