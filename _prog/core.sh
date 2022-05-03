@@ -582,12 +582,13 @@ _create_ubDistBuild-rotten_install() {
 	sudo -n chmod 755 "$globalVirtFS"/ubiquitous_bash.sh
 	
 	
+	
+	! _chroot /rotten_install.sh _custom_kernel && _messageFAIL
+	
 	#echo | sudo -n tee "$globalVirtFS"/in_chroot
 	! _chroot /rotten_install.sh _install && _messageFAIL
 	#sudo rm -f "$globalVirtFS"/in_chroot
 	
-	
-	! _chroot /rotten_install.sh _custom_kernel && _messageFAIL
 	
 	
 	_chroot env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --install-recommends -y upgrade
@@ -939,6 +940,42 @@ _upload_ubDistBuild_custom() {
 
 
 
+_croc_ubDistBuild_image() {
+	cd "$scriptLocal"
+	
+	! [[ -e "$scriptLocal"/ops.sh ]] && echo >> "$scriptLocal"/ops.sh
+	
+	rm -f "$scriptLocal"/package_image.tar.xz > /dev/null 2>&1
+	
+	# https://www.rootusers.com/gzip-vs-bzip2-vs-xz-performance-comparison/
+	env XZ_OPT="-3 -T0" tar -cJvf "$scriptLocal"/package_image.tar.xz ./vm.img ./ops.sh
+	
+	! [[ -e "$scriptLocal"/package_image.tar.xz ]] && _messageFAIL
+	
+	_mustHaveCroc
+	
+	local currentPID
+	
+	croc send "$scriptLocal"/package_image.tar.xz | sudo tee "$scriptLocal"/croc.log &
+	
+	currentPID="$!"
+	
+	#while pgrep '^croc$'
+	while true
+	do
+		tail "$scriptLocal"/croc.log
+		sleep 3
+	done
+	
+	kill "$currentPID"
+	sleep 3
+	kill -KILL "$currentPID"
+	
+	return 0
+}
+
+
+
 # ATTENTION: Override with 'ops.sh' or similar.
 _zSpecial_qemu_sequence() {
 	_messagePlain_nominal 'init: _zSpecial_qemu'
@@ -1228,6 +1265,8 @@ _refresh_anchors() {
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_upload_ubDistBuild_image
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_upload_ubDistBuild_custom
+	
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_croc_ubDistBuild_image
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_ubDistBuild
 	
