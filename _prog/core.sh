@@ -1148,6 +1148,7 @@ _chroot_test() {
 }
 
 # WARNING: DANGER: NOTICE: Do NOT distribute!
+# WARNING: No production use. End-user function ONLY.
 _nvidia_force_install() {
 	_messageError 'WARNING: DANGER: Do NOT distribute!'
 	_messagePlain_warn 'WARNING: DANGER: Do NOT distribute!'
@@ -1256,5 +1257,8 @@ _refresh_anchors() {
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_true
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_false
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_chroot_test
+	
+	# WARNING: DANGER: NOTICE: Do NOT distribute!
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_nvidia_force_install
 }
 
