@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='703696349'
+export ub_setScriptChecksum_contents='7388712'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -8152,6 +8152,23 @@ CZXWXcRMTo8EmM8i4d
 	fi
 	
 	
+	if [[ "$1" == "nix-env" ]]
+	then
+		_tryExec '_test_nix-env_upstream'
+		#_tryExec '_test_nix-env_upstream_beta'
+		
+		return 0
+	fi
+	
+	
+	if [[ "$1" == "croc" ]]
+	then
+		_tryExec '_test_croc_upstream'
+		#_tryExec '_test_croc_upstream_beta'
+		
+		return 0
+	fi
+	
 	if [[ "$1" == "rclone" ]]
 	then
 		_tryExec '_test_rclone_upstream'
@@ -8159,6 +8176,7 @@ CZXWXcRMTo8EmM8i4d
 		
 		return 0
 	fi
+	
 	
 	if [[ "$1" == "terraform" ]]
 	then
@@ -8562,6 +8580,23 @@ CZXWXcRMTo8EmM8i4d
 	fi
 	
 	
+	if [[ "$1" == "nix-env" ]]
+	then
+		_tryExec '_test_nix-env_upstream'
+		#_tryExec '_test_nix-env_upstream_beta'
+		
+		return 0
+	fi
+	
+	
+	if [[ "$1" == "croc" ]]
+	then
+		_tryExec '_test_croc_upstream'
+		#_tryExec '_test_croc_upstream_beta'
+		
+		return 0
+	fi
+	
 	if [[ "$1" == "rclone" ]]
 	then
 		_tryExec '_test_rclone_upstream'
@@ -8569,6 +8604,7 @@ CZXWXcRMTo8EmM8i4d
 		
 		return 0
 	fi
+	
 	
 	if [[ "$1" == "terraform" ]]
 	then
@@ -8966,6 +9002,23 @@ CZXWXcRMTo8EmM8i4d
 	fi
 	
 	
+	if [[ "$1" == "nix-env" ]]
+	then
+		_tryExec '_test_nix-env_upstream'
+		#_tryExec '_test_nix-env_upstream_beta'
+		
+		return 0
+	fi
+	
+	
+	if [[ "$1" == "croc" ]]
+	then
+		_tryExec '_test_croc_upstream'
+		#_tryExec '_test_croc_upstream_beta'
+		
+		return 0
+	fi
+	
 	if [[ "$1" == "rclone" ]]
 	then
 		_tryExec '_test_rclone_upstream'
@@ -8973,6 +9026,7 @@ CZXWXcRMTo8EmM8i4d
 		
 		return 0
 	fi
+	
 	
 	if [[ "$1" == "terraform" ]]
 	then
@@ -10170,6 +10224,176 @@ expect eof' > "$safeTmp"/veracrypt.exp
 		_messageFAIL
 	fi
 	_stop
+}
+
+
+
+
+
+
+# WARNING: Infinite loop risk, do not call '_wantGetDep nix-env' within this function.
+_test_nix-env_upstream() {
+	# WARNING: May be untested. Do NOT attempt upstream install for NixOS distribution.
+	[[ -e /etc/issue ]] && ! cat /etc/issue | grep 'Debian\|Raspbian\|Ubuntu' > /dev/null 2>&1 && type nix-env && return 0
+	
+	! _wantSudo && return 1
+	
+	# https://ariya.io/2020/05/nix-package-manager-on-ubuntu-or-debian
+	#  'Note that if you use WSL 1'
+	#   'sandbox = false'
+	#     WSL is NOT expected fully compatible with Ubiquitous Bash . MS commitment to WSL end-user usability, or so much as WSL having any better functionality than Cygwin, Qemu, VirtualBox, etc, is not obvious.
+	# https://github.com/microsoft/WSL/issues/6301
+	
+	
+	# Prefer to develop software not to expect multi-user features from nix. Expected not normally necessary.
+	# https://nixos.org/download.html
+	#  'Harder to uninstall'
+	# https://nixos.org/manual/nix/stable/installation/multi-user.html
+	#  'unprivileged users' ... 'pre-built binaries'
+	# https://nixos.wiki/wiki/Nix
+	#  'remove further hidden dependencies' ... 'access to the network' ... 'inter process communication is isolated on Linux'
+	# https://ariya.io/2020/05/nix-package-manager-on-ubuntu-or-debian
+	echo
+	sh <(curl -L https://nixos.org/nix/install) --no-daemon
+	echo
+}
+
+
+
+
+# ATTENTION: Override with 'core.sh', 'ops', or similar!
+# Software which specifically may rely upon a recent feature of cloud services software (eg. aws, gcloud) should force this to instead always return 'true' .
+_test_nixenv_updateInterval() {
+	! find "$HOME"/.ubcore/.retest-"$1" -type f -mtime -9 2>/dev/null | grep '.retest-' > /dev/null 2>&1
+	
+	#return 0
+	return
+}
+
+_test_nix-env_sequence() {
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+	_start
+	
+	_mustHave_nixos
+	
+	cd "$safeTmp"
+	
+	# https://ariya.io/2016/06/isolated-development-environment-using-nix
+	cat << 'CZXWXcRMTo8EmM8i4d' > ./default.nix
+with import <nixpkgs> {};
+stdenv.mkDerivation rec {
+  name = "env";
+  env = buildEnv { name = name; paths = buildInputs; };
+  buildInputs = [
+    hello
+  ];
+}
+CZXWXcRMTo8EmM8i4d
+	
+	! nix-shell --run hello | grep -i 'hello' > /dev/null && echo 'fail: nix-shell: hello' && _stop 1
+	! nix-shell --run true && echo 'fail: nix-shell: true' && _stop 1
+	nix-shell --run false && echo 'fail: nix-shell: false' && _stop 1
+	[[ $(nix-shell --run 'type hello' | tr -dc 'a-zA-Z0-9/ ') == $(type hello | tr -dc 'a-zA-Z0-9/ ') ]] && echo 'fail: nix-shell: type: hello' && _stop 1
+	[[ $(nix-shell --run 'type -P true' | tr -dc 'a-zA-Z0-9/ ') == $(type -P true | tr -dc 'a-zA-Z0-9/ ') ]] && echo 'fail: nix-shell: type: true' && _stop 1
+	[[ $(nix-shell --run 'type -P false' | tr -dc 'a-zA-Z0-9/ ') == $(type -P false | tr -dc 'a-zA-Z0-9/ ') ]] && echo 'fail: nix-shell: type: false' && _stop 1
+	
+	cd "$functionEntryPWD"
+	_stop
+}
+
+_test_nix-env() {
+	# Root installation of nixenv is not expected either necessary or possible.
+	if [[ $(id -u 2> /dev/null) == "0" ]]
+	then
+		return 0
+	fi
+	
+	! _test_nixenv_updateInterval 'nixenv' && return 0
+	rm -f "$HOME"/.ubcore/.retest-'nixenv' > /dev/null 2>&1
+	
+	if [[ "$nonet" != "true" ]] && ! _if_cygwin
+	then
+		_messagePlain_request 'ignore: upstream progress ->'
+		
+		_test_nix-env_upstream "$@"
+		#_test_nix-env_upstream_beta "$@"
+		
+		_messagePlain_request 'ignore: <- upstream progress'
+	fi
+	
+	_mustHave_nixos
+	
+	_wantSudo && _wantGetDep nix-env
+	
+	
+	! _typeDep nix-env && echo 'fail: missing: nix-env' && _messageFAIL
+	
+	! _typeDep nix-shell && echo 'fail: missing: nix-shell' && _messageFAIL
+	
+	
+	if ! "$scriptAbsoluteLocation" _test_nix-env_sequence "$@"
+	then
+		_messageFAIL
+		_stop 1
+		return 1
+	fi
+	#! nix-shell true && echo 'fail: nix-shell: true' && _messageFAIL
+	#! nix-shell false && echo 'fail: nix-shell: false' && _messageFAIL
+	
+	
+	
+	touch "$HOME"/.ubcore/.retest-'nixenv'
+	date +%s > "$HOME"/.ubcore/.retest-'nixenv'
+	
+	return 0
+}
+
+_mustHave_nixos() {
+	#_setupUbiquitous_accessories_here-nixenv-bashrc
+	[[ -e "$HOME"/.nix-profile/etc/profile.d/nix.sh ]] && . "$HOME"/.nix-profile/etc/profile.d/nix.sh
+	
+	if ! type nix-env > /dev/null 2>&1
+	then
+		_test_nix-env_upstream > /dev/null 2>&1
+	fi
+	
+	! type nix-env > /dev/null 2>&1 && _stop 1
+	
+	return 0
+}
+
+# WARNING: No production use. Prefer '_mustHave_nixos' .
+_nix-env() {
+	_mustHave_nixos
+	
+	nix-env "$@"
+}
+
+
+_nix-shell() {
+	_mustHave_nixos
+	
+	# https://forum.holochain.org/t/how-to-load-your-bash-profile-into-nix-shell/2070
+	nix-shell --command '. ~/.bashrc; return' "$@"
+}
+_nix() {
+	_nix-shell "$@"
+}
+_nixShell() {
+	_nix-shell "$@"
+}
+_ns() {
+	_nix-shell "$@"
+}
+nixshell() {
+	_nix-shell "$@"
+}
+nixShell() {
+	_nix-shell "$@"
+}
+ns() {
+	_nix-shell "$@"
 }
 
 
@@ -17391,7 +17615,16 @@ _visualPrompt() {
 	#export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${debian_chroot:+($debian_chroot)}\[\033[01;33m\]\u\[\033[01;32m\]@\h\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[37m\][\w]\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$PS1_lineNumberText\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '
 	
 	
-	export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${debian_chroot:+($debian_chroot)}\[\033[01;33m\]\u\[\033[01;32m\]@\h\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[37m\][\w]\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '
+	if [[ "$SHELL" == *"/nix/store/"*"/bin/bash"* ]]
+	then
+		export prompt_nixShell="nixShell"
+	else
+		export prompt_nixShell=""
+	fi
+	
+	export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${debian_chroot:+($debian_chroot)}\[\033[01;33m\]\u\[\033[01;32m\]@\h\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]'"$prompt_nixShell"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[37m\][\w]\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '
+	
+	#export PS1="$prompt_nixShell""$PS1"
 }
 
 
@@ -22461,7 +22694,7 @@ _mustHaveCroc() {
 	# https://github.com/schollz/croc
 	if ! type croc > /dev/null 2>&1
 	then
-		curl https://getcroc.schollz.com | bash > /dev/null 2>&1
+		_test_croc_upstream > /dev/null 2>&1
 	fi
 	
 	! type croc > /dev/null 2>&1 && _stop 1
@@ -22801,6 +23034,7 @@ _cloud_hook() {
 	
 	_tryExec '_aws_hook'
 	_tryExec '_google_hook'
+	return 0
 }
 
 # WARNING: End user function. Do NOT call within scripts.
@@ -26187,7 +26421,13 @@ CZXWXcRMTo8EmM8i4d
 
 
 
+_setupUbiquitous_accessories_here-nixenv-bashrc() {
+	cat << CZXWXcRMTo8EmM8i4d
 
+[[ -e "$HOME"/.nix-profile/etc/profile.d/nix.sh ]] && . "$HOME"/.nix-profile/etc/profile.d/nix.sh
+
+CZXWXcRMTo8EmM8i4d
+}
 
 
 
@@ -26272,6 +26512,7 @@ _setupUbiquitous_accessories-python() {
 
 
 
+
 _setupUbiquitous_accessories() {
 	
 	_setupUbiquitous_accessories-gnuoctave "$@"
@@ -26287,6 +26528,8 @@ _setupUbiquitous_accessories_bashrc() {
 	_setupUbiquitous_accessories_bashrc-cloud_bin "$@"
 	
 	_setupUbiquitous_accessories_here-python_bashrc "$@"
+	
+	_setupUbiquitous_accessories_here-nixenv-bashrc "$@"
 }
 
 
@@ -35843,6 +36086,267 @@ _test_parallelFifo_sequence() {
 	_stop
 }
 
+_test_pipe_true() {
+	true | tee /dev/null 2>&1
+}
+
+# Apparently, shell script functions and conditions default to pipefail or pipestatus, although "$scriptAbsoluteLocation" is able to use the exit status instead.
+_test_pipe_false() {
+	false | tee /dev/null 2>&1
+}
+_test_pipe_false_condition() {
+	#false | tee /dev/null 2>&1 && return 0
+	false | echo stuff | grep stuff > /dev/null 2>&1 && return 0
+	return 1
+}
+_test_pipe_false_condition_special() {
+	false | tee /dev/null
+	[[ "$?" == "0" ]] && return 0
+	return 1
+}
+
+# Expect return true (ie. 0).
+_test_pipefail_forcePlus_true_sequence() {
+	set +o pipefail
+	true | tee /dev/null 2>&1
+}
+_test_pipefail_forcePlus_true() {
+	"$scriptAbsoluteLocation" _test_pipefail_forcePlus_true_sequence "$@"
+}
+
+# Expect return true (ie. 0).
+_test_pipefail_forcePlus_false_sequence() {
+	set +o pipefail
+	false | tee /dev/null 2>&1
+}
+_test_pipefail_forcePlus_false() {
+	"$scriptAbsoluteLocation" _test_pipefail_forcePlus_false_sequence "$@"
+}
+
+# Expect return true (ie. 0).
+_test_pipefail_forceMinus_true_sequence() {
+	set -o pipefail
+	true | tee /dev/null 2>&1
+}
+_test_pipefail_forceMinus_true() {
+	"$scriptAbsoluteLocation" _test_pipefail_forceMinus_true_sequence "$@"
+}
+
+# Expect return false (ie. 1).
+_test_pipefail_forceMinus_false_sequence() {
+	set -o pipefail
+	false | tee /dev/null 2>&1
+}
+_test_pipefail_forceMinus_false() {
+	"$scriptAbsoluteLocation" _test_pipefail_forceMinus_false_sequence "$@"
+}
+
+# https://stackoverflow.com/questions/6871859/piping-command-output-to-tee-but-also-save-exit-code-of-command
+_test_pipestatus_true() {
+	true | tee /dev/null 2>&1
+	return ${PIPESTATUS[0]}
+}
+
+_test_pipestatus_false() {
+	false | tee /dev/null 2>&1
+	return ${PIPESTATUS[0]}
+}
+
+# ATTENTION: NOTICE: Regard this as a relatively definitive specification of known bash pipe 'exit status', 'pipestatus', 'pipefail', defaults and inheritance.
+# WARNING: If 'bash' software interpreter uses same code paths (eg. for shell functions and subshells) do not assume this will always remain the case. Test and consider specifically and explicitly.
+_test_pipefail_sequence_sequence() {
+	if ! _test_pipefail_forcePlus_true || ! _test_pipefail_forcePlus_false || ! _test_pipefail_forceMinus_true_sequence || _test_pipefail_forceMinus_false_sequence
+	then
+		echo 'fail: pipefail'
+		_stop 1
+		return 1
+	fi
+	
+	# NOTICE: Will FAIL if 'set -o pipefail' applies to script commands !
+	if ! _test_pipestatus_true || _test_pipestatus_false || ! "$scriptAbsoluteLocation" _test_pipestatus_true || "$scriptAbsoluteLocation" _test_pipestatus_false
+	then
+		echo 'fail: pipestatus'
+		_stop 1
+		return 1
+	fi
+	
+	
+	
+	# ATTENTION: Apparently, "$scriptAbsoluteLocation" is able to correctly retrieve the expected (ie. 0, true) exit status of both '_test_pipe_true' and '_test_pipe_false', although calling these functions directly results in the unexpected use of pipestatus, pipefail, or similar, etc.
+	# CAUTION: While such defaults may seem slightly undesirable for shell scripts, there may be some benefit to command prompt use (especailly when functions are called from an interactive shell through such as ubiquitous_bash.sh _true , etc), UNIX pipe input programs (eg. cat /file) rarely if ever fail when a grep match would occur, and best practice of using a condition (ie. [[ -e /file ]]) before such pipes already avoids severe issues in shell script usage.
+	# CAUTION: Ensure all pipe exit status, pipe status, and pipe fail, default behavior remains *strictly* as-is.
+	
+	
+	
+	# ATTENTION: ! _test_pipe_false ... would return true if consistent with behavior when called by "$scriptAbsoluteLocation"
+	_test_pipe_false
+	[[ "$?" == "0" ]] && echo 'fail: _test_pipe_false' && _stop 1 && return 1
+	if _test_pipe_false
+	then
+		echo 'fail: _test_pipe_false'
+		_stop 1
+		return 1
+	fi
+	
+	# ATTENTION: ! _test_pipe_false ... does return true if called by "$scriptAbsoluteLocation"
+	! "$scriptAbsoluteLocation" _test_pipe_false
+	[[ "$?" == "0" ]] && echo 'fail: ! "$scriptAbsoluteLocation" _test_pipe_false' && _stop 1 && return 1
+	if ! "$scriptAbsoluteLocation" _test_pipe_false
+	then
+		echo 'fail: if: ! "$scriptAbsoluteLocation" _test_pipe_false'
+		_stop 1
+		return 1
+	fi
+	
+	_test_pipe_false_condition
+	[[ "$?" == "0" ]] && echo 'fail: _test_pipe_false_condition' && _stop 1 && return 1
+	if _test_pipe_false_condition
+	then
+		echo 'fail: if: _test_pipe_false_condition'
+		_stop 1
+		return 1
+	fi
+	
+	! "$scriptAbsoluteLocation" _test_pipe_false_condition
+	[[ "$?" == "0" ]] && echo 'fail: ! "$scriptAbsoluteLocation" _test_pipe_false_condition' && _stop 1 && return 1
+	if _test_pipe_false_condition
+	then
+		echo 'fail: if: ! "$scriptAbsoluteLocation" _test_pipe_false_condition'
+		_stop 1
+		return 1
+	fi
+	
+	
+	_test_pipe_false_condition_special
+	[[ "$?" == "0" ]] && echo 'fail: _test_pipe_false_condition_special' && _stop 1 && return 1
+	if _test_pipe_false_condition_special
+	then
+		echo 'fail: if: _test_pipe_false_condition_special'
+		_stop 1
+		return 1
+	fi
+	
+	! "$scriptAbsoluteLocation" _test_pipe_false_condition_special
+	[[ "$?" == "0" ]] && echo 'fail: ! "$scriptAbsoluteLocation" _test_pipe_false_condition_special' && _stop 1 && return 1
+	if ! "$scriptAbsoluteLocation" _test_pipe_false_condition_special
+	then
+		echo 'fail: if: ! "$scriptAbsoluteLocation" _test_pipe_false_condition_special'
+		_stop 1
+		return 1
+	fi
+	
+	"$scriptAbsoluteLocation" _test_pipe_false_condition_special
+	[[ "$?" != "0" ]] && echo 'fail: "$scriptAbsoluteLocation" _test_pipe_false_condition_special' && _stop 1 && return 1
+	if "$scriptAbsoluteLocation" _test_pipe_false_condition_special
+	then
+		true
+	else
+		echo 'fail: if: "$scriptAbsoluteLocation" _test_pipe_false_condition_special'
+		_stop 1
+		return 1
+	fi
+	
+	
+	#! _test_pipe_true || ! _test_pipe_false || ! "$scriptAbsoluteLocation" _test_pipe_true || ! "$scriptAbsoluteLocation" _test_pipe_false
+	#! _test_pipe_false
+	if ! _test_pipe_true || ! "$scriptAbsoluteLocation" _test_pipe_true || ! "$scriptAbsoluteLocation" _test_pipe_false
+	then
+		echo 'fail: if: pipe: value'
+		_stop 1
+		return 1
+	fi
+	
+	set +o pipefail
+	# NOTICE: Will FAIL if 'set -o pipefail' applies to script commands !
+	if ! _test_pipestatus_true || _test_pipestatus_false || ! "$scriptAbsoluteLocation" _test_pipestatus_true || "$scriptAbsoluteLocation" _test_pipestatus_false
+	then
+		echo 'fail: pipestatus'
+		_stop 1
+		return 1
+	fi
+	if ( true | tee /dev/null 2>&1 )
+	then
+		true
+	else
+		echo 'fail: if: pipe: pipefail: plus: subshell: true'
+		_stop 1
+		return 1
+	fi
+	if ( false | tee /dev/null 2>&1 )
+	then
+		true
+	else
+		echo 'fail: if: pipe: pipefail: plus: subshell: false'
+		_stop 1
+		return 1
+	fi
+	if ! "$scriptAbsoluteLocation" _test_pipe_true || ! "$scriptAbsoluteLocation" _test_pipe_false
+	then
+		echo 'fail: if: pipe: pipefail: plus'
+		_stop 1
+		return 1
+	fi
+	
+	set -o pipefail
+	# NOTICE: Will FAIL if 'set -o pipefail' applies to script commands !
+	if ! _test_pipestatus_true || _test_pipestatus_false || ! "$scriptAbsoluteLocation" _test_pipestatus_true || "$scriptAbsoluteLocation" _test_pipestatus_false
+	then
+		echo 'fail: pipestatus'
+		_stop 1
+		return 1
+	fi
+	if ( true | tee /dev/null 2>&1 )
+	then
+		true
+	else
+		echo 'fail: if: pipe: pipefail: minus: subshell: true'
+		_stop 1
+		return 1
+	fi
+	# ATTENTION: Seems this actually is sensitive to 'set -o pipefail' .
+	if ( false | tee /dev/null 2>&1 )
+	then
+		echo 'fail: if: pipe: pipefail: minus: subshell: false'
+		_stop 1
+		return 1
+	else
+		true
+	fi
+	if ! "$scriptAbsoluteLocation" _test_pipe_true || ! "$scriptAbsoluteLocation" _test_pipe_false
+	then
+		echo 'fail: if: pipe: pipefail: minus'
+		_stop 1
+		return 1
+	fi
+	return 0
+}
+_test_pipefail_sequence() {
+	! "$scriptAbsoluteLocation" _test_pipefail_sequence_sequence "$@" && return 1
+	
+	set +o pipefail
+	! "$scriptAbsoluteLocation" _test_pipefail_sequence_sequence "$@" && return 1
+	
+	set -o pipefail
+	! "$scriptAbsoluteLocation" _test_pipefail_sequence_sequence "$@" && return 1
+	
+	return 0
+}
+_test_pipefail() {
+	if ! "$scriptAbsoluteLocation" _test_pipefail_sequence "$@"
+	then
+		_messageFAIL
+		_stop 1
+		return 1
+	fi
+	"$scriptAbsoluteLocation" _test_pipefail_sequence "$@"
+	if [[ "$?" != "0" ]]
+	then
+		_messageFAIL
+		_stop 1
+		return 1
+	fi
+}
+
 _test_sanity() {
 	if (exit 0)
 	then
@@ -35916,6 +36420,12 @@ _test_sanity() {
 	
 	# Do NOT allow 'rm' to be a shell function alias to 'rm -i' or similar.
 	[[ $(type -p rm) == "" ]] && _messageFAIL && return 1
+	
+	
+	! _test_pipefail && _messageFAIL && return 1
+	
+	
+	
 	
 	#! [[ -2147483648 -lt 2147483647 ]] && _messageFAIL && return 1
 	#! [[ -2000000000 -lt 2000000000 ]] && _messageFAIL && return 1
@@ -36539,6 +37049,9 @@ _test() {
 	_tryExec "_test_metaengine"
 	
 	_tryExec "_test_channel"
+	
+	_tryExec "_test_nix-env"
+	
 	
 	! [[ -e /dev/urandom ]] && echo /dev/urandom missing && _stop 1
 	[[ $(_timeout 3 cat /dev/urandom 2> /dev/null | _timeout 3 base64 2> /dev/null | _timeout 3 tr -dc 'a-zA-Z0-9' 2> /dev/null | _timeout 3 head -c 18 2> /dev/null) == "" ]] && echo /dev/urandom fail && _stop 1
@@ -40608,6 +41121,11 @@ _compile_bash_utilities() {
 	( [[ "$enUb_notLean" == "true" ]] || [[ "$enUb_getMinimal" == "true" ]] ) && includeScriptList+=( "os/distro"/getMinimal_special.sh )
 	
 	( [[ "$enUb_notLean" == "true" ]] || [[ "$enUb_getMinimal" == "true" ]] || [[ "$enUb_getMost_special_veracrypt" == "true" ]] ) && includeScriptList+=( "os/distro"/getMost_special_veracrypt.sh )
+	
+	
+	
+	( [[ "$enUb_notLean" == "true" ]] || [[ "$enUb_getMinimal" == "true" ]] || [[ "$enUb_cloud_heavy" == "true" ]] || [[ "$enUb_cloud" == "true" ]] || [[ "$enUb_distro" == "true" ]] ) && includeScriptList+=( "os"/nixos.sh )
+	
 	
 	
 	[[ "$enUb_notLean" == "true" ]] && includeScriptList+=( "os/unix/systemd"/here_systemd.sh )
