@@ -12,6 +12,7 @@ chmod u+x getNvSh
 
 wget https://bit.ly/rotInsSh
 chmod u+x rotInsSh
+./rotInsSh _custom_kernel
 ./rotInsSh _install_and_run
 
 # optional

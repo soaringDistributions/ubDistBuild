@@ -544,19 +544,42 @@ _install_nvidia() {
 	# https://download.nvidia.com/XFree86/Linux-x86_64/384.111/README/installdriver.html
 	
 	local currentExitStatus
+	currentExitStatus=0
 	
 	sleep 45
 	systemctl stop gdm3
 	systemctl stop sddm
 	sleep 3
-	sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s --dkms
-	currentExitStatus="$?"
+	# https://www.linuxquestions.org/questions/linux-hardware-18/is-it-possible-to-install-nvidia-driver-without-card-780867/
+	#sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s -k $(ls -A -1 -d /usr/src/linux-headers-* | head -n1 | sed -s 's/.*linux-headers-//') --dkms
+	#[[ "$?" != "0" ]] && currentExitStatus=1
+	
+	
+	
+	
+	
+	local currentLine
+	
+	# If headers for more than 12 kernels are installed, that is an issue.
+	ls -A -1 -d /usr/src/linux-headers-* | head -n 12 | sed -s 's/.*linux-headers-//' | while read -r currentLine
+	do
+		sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s -k "$currentLine" --dkms
+		[[ "$?" != "0" ]] && currentExitStatus=1
+	done
+	
+	
+	
+	
+	
+	
+	
 	sleep 3
 	systemctl stop gdm3
 	systemctl start sddm
 	sleep 6
 	systemctl status sddm
 	
+	[[ "$currentExitStatus" != "0" ]] && _messageFAIL
 	return "$currentExitStatus"
 }
 
@@ -647,8 +670,13 @@ _autoinstall() {
 
 
 
-
-
+# WARNING: DANGER: Do NOT distribute!
+_force_install() {
+	_mustBeRoot
+	
+	_fetch_nvidia "$@"
+	_install_nvidia "$@"
+}
 
 
 

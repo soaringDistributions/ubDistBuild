@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='1088334524'
+export ub_setScriptChecksum_contents='1707965496'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -9548,6 +9548,11 @@ _getMost_debian11_install() {
 	
 	
 	
+	# purge-old-kernels
+	_getMost_backend_aptGetInstall byobu
+	
+	
+	
 	_getMost_backend_aptGetInstall iotop
 	
 	_getMost_backend_aptGetInstall pavucontrol
@@ -10041,6 +10046,10 @@ _getMinimal_cloud() {
 	
 	_getMost_backend_aptGetInstall mkisofs
 	_getMost_backend_aptGetInstall genisoimage
+	
+	
+	# purge-old-kernels
+	_getMost_backend_aptGetInstall byobu
 	
 	
 	
@@ -37465,10 +37474,15 @@ _create_ubDistBuild-rotten_install() {
 	! _chroot /rotten_install.sh _install && _messageFAIL
 	#sudo rm -f "$globalVirtFS"/in_chroot
 	
+	
+	! _chroot /rotten_install.sh _custom_kernel && _messageFAIL
+	
+	
 	_chroot env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --install-recommends -y upgrade
 	
 	
 	_chroot apt-get -y clean
+	_chroot sudo apt-get autoremove --purge
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0
@@ -38021,7 +38035,24 @@ _chroot_test() {
 	return 0
 }
 
-
+# WARNING: DANGER: NOTICE: Do NOT distribute!
+_nvidia_force_install() {
+	_messageError 'WARNING: DANGER: Do NOT distribute!'
+	_messagePlain_warn 'WARNING: DANGER: Do NOT distribute!'
+	_messagePlain_bad 'WARNING: DANGER: Do NOT distribute!'
+	_messageError 'WARNING: DANGER: Do NOT distribute!'
+	_messageNormal '##### init: _nvidia_force_install'
+	echo
+	
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	
+	
+	_chroot /root/_get_nvidia.sh _force_install
+	
+	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	return 0
+}
 
 _ubDistBuild() {
 	

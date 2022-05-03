@@ -586,10 +586,15 @@ _create_ubDistBuild-rotten_install() {
 	! _chroot /rotten_install.sh _install && _messageFAIL
 	#sudo rm -f "$globalVirtFS"/in_chroot
 	
+	
+	! _chroot /rotten_install.sh _custom_kernel && _messageFAIL
+	
+	
 	_chroot env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --install-recommends -y upgrade
 	
 	
 	_chroot apt-get -y clean
+	_chroot sudo apt-get autoremove --purge
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0
@@ -1142,7 +1147,24 @@ _chroot_test() {
 	return 0
 }
 
-
+# WARNING: DANGER: NOTICE: Do NOT distribute!
+_nvidia_force_install() {
+	_messageError 'WARNING: DANGER: Do NOT distribute!'
+	_messagePlain_warn 'WARNING: DANGER: Do NOT distribute!'
+	_messagePlain_bad 'WARNING: DANGER: Do NOT distribute!'
+	_messageError 'WARNING: DANGER: Do NOT distribute!'
+	_messageNormal '##### init: _nvidia_force_install'
+	echo
+	
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	
+	
+	_chroot /root/_get_nvidia.sh _force_install
+	
+	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	return 0
+}
 
 _ubDistBuild() {
 	
