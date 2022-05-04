@@ -145,6 +145,7 @@ jobs:
         shell: bash
         run: |
           ./_croc_ubDistBuild_image_out
+        timeout-minutes: 15
       - name: Setup tmate session
         #if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
