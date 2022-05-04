@@ -130,6 +130,14 @@ jobs:
         #shell: bash
         #run: |
           #./_chroot_test | sudo -n tee ./_local/_chroot_test.log
+      - name: _package_ubDistBuild_image
+        shell: bash
+        run: |
+          ./_package_ubDistBuild_image
+      - name: _croc_ubDistBuild_image_out
+        shell: bash
+        run: |
+          ./_croc_ubDistBuild_image_out
       - name: Setup tmate session
         #if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3

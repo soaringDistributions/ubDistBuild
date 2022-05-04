@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='497585799'
+export ub_setScriptChecksum_contents='819888085'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -38352,14 +38352,26 @@ _create_ubDistBuild-bootOnce() {
 	( _chroot crontab -l ; echo '@reboot /root/_get_nvidia.sh _autoinstall > /var/log/_get_nvidia.log 2>&1' ) | _chroot crontab '-'
 	
 	
-	# Apparently, if defrag is run once with compression, rootfs usage may reduce from ~6.6GB to ~5.9GB . However, running again may expand usage back to ~6.6GB.
-	# https://github.com/kdave/btrfs-progs/issues/184
-	#btrfs filesystem defrag -r -czstd /
-	
 	
 	_chroot dpkg -l | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
 	
 	echo | sudo -n tee "$globalVirtFS"/regenerate > /dev/null
+	
+	
+	# WARNING: Important. May drastically reduce image size, especially if large temporary files (ie. apt cache) have been used. *Very* compressible zeros.
+	_chroot rm -f /fill > /dev/null 2>&1
+	_chroot dd if=/dev/zero of=/fill bs=1M count=1 oflag=append conv=notrunc status=progress
+	_chroot btrfs property set /fill compression ""
+	_chroot dd if=/dev/zero of=/fill bs=1M oflag=append conv=notrunc status=progress
+	_chroot rm -f /fill
+	
+	# Run only once. If used two or more times, apparently may decrease available storage by ~1GB .
+	# Apparently, if defrag is run once with compression, rootfs usage may reduce from ~6.6GB to ~5.9GB . However, running again may expand usage back to ~6.6GB.
+	# https://github.com/kdave/btrfs-progs/issues/184
+	_chroot btrfs filesystem defrag -r -czstd /
+	
+	_chroot df -h /
+	
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
@@ -38404,7 +38416,7 @@ _custom_ubDistBuild() {
 
 
 
-_upload_ubDistBuild_image() {
+_package_ubDistBuild_image() {
 	cd "$scriptLocal"
 	
 	! [[ -e "$scriptLocal"/ops.sh ]] && echo >> "$scriptLocal"/ops.sh
@@ -38412,7 +38424,21 @@ _upload_ubDistBuild_image() {
 	rm -f "$scriptLocal"/package_image.tar.xz > /dev/null 2>&1
 	
 	# https://www.rootusers.com/gzip-vs-bzip2-vs-xz-performance-comparison/
-	env XZ_OPT="-3 -T0" tar -cJvf "$scriptLocal"/package_image.tar.xz ./vm.img ./ops.sh
+	# https://stephane.lesimple.fr/blog/lzop-vs-compress-vs-gzip-vs-bzip2-vs-lzma-vs-lzma2xz-benchmark-reloaded/
+	env XZ_OPT="-1 -T0" tar -cJvf "$scriptLocal"/package_image.tar.xz ./vm.img ./ops.sh
+	
+	! [[ -e "$scriptLocal"/package_image.tar.xz ]] && _messageFAIL
+	
+	return 0
+}
+
+
+
+_upload_ubDistBuild_image() {
+	_package_ubDistBuild_image "$@"
+	cd "$scriptLocal"
+	
+	! [[ -e "$scriptLocal"/package_image.tar.xz ]] && _messageFAIL
 	
 	_rclone_limited --progress copy "$scriptLocal"/package_image.tar.xz distLLC_build_ubDistBuild:
 	[[ "$?" != "0" ]] && _messageFAIL
@@ -38438,26 +38464,21 @@ _upload_ubDistBuild_custom() {
 
 
 
-_croc_ubDistBuild_image() {
+
+_croc_ubDistBuild_image_out() {
+	_mustHaveCroc
 	cd "$scriptLocal"
-	
-	! [[ -e "$scriptLocal"/ops.sh ]] && echo >> "$scriptLocal"/ops.sh
-	
-	rm -f "$scriptLocal"/package_image.tar.xz > /dev/null 2>&1
-	
-	# https://www.rootusers.com/gzip-vs-bzip2-vs-xz-performance-comparison/
-	env XZ_OPT="-3 -T0" tar -cJvf "$scriptLocal"/package_image.tar.xz ./vm.img ./ops.sh
 	
 	! [[ -e "$scriptLocal"/package_image.tar.xz ]] && _messageFAIL
 	
-	_mustHaveCroc
 	
 	local currentPID
 	
-	croc send "$scriptLocal"/package_image.tar.xz | sudo tee "$scriptLocal"/croc.log &
+	croc send "$scriptLocal"/package_image.tar.xz 2>&1 | sudo -n tee "$scriptLocal"/croc.log &
 	
 	currentPID="$!"
 	
+	sleep 3
 	#while pgrep '^croc$'
 	while true
 	do
@@ -38470,6 +38491,14 @@ _croc_ubDistBuild_image() {
 	kill -KILL "$currentPID"
 	
 	return 0
+}
+
+_croc_ubDistBuild_image() {
+	_mustHaveCroc
+	
+	_package_ubDistBuild_image "$@"
+	
+	_croc_ubDistBuild_image_out "$@"
 }
 
 
@@ -38761,10 +38790,13 @@ _refresh_anchors() {
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_custom_ubDistBuild
 	
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_package_ubDistBuild_image
+	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_upload_ubDistBuild_image
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_upload_ubDistBuild_custom
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_croc_ubDistBuild_image
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_croc_ubDistBuild_image_out
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_ubDistBuild
 	
@@ -38794,6 +38826,7 @@ _refresh_anchors() {
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_true
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_false
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_chroot_test
+	
 	
 	# WARNING: DANGER: NOTICE: Do NOT distribute!
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_nvidia_force_install
