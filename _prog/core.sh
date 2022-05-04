@@ -712,20 +712,20 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	#disown -a -h -r
 	#disown -a -r
 	
-	
-	_messagePlain_nominal 'wait: 1800s'
+	# Up to 700s per kernel (ie. modules), plus 500s, total of 1147s for one kernel, 1749s to wait for three kernels.
+	_messagePlain_nominal 'wait: 2800s'
 	local currentIterationWait
 	currentIterationWait=0
 	pgrep qemu-system
 	pgrep qemu
 	ps -p "$currentPID"
-	while [[ "$currentIterationWait" -lt 1800 ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
+	while [[ "$currentIterationWait" -lt 2800 ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
 	do
 		sleep 1
 		let currentIterationWait=currentIterationWait+1
 	done
 	_messagePlain_probe_var currentIterationWait
-	[[ "$currentIterationWait" -ge 1800 ]] && _messagePlain_bad 'bad: fail: bootdisc: poweroff'
+	[[ "$currentIterationWait" -ge 2800 ]] && _messagePlain_bad 'bad: fail: bootdisc: poweroff'
 	sleep 27
 	
 	

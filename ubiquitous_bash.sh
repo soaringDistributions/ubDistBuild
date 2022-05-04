@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='560022731'
+export ub_setScriptChecksum_contents='497585799'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -10294,7 +10294,7 @@ CZXWXcRMTo8EmM8i4d
 	! nix-shell --run hello | grep -i 'hello' > /dev/null && echo 'fail: nix-shell: hello' && _stop 1
 	! nix-shell --run true && echo 'fail: nix-shell: true' && _stop 1
 	nix-shell --run false && echo 'fail: nix-shell: false' && _stop 1
-	[[ $(nix-shell --run 'type hello' | tr -dc 'a-zA-Z0-9/ ') == $(type hello | tr -dc 'a-zA-Z0-9/ ') ]] && echo 'fail: nix-shell: type: hello' && _stop 1
+	[[ $(nix-shell --run 'type hello' | tr -dc 'a-zA-Z0-9/ ') == $(type hello 2>/dev/null | tr -dc 'a-zA-Z0-9/ ') ]] && echo 'fail: nix-shell: type: hello' && _stop 1
 	[[ $(nix-shell --run 'type -P true' | tr -dc 'a-zA-Z0-9/ ') == $(type -P true | tr -dc 'a-zA-Z0-9/ ') ]] && echo 'fail: nix-shell: type: true' && _stop 1
 	[[ $(nix-shell --run 'type -P false' | tr -dc 'a-zA-Z0-9/ ') == $(type -P false | tr -dc 'a-zA-Z0-9/ ') ]] && echo 'fail: nix-shell: type: false' && _stop 1
 	
@@ -10302,8 +10302,13 @@ CZXWXcRMTo8EmM8i4d
 	_stop
 }
 
+
+_test_nix-env_enter() {
+	cd "$HOME"
+	_test_nix-env "$@"
+}
 _test_nix-env() {
-	# Cygwin implies other package managers (ie. 'chocolatey').
+	# Cygwin implies other package managers (ie. 'chocolatey'), NOT nix .
 	_if_cygwin && return 0
 	
 	# Root installation of nixenv is not expected either necessary or possible.
@@ -10311,6 +10316,7 @@ _test_nix-env() {
 	then
 		local sudoAvailable
 		sudoAvailable=false
+		sudoAvailable=$(sudo -n echo true 2> /dev/null)
 		
 		local currentUser
 		currentUser="$custom_user"
@@ -10320,7 +10326,7 @@ _test_nix-env() {
 		currentScript="$scriptAbsoluteLocation"
 		[[ -e /home/"$currentUser"/ubiquitous_bash.sh ]] && currentScript=/home/"$currentUser"/ubiquitous_bash.sh
 		
-		[[ -e /home/"$currentUser" ]] && [[ $(sudo -n -u "$currentUser" id -u | tr -dc '0-9') != "0" ]] && sudo -n -u "$currentUser" "$currentScript" _test_nix-env
+		[[ -e /home/"$currentUser" ]] && [[ "$sudoAvailable" == "true" ]] && [[ $(sudo -n -u "$currentUser" id -u | tr -dc '0-9') != "0" ]] && sudo -n -u "$currentUser" "$currentScript" _test_nix-env_enter
 		return
 	fi
 	
@@ -38204,20 +38210,20 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	#disown -a -h -r
 	#disown -a -r
 	
-	
-	_messagePlain_nominal 'wait: 1800s'
+	# Up to 700s per kernel (ie. modules), plus 500s, total of 1147s for one kernel, 1749s to wait for three kernels.
+	_messagePlain_nominal 'wait: 2800s'
 	local currentIterationWait
 	currentIterationWait=0
 	pgrep qemu-system
 	pgrep qemu
 	ps -p "$currentPID"
-	while [[ "$currentIterationWait" -lt 1800 ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
+	while [[ "$currentIterationWait" -lt 2800 ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
 	do
 		sleep 1
 		let currentIterationWait=currentIterationWait+1
 	done
 	_messagePlain_probe_var currentIterationWait
-	[[ "$currentIterationWait" -ge 1800 ]] && _messagePlain_bad 'bad: fail: bootdisc: poweroff'
+	[[ "$currentIterationWait" -ge 2800 ]] && _messagePlain_bad 'bad: fail: bootdisc: poweroff'
 	sleep 27
 	
 	
