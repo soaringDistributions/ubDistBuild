@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='3623023500'
+export ub_setScriptChecksum_contents='3180176308'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -38464,6 +38464,15 @@ _upload_ubDistBuild_custom() {
 
 
 
+_croc_ubDistBuild_image_out_message() {
+	sleep 3
+	while pgrep '^croc$' || ps -p "$currentPID"
+	#while true
+	do
+		[[ -e "$scriptLocal"/croc.log ]] && tail "$scriptLocal"/croc.log
+		sleep 3
+	done
+}
 
 _croc_ubDistBuild_image_out() {
 	_mustHaveCroc
@@ -38474,17 +38483,16 @@ _croc_ubDistBuild_image_out() {
 	
 	local currentPID
 	
-	croc send "$scriptLocal"/package_image.tar.xz 2>&1 | sudo -n tee "$scriptLocal"/croc.log &
+	"$scriptAbsoluteLocation" _croc_ubDistBuild_image_out_message &
 	
 	currentPID="$!"
 	
-	sleep 3
-	while pgrep '^croc$' || ps -p "$currentPID"
-	#while true
-	do
-		tail "$scriptLocal"/croc.log
-		sleep 3
-	done
+	
+	croc send "$scriptLocal"/package_image.tar.xz 2>&1 | tee "$scriptLocal"/croc.log
+	
+	
+	
+	
 	
 	kill "$currentPID"
 	sleep 3

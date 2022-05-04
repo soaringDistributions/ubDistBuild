@@ -966,6 +966,15 @@ _upload_ubDistBuild_custom() {
 
 
 
+_croc_ubDistBuild_image_out_message() {
+	sleep 3
+	while pgrep '^croc$' || ps -p "$currentPID"
+	#while true
+	do
+		[[ -e "$scriptLocal"/croc.log ]] && tail "$scriptLocal"/croc.log
+		sleep 3
+	done
+}
 
 _croc_ubDistBuild_image_out() {
 	_mustHaveCroc
@@ -976,17 +985,16 @@ _croc_ubDistBuild_image_out() {
 	
 	local currentPID
 	
-	croc send "$scriptLocal"/package_image.tar.xz 2>&1 | sudo -n tee "$scriptLocal"/croc.log &
+	"$scriptAbsoluteLocation" _croc_ubDistBuild_image_out_message &
 	
 	currentPID="$!"
 	
-	sleep 3
-	while pgrep '^croc$' || ps -p "$currentPID"
-	#while true
-	do
-		tail "$scriptLocal"/croc.log
-		sleep 3
-	done
+	
+	croc send "$scriptLocal"/package_image.tar.xz 2>&1 | tee "$scriptLocal"/croc.log
+	
+	
+	
+	
 	
 	kill "$currentPID"
 	sleep 3
