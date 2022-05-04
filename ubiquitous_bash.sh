@@ -32,7 +32,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='1891409836'
-export ub_setScriptChecksum_contents='819888085'
+export ub_setScriptChecksum_contents='3623023500'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -38425,7 +38425,7 @@ _package_ubDistBuild_image() {
 	
 	# https://www.rootusers.com/gzip-vs-bzip2-vs-xz-performance-comparison/
 	# https://stephane.lesimple.fr/blog/lzop-vs-compress-vs-gzip-vs-bzip2-vs-lzma-vs-lzma2xz-benchmark-reloaded/
-	env XZ_OPT="-1 -T0" tar -cJvf "$scriptLocal"/package_image.tar.xz ./vm.img ./ops.sh
+	env XZ_OPT="-2 -T0" tar -cJvf "$scriptLocal"/package_image.tar.xz ./vm.img ./ops.sh
 	
 	! [[ -e "$scriptLocal"/package_image.tar.xz ]] && _messageFAIL
 	
@@ -38479,8 +38479,8 @@ _croc_ubDistBuild_image_out() {
 	currentPID="$!"
 	
 	sleep 3
-	#while pgrep '^croc$'
-	while true
+	while pgrep '^croc$' || ps -p "$currentPID"
+	#while true
 	do
 		tail "$scriptLocal"/croc.log
 		sleep 3

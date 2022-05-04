@@ -134,6 +134,13 @@ jobs:
         shell: bash
         run: |
           ./_package_ubDistBuild_image
+      - name: Setup tmate session
+        #if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+        # ssh -i <path-to-key> <tmate-connection-string>
+        with:
+          limit-access-to-actor: true
+        timeout-minutes: 355
       - name: _croc_ubDistBuild_image_out
         shell: bash
         run: |
