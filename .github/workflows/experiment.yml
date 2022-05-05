@@ -130,10 +130,11 @@ jobs:
         #shell: bash
         #run: |
           #./_chroot_test | sudo -n tee ./_local/_chroot_test.log
-      - name: _package_ubDistBuild_image
-        shell: bash
-        run: |
-          ./_package_ubDistBuild_image
+      #- name: _package_ubDistBuild_image
+        #shell: bash
+        #run: |
+          #./_package_ubDistBuild_image
+      # ATTENTION: NOTICE: Use this to make experimental changes to the image.
       - name: Setup tmate session
         #if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
@@ -141,7 +142,11 @@ jobs:
         with:
           limit-access-to-actor: true
         timeout-minutes: 355
-      # ATTENTION: NOTICE: Use 'tmate' session with ssh to run this instead.
+      - name: _package_ubDistBuild_image
+        shell: bash
+        run: |
+          ./_package_ubDistBuild_image
+      # ATTENTION: NOTICE: Use 'tmate' session with ssh to run this instead. Get the image with croc .
       # For some reason, this attempts to 'Sending 0 files (0 B)' , and attempting to receive results in 'room not ready'.
       #- name: _croc_ubDistBuild_image_out
         #shell: bash
