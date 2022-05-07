@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2945558178'
+export ub_setScriptChecksum_contents='1471349881'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -38175,6 +38175,9 @@ _createVMimage() {
 }
 # WARNING: No production use. No use as-is. Hybrid/UEFI is default.
 _convertVMimage_sequence() {
+	_messageNormal '_convertVMimage_sequence'
+	
+	_messagePlain_nominal '_convertVMimage_sequence: start'
 	_start
 	mkdir -p "$safeTmp"/rootfs
 	
@@ -38190,6 +38193,7 @@ _convertVMimage_sequence() {
 	export ubVirtImagePartition=p3
 	
 	
+	_messagePlain_nominal '_convertVMimage_sequence: copy: out'
 	! "$scriptAbsoluteLocation" _openImage && _messagePlain_bad 'fail: _openImage' && _messageFAIL
 	
 	sudo -n rsync -ax "$globalVirtFS"/. "$safeTmp"/rootfs/.
@@ -38201,6 +38205,7 @@ _convertVMimage_sequence() {
 	_createVMimage
 	
 	
+	_messagePlain_nominal '_convertVMimage_sequence: copy: in'
 	! "$scriptAbsoluteLocation" _openImage && _messagePlain_bad 'fail: _openImage' && _messageFAIL
 	
 	sudo -n rsync -ax "$safeTmp"/rootfs/. "$globalVirtFS"/.
@@ -38208,6 +38213,7 @@ _convertVMimage_sequence() {
 	! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
 	
 	
+	_messagePlain_nominal '_convertVMimage_sequence: stop'
 	export safeToDeleteGit="true"
 	_safeRMR "$safeTmp"/rootfs/.
 	_stop

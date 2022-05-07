@@ -590,6 +590,9 @@ _createVMimage() {
 }
 # WARNING: No production use. No use as-is. Hybrid/UEFI is default.
 _convertVMimage_sequence() {
+	_messageNormal '_convertVMimage_sequence'
+	
+	_messagePlain_nominal '_convertVMimage_sequence: start'
 	_start
 	mkdir -p "$safeTmp"/rootfs
 	
@@ -605,6 +608,7 @@ _convertVMimage_sequence() {
 	export ubVirtImagePartition=p3
 	
 	
+	_messagePlain_nominal '_convertVMimage_sequence: copy: out'
 	! "$scriptAbsoluteLocation" _openImage && _messagePlain_bad 'fail: _openImage' && _messageFAIL
 	
 	sudo -n rsync -ax "$globalVirtFS"/. "$safeTmp"/rootfs/.
@@ -616,6 +620,7 @@ _convertVMimage_sequence() {
 	_createVMimage
 	
 	
+	_messagePlain_nominal '_convertVMimage_sequence: copy: in'
 	! "$scriptAbsoluteLocation" _openImage && _messagePlain_bad 'fail: _openImage' && _messageFAIL
 	
 	sudo -n rsync -ax "$safeTmp"/rootfs/. "$globalVirtFS"/.
@@ -623,6 +628,7 @@ _convertVMimage_sequence() {
 	! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
 	
 	
+	_messagePlain_nominal '_convertVMimage_sequence: stop'
 	export safeToDeleteGit="true"
 	_safeRMR "$safeTmp"/rootfs/.
 	_stop
