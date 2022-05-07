@@ -610,7 +610,15 @@ _convertVMimage_sequence() {
 	
 	_messagePlain_nominal '_convertVMimage_sequence: stop'
 	export safeToDeleteGit="true"
-	sudo -n "$scriptAbsoluteLocation" _safeRMR "$safeTmp"/rootfs
+	if ! _safePath "$safeTmp"/rootfs
+	then
+		_stop 1
+		exit 1
+		return 1
+	fi
+	#sudo -n rm -rf "$safeTmp"/rootfs
+	sudo -n chown "$USER":"$USER" "$safeTmp"/rootfs
+	_safeRMR "$safeTmp"/rootfs
 	_stop
 }
 _convertVMimage() {
