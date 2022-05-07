@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1208440043'
+export ub_setScriptChecksum_contents='2945558178'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -37619,9 +37619,14 @@ _set_ubDistBuild() {
 	#export ubVirtImageEFI=p2
 	
 	
-	export ubVirtImageEFI=p1
-	export ubVirtImageSwap=p2
-	export ubVirtImagePartition=p3
+	export ubVirtPlatformOverride='x64-efi'
+	export ubVirtImageBIOS=p1
+	export ubVirtImageEFI=p2
+	export ubVirtImageNTFS=
+	export ubVirtImageRecovery=
+	export ubVirtImageSwap=p3
+	export ubVirtImageBoot=p4
+	export ubVirtImagePartition=p5
 	
 	
 	# ATTENTION: Unusual 'x64-efi' variation.
@@ -37693,117 +37698,18 @@ type _set_ubDistBuild > /dev/null 2>&1 && _set_ubDistBuild
 _create_ubDistBuild-create() {
 	_messageNormal '##### init: _create_ubDistBuild-create'
 	
+	
 	mkdir -p "$scriptLocal"
 	
 	_set_ubDistBuild
 	
-	export vmImageFile="$scriptLocal"/vm.img
-	[[ -e "$vmImageFile" ]] && _messagePlain_good 'exists: vm.img' && return 0
-	[[ -e "$scriptLocal"/vm.img ]] && _messagePlain_good 'exists: vm.img' && return 0
-	
-	[[ -e "$lock_open" ]]  && _messagePlain_bad 'bad: locked!' && _messageFAIL && _stop 1
-	[[ -e "$scriptLocal"/l_o ]]  && _messagePlain_bad 'bad: locked!' && _messageFAIL && _stop 1
-	
-	! [[ $(df --block-size=1000000000 --output=avail "$scriptLocal" | tr -dc '0-9') -gt "25" ]] && _messageFAIL && _stop 1
 	
 	
-	
-	local imagedev
-	
-	_open
-	
-	export vmImageFile="$scriptLocal"/vm.img
-	[[ -e "$vmImageFile" ]] && _messagePlain_bad 'bad: exists: vm.img' && _messageFAIL && _stop 1
-	
-	
-	_messageNormal 'create: vm.img'
-	
-	export vmSize=23296
-	_createRawImage
-	
-	
-	_messageNormal 'partition: vm.img'
-	sudo -n parted --script "$scriptLocal"/vm.img 'mklabel gpt'
-	
-	# Unusual.
-	#   EFI, Image/Root.
-	# Former default, only preferable if disk is strictly spinning CAV and many more bits per second with beginning tracks.
-	#   Swap, EFI, Image/Root.
-	# Compromise. May have better compatibility, may reduce CLV (and zoned CAV) speed changes from slowest tracks at beginning of some optical discs.
-	#   EFI, Swap, Image/Root.
-	# Expect <8MiB usage of EFI parition FAT32 filesystem, ~28GiB usage of Image/Root partition ext4 filesystem.
-	# 512MiB EFI, 5120MiB Swap, remainder Image/Root
-	
-	# CAUTION: Must match _set_ubDistBuild .
-	#export ubVirtImageEFI=p?
-	#export ubVirtImageSwap=p?
-	#export ubVirtImagePartition=p?
-	
-	
-	
-	# ATTENTION: NOTICE: Larger EFI partition may be more compatible. Larger Swap partition may be more useful for hibernation.
-	
-	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart EFI fat32 '"1"'MiB '"513"'MiB'
-	sudo -n parted --script "$scriptLocal"/vm.img 'mkpart EFI fat32 '"1"'MiB '"73"'MiB'
-	
-	sudo -n parted --script "$scriptLocal"/vm.img 'set 1 msftdata on'
-	sudo -n parted --script "$scriptLocal"/vm.img 'set 1 boot on'
-	sudo -n parted --script "$scriptLocal"/vm.img 'set 1 esp on'
-	
-	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"513"'MiB '"5633"'MiB'
-	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"513"'MiB '"3073"'MiB'
-	sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"73"'MiB '"97"'MiB'
-	
-	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"5633"'MiB '"23295"'MiB'
-	#sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"3073"'MiB '"23295"'MiB'
-	sudo -n parted --script "$scriptLocal"/vm.img 'mkpart primary '"97"'MiB '"23295"'MiB'
-	
-	
-	sudo -n parted --script "$scriptLocal"/vm.img 'unit MiB print'
-	
-	
-	_close
+	_createVMimage "$@"
 	
 	
 	
 	
-	# Format partitions .
-	_messageNormal 'format: vm.img'
-	#"$scriptAbsoluteLocation" _loopImage_sequence || _stop 1
-	! "$scriptAbsoluteLocation" _openLoop && _messagePlain_bad 'fail: _openLoop' && _messageFAIL
-	
-	mkdir -p "$globalVirtFS"
-	"$scriptAbsoluteLocation" _checkForMounts "$globalVirtFS" && _messagePlain_bad 'bad: mounted: globalVirtFS' && _messageFAIL && _stop 1
-	imagedev=$(cat "$scriptLocal"/imagedev)
-	
-	local imagepart
-	local loopdevfs
-	
-	# Compression from btrfs may free up ~8GB . Some performance degradation may result if files with many random writes (eg. COW VM images) are used with btrfs .
-	# https://www.phoronix.com/scan.php?page=article&item=btrfs-zstd-compress&num=4
-	# https://btrfs.wiki.kernel.org/index.php/Compression
-	# https://unix.stackexchange.com/questions/394973/why-would-i-want-to-disable-copy-on-write-while-creating-qemu-images
-	# https://gist.github.com/niflostancu/03810a8167edc533b1712551d4f90a14
-	
-	
-	imagepart="$imagedev""$ubVirtImageEFI"
-	loopdevfs=$(sudo -n blkid -s TYPE -o value "$imagepart" | tr -dc 'a-zA-Z0-9')
-	[[ "$loopdevfs" == "ext4" ]] && _stop 1
-	sudo -n mkfs.vfat -F 32 -n EFI "$imagepart" || _stop 1
-	
-	imagepart="$imagedev""$ubVirtImagePartition"
-	loopdevfs=$(sudo -n blkid -s TYPE -o value "$imagepart" | tr -dc 'a-zA-Z0-9')
-	[[ "$loopdevfs" == "ext4" ]] && _stop 1
-	#sudo -n mkfs.ext4 -e remount-ro -E lazy_itable_init=0,lazy_journal_init=0 -m 0 "$imagepart" || _stop 1
-	sudo -n mkfs.btrfs --checksum xxhash -M -d single "$imagepart" || _stop 1
-	
-	imagepart="$imagedev""$ubVirtImageSwap"
-	loopdevfs=$(sudo -n blkid -s TYPE -o value "$imagepart" | tr -dc 'a-zA-Z0-9')
-	[[ "$loopdevfs" == "ext4" ]] && _stop 1
-	sudo -n mkswap "$imagepart" || _stop 1
-	
-	#"$scriptAbsoluteLocation" _umountImage || _stop 1
-	! "$scriptAbsoluteLocation" _closeLoop && _messagePlain_bad 'fail: _closeLoop' && _messageFAIL
 	
 	
 	
@@ -38096,23 +38002,284 @@ CZXWXcRMTo8EmM8i4d
 	#export ubVirtImageSwap=p2
 	#export ubVirtImagePartition=p3
 	
+	
+	# https://linuxconfig.org/how-to-disable-blacklist-nouveau-nvidia-driver-on-ubuntu-20-04-focal-fossa-linux
+	# https://askubuntu.com/questions/747314/is-nomodeset-still-required
+	#echo 'GRUB_CMDLINE_LINUX="nouveau.modeset=0"' | sudo -n tee -a "$globalVirtFS"/etc/default/grub
+	echo 'blacklist nouveau' | sudo -n tee "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
+	echo 'options nouveau modeset=0' | sudo -n tee -a "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
+	
+	
 	_messagePlain_nominal 'install grub'
 	export getMost_backend="chroot"
 	_set_getMost_backend "$@"
 	_set_getMost_backend_debian "$@"
 	_test_getMost_backend "$@"
 	
+	_getMost_backend_aptGetInstall grub-pc-bin
+	
 	_chroot env DEBIAN_FRONTEND=noninteractive debconf-set-selections <<< "grub-efi-amd64 grub2/update_nvram boolean false"
 	_chroot env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" remove -y grub-efi grub-efi-amd64
 	_getMost_backend_aptGetInstall linux-image-amd64 linux-headers-amd64 grub-efi
 	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
-	_messagePlain_nominal 'grub-install'
+	
+	# Install EFI bootloader by default. May be rewritten later if appropriate.
+	_create_ubDistBuild-bootloader-efi
+	
+	
+	
+	return 0
+}
+
+
+# Creates a raw VM image. Default Hybrid/UEFI partitioning and formatting.
+# ATTENTION: Override, if necessary.
+_createVMimage() {
+	_messageNormal '##### _createVMimage'
+	
+	mkdir -p "$scriptLocal"
+	
+	
+	export vmImageFile="$scriptLocal"/vm.img
+	[[ -e "$vmImageFile" ]] && _messagePlain_good 'exists: '"$vmImageFile" && return 0
+	[[ -e "$scriptLocal"/vm.img ]] && _messagePlain_good 'exists: '"$vmImageFile" && return 0
+	
+	[[ -e "$lock_open" ]]  && _messagePlain_bad 'bad: locked!' && _messageFAIL && _stop 1
+	[[ -e "$scriptLocal"/l_o ]]  && _messagePlain_bad 'bad: locked!' && _messageFAIL && _stop 1
+	
+	! [[ $(df --block-size=1000000000 --output=avail "$scriptLocal" | tr -dc '0-9') -gt "25" ]] && _messageFAIL && _stop 1
+	
+	
+	
+	local imagedev
+	
+	_open
+	
+	export vmImageFile="$scriptLocal"/vm.img
+	[[ -e "$vmImageFile" ]] && _messagePlain_bad 'exists: '"$vmImageFile" && _messageFAIL && _stop 1
+	
+	
+	_messageNormal 'create: vm.img'
+	
+	export vmSize=23296
+	_createRawImage
+	
+	
+	_messageNormal 'partition: vm.img'
+	sudo -n parted --script "$vmImageFile" 'mklabel gpt'
+	
+	# Unusual.
+	#   EFI, Image/Root.
+	# Former default, only preferable if disk is strictly spinning CAV and many more bits per second with beginning tracks.
+	#   Swap, EFI, Image/Root.
+	# Compromise. May have better compatibility, may reduce CLV (and zoned CAV) speed changes from slowest tracks at beginning of some optical discs.
+	#   EFI, Swap, Image/Root.
+	# Expect <8MiB usage of EFI parition FAT32 filesystem, ~28GiB usage of Image/Root partition ext4 filesystem.
+	# 512MiB EFI, 5120MiB Swap, remainder Image/Root
+	# https://www.compuhoy.com/what-is-difference-between-bios-and-efi/
+	#  'Does EFI partition have to be first?' 'UEFI does not impose a restriction on the number or location of System Partitions that can exist on a system. (Version 2.5, p. 540.) As a practical matter, putting the ESP first is advisable because this location is unlikely to be impacted by partition moving and resizing operations.'
+	# http://blog.arainho.me/grub/gpt/arch-linux/2016/01/14/grub-on-gpt-partition.html
+	#  'at the first 2GB of the disk with toggle bios_grub used for booting'
+	
+	# CAUTION: *As DEFAULT*, must match other definitions (eg. _set_ubDistBuild , 'core.sh' , 'ops.sh' , ubiquitous_bash , etc) .
+	# NTFS and Recovery partitions should not have set values in any other functions. Never used - documentation only.
+	# x64-bios , raspbian , x64-efi
+	export ubVirtPlatformOverride='x64-efi'
+	export ubVirtImageBIOS=p1
+	export ubVirtImageEFI=p2
+	export ubVirtImageNTFS=
+	export ubVirtImageRecovery=
+	export ubVirtImageSwap=p3
+	export ubVirtImageBoot=p4
+	export ubVirtImagePartition=p5
+	
+	
+	
+	
+	# ATTENTION: NOTICE: Larger EFI partition may be more compatible. Larger Swap partition may be more useful for hibernation.
+	
+	# BIOS
+	sudo -n parted --script "$vmImageFile" 'mkpart primary ext2 1 2'
+	sudo -n parted --script "$vmImageFile" 'set 1 bios_grub on'
+	
+	
+	# EFI
+	#sudo -n parted --script "$vmImageFile" 'mkpart EFI fat32 '"2"'MiB '"514"'MiB'
+	sudo -n parted --script "$vmImageFile" 'mkpart EFI fat32 '"2"'MiB '"74"'MiB'
+	sudo -n parted --script "$vmImageFile" 'set 1 msftdata on'
+	sudo -n parted --script "$vmImageFile" 'set 1 boot on'
+	sudo -n parted --script "$vmImageFile" 'set 1 esp on'
+	
+	
+	# Swap
+	#sudo -n parted --script "$vmImageFile" 'mkpart primary '"514"'MiB '"5633"'MiB'
+	#sudo -n parted --script "$vmImageFile" 'mkpart primary '"514"'MiB '"3073"'MiB'
+	sudo -n parted --script "$vmImageFile" 'mkpart primary '"74"'MiB '"98"'MiB'
+	
+	
+	# Boot
+	sudo -n parted --script "$vmImageFile" 'mkpart primary '"98"'MiB '"610"'MiB'
+	
+	
+	# Root
+	sudo -n parted --script "$vmImageFile" 'mkpart primary '"610"'MiB '"23295"'MiB'
+	
+	
+	
+	
+	sudo -n parted --script "$vmImageFile" 'unit MiB print'
+	
+	
+	_close
+	
+	
+	# Format partitions .
+	_messageNormal 'format: vm.img'
+	#"$scriptAbsoluteLocation" _loopImage_sequence || _stop 1
+	! "$scriptAbsoluteLocation" _openLoop && _messagePlain_bad 'fail: _openLoop' && _messageFAIL
+	
+	mkdir -p "$globalVirtFS"
+	"$scriptAbsoluteLocation" _checkForMounts "$globalVirtFS" && _messagePlain_bad 'bad: mounted: globalVirtFS' && _messageFAIL && _stop 1
+	imagedev=$(cat "$scriptLocal"/imagedev)
+	
+	local imagepart
+	local loopdevfs
+	
+	# Compression from btrfs may free up ~8GB . Some performance degradation may result if files with many random writes (eg. COW VM images) are used with btrfs .
+	# https://www.phoronix.com/scan.php?page=article&item=btrfs-zstd-compress&num=4
+	# https://btrfs.wiki.kernel.org/index.php/Compression
+	# https://unix.stackexchange.com/questions/394973/why-would-i-want-to-disable-copy-on-write-while-creating-qemu-images
+	# https://gist.github.com/niflostancu/03810a8167edc533b1712551d4f90a14
+	
+	
+	imagepart="$imagedev""$ubVirtImageEFI"
+	loopdevfs=$(sudo -n blkid -s TYPE -o value "$imagepart" | tr -dc 'a-zA-Z0-9')
+	[[ "$loopdevfs" == "ext4" ]] && _stop 1
+	sudo -n mkfs.vfat -F 32 -n EFI "$imagepart" || _stop 1
+	
+	imagepart="$imagedev""$ubVirtImagePartition"
+	loopdevfs=$(sudo -n blkid -s TYPE -o value "$imagepart" | tr -dc 'a-zA-Z0-9')
+	[[ "$loopdevfs" == "ext4" ]] && _stop 1
+	#sudo -n mkfs.ext4 -e remount-ro -E lazy_itable_init=0,lazy_journal_init=0 -m 0 "$imagepart" || _stop 1
+	sudo -n mkfs.btrfs --checksum xxhash -M -d single "$imagepart" || _stop 1
+	
+	imagepart="$imagedev""$ubVirtImageSwap"
+	loopdevfs=$(sudo -n blkid -s TYPE -o value "$imagepart" | tr -dc 'a-zA-Z0-9')
+	[[ "$loopdevfs" == "ext4" ]] && _stop 1
+	sudo -n mkswap "$imagepart" || _stop 1
+	
+	#"$scriptAbsoluteLocation" _umountImage || _stop 1
+	! "$scriptAbsoluteLocation" _closeLoop && _messagePlain_bad 'fail: _closeLoop' && _messageFAIL
+}
+# WARNING: No production use. No use as-is. Hybrid/UEFI is default.
+_convertVMimage_sequence() {
+	_start
+	mkdir -p "$safeTmp"/rootfs
+	
+	
+	# ATTENTION: Override if necessary (ie. with 'ops.sh' from an existing image).
+	export ubVirtPlatformOverride='x64-efi'
+	export ubVirtImageBIOS=
+	export ubVirtImageEFI=p1
+	export ubVirtImageNTFS=
+	export ubVirtImageRecovery=
+	export ubVirtImageSwap=p2
+	export ubVirtImageBoot=
+	export ubVirtImagePartition=p3
+	
+	
+	! "$scriptAbsoluteLocation" _openImage && _messagePlain_bad 'fail: _openImage' && _messageFAIL
+	
+	sudo -n rsync -ax "$globalVirtFS"/. "$safeTmp"/rootfs/.
+	
+	! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
+	
+	
+	rm -f "$scriptLocal"/vm.img
+	_createVMimage
+	
+	
+	! "$scriptAbsoluteLocation" _openImage && _messagePlain_bad 'fail: _openImage' && _messageFAIL
+	
+	sudo -n rsync -ax "$safeTmp"/rootfs/. "$globalVirtFS"/.
+	
+	! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
+	
+	
+	export safeToDeleteGit="true"
+	_safeRMR "$safeTmp"/rootfs/.
+	_stop
+}
+_convertVMimage() {
+	"$scriptAbsoluteLocation" _convertVMimage_sequence "$@"
+}
+
+
+# Creates a raw VM image. UEFI partitioning and formatting (expected possibility of eventual MSW dual-boot compatibility).
+_createVMimage-efi() {
+	false
+}
+
+
+# Creates a raw VM image. BIOS partitioning and formatting (legacy compatibility, possibly with some cloud providers).
+_createVMimage-bios() {
+	false
+}
+
+
+
+
+
+_create_ubDistBuild-bootloader-bios() {
+	_messageNormal '##### _create_ubDistBuild-bootloader-bios'
+	
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	
+	
+	_messagePlain_nominal 'chroot: grub-install: efi'
+	
+	# WARNING: Apparently, any use of BIOS bootloader either needs at least a 'BIOS boot partition' to share with EFI, or needs a dedicated '/boot' for 'btrfs' compression.
+	# https://bbs.archlinux.org/viewtopic.php?id=251059
+	#  'btrfs' 'zstd compression' 'properly installing the bootloader to a dedicated partitioning designed and maintained for that purpose'
+	# https://unix.stackexchange.com/questions/273329/can-i-install-grub2-on-a-flash-drive-to-boot-both-bios-and-uefi
+	#  'precondition for this to work is that you use GPT partitioning and that you have an BIOS boot partition (1 MiB is enough).'
+	# https://en.wikipedia.org/wiki/BIOS_boot_partition
+	#_chroot grub2-install --modules=part_msdos --target=i386-pc "$imagedev"
+	
+	
+	_messagePlain_probe_cmd _chroot grub-install --modules=part_msdos --target=i386-pc "$imagedev"
+	_messagePlain_probe_cmd _chroot grub-install --modules=part_msdos --target=i386-pc "$imagedev""$ubVirtImageEFI"
+	
+	
+	_messagePlain_nominal 'chroot: update-grub'
+	_chroot update-grub
+	
+	_messagePlain_nominal 'chroot: update-initramfs'
+	_chroot update-initramfs -u
+	
+	
+	
+	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+}
+
+_create_ubDistBuild-bootloader-efi() {
+	_messageNormal '##### _create_ubDistBuild-bootloader-efi'
+	
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	
+	
+	_messagePlain_nominal 'chroot: grub-install: efi'
 	
 	# https://unix.stackexchange.com/questions/273329/can-i-install-grub2-on-a-flash-drive-to-boot-both-bios-and-uefi
 	#  'precondition for this to work is that you use GPT partitioning and that you have an BIOS boot partition (1 MiB is enough).'
+	# https://en.wikipedia.org/wiki/BIOS_boot_partition
+	# https://askubuntu.com/questions/705055/gpt-detected-please-create-a-bios-boot-partition
+	#  'must be located at the start of a GPT disk, and have a "bios_grub" flag' 'Size: 1MB.'
 	#_chroot grub2-install --modules=part_msdos --target=i386-pc "$imagedev"
-
+	
 	
 	_messagePlain_probe_cmd _chroot grub-install --boot-directory=/boot --root-directory=/ --modules=part_msdos --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=debian --recheck --no-nvram --removable "$imagedev"
 	_messagePlain_probe_cmd _chroot grub-install --boot-directory=/boot --root-directory=/ --modules=part_msdos --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=debian --recheck --no-nvram --removable "$imagedev""$ubVirtImageEFI"
@@ -38122,27 +38289,22 @@ CZXWXcRMTo8EmM8i4d
 	#sudo -n mkdir -p "$globalVirtFS"/boot/efi/EFI/BOOT/
 	#sudo -n cp "$globalVirtFS"/boot/efi/EFI/debian/grubx64.efi "$globalVirtFS"/boot/efi/EFI/BOOT/bootx64.efi
 	
-	# https://linuxconfig.org/how-to-disable-blacklist-nouveau-nvidia-driver-on-ubuntu-20-04-focal-fossa-linux
-	# https://askubuntu.com/questions/747314/is-nomodeset-still-required
-	#echo 'GRUB_CMDLINE_LINUX="nouveau.modeset=0"' | sudo -n tee -a "$globalVirtFS"/etc/default/grub
-	echo 'blacklist nouveau' | sudo -n tee "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
-	echo 'options nouveau modeset=0' | sudo -n tee -a "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
 	
-	
-	
-	
-	_messagePlain_nominal 'update-grub'
+	_messagePlain_nominal 'chroot: update-grub'
 	_chroot update-grub
 	
-	_messagePlain_nominal 'update-initramfs'
+	_messagePlain_nominal 'chroot: update-initramfs'
 	_chroot update-initramfs -u
 	
 	
 	
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
-	return 0
 }
+
+
+
+
 _create_ubDistBuild-rotten_install() {
 	_messageNormal '##### init: _create_ubDistBuild-rotten_install'
 	
