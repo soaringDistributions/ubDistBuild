@@ -150,39 +150,11 @@ _create_ubDistBuild-create() {
 	
 	
 	
+	_createVMfstab
+	
+	
+	
 	_messageNormal 'os: globalVirtFS: write: fs'
-	
-	
-	sudo -n mkdir -p "$globalVirtFS"/media/bootdisc
-	sudo -n chmod 755 "$globalVirtFS"/media/bootdisc
-	
-	
-	# https://gist.github.com/varqox/42e213b6b2dde2b636ef#edit-fstab-file
-	
-	local ubVirtImagePartition_UUID
-	ubVirtImagePartition_UUID=$(sudo -n blkid -s UUID -o value "$imagedev""$ubVirtImagePartition" | tr -dc 'a-zA-Z0-9\-')
-	
-	#echo 'UUID='"$ubVirtImagePartition_UUID"' / ext4 errors=remount-ro 0 1' | sudo -n tee "$globalVirtFS"/etc/fstab
-	echo 'UUID='"$ubVirtImagePartition_UUID"' / btrfs defaults,compress=zstd:1 0 1' | sudo -n tee "$globalVirtFS"/etc/fstab
-	
-	
-	# initramfs-update, from chroot, may not enable hibernation/resume... may be device specific
-	
-	local ubVirtImageSwap_UUID
-	ubVirtImageSwap_UUID=$(sudo -n blkid -s UUID -o value "$imagedev""$ubVirtImageSwap" | tr -dc 'a-zA-Z0-9\-')
-	
-	echo '#UUID='"$ubVirtImageSwap_UUID"' swap swap defaults 0 0' | sudo -n tee -a "$globalVirtFS"/etc/fstab
-	
-	
-	local ubVirtImageEFI_UUID
-	ubVirtImageEFI_UUID=$(sudo -n blkid -s UUID -o value "$imagedev""$ubVirtImageEFI" | tr -dc 'a-zA-Z0-9\-')
-	
-	echo 'UUID='"$ubVirtImageEFI_UUID"' /boot/efi vfat umask=0077 0 1' | sudo -n tee -a "$globalVirtFS"/etc/fstab
-	
-	if ! sudo -n cat "$globalVirtFS"/etc/fstab | grep 'uk4uPhB663kVcygT0q' | grep 'bootdisc' > /dev/null 2>&1
-	then
-		echo 'LABEL=uk4uPhB663kVcygT0q /media/bootdisc iso9660 ro,nofail 0 0' | sudo -n tee -a "$globalVirtFS"/etc/fstab
-	fi
 	
 	
 	
@@ -447,7 +419,7 @@ CZXWXcRMTo8EmM8i4d
 	
 	
 	# Install EFI bootloader by default. May be rewritten later if appropriate.
-	_create_ubDistBuild-bootloader-efi
+	_createVMbootloader-efi
 	
 	
 	
@@ -661,8 +633,8 @@ _createVMimage-bios() {
 
 
 
-_create_ubDistBuild-bootloader-bios() {
-	_messageNormal '##### _create_ubDistBuild-bootloader-bios'
+_createVMbootloader-bios() {
+	_messageNormal '##### _createVMbootloader-bios'
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
@@ -689,13 +661,13 @@ _create_ubDistBuild-bootloader-bios() {
 	_chroot update-initramfs -u
 	
 	
-	
+	_createVMfstab
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 }
 
-_create_ubDistBuild-bootloader-efi() {
-	_messageNormal '##### _create_ubDistBuild-bootloader-efi'
+_createVMbootloader-efi() {
+	_messageNormal '##### _createVMbootloader-efi'
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
@@ -726,10 +698,61 @@ _create_ubDistBuild-bootloader-efi() {
 	_chroot update-initramfs -u
 	
 	
-	
+	_createVMfstab
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 }
+
+
+
+
+
+
+
+
+_createVMfstab() {
+	_messageNormal 'os: globalVirtFS: write: fs: _createVMfstab'
+	
+	sudo -n mkdir -p "$globalVirtFS"/media/bootdisc
+	sudo -n chmod 755 "$globalVirtFS"/media/bootdisc
+	
+	
+	# https://gist.github.com/varqox/42e213b6b2dde2b636ef#edit-fstab-file
+	
+	local ubVirtImagePartition_UUID
+	ubVirtImagePartition_UUID=$(sudo -n blkid -s UUID -o value "$imagedev""$ubVirtImagePartition" | tr -dc 'a-zA-Z0-9\-')
+	
+	#echo 'UUID='"$ubVirtImagePartition_UUID"' / ext4 errors=remount-ro 0 1' | sudo -n tee "$globalVirtFS"/etc/fstab
+	echo 'UUID='"$ubVirtImagePartition_UUID"' / btrfs defaults,compress=zstd:1 0 1' | sudo -n tee "$globalVirtFS"/etc/fstab
+	
+	
+	# initramfs-update, from chroot, may not enable hibernation/resume... may be device specific
+	
+	local ubVirtImageSwap_UUID
+	ubVirtImageSwap_UUID=$(sudo -n blkid -s UUID -o value "$imagedev""$ubVirtImageSwap" | tr -dc 'a-zA-Z0-9\-')
+	
+	echo '#UUID='"$ubVirtImageSwap_UUID"' swap swap defaults 0 0' | sudo -n tee -a "$globalVirtFS"/etc/fstab
+	
+	
+	local ubVirtImageEFI_UUID
+	ubVirtImageEFI_UUID=$(sudo -n blkid -s UUID -o value "$imagedev""$ubVirtImageEFI" | tr -dc 'a-zA-Z0-9\-')
+	
+	echo 'UUID='"$ubVirtImageEFI_UUID"' /boot/efi vfat umask=0077 0 1' | sudo -n tee -a "$globalVirtFS"/etc/fstab
+	
+	if ! sudo -n cat "$globalVirtFS"/etc/fstab | grep 'uk4uPhB663kVcygT0q' | grep 'bootdisc' > /dev/null 2>&1
+	then
+		echo 'LABEL=uk4uPhB663kVcygT0q /media/bootdisc iso9660 ro,nofail 0 0' | sudo -n tee -a "$globalVirtFS"/etc/fstab
+	fi
+	
+	return 0
+}
+
+
+
+
+
+
+
 
 
 
