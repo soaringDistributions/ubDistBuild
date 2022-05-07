@@ -161,6 +161,10 @@ jobs:
         shell: bash
         run: |
           ./_upload_ubDistBuild_image | sudo -n tee ./_local/_upload_ubDistBuild_image.log
+      - name: _assessment
+        shell: bash
+        run: |
+          ./_assessment | sudo -n tee ./_local/_assessment.log
       - name: Setup tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3

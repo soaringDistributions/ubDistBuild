@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2398008833'
+export ub_setScriptChecksum_contents='3630083918'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -39960,18 +39960,18 @@ _convert() {
 	
 	
 	
-	_messageNormal '_upload_convert: vm.vdi'
+	_messageNormal '_convert: vm.vdi'
 	_vm_convert_vdi
 	[[ ! -e "$scriptLocal"/vm.vdi ]] && _messageFAIL
 	
 	
-	_messageNormal '_upload_convert: vm.vmdk'
+	_messageNormal '_convert: vm.vmdk'
 	_vm_convert_vmdk
 	[[ ! -e "$scriptLocal"/vm.vmdk ]] && _messageFAIL
 	
 	
 	
-	_messageNormal '_upload_convert: vm-live.iso'
+	_messageNormal '_convert: vm-live.iso'
 	
 	if ! "$scriptAbsoluteLocation" _live_sequence_in "$@"
 	then
@@ -39989,7 +39989,7 @@ _convert() {
 	
 	
 	
-	_messageNormal '_upload_convert: vm-live-more.iso'
+	_messageNormal '_convert: vm-live-more.iso'
 	
 	_live_more_copy
 	"$scriptAbsoluteLocation" _live_more_sequence "$@"
@@ -39999,7 +39999,7 @@ _convert() {
 	
 	
 	
-	_messageNormal '_upload_convert: vm-live-more.vdi'
+	_messageNormal '_convert: vm-live-more.vdi'
 	_live_more_convert_vdi
 	
 	[[ ! -e "$scriptLocal"/vm-live-more.vdi ]] && _messageFAIL
@@ -40007,7 +40007,7 @@ _convert() {
 	
 	
 	
-	_messageNormal '_upload_convert: vm-live-more.vmdk'
+	_messageNormal '_convert: vm-live-more.vmdk'
 	_live_more_convert_vmdk
 	
 	[[ ! -e "$scriptLocal"/vm-live-more.vmdk ]] && _messageFAIL
@@ -40104,6 +40104,42 @@ _upload_convert() {
 
 
 
+# WARNING: Deletes 'vm.img' .
+_assessment() {
+	[[ ! -e "$scriptLocal"/vm.img ]] && _messageFAIL
+	rm -f "$scriptLocal"/package_image.tar.xz
+	
+	
+	_messageNormal '_convert: vm-live.iso'
+	
+	if ! "$scriptAbsoluteLocation" _live_sequence_in "$@"
+	then
+		_stop 1
+	fi
+	
+	rm -f "$scriptLocal"/vm.img
+	
+	if ! "$scriptAbsoluteLocation" _live_sequence_out "$@"
+	then
+		_stop 1
+	fi
+	
+	_safeRMR "$scriptLocal"/livefs
+	
+	du -sh "$scriptLocal"/vm-live.iso
+	
+	
+	
+	_messageNormal '_convert: vm-live-more.iso'
+	
+	_live_more_move
+	"$scriptAbsoluteLocation" _live_more_sequence "$@"
+	
+	[[ ! -e "$scriptLocal"/vm-live-more.iso ]] && _messageFAIL
+	
+	du -sh "$scriptLocal"/vm-live-more.iso
+}
+
 
 _refresh_anchors() {
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild
@@ -40151,6 +40187,11 @@ _refresh_anchors() {
 	
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_kde
+	
+	
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_convert
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_upload_convert
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_assessment
 	
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_true
