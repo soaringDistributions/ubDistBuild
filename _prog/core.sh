@@ -569,6 +569,7 @@ _createVMimage() {
 	
 	#"$scriptAbsoluteLocation" _umountImage || _stop 1
 	! "$scriptAbsoluteLocation" _closeLoop && _messagePlain_bad 'fail: _closeLoop' && _messageFAIL
+	return 0
 }
 # WARNING: No production use. No use as-is. Hybrid/UEFI is default.
 _convertVMimage_sequence() {
@@ -679,6 +680,7 @@ _createVMbootloader-bios() {
 	
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	return 0
 }
 
 _createVMbootloader-efi() {
@@ -720,6 +722,7 @@ _createVMbootloader-efi() {
 	
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	return 0
 }
 
 
