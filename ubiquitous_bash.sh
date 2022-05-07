@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1471349881'
+export ub_setScriptChecksum_contents='4274235715'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -37592,49 +37592,6 @@ _set_ubDistBuild() {
 	export ubVirtImageLocal="true"
 	
 	
-	###
-	
-	# ATTENTION: Explicitly override platform. Not all backends support all platforms.
-	# chroot , qemu
-	# x64-bios , raspbian , x64-efi
-	export ubVirtPlatformOverride='x64-efi'
-	
-	###
-	
-	
-	
-	###
-	
-	# ATTENTION: Override with 'ops' or similar.
-	# WARNING: Do not override unnecessarily. Default rules are expected to accommodate typical requirements.
-	
-	# WARNING: Only applies to imagedev (text) loopback device.
-	# x64 bios , raspbian , x64 efi (respectively)
-	
-	#export ubVirtImagePartition='p1'
-	
-	#export ubVirtImagePartition='p2'
-	
-	#export ubVirtImagePartition='p3'
-	#export ubVirtImageEFI=p2
-	
-	
-	export ubVirtPlatformOverride='x64-efi'
-	export ubVirtImageBIOS=p1
-	export ubVirtImageEFI=p2
-	export ubVirtImageNTFS=
-	export ubVirtImageRecovery=
-	export ubVirtImageSwap=p3
-	export ubVirtImageBoot=p4
-	export ubVirtImagePartition=p5
-	
-	
-	# ATTENTION: Unusual 'x64-efi' variation.
-	#export ubVirtImagePartition='p2'
-	#export ubVirtImageEFI='p1'
-	
-	###
-	
 	
 	# _vboxGUI() {
 	# 	_workaround_VirtualBoxVM "$@"
@@ -37688,6 +37645,55 @@ _set_ubDistBuild() {
 	# 	
 	# 	true
 	# }
+	
+	
+	
+	[[ "$ubVirtImage_doNotOverride" == "true" ]] && return 0
+	
+	
+	
+	###
+	
+	# ATTENTION: Explicitly override platform. Not all backends support all platforms.
+	# chroot , qemu
+	# x64-bios , raspbian , x64-efi
+	export ubVirtPlatformOverride='x64-efi'
+	
+	###
+	
+	
+	
+	###
+	
+	# ATTENTION: Override with 'ops' or similar.
+	# WARNING: Do not override unnecessarily. Default rules are expected to accommodate typical requirements.
+	
+	# WARNING: Only applies to imagedev (text) loopback device.
+	# x64 bios , raspbian , x64 efi (respectively)
+	
+	#export ubVirtImagePartition='p1'
+	
+	#export ubVirtImagePartition='p2'
+	
+	#export ubVirtImagePartition='p3'
+	#export ubVirtImageEFI=p2
+	
+	
+	export ubVirtPlatformOverride='x64-efi'
+	export ubVirtImageBIOS=p1
+	export ubVirtImageEFI=p2
+	export ubVirtImageNTFS=
+	export ubVirtImageRecovery=
+	export ubVirtImageSwap=p3
+	export ubVirtImageBoot=p4
+	export ubVirtImagePartition=p5
+	
+	
+	# ATTENTION: Unusual 'x64-efi' variation.
+	#export ubVirtImagePartition='p2'
+	#export ubVirtImageEFI='p1'
+	
+	###
 }
 # ATTENTION: NOTICE: Most stuff from 'ops.sh' from kit is here.
 type _set_ubDistBuild > /dev/null 2>&1 && _set_ubDistBuild
@@ -38086,6 +38092,7 @@ _createVMimage() {
 	# CAUTION: *As DEFAULT*, must match other definitions (eg. _set_ubDistBuild , 'core.sh' , 'ops.sh' , ubiquitous_bash , etc) .
 	# NTFS and Recovery partitions should not have set values in any other functions. Never used - documentation only.
 	# x64-bios , raspbian , x64-efi
+	export ubVirtImage_doNotOverride="true"
 	export ubVirtPlatformOverride='x64-efi'
 	export ubVirtImageBIOS=p1
 	export ubVirtImageEFI=p2
@@ -38183,6 +38190,7 @@ _convertVMimage_sequence() {
 	
 	
 	# ATTENTION: Override if necessary (ie. with 'ops.sh' from an existing image).
+	export ubVirtImage_doNotOverride="true"
 	export ubVirtPlatformOverride='x64-efi'
 	export ubVirtImageBIOS=
 	export ubVirtImageEFI=p1
