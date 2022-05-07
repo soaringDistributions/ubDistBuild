@@ -791,8 +791,6 @@ _custom_ubDistBuild() {
 	# TODO: _setup for all infrastructure/installations
 		# _custom_core from rotten_install  ?  probably not ... these are tests which rotten_install may not normally run
 	
-	# TODO: live, live-more, etc
-	
 	true
 }
 
@@ -1163,6 +1161,156 @@ _create_kde() {
 	rm -f "$HOME"/.license_package_kde/CC0_license.txt
 	rmdir "$HOME"/.license_package_kde
 }
+
+
+
+
+_convert() {
+	[[ ! -e "$scriptLocal"/vm.img ]] && _messageFAIL
+	rm -f "$scriptLocal"/package_image.tar.xz
+	
+	
+	
+	
+	_messageNormal '_upload_convert: vm.vdi'
+	_vm_convert_vmdk
+	
+	
+	_messageNormal '_upload_convert: vm.vmdk'
+	_vm_convert_vmdk
+	
+	
+	
+	_messageNormal '_upload_convert: vm-live.iso'
+	
+	if ! "$scriptAbsoluteLocation" _live_sequence_in "$@"
+	then
+		_stop 1
+	fi
+	
+	#rm -f "$scriptLocal"/vm.img
+	
+	if ! "$scriptAbsoluteLocation" _live_sequence_out "$@"
+	then
+		_stop 1
+	fi
+	
+	_safeRMR "$scriptLocal"/livefs
+	
+	
+	
+	_messageNormal '_upload_convert: vm-live-more.iso'
+	
+	_live_more_copy
+	"$scriptAbsoluteLocation" _live_more_sequence "$@"
+	
+	[[ ! -e "$scriptLocal"/vm-live-more.iso ]] && _messageFAIL
+	
+	
+	
+	
+	_messageNormal '_upload_convert: vm-live-more.vdi'
+	_live_more_convert_vdi
+	
+	[[ ! -e "$scriptLocal"/vm-live-more.vdi ]] && _messageFAIL
+	
+	
+	
+	
+	_messageNormal '_upload_convert: vm-live-more.vmdk'
+	_live_more_convert_vmdk
+	
+	[[ ! -e "$scriptLocal"/vm-live-more.vmdk ]] && _messageFAIL
+}
+
+
+# WARNING: Deletes 'vm.img' .
+_upload_convert() {
+	[[ ! -e "$scriptLocal"/vm.img ]] && _messageFAIL
+	rm -f "$scriptLocal"/package_image.tar.xz
+	
+	
+	
+	
+	_messageNormal '_upload_convert: vm.vdi'
+	_vm_convert_vmdk
+	_rclone_limited --progress copy "$scriptLocal"/vm.vmdk distLLC_build_ubDistBuild:
+	[[ "$?" != "0" ]] && _messageFAIL
+	_rclone_limited --progress copy "$scriptLocal"/vm.vmdk.uuid distLLC_build_ubDistBuild:
+	[[ "$?" != "0" ]] && _messagePlain_bad 'bad: fail'
+	rm -f "$scriptLocal"/vm.vmdk "$scriptLocal"/vm.vmdk.uuid
+	
+	
+	_messageNormal '_upload_convert: vm.vmdk'
+	_vm_convert_vmdk
+	_rclone_limited --progress copy "$scriptLocal"/vm.vmdk distLLC_build_ubDistBuild:
+	[[ "$?" != "0" ]] && _messageFAIL
+	_rclone_limited --progress copy "$scriptLocal"/vm.vmdk.uuid distLLC_build_ubDistBuild:
+	[[ "$?" != "0" ]] && _messagePlain_bad 'bad: fail'
+	rm -f "$scriptLocal"/vm.vmdk "$scriptLocal"/vm.vmdk.uuid
+	
+	
+	
+	_messageNormal '_upload_convert: vm-live.iso'
+	
+	if ! "$scriptAbsoluteLocation" _live_sequence_in "$@"
+	then
+		_stop 1
+	fi
+	
+	rm -f "$scriptLocal"/vm.img
+	
+	if ! "$scriptAbsoluteLocation" _live_sequence_out "$@"
+	then
+		_stop 1
+	fi
+	
+	_safeRMR "$scriptLocal"/livefs
+	
+	_rclone_limited --progress copy "$scriptLocal"/vm-live.iso distLLC_build_ubDistBuild:
+	[[ "$?" != "0" ]] && _messageFAIL
+	#rm -f "$scriptLocal"/vm-live.iso
+	
+	
+	
+	_messageNormal '_upload_convert: vm-live-more.iso'
+	
+	_live_more_move
+	"$scriptAbsoluteLocation" _live_more_sequence "$@"
+	
+	[[ ! -e "$scriptLocal"/vm-live-more.iso ]] && _messageFAIL
+	#_rclone_limited --progress copy "$scriptLocal"/vm-live-more.iso distLLC_build_ubDistBuild:
+	#[[ "$?" != "0" ]] && _messageFAIL
+	#rm -f "$scriptLocal"/vm-live-more.iso
+	
+	
+	
+	
+	_messageNormal '_upload_convert: vm-live-more.vdi'
+	_live_more_convert_vdi
+	
+	[[ ! -e "$scriptLocal"/vm-live-more.vdi ]] && _messageFAIL
+	#_rclone_limited --progress copy "$scriptLocal"/vm-live-more.vdi distLLC_build_ubDistBuild:
+	#[[ "$?" != "0" ]] && _messageFAIL
+	_rclone_limited --progress copy "$scriptLocal"/vm-live-more.vdi.uuid distLLC_build_ubDistBuild:
+	[[ "$?" != "0" ]] && _messagePlain_bad 'bad: fail'
+	#rm -f "$scriptLocal"/vm-live-more.vdi
+	
+	
+	
+	
+	_messageNormal '_upload_convert: vm-live-more.vmdk'
+	_live_more_convert_vmdk
+	
+	[[ ! -e "$scriptLocal"/vm-live-more.vmdk ]] && _messageFAIL
+	#_rclone_limited --progress copy "$scriptLocal"/vm-live-more.vmdk distLLC_build_ubDistBuild:
+	#[[ "$?" != "0" ]] && _messageFAIL
+	_rclone_limited --progress copy "$scriptLocal"/vm-live-more.vmdk.uuid distLLC_build_ubDistBuild:
+	[[ "$?" != "0" ]] && _messagePlain_bad 'bad: fail'
+	#rm -f "$scriptLocal"/vm-live-more.vmdk
+}
+
+
 
 
 _refresh_anchors() {
