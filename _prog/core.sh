@@ -139,6 +139,7 @@ _create_ubDistBuild-create() {
 	_messageNormal 'os: globalVirtFS: debootstrap'
 	
 	! "$scriptAbsoluteLocation" _openImage && _messagePlain_bad 'fail: _openImage' && _messageFAIL
+	local imagedev
 	imagedev=$(cat "$scriptLocal"/imagedev)
 	
 	
@@ -198,6 +199,7 @@ Relogin=true
 	_messageNormal 'chroot: config'
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	#local imagedev
 	imagedev=$(cat "$scriptLocal"/imagedev)
 	
 	
@@ -536,6 +538,7 @@ _createVMimage() {
 	
 	mkdir -p "$globalVirtFS"
 	"$scriptAbsoluteLocation" _checkForMounts "$globalVirtFS" && _messagePlain_bad 'bad: mounted: globalVirtFS' && _messageFAIL && _stop 1
+	#local imagedev
 	imagedev=$(cat "$scriptLocal"/imagedev)
 	
 	local imagepart
@@ -645,6 +648,8 @@ _createVMbootloader-bios() {
 	_messageNormal '##### _createVMbootloader-bios'
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	local imagedev
+	imagedev=$(cat "$scriptLocal"/imagedev)
 	
 	_createVMfstab
 	
@@ -680,6 +685,8 @@ _createVMbootloader-efi() {
 	_messageNormal '##### _createVMbootloader-efi'
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	local imagedev
+	imagedev=$(cat "$scriptLocal"/imagedev)
 	
 	_createVMfstab
 	
@@ -724,6 +731,12 @@ _createVMbootloader-efi() {
 
 _createVMfstab() {
 	_messageNormal 'os: globalVirtFS: write: fs: _createVMfstab'
+	
+	
+	local imagedev
+	imagedev=$(cat "$scriptLocal"/imagedev)
+	
+	[[ ! -e "$imagedev" ]] && _messageFAIL
 	
 	sudo -n mkdir -p "$globalVirtFS"/media/bootdisc
 	sudo -n chmod 755 "$globalVirtFS"/media/bootdisc
