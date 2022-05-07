@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2386389926'
+export ub_setScriptChecksum_contents='2398008833'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -39961,11 +39961,13 @@ _convert() {
 	
 	
 	_messageNormal '_upload_convert: vm.vdi'
-	_vm_convert_vmdk
+	_vm_convert_vdi
+	[[ ! -e "$scriptLocal"/vm.vdi ]] && _messageFAIL
 	
 	
 	_messageNormal '_upload_convert: vm.vmdk'
 	_vm_convert_vmdk
+	[[ ! -e "$scriptLocal"/vm.vmdk ]] && _messageFAIL
 	
 	
 	
@@ -40022,6 +40024,7 @@ _upload_convert() {
 	
 	_messageNormal '_upload_convert: vm.vdi'
 	_vm_convert_vdi
+	[[ ! -e "$scriptLocal"/vm.vdi ]] && _messageFAIL
 	_rclone_limited --progress copy "$scriptLocal"/vm.vmdk distLLC_build_ubDistBuild:
 	[[ "$?" != "0" ]] && _messageFAIL
 	_rclone_limited --progress copy "$scriptLocal"/vm.vmdk.uuid distLLC_build_ubDistBuild:
@@ -40031,6 +40034,7 @@ _upload_convert() {
 	
 	_messageNormal '_upload_convert: vm.vmdk'
 	_vm_convert_vmdk
+	[[ ! -e "$scriptLocal"/vm.vmdk ]] && _messageFAIL
 	_rclone_limited --progress copy "$scriptLocal"/vm.vmdk distLLC_build_ubDistBuild:
 	[[ "$?" != "0" ]] && _messageFAIL
 	_rclone_limited --progress copy "$scriptLocal"/vm.vmdk.uuid distLLC_build_ubDistBuild:

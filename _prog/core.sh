@@ -1173,11 +1173,13 @@ _convert() {
 	
 	
 	_messageNormal '_upload_convert: vm.vdi'
-	_vm_convert_vmdk
+	_vm_convert_vdi
+	[[ ! -e "$scriptLocal"/vm.vdi ]] && _messageFAIL
 	
 	
 	_messageNormal '_upload_convert: vm.vmdk'
 	_vm_convert_vmdk
+	[[ ! -e "$scriptLocal"/vm.vmdk ]] && _messageFAIL
 	
 	
 	
@@ -1234,6 +1236,7 @@ _upload_convert() {
 	
 	_messageNormal '_upload_convert: vm.vdi'
 	_vm_convert_vdi
+	[[ ! -e "$scriptLocal"/vm.vdi ]] && _messageFAIL
 	_rclone_limited --progress copy "$scriptLocal"/vm.vmdk distLLC_build_ubDistBuild:
 	[[ "$?" != "0" ]] && _messageFAIL
 	_rclone_limited --progress copy "$scriptLocal"/vm.vmdk.uuid distLLC_build_ubDistBuild:
@@ -1243,6 +1246,7 @@ _upload_convert() {
 	
 	_messageNormal '_upload_convert: vm.vmdk'
 	_vm_convert_vmdk
+	[[ ! -e "$scriptLocal"/vm.vmdk ]] && _messageFAIL
 	_rclone_limited --progress copy "$scriptLocal"/vm.vmdk distLLC_build_ubDistBuild:
 	[[ "$?" != "0" ]] && _messageFAIL
 	_rclone_limited --progress copy "$scriptLocal"/vm.vmdk.uuid distLLC_build_ubDistBuild:
