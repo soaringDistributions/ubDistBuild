@@ -1233,7 +1233,7 @@ _upload_convert() {
 	
 	
 	_messageNormal '_upload_convert: vm.vdi'
-	_vm_convert_vmdk
+	_vm_convert_vdi
 	_rclone_limited --progress copy "$scriptLocal"/vm.vmdk distLLC_build_ubDistBuild:
 	[[ "$?" != "0" ]] && _messageFAIL
 	_rclone_limited --progress copy "$scriptLocal"/vm.vmdk.uuid distLLC_build_ubDistBuild:
