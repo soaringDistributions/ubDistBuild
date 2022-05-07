@@ -600,23 +600,24 @@ _convertVMimage_sequence() {
 	
 	
 	_messagePlain_nominal '_convertVMimage_sequence: copy: out'
-	! "$scriptAbsoluteLocation" _openImage && _messagePlain_bad 'fail: _openImage' && _messageFAIL
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
 	sudo -n rsync -ax "$globalVirtFS"/. "$safeTmp"/rootfs/.
 	
-	! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
 	
 	rm -f "$scriptLocal"/vm.img
 	_createVMimage
+	export ubVirtImage_doNotOverride="true"
 	
 	
 	_messagePlain_nominal '_convertVMimage_sequence: copy: in'
-	! "$scriptAbsoluteLocation" _openImage && _messagePlain_bad 'fail: _openImage' && _messageFAIL
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
 	sudo -n rsync -ax "$safeTmp"/rootfs/. "$globalVirtFS"/.
 	
-	! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
 	
 	
