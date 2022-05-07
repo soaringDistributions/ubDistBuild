@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='581109876'
+export ub_setScriptChecksum_contents='1711239879'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -38337,7 +38337,7 @@ _createVMbootloader-bios() {
 	_createVMfstab
 	
 	
-	_messagePlain_nominal 'chroot: grub-install: efi'
+	_messagePlain_nominal 'chroot: grub-install: bios'
 	
 	# WARNING: Apparently, any use of BIOS bootloader either needs at least a 'BIOS boot partition' to share with EFI, or needs a dedicated '/boot' for 'btrfs' compression.
 	# https://bbs.archlinux.org/viewtopic.php?id=251059
@@ -38349,7 +38349,7 @@ _createVMbootloader-bios() {
 	
 	
 	_messagePlain_probe_cmd _chroot grub-install --modules=part_msdos --target=i386-pc "$imagedev"
-	_messagePlain_probe_cmd _chroot grub-install --modules=part_msdos --target=i386-pc "$imagedev""$ubVirtImageEFI"
+	_messagePlain_probe_cmd _chroot grub-install --force --modules=part_msdos --target=i386-pc "$imagedev""$ubVirtImageEFI"
 	
 	
 	_messagePlain_nominal 'chroot: update-grub'

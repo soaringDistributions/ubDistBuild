@@ -697,7 +697,7 @@ _createVMbootloader-bios() {
 	_createVMfstab
 	
 	
-	_messagePlain_nominal 'chroot: grub-install: efi'
+	_messagePlain_nominal 'chroot: grub-install: bios'
 	
 	# WARNING: Apparently, any use of BIOS bootloader either needs at least a 'BIOS boot partition' to share with EFI, or needs a dedicated '/boot' for 'btrfs' compression.
 	# https://bbs.archlinux.org/viewtopic.php?id=251059
@@ -709,7 +709,7 @@ _createVMbootloader-bios() {
 	
 	
 	_messagePlain_probe_cmd _chroot grub-install --modules=part_msdos --target=i386-pc "$imagedev"
-	_messagePlain_probe_cmd _chroot grub-install --modules=part_msdos --target=i386-pc "$imagedev""$ubVirtImageEFI"
+	_messagePlain_probe_cmd _chroot grub-install --force --modules=part_msdos --target=i386-pc "$imagedev""$ubVirtImageEFI"
 	
 	
 	_messagePlain_nominal 'chroot: update-grub'
