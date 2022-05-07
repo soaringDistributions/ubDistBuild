@@ -617,6 +617,8 @@ _convertVMimage_sequence() {
 	
 	sudo -n rsync -ax "$globalVirtFS"/. "$safeTmp"/rootfs/.
 	
+	sudo -n umount "$globalVirtFS"/boot/efi > /dev/null 2>&1
+	sudo -n umount "$globalVirtFS"/boot > /dev/null 2>&1
 	! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
 	
 	
@@ -641,6 +643,8 @@ _convertVMimage_sequence() {
 	
 	sudo -n rsync -ax "$safeTmp"/rootfs/. "$globalVirtFS"/.
 	
+	sudo -n umount "$globalVirtFS"/boot/efi > /dev/null 2>&1
+	sudo -n umount "$globalVirtFS"/boot > /dev/null 2>&1
 	! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
 	
 	
