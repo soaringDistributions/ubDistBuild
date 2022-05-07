@@ -604,10 +604,16 @@ _convertVMimage_sequence() {
 	_messagePlain_nominal '_convertVMimage_sequence: copy: out'
 	! "$scriptAbsoluteLocation" _openImage && _messagePlain_bad 'fail: _openImage' && _messageFAIL
 	imagedev=$(cat "$scriptLocal"/imagedev)
-	sudo -n mkdir -p "$globalVirtFS"/boot
-	sudo -n mount "$imagedev""$ubVirtImageBoot" "$globalVirtFS"/boot
-	sudo -n mkdir -p "$globalVirtFS"/boot/efi
-	sudo -n mount "$imagedev""$ubVirtImageEFI" "$globalVirtFS"/boot/efi
+	if [[ "$ubVirtImageBoot" != "" ]]
+	then
+		sudo -n mkdir -p "$globalVirtFS"/boot
+		sudo -n mount "$imagedev""$ubVirtImageBoot" "$globalVirtFS"/boot
+	fi
+	if [[ "$ubVirtImageEFI" != "" ]]
+	then
+		sudo -n mkdir -p "$globalVirtFS"/boot/efi
+		sudo -n mount "$imagedev""$ubVirtImageEFI" "$globalVirtFS"/boot/efi
+	fi
 	
 	sudo -n rsync -ax "$globalVirtFS"/. "$safeTmp"/rootfs/.
 	
@@ -622,10 +628,16 @@ _convertVMimage_sequence() {
 	_messagePlain_nominal '_convertVMimage_sequence: copy: in'
 	! "$scriptAbsoluteLocation" _openImage && _messagePlain_bad 'fail: _openImage' && _messageFAIL
 	imagedev=$(cat "$scriptLocal"/imagedev)
-	sudo -n mkdir -p "$globalVirtFS"/boot
-	sudo -n mount "$imagedev""$ubVirtImageBoot" "$globalVirtFS"/boot
-	sudo -n mkdir -p "$globalVirtFS"/boot/efi
-	sudo -n mount "$imagedev""$ubVirtImageEFI" "$globalVirtFS"/boot/efi
+	if [[ "$ubVirtImageBoot" != "" ]]
+	then
+		sudo -n mkdir -p "$globalVirtFS"/boot
+		sudo -n mount "$imagedev""$ubVirtImageBoot" "$globalVirtFS"/boot
+	fi
+	if [[ "$ubVirtImageEFI" != "" ]]
+	then
+		sudo -n mkdir -p "$globalVirtFS"/boot/efi
+		sudo -n mount "$imagedev""$ubVirtImageEFI" "$globalVirtFS"/boot/efi
+	fi
 	
 	sudo -n rsync -ax "$safeTmp"/rootfs/. "$globalVirtFS"/.
 	
