@@ -649,6 +649,7 @@ _convertVMimage_sequence() {
 	
 	
 	
+	_createVMbootloader-bios
 	_createVMbootloader-efi
 	
 	
