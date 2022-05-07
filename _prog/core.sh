@@ -586,6 +586,8 @@ _convertVMimage_sequence() {
 	_start
 	mkdir -p "$safeTmp"/rootfs
 	
+	local imagedev
+	
 	
 	# ATTENTION: Override if necessary (ie. with 'ops.sh' from an existing image).
 	export ubVirtImage_doNotOverride="true"
@@ -601,10 +603,11 @@ _convertVMimage_sequence() {
 	
 	_messagePlain_nominal '_convertVMimage_sequence: copy: out'
 	! "$scriptAbsoluteLocation" _openImage && _messagePlain_bad 'fail: _openImage' && _messageFAIL
+	imagedev=$(cat "$scriptLocal"/imagedev)
 	sudo -n mkdir -p "$globalVirtFS"/boot
-	sudo -n mount "$current_imagedev""$ubVirtImageBoot" "$globalVirtFS"/boot
+	sudo -n mount "$imagedev""$ubVirtImageBoot" "$globalVirtFS"/boot
 	sudo -n mkdir -p "$globalVirtFS"/boot/efi
-	sudo -n mount "$current_imagedev""$ubVirtImageEFI" "$globalVirtFS"/boot/efi
+	sudo -n mount "$imagedev""$ubVirtImageEFI" "$globalVirtFS"/boot/efi
 	
 	sudo -n rsync -ax "$globalVirtFS"/. "$safeTmp"/rootfs/.
 	
@@ -618,10 +621,11 @@ _convertVMimage_sequence() {
 	
 	_messagePlain_nominal '_convertVMimage_sequence: copy: in'
 	! "$scriptAbsoluteLocation" _openImage && _messagePlain_bad 'fail: _openImage' && _messageFAIL
+	imagedev=$(cat "$scriptLocal"/imagedev)
 	sudo -n mkdir -p "$globalVirtFS"/boot
-	sudo -n mount "$current_imagedev""$ubVirtImageBoot" "$globalVirtFS"/boot
+	sudo -n mount "$imagedev""$ubVirtImageBoot" "$globalVirtFS"/boot
 	sudo -n mkdir -p "$globalVirtFS"/boot/efi
-	sudo -n mount "$current_imagedev""$ubVirtImageEFI" "$globalVirtFS"/boot/efi
+	sudo -n mount "$imagedev""$ubVirtImageEFI" "$globalVirtFS"/boot/efi
 	
 	sudo -n rsync -ax "$safeTmp"/rootfs/. "$globalVirtFS"/.
 	
