@@ -633,7 +633,7 @@ _convertVMimage_sequence() {
 		return 1
 	fi
 	#sudo -n rm -rf "$safeTmp"/rootfs
-	sudo -n chown "$USER":"$USER" "$safeTmp"/rootfs
+	sudo -n chown -R "$USER":"$USER" "$safeTmp"/rootfs
 	_safeRMR "$safeTmp"/rootfs
 	_stop
 }
