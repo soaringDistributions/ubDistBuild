@@ -551,6 +551,12 @@ _createVMimage() {
 	# https://unix.stackexchange.com/questions/394973/why-would-i-want-to-disable-copy-on-write-while-creating-qemu-images
 	# https://gist.github.com/niflostancu/03810a8167edc533b1712551d4f90a14
 	
+	# WARNING: Compression/btrfs of boot partition may cause BIOS compatibility issues.
+	imagepart="$imagedev""$ubVirtImageBoot"
+	loopdevfs=$(sudo -n blkid -s TYPE -o value "$imagepart" | tr -dc 'a-zA-Z0-9')
+	[[ "$loopdevfs" == "ext4" ]] && _stop 1
+	sudo -n mkfs.ext4 -e remount-ro -E lazy_itable_init=0,lazy_journal_init=0 -m 0 "$imagepart" || _stop 1
+	#sudo -n mkfs.btrfs --checksum xxhash -M -d single "$imagepart" || _stop 1
 	
 	imagepart="$imagedev""$ubVirtImageEFI"
 	loopdevfs=$(sudo -n blkid -s TYPE -o value "$imagepart" | tr -dc 'a-zA-Z0-9')
