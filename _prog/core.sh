@@ -600,11 +600,15 @@ _convertVMimage_sequence() {
 	
 	
 	_messagePlain_nominal '_convertVMimage_sequence: copy: out'
-	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	! "$scriptAbsoluteLocation" _openImage && _messagePlain_bad 'fail: _openImage' && _messageFAIL
+	sudo -n mkdir -p "$globalVirtFS"/boot
+	sudo -n mount "$current_imagedev""$ubVirtImageBoot" "$globalVirtFS"/boot
+	sudo -n mkdir -p "$globalVirtFS"/boot/efi
+	sudo -n mount "$current_imagedev""$ubVirtImageEFI" "$globalVirtFS"/boot/efi
 	
 	sudo -n rsync -ax "$globalVirtFS"/. "$safeTmp"/rootfs/.
 	
-	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
 	
 	
 	rm -f "$scriptLocal"/vm.img
@@ -613,11 +617,15 @@ _convertVMimage_sequence() {
 	
 	
 	_messagePlain_nominal '_convertVMimage_sequence: copy: in'
-	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	! "$scriptAbsoluteLocation" _openImage && _messagePlain_bad 'fail: _openImage' && _messageFAIL
+	sudo -n mkdir -p "$globalVirtFS"/boot
+	sudo -n mount "$current_imagedev""$ubVirtImageBoot" "$globalVirtFS"/boot
+	sudo -n mkdir -p "$globalVirtFS"/boot/efi
+	sudo -n mount "$current_imagedev""$ubVirtImageEFI" "$globalVirtFS"/boot/efi
 	
 	sudo -n rsync -ax "$safeTmp"/rootfs/. "$globalVirtFS"/.
 	
-	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
 	
 	
 	
