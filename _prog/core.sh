@@ -420,7 +420,8 @@ CZXWXcRMTo8EmM8i4d
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
 	
-	# Install EFI bootloader by default. May be rewritten later if appropriate.
+	# Install Hybrid/UEFI bootloader by default. May be rewritten later if appropriate.
+	_createVMbootloader-bios
 	_createVMbootloader-efi
 	
 	
@@ -505,9 +506,9 @@ _createVMimage() {
 	# EFI
 	#sudo -n parted --script "$vmImageFile" 'mkpart EFI fat32 '"2"'MiB '"514"'MiB'
 	sudo -n parted --script "$vmImageFile" 'mkpart EFI fat32 '"2"'MiB '"74"'MiB'
-	sudo -n parted --script "$vmImageFile" 'set 1 msftdata on'
-	sudo -n parted --script "$vmImageFile" 'set 1 boot on'
-	sudo -n parted --script "$vmImageFile" 'set 1 esp on'
+	sudo -n parted --script "$vmImageFile" 'set 2 msftdata on'
+	sudo -n parted --script "$vmImageFile" 'set 2 boot on'
+	sudo -n parted --script "$vmImageFile" 'set 2 esp on'
 	
 	
 	# Swap

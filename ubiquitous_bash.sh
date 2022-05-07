@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1516712187'
+export ub_setScriptChecksum_contents='581109876'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -38060,7 +38060,8 @@ CZXWXcRMTo8EmM8i4d
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
 	
-	# Install EFI bootloader by default. May be rewritten later if appropriate.
+	# Install Hybrid/UEFI bootloader by default. May be rewritten later if appropriate.
+	_createVMbootloader-bios
 	_createVMbootloader-efi
 	
 	
@@ -38145,9 +38146,9 @@ _createVMimage() {
 	# EFI
 	#sudo -n parted --script "$vmImageFile" 'mkpart EFI fat32 '"2"'MiB '"514"'MiB'
 	sudo -n parted --script "$vmImageFile" 'mkpart EFI fat32 '"2"'MiB '"74"'MiB'
-	sudo -n parted --script "$vmImageFile" 'set 1 msftdata on'
-	sudo -n parted --script "$vmImageFile" 'set 1 boot on'
-	sudo -n parted --script "$vmImageFile" 'set 1 esp on'
+	sudo -n parted --script "$vmImageFile" 'set 2 msftdata on'
+	sudo -n parted --script "$vmImageFile" 'set 2 boot on'
+	sudo -n parted --script "$vmImageFile" 'set 2 esp on'
 	
 	
 	# Swap
