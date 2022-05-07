@@ -610,7 +610,7 @@ _convertVMimage_sequence() {
 	
 	_messagePlain_nominal '_convertVMimage_sequence: stop'
 	export safeToDeleteGit="true"
-	_safeRMR "$safeTmp"/rootfs/.
+	sudo -n "$scriptAbsoluteLocation" _safeRMR "$safeTmp"/rootfs
 	_stop
 }
 _convertVMimage() {
@@ -638,6 +638,8 @@ _createVMbootloader-bios() {
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
+	_createVMfstab
+	
 	
 	_messagePlain_nominal 'chroot: grub-install: efi'
 	
@@ -661,7 +663,7 @@ _createVMbootloader-bios() {
 	_chroot update-initramfs -u
 	
 	
-	_createVMfstab
+	
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 }
@@ -670,6 +672,8 @@ _createVMbootloader-efi() {
 	_messageNormal '##### _createVMbootloader-efi'
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	
+	_createVMfstab
 	
 	
 	_messagePlain_nominal 'chroot: grub-install: efi'
@@ -698,7 +702,7 @@ _createVMbootloader-efi() {
 	_chroot update-initramfs -u
 	
 	
-	_createVMfstab
+	
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 }
