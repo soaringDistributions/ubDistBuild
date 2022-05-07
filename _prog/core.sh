@@ -479,7 +479,8 @@ _createVMimage() {
 	#  'at the first 2GB of the disk with toggle bios_grub used for booting'
 	
 	# CAUTION: *As DEFAULT*, must match other definitions (eg. _set_ubDistBuild , 'core.sh' , 'ops.sh' , ubiquitous_bash , etc) .
-	# NTFS and Recovery partitions should not have set values in any other functions. Never used - documentation only.
+	# NTFS, Recovery, partitions should not have set values in any other functions. Never used - documentation only.
+	# Swap, partition should only have set values in this and fstab functions. Never used elsewhere.
 	# x64-bios , raspbian , x64-efi
 	export ubVirtImage_doNotOverride="true"
 	export ubVirtPlatformOverride='x64-efi'
@@ -610,6 +611,10 @@ _convertVMimage_sequence() {
 	sudo -n rsync -ax "$safeTmp"/rootfs/. "$globalVirtFS"/.
 	
 	! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
+	
+	
+	
+	_createVMbootloader-efi
 	
 	
 	_messagePlain_nominal '_convertVMimage_sequence: stop'
@@ -756,16 +761,23 @@ _createVMfstab() {
 	
 	# initramfs-update, from chroot, may not enable hibernation/resume... may be device specific
 	
-	local ubVirtImageSwap_UUID
-	ubVirtImageSwap_UUID=$(sudo -n blkid -s UUID -o value "$imagedev""$ubVirtImageSwap" | tr -dc 'a-zA-Z0-9\-')
+	if [[ "$ubVirtImageSwap" != "" ]]
+	then
+		local ubVirtImageSwap_UUID
+		ubVirtImageSwap_UUID=$(sudo -n blkid -s UUID -o value "$imagedev""$ubVirtImageSwap" | tr -dc 'a-zA-Z0-9\-')
+	fi
 	
 	echo '#UUID='"$ubVirtImageSwap_UUID"' swap swap defaults 0 0' | sudo -n tee -a "$globalVirtFS"/etc/fstab
 	
 	
-	local ubVirtImageEFI_UUID
-	ubVirtImageEFI_UUID=$(sudo -n blkid -s UUID -o value "$imagedev""$ubVirtImageEFI" | tr -dc 'a-zA-Z0-9\-')
+	if [[ "$ubVirtImageEFI" != "" ]]
+	then
+		local ubVirtImageEFI_UUID
+		ubVirtImageEFI_UUID=$(sudo -n blkid -s UUID -o value "$imagedev""$ubVirtImageEFI" | tr -dc 'a-zA-Z0-9\-')
+	fi
 	
 	echo 'UUID='"$ubVirtImageEFI_UUID"' /boot/efi vfat umask=0077 0 1' | sudo -n tee -a "$globalVirtFS"/etc/fstab
+	
 	
 	if ! sudo -n cat "$globalVirtFS"/etc/fstab | grep 'uk4uPhB663kVcygT0q' | grep 'bootdisc' > /dev/null 2>&1
 	then

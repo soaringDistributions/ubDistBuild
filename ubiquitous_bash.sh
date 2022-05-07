@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='110947883'
+export ub_setScriptChecksum_contents='3796865189'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -13362,8 +13362,21 @@ _determine_rawFileRootPartition() {
 	#Platform defaults.
 	export ubVirtImageEFI=""
 	export ubVirtImagePartition=""
+	
 	[[ "$ubVirtPlatform" == "x64-bios" ]] && export ubVirtImagePartition=p1
-	[[ "$ubVirtPlatform" == "x64-efi" ]] && export ubVirtImagePartition=p3 && export ubVirtImageEFI=p2
+	
+	if [[ "$ubVirtPlatform" == "x64-efi" ]]
+	then
+		#export ubVirtImagePartition=p3 && export ubVirtImageEFI=p2
+		export ubVirtImageBIOS=p1
+		export ubVirtImageEFI=p2
+		#export ubVirtImageNTFS=
+		#export ubVirtImageRecovery=
+		#export ubVirtImageSwap=p3
+		export ubVirtImageBoot=p4
+		export ubVirtImagePartition=p5
+	fi
+	
 	[[ "$ubVirtPlatform" == "raspbian" ]] && export ubVirtImagePartition=p2
 	
 	
@@ -14835,6 +14848,28 @@ _mountChRoot_image_x64_efi() {
 	loopdevfs=$(sudo -n blkid -s TYPE -o value "$current_imagedev""$ubVirtImageEFI" | tr -dc 'a-zA-Z0-9')
 	
 	! [[ "$loopdevfs" == "vfat" ]] && _stop 1
+	
+	
+	
+	
+	
+	#export ubVirtPlatformOverride='x64-efi'
+	#export ubVirtImageBIOS=p1
+	#export ubVirtImageEFI=p2
+	#export ubVirtImageNTFS=
+	#export ubVirtImageRecovery=
+	#export ubVirtImageSwap=p3
+	#export ubVirtImageBoot=p4
+	#export ubVirtImagePartition=p5
+	
+	if [[ "$ubVirtImageBoot" != "" ]]
+	then
+		sudo -n mkdir -p "$globalVirtFS"/boot
+		if ! sudo -n mount "$current_imagedev""$ubVirtImageBoot" "$globalVirtFS"/boot/efi
+		then
+			_stop 1
+		fi
+	fi
 	
 	
 	sudo -n mkdir -p "$globalVirtFS"/boot/efi
@@ -38064,7 +38099,8 @@ _createVMimage() {
 	#  'at the first 2GB of the disk with toggle bios_grub used for booting'
 	
 	# CAUTION: *As DEFAULT*, must match other definitions (eg. _set_ubDistBuild , 'core.sh' , 'ops.sh' , ubiquitous_bash , etc) .
-	# NTFS and Recovery partitions should not have set values in any other functions. Never used - documentation only.
+	# NTFS, Recovery, partitions should not have set values in any other functions. Never used - documentation only.
+	# Swap, partition should only have set values in this and fstab functions. Never used elsewhere.
 	# x64-bios , raspbian , x64-efi
 	export ubVirtImage_doNotOverride="true"
 	export ubVirtPlatformOverride='x64-efi'
@@ -38195,6 +38231,10 @@ _convertVMimage_sequence() {
 	sudo -n rsync -ax "$safeTmp"/rootfs/. "$globalVirtFS"/.
 	
 	! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
+	
+	
+	
+	_createVMbootloader-efi
 	
 	
 	_messagePlain_nominal '_convertVMimage_sequence: stop'
@@ -38341,16 +38381,23 @@ _createVMfstab() {
 	
 	# initramfs-update, from chroot, may not enable hibernation/resume... may be device specific
 	
-	local ubVirtImageSwap_UUID
-	ubVirtImageSwap_UUID=$(sudo -n blkid -s UUID -o value "$imagedev""$ubVirtImageSwap" | tr -dc 'a-zA-Z0-9\-')
+	if [[ "$ubVirtImageSwap" != "" ]]
+	then
+		local ubVirtImageSwap_UUID
+		ubVirtImageSwap_UUID=$(sudo -n blkid -s UUID -o value "$imagedev""$ubVirtImageSwap" | tr -dc 'a-zA-Z0-9\-')
+	fi
 	
 	echo '#UUID='"$ubVirtImageSwap_UUID"' swap swap defaults 0 0' | sudo -n tee -a "$globalVirtFS"/etc/fstab
 	
 	
-	local ubVirtImageEFI_UUID
-	ubVirtImageEFI_UUID=$(sudo -n blkid -s UUID -o value "$imagedev""$ubVirtImageEFI" | tr -dc 'a-zA-Z0-9\-')
+	if [[ "$ubVirtImageEFI" != "" ]]
+	then
+		local ubVirtImageEFI_UUID
+		ubVirtImageEFI_UUID=$(sudo -n blkid -s UUID -o value "$imagedev""$ubVirtImageEFI" | tr -dc 'a-zA-Z0-9\-')
+	fi
 	
 	echo 'UUID='"$ubVirtImageEFI_UUID"' /boot/efi vfat umask=0077 0 1' | sudo -n tee -a "$globalVirtFS"/etc/fstab
+	
 	
 	if ! sudo -n cat "$globalVirtFS"/etc/fstab | grep 'uk4uPhB663kVcygT0q' | grep 'bootdisc' > /dev/null 2>&1
 	then
