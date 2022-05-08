@@ -1155,7 +1155,7 @@ _create_kde() {
 	
 	rm -f "$scriptLocal"/package_kde.tar.xz > /dev/null 2>&1
 	#-T0
-	env XZ_OPT="-e9" tar --exclude='./.config/chromium' -cJvf "$scriptLocal"/package_kde.tar.xz ./.config ./.kde ./.local ./.license_package_kde
+	env XZ_OPT="-e9" tar --exclude='./.config/chromium' --exclude='./.config/autostart/startup.desktop' -cJvf "$scriptLocal"/package_kde.tar.xz ./.config ./.kde ./.local ./.license_package_kde
 	
 	rm -f "$HOME"/.license_package_kde/license.txt
 	rm -f "$HOME"/.license_package_kde/CC0_license.txt

@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='371650474'
+export ub_setScriptChecksum_contents='1438497862'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -39977,7 +39977,7 @@ _create_kde() {
 	
 	rm -f "$scriptLocal"/package_kde.tar.xz > /dev/null 2>&1
 	#-T0
-	env XZ_OPT="-e9" tar --exclude='./.config/chromium' -cJvf "$scriptLocal"/package_kde.tar.xz ./.config ./.kde ./.local ./.license_package_kde
+	env XZ_OPT="-e9" tar --exclude='./.config/chromium' --exclude='./.config/autostart/startup.desktop' -cJvf "$scriptLocal"/package_kde.tar.xz ./.config ./.kde ./.local ./.license_package_kde
 	
 	rm -f "$HOME"/.license_package_kde/license.txt
 	rm -f "$HOME"/.license_package_kde/CC0_license.txt
