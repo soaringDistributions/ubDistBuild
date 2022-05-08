@@ -683,7 +683,7 @@ _create_ubDistBuild-bootOnce() {
 	##echo '@reboot cd '/home/user'/ ; '/home/user'/rottenScript.sh _run' | sudo -n -u user bash -c "crontab -"
 	
 	##sudo -n mkdir -p "$globalVirtFS"/home/user/.config/autostart
-	##_here_bootdisc_statup_xdg | sudo -n tee "$globalVirtFS"/home/user/.config/autostart/startup.desktop > /dev/null
+	##_here_bootdisc_startup_xdg | sudo -n tee "$globalVirtFS"/home/user/.config/autostart/startup.desktop > /dev/null
 	##_chroot chown -R user:user /home/user/.config
 	##_chroot chmod 555 /home/user/.config/autostart/startup.desktop
 	

@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1629204980'
+export ub_setScriptChecksum_contents='2957780099'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -14025,7 +14025,7 @@ _createFS() {
 
 
 
-_here_bootdisc_statup_xdg() {
+_here_bootdisc_startup_xdg() {
 cat << 'CZXWXcRMTo8EmM8i4d'
 [Desktop Entry]
 Comment=
@@ -14340,7 +14340,7 @@ _createHTG_UNIX() {
 	#"$sharedHostProjectDir"
 	#"${processedArgs[@]}"
 	
-	_here_bootdisc_statup_xdg >> "$hostToGuestFiles"/startup.desktop
+	_here_bootdisc_startup_xdg >> "$hostToGuestFiles"/startup.desktop
 	
 	_here_bootdisc_rootnix >> "$hostToGuestFiles"/rootnix.sh
 	
@@ -39480,7 +39480,7 @@ _create_ubDistBuild-bootOnce() {
 	##echo '@reboot cd '/home/user'/ ; '/home/user'/rottenScript.sh _run' | sudo -n -u user bash -c "crontab -"
 	
 	##sudo -n mkdir -p "$globalVirtFS"/home/user/.config/autostart
-	##_here_bootdisc_statup_xdg | sudo -n tee "$globalVirtFS"/home/user/.config/autostart/startup.desktop > /dev/null
+	##_here_bootdisc_startup_xdg | sudo -n tee "$globalVirtFS"/home/user/.config/autostart/startup.desktop > /dev/null
 	##_chroot chown -R user:user /home/user/.config
 	##_chroot chmod 555 /home/user/.config/autostart/startup.desktop
 	
