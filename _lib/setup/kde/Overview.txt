@@ -168,6 +168,9 @@ One size fits all, mostly, defaults. Customization (eg. left-handedness, large f
 
 
 
+*) Window Management > Window Behavior > Window Actions > Modifier key: Alt
+
+
 
 *) Konsole > Edit Current Profile
  *) Profile name  Default (set profile name, do not create new profile)
