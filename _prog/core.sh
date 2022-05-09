@@ -189,7 +189,7 @@ Relogin=true
 	#ExecStart=-/sbin/agetty -o '-p -- \\u' --noclear %I $TERM
 	#ExecStart=-/sbin/agetty --autologin user --noclear %I 38400 linux
 	sudo -n mkdir -p "$globalVirtFS"/etc/systemd/system/getty@tty1.service.d
-	cat << 'CZXWXcRMTo8EmM8i4d' | sudo -n tee /etc/systemd/system/getty@tty1.service.d/override.conf
+	cat << 'CZXWXcRMTo8EmM8i4d' | sudo -n tee "$globalVirtFS"/etc/systemd/system/getty@tty1.service.d/override.conf
 	echo "[Service]
 Type=simple
 ExecStart=

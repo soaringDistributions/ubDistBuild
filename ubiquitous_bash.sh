@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2055060258'
+export ub_setScriptChecksum_contents='1575681088'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -39011,7 +39011,7 @@ Relogin=true
 	#ExecStart=-/sbin/agetty -o '-p -- \\u' --noclear %I $TERM
 	#ExecStart=-/sbin/agetty --autologin user --noclear %I 38400 linux
 	sudo -n mkdir -p "$globalVirtFS"/etc/systemd/system/getty@tty1.service.d
-	cat << 'CZXWXcRMTo8EmM8i4d' | sudo -n tee /etc/systemd/system/getty@tty1.service.d/override.conf
+	cat << 'CZXWXcRMTo8EmM8i4d' | sudo -n tee "$globalVirtFS"/etc/systemd/system/getty@tty1.service.d/override.conf
 	echo "[Service]
 Type=simple
 ExecStart=
