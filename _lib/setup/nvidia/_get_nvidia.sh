@@ -574,7 +574,18 @@ _install_nvidia() {
 	
 	
 	
-	
+	sudo -n mkdir -p /home/"$custom_user"/.config/autostart
+	[[ "$currentUser" == "" ]] && export currentUser=user
+	echo '
+[Desktop Entry]
+Exec=/usr/bin/nvidia-settings -l
+Type=Application
+' | sudo tee /home/"$custom_user"/.config/autostart/nvidia.desktop > /dev/null
+	sudo -n chown "$custom_user":"$custom_user" /home/"$custom_user"
+	sudo -n chown "$custom_user":"$custom_user" /home/"$custom_user"/.config
+	sudo -n chown "$custom_user":"$custom_user" /home/"$custom_user"/.config/autostart
+	sudo -n chown "$custom_user":"$custom_user" /home/"$custom_user"/.config/autostart/nvidia.desktop
+	sudo -n chmod 555 /home/"$custom_user"/.config/autostart/nvidia.desktop
 	
 	
 	
