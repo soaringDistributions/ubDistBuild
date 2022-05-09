@@ -1223,6 +1223,8 @@ _convert() {
 	_live_more_convert_vmdk
 	
 	[[ ! -e "$scriptLocal"/vm-live-more.vmdk ]] && _messageFAIL
+	
+	return 0
 }
 
 
@@ -1312,6 +1314,8 @@ _upload_convert() {
 	_rclone_limited --progress copy "$scriptLocal"/vm-live-more.vmdk.uuid distLLC_build_ubDistBuild:
 	[[ "$?" != "0" ]] && _messagePlain_bad 'bad: fail'
 	#rm -f "$scriptLocal"/vm-live-more.vmdk
+	
+	return 0
 }
 
 

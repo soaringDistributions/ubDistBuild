@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1438497862'
+export ub_setScriptChecksum_contents='1179949158'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -18898,7 +18898,7 @@ _visualPrompt() {
 	
 	
 	export currentChroot=
-	[[ "$chrootName" != "" ]] && export currentChRoot="$chrootName"
+	[[ "$chrootName" != "" ]] && export currentChroot="$chrootName"
 	
 	
 	#+%H:%M:%S\ %Y-%m-%d\ Q%q
@@ -40045,6 +40045,8 @@ _convert() {
 	_live_more_convert_vmdk
 	
 	[[ ! -e "$scriptLocal"/vm-live-more.vmdk ]] && _messageFAIL
+	
+	return 0
 }
 
 
@@ -40134,6 +40136,8 @@ _upload_convert() {
 	_rclone_limited --progress copy "$scriptLocal"/vm-live-more.vmdk.uuid distLLC_build_ubDistBuild:
 	[[ "$?" != "0" ]] && _messagePlain_bad 'bad: fail'
 	#rm -f "$scriptLocal"/vm-live-more.vmdk
+	
+	return 0
 }
 
 
