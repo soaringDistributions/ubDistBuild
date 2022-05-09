@@ -181,6 +181,22 @@ Relogin=true
 	
 	
 	
+	# https://wiki.gentoo.org/wiki/Automatic_login_to_virtual_console
+	# https://forums.debian.net/viewtopic.php?t=140452
+	# https://forums.debian.net/viewtopic.php?f=16&t=123694
+	# https://man7.org/linux/man-pages/man8/agetty.8.html
+	# https://unix.stackexchange.com/questions/459942/using-systemctl-edit-via-bash-script
+	#ExecStart=-/sbin/agetty -o '-p -- \\u' --noclear %I $TERM
+	#ExecStart=-/sbin/agetty --autologin user --noclear %I 38400 linux
+	sudo -n mkdir -p "$globalVirtFS"/etc/systemd/system/getty@tty1.service.d
+	cat << 'CZXWXcRMTo8EmM8i4d' | sudo -n tee /etc/systemd/system/getty@tty1.service.d/override.conf
+	echo "[Service]
+Type=simple
+ExecStart=
+ExecStart=-/sbin/agetty --autologin user -o '-p -- \\u' --noclear %I $TERM
+CZXWXcRMTo8EmM8i4d
+	
+	
 	
 	sudo -n mkdir -p "$globalVirtFS"/root
 	sudo -n cp -f "$scriptLib"/setup/nvidia/_get_nvidia.sh "$globalVirtFS"/root/
