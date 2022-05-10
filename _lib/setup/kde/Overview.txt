@@ -15,8 +15,8 @@ One size fits all, mostly, defaults. Customization (eg. left-handedness, large f
 *) Visible   Notifications, Audio, Network
 *) Relevant   Media Player
 *) Clipboard   do NOT save
-*) Netspeed Widget   download speed first   0.3s OR 5s   Bits/s   w b/s   r kb/s   y Mb/s   g Gb/s
-*) System Load Viewer   CPU, Memory   Bar   0.2s OR 3s   Set Colors Manually   b User   g IOWait   r Sys   y Nice
+*) Netspeed Widget   download speed first   0.3s OR 5.3s   Bits/s   w b/s   r kb/s   y Mb/s   g Gb/s
+*) System Load Viewer   CPU, Memory   Bar   0.2s OR 3.2s   Set Colors Manually   b User   g IOWait   r Sys   y Nice
 *) Task Manager (NOT Icons-only)   Do not group   Sort Manually   From current screen/desktop/activity
 *) 18 virtual desktops   Show only current screens   Desktop number   (see names elsewhere)
 *) Dolphin File Manager   Firefox/Chromium   KWrite/Kate   Konsole   Spectacle   System Settings   pavucontrol
@@ -181,10 +181,26 @@ One size fits all, mostly, defaults. Customization (eg. left-handedness, large f
 *) KSysGuard   Name   Window Title   TTY   PID   Username   Niceness   CPU % ^   IO Write   IO Read   Upload   Download   Memory   Shared Mem   Relative Start Time   Command
 
 
+
+
+
+*) Xournal
+ *) Use Xinput
+ *) > Pen and Touch
+  *) Eraser Tip
+  *) Pressure sensitivity
+ *) Button 2 Mapping   Hand Tool
+ *) Button 3 Mapping   Eraser
+ *) Pencil Cursor
+ *) > Tools
+  *) Shape Recognizer
+
 -
 
 
 
 
+
+-
 
 

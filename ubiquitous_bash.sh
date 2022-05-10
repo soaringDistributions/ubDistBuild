@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1922717026'
+export ub_setScriptChecksum_contents='475881154'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -39010,13 +39010,26 @@ Relogin=true
 	# https://unix.stackexchange.com/questions/459942/using-systemctl-edit-via-bash-script
 	#ExecStart=-/sbin/agetty -o '-p -- \\u' --noclear %I $TERM
 	#ExecStart=-/sbin/agetty --autologin user --noclear %I 38400 linux
-	sudo -n mkdir -p "$globalVirtFS"/etc/systemd/system/getty@tty1.service.d
-	cat << 'CZXWXcRMTo8EmM8i4d' | sudo -n tee "$globalVirtFS"/etc/systemd/system/getty@tty1.service.d/override.conf
+	_write_autologin_tty() {
+	sudo -n mkdir -p "$globalVirtFS"/etc/systemd/system/getty@tty"$1".service.d
+	cat << 'CZXWXcRMTo8EmM8i4d' | sudo -n tee "$globalVirtFS"/etc/systemd/system/getty@tty"$1".service.d/override.conf
 [Service]
 Type=simple
 ExecStart=
-ExecStart=-/sbin/agetty --autologin user -o '-p -- \\u' --noclear %I $TERM
+ExecStart=-/sbin/agetty --autologin user --noclear %I $TERM
 CZXWXcRMTo8EmM8i4d
+	}
+	_write_autologin_tty 1
+	_write_autologin_tty 2
+	_write_autologin_tty 3
+	_write_autologin_tty 4
+	_write_autologin_tty 5
+	_write_autologin_tty 6
+	_write_autologin_tty 7
+	
+	
+	sudo -n mkdir -p "$globalVirtFS"/etc/sysctl.d
+	echo 'kernel.sysrq=1' | sudo -n tee "$globalVirtFS"/etc/sysctl.d/magicsysrq.conf
 	
 	
 	
@@ -39208,6 +39221,7 @@ CZXWXcRMTo8EmM8i4d
 	_getMost_backend_aptGetInstall locales
 	
 	_messagePlain_nominal 'timedatectl, update-locale, localectl'
+	[[ -e "$globalVirtFS" /usr/share/zoneinfo/America/New_York ]] && _chroot ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime
 	_chroot timedatectl set-timezone US/Eastern
 	_chroot update-locale LANG=en_US.UTF-8 LANGUAGE
 	_chroot localectl set-locale LANG=en_US.UTF-8
@@ -39993,7 +40007,7 @@ _create_kde() {
 	
 	rm -f "$scriptLocal"/package_kde.tar.xz > /dev/null 2>&1
 	#-T0
-	env XZ_OPT="-e9" tar --exclude='./.config/chromium' --exclude='./.config/autostart/startup.desktop' -cJvf "$scriptLocal"/package_kde.tar.xz ./.config ./.kde ./.local ./.license_package_kde
+	env XZ_OPT="-e9" tar --exclude='./.config/chromium' --exclude='./.config/autostart/startup.desktop' -cJvf "$scriptLocal"/package_kde.tar.xz ./.config ./.kde ./.local ./.xournal/config ./.license_package_kde
 	
 	rm -f "$HOME"/.license_package_kde/license.txt
 	rm -f "$HOME"/.license_package_kde/CC0_license.txt
