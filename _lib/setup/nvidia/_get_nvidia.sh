@@ -500,19 +500,19 @@ _detect_installed_nvidia() {
 	# https://askubuntu.com/questions/271613/am-i-using-the-nouveau-driver-or-the-proprietary-nvidia-driver
 	#  'Nvidia's (restricted) module name is nvidia . Not nvidiafb or something similar.'
 	
-	modprobe -l 2>/dev/null | grep -v -i 'nvidiafb' | grep -v -i 'typec' | grep -v -i 'eth' | grep 'nvidia' && return 0
+	modprobe -l 2>/dev/null | grep -v -i 'nvidiafb' | grep -v -i 'typec' | grep -v -i 'eth' | grep 'nvidia' && _stop 0
 	
-	find /lib/modules/`uname -r` -name '*.ko' -type f -printf '%P\n' | grep -v -i 'nvidiafb' | grep -v -i 'typec' | grep -v -i 'eth' | grep 'nvidia' && return 0
+	find /lib/modules/`uname -r` -name '*.ko' -type f -printf '%P\n' | grep -v -i 'nvidiafb' | grep -v -i 'typec' | grep -v -i 'eth' | grep 'nvidia' && _stop 0
 	
-	lsmod | cut -f1 -d\  | grep -v -i 'nvidiafb' | grep 'nvidia' && return 0
+	lsmod | cut -f1 -d\  | grep -v -i 'nvidiafb' | grep 'nvidia' && _stop 0
 	
-	dpkg -l | grep -v -i 'nvidiafb' | grep 'nvidia' && return 0
+	dpkg -l | grep -v -i 'nvidiafb' | grep 'nvidia' && _stop 0
 	
-	lspci -nnk | grep -iA2 vga | grep -v -i 'nvidiafb' | grep 'nvidia' && return 0
+	lspci -nnk | grep -iA2 vga | grep -v -i 'nvidiafb' | grep 'nvidia' && _stop 0
 	
 	
 	_messagePlain_good 'missing: nvidia: driver not installed'
-	_stop 0
+	return 0
 }
 
 
@@ -522,6 +522,8 @@ _detect_nvidia() {
 	#1b:00.0 VGA compatible controller: NVIDIA Corporation GA102 [GeForce RTX 3090] (rev a1) (prog-if 00 [VGA controller])
 	! lspci | grep -i nvidia | grep -i vga && _messagePlain_good 'lspci: missing: nvidia' && _stop 0
 	_messagePlain_warn 'lspci: exists: nvidia'
+	
+	return 0
 }
 
 
