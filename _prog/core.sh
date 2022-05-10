@@ -505,7 +505,7 @@ _create_ubDistBuild-rotten_install() {
 	
 	
 	_chroot apt-get -y clean
-	_chroot sudo apt-get autoremove --purge
+	_chroot sudo -n apt-get autoremove --purge
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0

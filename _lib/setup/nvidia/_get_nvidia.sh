@@ -584,19 +584,24 @@ _install_nvidia() {
 		ls -A -1 -d /usr/src/linux-headers-* | sort -r -V | head -n 12 | sed -s 's/.*linux-headers-//' | while read -r currentLine
 		do
 			_messagePlain_probe nvidia "$currentLine"
-			sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s --log-file-name=/dev/stdout -k "$currentLine" --dkms
+			sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s -k "$currentLine" --dkms
 			[[ "$?" != "0" ]] && currentExitStatus=1
 		done
 	else
 		local currentKernel=$(uname -r)
 		_messagePlain_probe nvidia uname -r "$currentKernel"
-		sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s --log-file-name=/dev/stdout -k "$currentKernel"
+		sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s -k "$currentKernel"
 	fi
 	
 	
+	#sudo -n apt-get -y clean
+	#sudo -n sudo apt-get autoremove --purge
 	
+	
+	# https://unix.stackexchange.com/questions/510757/how-to-automatically-force-full-composition-pipeline-for-nvidia-gpu-driver
 	sudo -n mkdir -p /home/"$custom_user"/.config/autostart
-	[[ "$currentUser" == "" ]] && export currentUser=user
+	[[ "$custom_user" == "" ]] && export custom_user=user
+	#Exec=nvidia-settings --assign CurrentMetaMode="nvidia-auto-select +0+0 { ForceFullCompositionPipeline = On }" ; /usr/bin/nvidia-settings -l
 	echo '
 [Desktop Entry]
 Exec=/usr/bin/nvidia-settings -l
@@ -608,7 +613,13 @@ Type=Application
 	sudo -n chown "$custom_user":"$custom_user" /home/"$custom_user"/.config/autostart/nvidia.desktop
 	sudo -n chmod 555 /home/"$custom_user"/.config/autostart/nvidia.desktop
 	
-	
+	# https://unix.stackexchange.com/questions/510757/how-to-automatically-force-full-composition-pipeline-for-nvidia-gpu-driver
+	#  WARNING: 'Do not have both of the above enabled at the same time.'
+	#  WARNING: 'Be sure to enable triple buffering in nvidia-settings if you enable triple buffering in KWin.'
+	# https://forums.developer.nvidia.com/t/gl-yield-and-performance-issues/27736
+	#  'performance is badly affected by __GL_YIELD=USLEEP'
+	echo "export __GL_YIELD=\"USLEEP\"" > /etc/profile.d/nvidia_kwin.sh
+	#echo "export KWIN_TRIPLE_BUFFER=1" > /etc/profile.d/nvidia_kwin.sh
 	
 	sleep 3
 	systemctl stop gdm3
