@@ -573,6 +573,9 @@ _install_nvidia() {
 	# ' "  -j CONCURRENCY-LEVEL, --concurrency-level=CONCURRENCY-LEVEL" '
 	# 'default' 'number of detected CPUs' 'nvidia-installer' 'default' 'limited to 32'
 	
+	# ' --log-file-name=/dev/stdout '
+	# 'default' ' /var/log/nvidia-installer.log '
+	
 	local currentLine
 	
 	if [[ "$current_nvidia_installAllKernels" == "true" ]]
@@ -581,12 +584,13 @@ _install_nvidia() {
 		ls -A -1 -d /usr/src/linux-headers-* | sort -r -V | head -n 12 | sed -s 's/.*linux-headers-//' | while read -r currentLine
 		do
 			_messagePlain_probe nvidia "$currentLine"
-			sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s -k "$currentLine" --dkms
+			sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s --log-file-name=/dev/stdout -k "$currentLine" --dkms
 			[[ "$?" != "0" ]] && currentExitStatus=1
 		done
 	else
 		local currentKernel=$(uname -r)
-		sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s -k "$currentKernel"
+		_messagePlain_probe nvidia uname -r "$currentKernel"
+		sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s --log-file-name=/dev/stdout -k "$currentKernel"
 	fi
 	
 	
