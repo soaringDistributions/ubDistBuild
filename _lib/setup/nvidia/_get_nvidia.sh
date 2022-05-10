@@ -621,6 +621,8 @@ Type=Application
 	echo "export __GL_YIELD=\"USLEEP\"" > /etc/profile.d/nvidia_kwin.sh
 	#echo "export KWIN_TRIPLE_BUFFER=1" > /etc/profile.d/nvidia_kwin.sh
 	
+	# Another workaround may be the 'OpenGL3.1' backend for kwin, however, that may cause some jitter or other issues.
+	
 	sleep 3
 	systemctl stop gdm3
 	systemctl start sddm
