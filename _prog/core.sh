@@ -399,7 +399,7 @@ CZXWXcRMTo8EmM8i4d
 	_getMost_backend_aptGetInstall locales
 	
 	_messagePlain_nominal 'timedatectl, update-locale, localectl'
-	[[ -e "$globalVirtFS" /usr/share/zoneinfo/America/New_York ]] && _chroot ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime
+	[[ -e "$globalVirtFS"/usr/share/zoneinfo/America/New_York ]] && _chroot ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime
 	_chroot timedatectl set-timezone US/Eastern
 	_chroot update-locale LANG=en_US.UTF-8 LANGUAGE
 	_chroot localectl set-locale LANG=en_US.UTF-8
