@@ -686,6 +686,13 @@ _detect_chroot() {
 _autoinstall() {
 	_mustBeRoot
 	
+	rm -f /lock_nvidia_autoinstall > /dev/null 2>&1
+	echo > /lock_nvidia_autoinstall
+	_stop_prog() {
+		rm -f /lock_nvidia_autoinstall
+	}
+	export -f _stop_prog
+	
 	# WARNING: DANGER: NOTICE: Do NOT autoinstall during build scripts. Distribution may NOT be allowed.
 	# That said, internal use is not distribution. For *strictly* internal builds, postprocessing the image by deliberately calling '_install' may be possible.
 	
