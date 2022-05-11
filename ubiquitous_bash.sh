@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='4239130164'
+export ub_setScriptChecksum_contents='3817339149'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -39610,6 +39610,9 @@ _create_ubDistBuild-bootOnce() {
 	
 	_chroot dpkg -l | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
 	
+	
+	_chroot rmdir /var/lib/docker/runtimes
+	
 	echo | sudo -n tee "$globalVirtFS"/regenerate > /dev/null
 	
 	
@@ -39662,7 +39665,9 @@ _create_ubDistBuild() {
 
 _custom_ubDistBuild() {
 	# TODO: _setup for all infrastructure/installations
-		# _custom_core from rotten_install  ?  probably not ... these are tests which rotten_install may not normally run
+	
+	# TODO: _test/_setup all programs from 'core/infrastructure' and such
+		# WARNING: Maybe not. May be better to run as a 'rotten_install' function (possibly normally already called by '_install_and_run') instead.
 	
 	true
 }
@@ -39991,6 +39996,28 @@ _nvidia_force_install() {
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0
 }
+
+# WARNING: DANGER: NOTICE: Do NOT distribute!
+# WARNING: No production use. End-user function ONLY.
+_nvidia_fetch_nvidia() {
+	_messageError 'WARNING: DANGER: Do NOT distribute!'
+	_messagePlain_warn 'WARNING: DANGER: Do NOT distribute!'
+	_messagePlain_bad 'WARNING: DANGER: Do NOT distribute!'
+	_messageError 'WARNING: DANGER: Do NOT distribute!'
+	_messageNormal '##### init: _nvidia_force_install'
+	echo
+	
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	
+	
+	_chroot /root/_get_nvidia.sh _fetch_nvidia
+	
+	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	return 0
+}
+
+
 
 _ubDistBuild() {
 	

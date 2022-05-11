@@ -767,6 +767,9 @@ _create_ubDistBuild-bootOnce() {
 	
 	_chroot dpkg -l | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
 	
+	
+	_chroot rmdir /var/lib/docker/runtimes
+	
 	echo | sudo -n tee "$globalVirtFS"/regenerate > /dev/null
 	
 	
@@ -819,7 +822,9 @@ _create_ubDistBuild() {
 
 _custom_ubDistBuild() {
 	# TODO: _setup for all infrastructure/installations
-		# _custom_core from rotten_install  ?  probably not ... these are tests which rotten_install may not normally run
+	
+	# TODO: _test/_setup all programs from 'core/infrastructure' and such
+		# WARNING: Maybe not. May be better to run as a 'rotten_install' function (possibly normally already called by '_install_and_run') instead.
 	
 	true
 }
@@ -1148,6 +1153,28 @@ _nvidia_force_install() {
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0
 }
+
+# WARNING: DANGER: NOTICE: Do NOT distribute!
+# WARNING: No production use. End-user function ONLY.
+_nvidia_fetch_nvidia() {
+	_messageError 'WARNING: DANGER: Do NOT distribute!'
+	_messagePlain_warn 'WARNING: DANGER: Do NOT distribute!'
+	_messagePlain_bad 'WARNING: DANGER: Do NOT distribute!'
+	_messageError 'WARNING: DANGER: Do NOT distribute!'
+	_messageNormal '##### init: _nvidia_force_install'
+	echo
+	
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	
+	
+	_chroot /root/_get_nvidia.sh _fetch_nvidia
+	
+	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	return 0
+}
+
+
 
 _ubDistBuild() {
 	
