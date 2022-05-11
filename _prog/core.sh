@@ -194,7 +194,7 @@ Relogin=true
 [Service]
 Type=simple
 ExecStart=
-ExecStart=-/sbin/agetty --autologin user -o '-p' --noclear %I $TERM
+ExecStart=-/sbin/agetty --autologin user --noclear %I $TERM
 CZXWXcRMTo8EmM8i4d
 	}
 	_write_autologin_tty 1
