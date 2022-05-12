@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3817339149'
+export ub_setScriptChecksum_contents='2617878064'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -39023,7 +39023,7 @@ Relogin=true
 ' | sudo -n tee "$globalVirtFS"/etc/sddm.conf.d/autologin.conf
 	
 	
-	
+	# WARNING: Do NOT login as same user as display manager (ie. 'sddm') login! Must continue to exist after all 'user' processes are terminated!
 	# https://wiki.gentoo.org/wiki/Automatic_login_to_virtual_console
 	# https://forums.debian.net/viewtopic.php?t=140452
 	# https://forums.debian.net/viewtopic.php?f=16&t=123694
@@ -39037,7 +39037,7 @@ Relogin=true
 [Service]
 Type=simple
 ExecStart=
-ExecStart=-/sbin/agetty --autologin user --noclear %I $TERM
+ExecStart=-/sbin/agetty --autologin root --noclear %I $TERM
 CZXWXcRMTo8EmM8i4d
 	}
 	_write_autologin_tty 1
