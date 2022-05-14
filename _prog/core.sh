@@ -427,12 +427,22 @@ CZXWXcRMTo8EmM8i4d
 	#export ubVirtImageSwap=p2
 	#export ubVirtImagePartition=p3
 	
+	echo 'GRUB_TIMEOUT=1' | sudo -n tee -a "$globalVirtFS"/etc/default/grub
+	
 	
 	# https://linuxconfig.org/how-to-disable-blacklist-nouveau-nvidia-driver-on-ubuntu-20-04-focal-fossa-linux
 	# https://askubuntu.com/questions/747314/is-nomodeset-still-required
 	#echo 'GRUB_CMDLINE_LINUX="nouveau.modeset=0"' | sudo -n tee -a "$globalVirtFS"/etc/default/grub
 	echo 'blacklist nouveau' | sudo -n tee "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
 	echo 'options nouveau modeset=0' | sudo -n tee -a "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
+	
+	# https://wiki.archlinux.org/title/NVIDIA#DRM_kernel_mode_setting
+	#  'NVIDIA driver does not provide an fbdev driver for the high-resolution console for the kernel compiled-in vesafb'
+	#   lsmod should show a modsetting driver in use ...
+	#echo 'GRUB_CMDLINE_LINUX="nvidia-drm.modeset=1"' | sudo -n tee -a "$globalVirtFS"/etc/default/grub
+	echo 'options nvidia-drm modeset=1' | sudo -n tee "$globalVirtFS"/etc/modprobe.d/nvidia-kms.conf
+	
+	#echo 'GRUB_CMDLINE_LINUX="nouveau.modeset=0 nvidia-drm.modeset=1"' | sudo -n tee -a "$globalVirtFS"/etc/default/grub
 	
 	
 	_messagePlain_nominal 'install grub'
@@ -765,12 +775,24 @@ _create_ubDistBuild-bootOnce() {
 	
 	
 	
+	sudo -n mkdir -p "$globalVirtFS"/root/core_rG/flipKey/_local
+	sudo -n cp -f "$scriptLib"/setup/rootGrab/_rootGrab.sh "$globalVirtFS"/root/_rootGrab.sh
+	sudo -n chmod 700 "$globalVirtFS"/root/_rootGrab.sh
+	sudo -n cp -f "$scriptLib"/flipKey/flipKey "$globalVirtFS"/root/core_rG/flipKey/flipKey
+	sudo -n chmod 700 "$globalVirtFS"/root/core_rG/flipKey/flipKey
+	
+	! _chroot /root/_rootGrab.sh _hook && _messageFAIL
+	
+	
+	
 	_chroot dpkg -l | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
 	
 	
 	_chroot rmdir /var/lib/docker/runtimes
 	
 	echo | sudo -n tee "$globalVirtFS"/regenerate > /dev/null
+	
+	echo | sudo -n tee "$globalVirtFS"/regenerate_rootGrab > /dev/null
 	
 	
 	# WARNING: Important. May drastically reduce image size, especially if large temporary files (ie. apt cache) have been used. *Very* compressible zeros.

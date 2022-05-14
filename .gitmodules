@@ -2,3 +2,6 @@
 	path = _lib/ubiquitous_bash
 	url = git@github.com:mirage335/ubiquitous_bash.git
 	shallow = true
+[submodule "_lib/flipKey"]
+	path = _lib/flipKey
+	url = git@github.com:mirage335/flipKey.git

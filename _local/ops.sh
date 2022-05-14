@@ -33,18 +33,35 @@ _create() {
 
 
 _custom() {
+	_upstream
 	_upgrade
 	
-	_timezone
+	#_timezone
 	
-	_regenerate
-	
+	#_regenerate
+	#_regenerate_rootGrab
 	
 	# WARNING: DANGER: NOTICE: Do NOT distribute!
 	#_nvidia_fetch_nvidia
 	#_nvidia_force_install
+	
+	# update-grub
+	#_create_ubDistBuild-bootOnce-qemu_sequence
 }
 
+
+
+
+_upstream() {
+	#! "$scriptAbsoluteLocation" _openChRoot && _messageFAIL
+	
+	
+	#true
+	
+	
+	#! "$scriptAbsoluteLocation" _closeChRoot && _messageFAIL
+	return 0
+}
 
 
 
@@ -82,6 +99,14 @@ _upgrade() {
 	[[ ! -e "$globalVirtFS"/ubiquitous_bash.sh ]] && _messageFAIL
 	sudo -n chmod 755 "$globalVirtFS"/ubiquitous_bash.sh
 	
+	
+	sudo -n mkdir -p "$globalVirtFS"/root/core_rG/flipKey/_local
+	sudo -n cp -f "$scriptLib"/setup/rootGrab/_rootGrab.sh "$globalVirtFS"/root/_rootGrab.sh
+	sudo -n chmod 700 "$globalVirtFS"/root/_rootGrab.sh
+	sudo -n cp -f "$scriptLib"/flipKey/flipKey "$globalVirtFS"/root/core_rG/flipKey/flipKey
+	sudo -n chmod 700 "$globalVirtFS"/root/core_rG/flipKey/flipKey
+	
+	! _chroot /root/_rootGrab.sh _hook && _messageFAIL
 	
 	
 	
@@ -154,11 +179,11 @@ _regenerate() {
 	local currentPassword
 	currentPassword=$(_uid 12)
 	
-	echo $currentPassword
+	echo "$currentPassword"
 	
-	echo root':'$currentPassword | _chroot chpasswd
+	echo root':'"$currentPassword" | _chroot chpasswd
 	
-	echo user':'$currentPassword | _chroot chpasswd
+	echo user':'"$currentPassword" | _chroot chpasswd
 	
 	
 	
@@ -168,6 +193,14 @@ _regenerate() {
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0
 }
+
+
+
+_regenerate_rootGrab() {
+	[[ -e "$globalVirtFS"/root/_rootGrab.sh ]] && ! _chroot /root/_rootGrab.sh _create && _messageFAIL
+	return 0
+}
+
 
 fi
 ######## ######## ######## ######## ######## ######## ######## ######## ######## ########
@@ -214,7 +247,7 @@ search --set=root --file /ROOT_TEXT
 #set default="0"
 #set default="1"
 set default="2"
-set timeout=3
+set timeout=1
 
 menuentry "Live" {
     #linux /vmlinuz boot=live config debug=1 noeject nopersistence selinux=0 mem=3712M resume=UUID=469457fc-293f-46ec-92da-27b5d0c36b17

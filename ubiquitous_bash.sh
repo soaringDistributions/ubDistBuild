@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2617878064'
+export ub_setScriptChecksum_contents='1917883452'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -15939,11 +15939,13 @@ _createVMfstab() {
 	
 	# https://gist.github.com/varqox/42e213b6b2dde2b636ef#edit-fstab-file
 	
+	#btrfs rescue zero-log /dev/sda5
+	
 	local ubVirtImagePartition_UUID
 	ubVirtImagePartition_UUID=$(sudo -n blkid -s UUID -o value "$imagedev""$ubVirtImagePartition" | tr -dc 'a-zA-Z0-9\-')
 	
 	#echo 'UUID='"$ubVirtImagePartition_UUID"' / ext4 errors=remount-ro 0 1' | sudo -n tee "$globalVirtFS"/etc/fstab
-	echo 'UUID='"$ubVirtImagePartition_UUID"' / btrfs defaults,compress=zstd:1 0 1' | sudo -n tee "$globalVirtFS"/etc/fstab
+	echo 'UUID='"$ubVirtImagePartition_UUID"' / btrfs defaults,compress=zstd:1,notreelog 0 1' | sudo -n tee "$globalVirtFS"/etc/fstab
 	
 	
 	# initramfs-update, from chroot, may not enable hibernation/resume... may be device specific
@@ -16476,7 +16478,7 @@ search --set=root --file /ROOT_TEXT
 #set default="0"
 #set default="1"
 set default="2"
-set timeout=3
+set timeout=1
 
 menuentry "Live" {
     #linux /vmlinuz boot=live config debug=1 noeject nopersistence selinux=0 mem=3712M resume=UUID=469457fc-293f-46ec-92da-27b5d0c36b17
@@ -37716,6 +37718,51 @@ _test_pipefail() {
 	fi
 }
 
+# WARNING: Not necessarily tested by default, due to lack of use except where faults are tolerable, and slim possibility of useful embedded systems not able to pass.
+_test_grep() {
+	# If not known distribution/OS, do NOT test. Some embedded systems not able to pass may be nevertheless useful.
+	! ( [[ -e /etc/issue ]] && cat /etc/issue | grep 'Debian\|Raspbian\|Ubuntu' > /dev/null 2>&1 ) && ! _if_cygwin && return 0
+	
+	
+	
+	! echo \$123 | grep -E '^\$[0-9]|^\.[0-9]' > /dev/null 2>&1 && _messageFAIL && return 1
+	! echo \.123 | grep -E '^\$[0-9]|^\.[0-9]' > /dev/null 2>&1 && _messageFAIL && return 1
+	echo 123 | grep -E '^\$[0-9]|^\.[0-9]' > /dev/null 2>&1 && _messageFAIL && return 1
+	
+	
+	
+	! echo 'qwerty.*123' | grep -xF 'qwerty.*123' > /dev/null 2>&1 && _messageFAIL && return 1
+	! echo 'qwerty.*123' | grep -F 'qwerty.*123' > /dev/null 2>&1 && _messageFAIL && return 1
+	! echo 'qwerty123' | grep -x 'q.*3' > /dev/null 2>&1 && _messageFAIL && return 1
+	
+	echo 'qwerty123' | grep -xF 'qwerty.*123' > /dev/null 2>&1 && _messageFAIL && return 1
+	echo 'qwerty.*123' | grep -xF 'qwerty123' > /dev/null 2>&1 && _messageFAIL && return 1
+	
+	echo 'qwerty123' | grep -xF 'qwerty' > /dev/null 2>&1 && _messageFAIL && return 1
+	echo 'qwerty123' | grep -xF '123' > /dev/null 2>&1 && _messageFAIL && return 1
+	echo 'qwerty123' | grep -xF 'werty12' > /dev/null 2>&1 && _messageFAIL && return 1
+	
+	
+	! echo 'qwerty123' | grep -x 'qwerty.*123' > /dev/null 2>&1 && _messageFAIL && return 1
+	echo 'qwerty.*123' | grep -x 'qwerty123' > /dev/null 2>&1 && _messageFAIL && return 1
+	
+	echo 'qwerty123' | grep -x 'qwerty' > /dev/null 2>&1 && _messageFAIL && return 1
+	echo 'qwerty123' | grep -x '123' > /dev/null 2>&1 && _messageFAIL && return 1
+	echo 'qwerty123' | grep -x 'werty12' > /dev/null 2>&1 && _messageFAIL && return 1
+	
+	
+	echo 'qwerty123' | grep -F 'qwerty.*123' > /dev/null 2>&1 && _messageFAIL && return 1
+	echo 'qwerty.*123' | grep -F 'qwerty123' > /dev/null 2>&1 && _messageFAIL && return 1
+	
+	! echo 'qwerty123' | grep -F 'qwerty' > /dev/null 2>&1 && _messageFAIL && return 1
+	! echo 'qwerty123' | grep -F '123' > /dev/null 2>&1 && _messageFAIL && return 1
+	! echo 'qwerty123' | grep -F 'werty12' > /dev/null 2>&1 && _messageFAIL && return 1
+	
+	
+	
+	return 0
+}
+
 _test_sanity() {
 	if (exit 0)
 	then
@@ -37918,10 +37965,7 @@ _test_sanity() {
 	
 	
 	
-	# WARNING: Not tested by default, due to lack of use except where faults are tolerable, and slim possibility of useful embedded systems not able to pass.
-	#! echo \$123 | grep -E '^\$[0-9]|^\.[0-9]' > /dev/null 2>&1 && _messageFAIL && return 1
-	#! echo \.123 | grep -E '^\$[0-9]|^\.[0-9]' > /dev/null 2>&1 && _messageFAIL && return 1
-	#echo 123 | grep -E '^\$[0-9]|^\.[0-9]' > /dev/null 2>&1 && _messageFAIL && return 1
+	_test_grep
 	
 	
 	local currentJobsList
@@ -39270,12 +39314,22 @@ CZXWXcRMTo8EmM8i4d
 	#export ubVirtImageSwap=p2
 	#export ubVirtImagePartition=p3
 	
+	echo 'GRUB_TIMEOUT=1' | sudo -n tee -a "$globalVirtFS"/etc/default/grub
+	
 	
 	# https://linuxconfig.org/how-to-disable-blacklist-nouveau-nvidia-driver-on-ubuntu-20-04-focal-fossa-linux
 	# https://askubuntu.com/questions/747314/is-nomodeset-still-required
 	#echo 'GRUB_CMDLINE_LINUX="nouveau.modeset=0"' | sudo -n tee -a "$globalVirtFS"/etc/default/grub
 	echo 'blacklist nouveau' | sudo -n tee "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
 	echo 'options nouveau modeset=0' | sudo -n tee -a "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
+	
+	# https://wiki.archlinux.org/title/NVIDIA#DRM_kernel_mode_setting
+	#  'NVIDIA driver does not provide an fbdev driver for the high-resolution console for the kernel compiled-in vesafb'
+	#   lsmod should show a modsetting driver in use ...
+	#echo 'GRUB_CMDLINE_LINUX="nvidia-drm.modeset=1"' | sudo -n tee -a "$globalVirtFS"/etc/default/grub
+	echo 'options nvidia-drm modeset=1' | sudo -n tee "$globalVirtFS"/etc/modprobe.d/nvidia-kms.conf
+	
+	#echo 'GRUB_CMDLINE_LINUX="nouveau.modeset=0 nvidia-drm.modeset=1"' | sudo -n tee -a "$globalVirtFS"/etc/default/grub
 	
 	
 	_messagePlain_nominal 'install grub'
@@ -39608,12 +39662,24 @@ _create_ubDistBuild-bootOnce() {
 	
 	
 	
+	sudo -n mkdir -p "$globalVirtFS"/root/core_rG/flipKey/_local
+	sudo -n cp -f "$scriptLib"/setup/rootGrab/_rootGrab.sh "$globalVirtFS"/root/_rootGrab.sh
+	sudo -n chmod 700 "$globalVirtFS"/root/_rootGrab.sh
+	sudo -n cp -f "$scriptLib"/flipKey/flipKey "$globalVirtFS"/root/core_rG/flipKey/flipKey
+	sudo -n chmod 700 "$globalVirtFS"/root/core_rG/flipKey/flipKey
+	
+	! _chroot /root/_rootGrab.sh _hook && _messageFAIL
+	
+	
+	
 	_chroot dpkg -l | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
 	
 	
 	_chroot rmdir /var/lib/docker/runtimes
 	
 	echo | sudo -n tee "$globalVirtFS"/regenerate > /dev/null
+	
+	echo | sudo -n tee "$globalVirtFS"/regenerate_rootGrab > /dev/null
 	
 	
 	# WARNING: Important. May drastically reduce image size, especially if large temporary files (ie. apt cache) have been used. *Very* compressible zeros.

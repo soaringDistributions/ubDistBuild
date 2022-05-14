@@ -486,7 +486,15 @@ true
 
 
 
-export currentVersion=510.60.02
+# ATTENTION: NOTICE: In principle, these commands can be adapted to any container with 'create', 'grab', 'toss', functions, accepting a mountpoint override .
+# Specifically, while 'flipKey' may be default, 'fragKey' is vastly more powerful, especially when combined with 'commKey', especially when combined with on/off keying RF.
+# If scripts for such container cannot run as root, sudo to another user is possible, though otherwise not useful.
+# Crontab to run this script as root is normal. Alternatively, may be called by another user through 'sudo' after providing any local credentials (ie. password).
+
+
+export custom_user="user"
+
+
 
 
 
@@ -500,17 +508,19 @@ _wait_rootLock() {
 	local currentIteration_continuing
 	currentIteration=0
 	currentIteration_continuing=99999
-	while [[ "$currentIteration" -lt 48000 ]] && [[ "$currentIteration_continuing" == 99999 ]] ; do
+	while [[ "$currentIteration" -lt 28000 ]] && [[ "$currentIteration_continuing" == 99999 ]] ; do
 		_messagePlain_probe 'wait: rootLock'
 		
 		currentIteration_continuing=0
-		while [[ "$currentIteration_continuing" -lt 120 ]] ; do
+		#while [[ "$currentIteration_continuing" -lt 120 ]] ; do
+		while [[ "$currentIteration_continuing" -lt 40 ]] ; do
 			sleep 0.1
 			echo 'busy: '"$currentIteration_continuing"
 			let currentIteration_continuing="$currentIteration_continuing"+1
 			# Some must wait for this script instead, this script does not wait for them.
-			#|| [[ $(ls -A -1 /lock* 2>/dev/null | wc -l | tr -dc '0-9') -gt "0" ]]
-			if [[ -e /regenerate ]] || [[ -e /lock_rootGrab ]]
+			#|| [[ -e /lock_nvidia_autoinstall ]]
+			#
+			if [[ -e /regenerate ]]
 			then
 				currentIteration_continuing=99999
 			fi
@@ -524,269 +534,449 @@ _wait_rootLock() {
 	return 0
 }
 
+_detect_live() {
+	mountpoint /run/live/overlay && return 0
+	return 1
+}
 
-
-_detect_installed_nvidia() {
-	_messageNormal 'init: _detect_installed_nvidia'
+_detect_small() {
+	_detect_live && return 0
 	
-	# https://askubuntu.com/questions/271613/am-i-using-the-nouveau-driver-or-the-proprietary-nvidia-driver
-	#  'Nvidia's (restricted) module name is nvidia . Not nvidiafb or something similar.'
+	[[ $(find /root/core_rG/flipKey/_local/container.vc -size +35G | wc -l | tr -dc '0-9') -ge 1 ]] && return 1
+	[[ $(bc <<< "scale=0; "$(df --block-size=1 --output=avail /home/"$custom_user"/ | tr -dc '0-9')" / 1000000000") -le 35 ]] && return 0
 	
-	modprobe -l 2>/dev/null | grep -v -i 'nvidiafb' | grep -v -i 'typec' | grep -v -i 'eth' | grep 'nvidia' && _stop 0
-	
-	find /lib/modules/`uname -r` -name '*.ko' -type f -printf '%P\n' | grep -v -i 'nvidiafb' | grep -v -i 'typec' | grep -v -i 'eth' | grep 'nvidia' && _stop 0
-	
-	lsmod | cut -f1 -d\  | grep -v -i 'nvidiafb' | grep 'nvidia' && _stop 0
-	
-	dpkg -l | grep -v -i 'nvidiafb' | grep 'nvidia' && _stop 0
-	
-	lspci -nnk | grep -iA2 vga | grep -v -i 'nvidiafb' | grep 'nvidia' && _stop 0
-	
-	
-	_messagePlain_good 'missing: nvidia: driver not installed'
-	return 0
+	return 1
 }
 
 
-_detect_nvidia() {
-	_messageNormal 'init: _detect_nvidia'
-	
-	#1b:00.0 VGA compatible controller: NVIDIA Corporation GA102 [GeForce RTX 3090] (rev a1) (prog-if 00 [VGA controller])
-	! lspci | grep -i nvidia | grep -i vga && _messagePlain_good 'lspci: missing: nvidia' && _stop 0
-	_messagePlain_warn 'lspci: exists: nvidia'
-	
-	return 0
-}
 
 
-_fetch_nvidia() {
-	_messageNormal 'init: _fetch_nvidia'
-	cd "$scriptAbsoluteFolder"
+
+
+_fetch_flipKey() {
+	_mustBeRoot
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
 	
-	# https://gitweb.gentoo.org/repo/gentoo.git/tree/x11-drivers/nvidia-drivers/nvidia-drivers-510.60.02.ebuild
-	# http://gpo.zugaina.org/AJAX/Ebuild/53561524/View
-	#  'SRC_URI' 'https://us.download.nvidia.com/XFree86/Linux-x86_64/${PV}/NVIDIA-Linux-x86_64-${PV}.run'
-	# https://us.download.nvidia.com/XFree86/Linux-x86_64/510.60.02/NVIDIA-Linux-x86_64-510.60.02.run
+	_messagePlain_nominal '_fetch_flipKey'
 	
-	
-	
-	
-	if [[ ! -e "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run ]]
+	if [[ -e /root/core_rG/flipKey/flipKey ]]
 	then
-		wget https://us.download.nvidia.com/XFree86/Linux-x86_64/"$currentVersion"/NVIDIA-Linux-x86_64-"$currentVersion".run
+		cd "$functionEntryPWD"
+		return 0
 	fi
-	chmod u+x "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
 	
 	
-	[[ ! -e "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run ]] && _messageFAIL
+	mkdir -p /root/core_rG/flipKey
+	mkdir -p /root/core_rG/flipKey/_local
+	cd /root/core_rG/flipKey
+	
+	
+	
+	if ! [[ -e /home/user/core/flipKey/flipKey ]]
+	then
+		cp -f /home/user/core/flipKey/flipKey /root/core_rG/flipKey/flipKey
+		chmod 700 /root/core_rG/flipKey/flipKey
+	fi
+	
+	if [[ -e /root/core_rG/flipKey/flipKey ]]
+	then
+		cd "$functionEntryPWD"
+		return 0
+	fi
+	
+	
+	
+	_messagePlain_bad 'warn: missing: flipKey: you should already have flipKey'
+	wget https://raw.githubusercontent.com/mirage335/flipKey/main/flipKey
+	chmod 700 /root/core_rG/flipKey/flipKey
+	
+	if [[ -e /root/core_rG/flipKey/flipKey ]]
+	then
+		cd "$functionEntryPWD"
+		return 0
+	fi
+	
+	
+	
+	cd "$functionEntryPWD"
+	return 1
+}
+_temp_flipKey() {
+	_mustBeRoot
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+	
+	_messagePlain_nominal '_temp_flipKey'
+	
+	if [[ -e /root/core_rG/flipKey_temp/flipKey ]]
+	then
+		if [[ -e /root/core_rG/flipKey/flipKey ]]
+		then
+			cp -f /root/core_rG/flipKey/flipKey /root/core_rG/flipKey_temp/flipKey
+			cd "$functionEntryPWD"
+			return 0
+		fi
+		cd "$functionEntryPWD"
+		return 0
+	fi
+	
+	
+	mkdir -p /root/core_rG/flipKey_temp
+	mkdir -p /root/core_rG/flipKey_temp/_local
+	cd /root/core_rG/flipKey_temp
+	
+	
+	
+	if [[ -e /root/core_rG/flipKey/flipKey ]]
+	then
+		cp -f /root/core_rG/flipKey/flipKey /root/core_rG/flipKey_temp/flipKey
+		chmod 700 /root/core_rG/flipKey_temp/flipKey
+		cd "$functionEntryPWD"
+		return 0
+	fi
+	
+	
+	
+	if [[ -e /root/core_rG/flipKey_temp/flipKey ]]
+	then
+		cd "$functionEntryPWD"
+		return 0
+	fi
+	
+	
+	
+	cd "$functionEntryPWD"
+	return 1
+}
+
+
+_write_disk_flipKey() {
+	cat << 'CZXWXcRMTo8EmM8i4d' > /root/core_rG/flipKey/_local/ops.sh
+
+_disk_declare() {
+	_disk_default
+}
+
+if [[ -e "$scriptLocal"/disk.sh ]]
+then
+	. "$scriptLocal"/disk.sh
+fi
+
+CZXWXcRMTo8EmM8i4d
+	
+	
+	cat << 'CZXWXcRMTo8EmM8i4d' > /root/core_rG/flipKey/_local/disk.sh
+
+# May have such minor benefits as trim/discard . Otherwise discouraged.
+_disk_simple_ops
+
+_disk_declare() {
+	_disk_default
+	_disk_simple_small
+	#_disk_simple
+	
+	[[ "$flipKey_mount_override" != "" ]] && export flipKey_mount="$flipKey_mount_override"
+}
+
+CZXWXcRMTo8EmM8i4d
+	
+	
+	! mountpoint /run/live/overlay && cat << 'CZXWXcRMTo8EmM8i4d' > /root/core_rG/flipKey/_local/disk.sh
+
+# May have such minor benefits as trim/discard . Otherwise discouraged.
+_disk_simple_ops
+
+_disk_declare() {
+	_disk_default
+	#_disk_simple_small
+	_disk_simple
+	
+	[[ "$flipKey_mount_override" != "" ]] && export flipKey_mount="$flipKey_mount_override"
+}
+
+CZXWXcRMTo8EmM8i4d
+}
+
+
+_purge_flipKey() {
+	_messagePlain_nominal '_purge_flipKey'
+	
+	_write_disk_flipKey
+	
+	export flipKey_mount_override="$1"
+	! /root/core_rG/flipKey/flipKey _purge && _messageFAIL
+	
 	return 0
 }
 
 
-_install_nvidia() {
-	_messageNormal 'init: _install_nvidia'
-	# https://ubuntu.com/blog/how-to-sign-things-for-secure-boot
-	# https://download.nvidia.com/XFree86/Linux-x86_64/384.111/README/installdriver.html
+__create_flipKey() {
+	_mustBeRoot
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
 	
-	local currentExitStatus
-	currentExitStatus=0
+	! _fetch_flipKey && _messageFAIL
 	
-	sleep 45
+	# RESERVED. May not be used yet.
+	! _temp_flipKey && _messageFAIL
+	
+	cd /root/core_rG/flipKey
+	
+	
+	_messagePlain_nominal '__create_flipKey: here: disk.sh'
+	
+	
+	_write_disk_flipKey
+	
+	
+	
+	_messagePlain_nominal '__create_flipKey: create'
+	
+	export flipKey_mount_override=
+	! /root/core_rG/flipKey/flipKey __create && _messageFAIL
+	
+	
+	cd "$functionEntryPWD"
+	return 0
+}
+
+
+_zzCreate() {
+	__create "$@"
+}
+
+__grab_flipKey() {
+	
+	head -c128 /dev/hwrng > /dev/random
+	date +%s%N > /dev/random
+	date +%s%N > /dev/random
+	arecord -q -d 3 -fS32_LE /dev/random
+	sleep 0.1
+	
+	if [[ -e /regenerate_rootGrab ]] && [[ ! -e /root/core_rG/flipKey/_local/fs ]]
+	then
+		! "$scriptAbsoluteLocation" __create && _messageFAIL
+		rm -f /regenerate_rootGrab
+	fi
+	
+	
+	_messagePlain_nominal '__grab_flipKey'
+	
+	export flipKey_mount_override="$1"
+	! /root/core_rG/flipKey/flipKey __grab && _messageFAIL
+	
+	return 0
+}
+
+__toss_flipKey() {
+	_messagePlain_nominal '__toss_flipKey'
+	
+	export flipKey_mount_override="$1"
+	! /root/core_rG/flipKey/flipKey __toss && _messageFAIL
+	
+	return 0
+}
+
+
+
+
+
+
+
+__create() {
+	_messageNormal 'init: __create'
+	
+	! "$scriptAbsoluteLocation" _purge_flipKey "" && _stop 1
+	
+	local current_small
+	current_small="false"
+	_detect_small && current_small="true"
+	#[[ $(head -c35000000000 /root/core_rG/flipKey/_local/container.vc 2>/dev/null | wc -c | tr -dc '0-9') -ge 35 ]] && current_small="false"
+	#[[ $(find /root/core_rG/flipKey/_local/container.vc -size +35G | wc -l | tr -dc '0-9') -ge 1 ]] && current_small="false"
+	
+	
+	! "$scriptAbsoluteLocation" __create_flipKey && _stop 1
+	[[ ! -e /root/core_rG/flipKey/_local/fs ]] && _messageFAIL
+	[[ ! -d /root/core_rG/flipKey/_local/fs ]] && _messageFAIL
+	
+	
+	! "$scriptAbsoluteLocation" __grab_flipKey && _stop 1
+	
+	
+	
+	chmod 700 /root/core_rG/flipKey/_local/fs
+	[[ ! -e /root/core_rG/flipKey/_local/fs ]] && _messageFAIL
+	[[ ! -d /root/core_rG/flipKey/_local/fs ]] && _messageFAIL
+	! mountpoint /root/core_rG/flipKey/_local/fs && _messageFAIL
+	
+	[[ ! -e /home/"$custom_user" ]] && _messageFAIL
+	#rsync -ax --delete /home/"$custom_user"/. /root/core_rG/flipKey/_local/fs/.
+	
+	
+	if [[ "$current_small" == "true" ]]
+	then
+		rsync -ax --exclude "/core/infrastructure" --exclude "/core/installations" --exclude /.cache --exclude /.gcloud --exclude /.ebcli-virtual-env --exclude /.kde.bak /home/"$custom_user"/. /root/core_rG/flipKey/_local/fs/.
+	else
+		rsync -ax /home/"$custom_user"/. /root/core_rG/flipKey/_local/fs/.
+	fi
+	
+	
+	
+	! "$scriptAbsoluteLocation" __toss_flipKey && _stop 1
+	
+	return 0
+}
+
+
+
+_terminate_user_session() {
+	# https://forum.endeavouros.com/t/switching-to-tty-does-not-display-anything-no-signal/23807?page=2
+	#  Unfortunate side effect. Virtual Terminals may be useless after 'stop' 'sddm' with NVIDIA drivers.
 	systemctl stop gdm3
 	systemctl stop sddm
-	sleep 3
-	# https://www.linuxquestions.org/questions/linux-hardware-18/is-it-possible-to-install-nvidia-driver-without-card-780867/
-	#sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s -k $(ls -A -1 -d /usr/src/linux-headers-* | head -n1 | sed -s 's/.*linux-headers-//') --dkms
-	#[[ "$?" != "0" ]] && currentExitStatus=1
 	
+	sleep 1
 	
+	# May cause issues. Instead prefer getty not to use same 'user' as sddm.
+	#systemctl stop getty@tty1
+	#systemctl stop getty@tty2
+	#systemctl stop getty@tty3
+	#systemctl stop getty@tty4
+	#systemctl stop getty@tty5
+	#systemctl stop getty@tty6
+	#systemctl stop getty@tty7
 	
-	# https://wiki.archlinux.org/title/NVIDIA#DRM_kernel_mode_setting
-	#  'NVIDIA driver does not provide an fbdev driver for the high-resolution console for the kernel compiled-in vesafb'
-	#   lsmod should show a modsetting driver in use ...
-	#echo 'GRUB_CMDLINE_LINUX="nvidia-drm.modeset=1"' | sudo -n tee -a "$globalVirtFS"/etc/default/grub
-	echo 'options nvidia-drm modeset=1' | sudo -n tee "$globalVirtFS"/etc/modprobe.d/nvidia-kms.conf
+	sleep 1
 	
-	
-	
-	
-	# ' "  -j CONCURRENCY-LEVEL, --concurrency-level=CONCURRENCY-LEVEL" '
-	# 'default' 'number of detected CPUs' 'nvidia-installer' 'default' 'limited to 32'
-	
-	# ' --log-file-name=/dev/stdout '
-	# 'default' ' /var/log/nvidia-installer.log '
-	
-	local currentLine
-	
-	if [[ "$current_nvidia_installAllKernels" == "true" ]]
-	then
-		# If headers for more than 12 kernels are installed, that is an issue.
-		ls -A -1 -d /usr/src/linux-headers-* | sort -r -V | head -n 12 | sed -s 's/.*linux-headers-//' | while read -r currentLine
-		do
-			_messagePlain_probe nvidia "$currentLine"
-			sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s -k "$currentLine" --dkms
-			[[ "$?" != "0" ]] && currentExitStatus=1
-		done
-	else
-		local currentKernel=$(uname -r)
-		_messagePlain_probe nvidia uname -r "$currentKernel"
-		sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s -k "$currentKernel"
-	fi
-	
-	
-	#sudo -n apt-get -y clean
-	#sudo -n sudo apt-get autoremove --purge
-	
-	
-	# https://unix.stackexchange.com/questions/510757/how-to-automatically-force-full-composition-pipeline-for-nvidia-gpu-driver
-	sudo -n mkdir -p /home/"$custom_user"/.config/autostart
-	[[ "$custom_user" == "" ]] && export custom_user=user
-	#Exec=nvidia-settings --assign CurrentMetaMode="nvidia-auto-select +0+0 { ForceFullCompositionPipeline = On }" ; /usr/bin/nvidia-settings -l
-	echo '
-[Desktop Entry]
-Exec=/usr/bin/nvidia-settings -l
-Type=Application
-' | sudo tee /home/"$custom_user"/.config/autostart/nvidia.desktop > /dev/null
-	sudo -n chown "$custom_user":"$custom_user" /home/"$custom_user"
-	sudo -n chown "$custom_user":"$custom_user" /home/"$custom_user"/.config
-	sudo -n chown "$custom_user":"$custom_user" /home/"$custom_user"/.config/autostart
-	sudo -n chown "$custom_user":"$custom_user" /home/"$custom_user"/.config/autostart/nvidia.desktop
-	sudo -n chmod 555 /home/"$custom_user"/.config/autostart/nvidia.desktop
-	
-	# https://unix.stackexchange.com/questions/510757/how-to-automatically-force-full-composition-pipeline-for-nvidia-gpu-driver
-	#  WARNING: 'Do not have both of the above enabled at the same time.'
-	#  WARNING: 'Be sure to enable triple buffering in nvidia-settings if you enable triple buffering in KWin.'
-	# https://forums.developer.nvidia.com/t/gl-yield-and-performance-issues/27736
-	#  'performance is badly affected by __GL_YIELD=USLEEP'
-	echo "export __GL_YIELD=\"USLEEP\"" > /etc/profile.d/nvidia_kwin.sh
-	#echo "export KWIN_TRIPLE_BUFFER=1" > /etc/profile.d/nvidia_kwin.sh
-	
-	# Another workaround may be the 'OpenGL3.1' backend for kwin, however, that may cause some jitter or other issues.
-	
-	sleep 3
-	systemctl stop gdm3
-	systemctl start sddm
-	sleep 6
-	systemctl status sddm
-	
-	[[ "$currentExitStatus" != "0" ]] && _messageFAIL
-	return "$currentExitStatus"
+	killall -u "$custom_user"
+	sleep 2
+	killall --signal SIGKILL -u "$custom_user"
+	sleep 1
 }
 
 
-
-
-_install() {
-	_mustBeRoot
-	
-	_detect_nvidia "$@"
-	
-	_fetch_nvidia "$@"
-	
-	_install_nvidia "$@"
-}
-
-
-
-
-_detect_virtualization() {
-	! lspci | grep -i vmware && ! lspci | grep -i virtualbox && ! cat /proc/cpuinfo | grep -i model | grep -i qemu && ! sudo -n lspci | grep -i vmware && ! sudo -n lspci | grep -i virtualbox && return 0
-	
-	_messageFAIL
-	_stop 1
-	exit 1
-	exit
-	return 1
-	return
-}
-_detect_chroot() {
-	# https://unix.stackexchange.com/questions/14345/how-do-i-tell-im-running-in-a-chroot
-	if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]
-	then
-		_messageFAIL
-		_stop 1
-		exit 1
-		exit
-		return 1
-		return
-	fi
-	
-	if systemctl status sddm 2>&1 | head -n 2 | grep -i 'chroot'
-	then
-		_messageFAIL
-		_stop 1
-		exit 1
-		exit
-		return 1
-		return
-	fi
-	
-	return 0
-}
-_autoinstall_procedure() {
-	_mustBeRoot
+__grab_procedure() {
+	_messageNormal 'init: __grab'
 	
 	! _wait_rootLock && _messageFAIL
 	
-	# WARNING: DANGER: NOTICE: Do NOT autoinstall during build scripts. Distribution may NOT be allowed.
-	# That said, internal use is not distribution. For *strictly* internal builds, postprocessing the image by deliberately calling '_install' may be possible.
+	_terminate_user_session
 	
-	if ! _detect_virtualization
+	
+	export flipKey_mount_override=/home/"$custom_user"
+	
+	chmod 700 "$flipKey_mount_override"
+	chown "$custom_user":"$custom_user" "$flipKey_mount_override"
+	if ! "$scriptAbsoluteLocation" __grab_flipKey "$flipKey_mount_override" "$custom_user"
 	then
 		_messageFAIL
-		_stop 1
-		exit 1
-		exit
-		return 1
-		return
 	fi
+	chmod 700 "$flipKey_mount_override"
+	chown "$custom_user":"$custom_user" "$flipKey_mount_override"
 	
-	if ! _detect_chroot
-	then
-		_messageFAIL
-		_stop 1
-		exit 1
-		exit
-		return 1
-		return
-	fi
+	# May cause issues. Instead prefer getty not to use same 'user' as sddm.
+	#systemctl start getty@tty1
+	#systemctl start getty@tty2
+	#systemctl start getty@tty3
+	#systemctl start getty@tty4
+	#systemctl start getty@tty5
+	#systemctl start getty@tty6
+	#systemctl start getty@tty7
 	
-	
-	
-	
-	
-	_detect_installed_nvidia "$@"
-	
-	_install "$@"
+	systemctl start sddm
 }
-_autoinstall() {
-	rm -f /lock_nvidia_autoinstall > /dev/null 2>&1
-	echo > /lock_nvidia_autoinstall
+__grab() {
+	rm -f /lock_rootGrab > /dev/null 2>&1
+	echo > /lock_rootGrab
 	#_stop_prog() {
-		#rm -f /lock_nvidia_autoinstall
+		#rm -f /lock_rootGrab
 	#}
 	#export -f _stop_prog
 	
-	if ! "$scriptAbsoluteLocation" _autoinstall_procedure "$@"
+	if ! "$scriptAbsoluteLocation" __grab_procedure "$@"
 	then
-		rm -f /lock_nvidia_autoinstall > /dev/null 2>&1
+		rm -f /lock_rootGrab > /dev/null 2>&1
 		_messageFAIL
 	fi
 	
-	rm -f /lock_nvidia_autoinstall > /dev/null 2>&1
+	rm -f /lock_rootGrab > /dev/null 2>&1
 	return 0
+}
+
+__toss() {
+	_messageNormal 'init: __toss'
+	
+	_terminate_user_session
+	
+	export flipKey_mount_override=/home/"$custom_user"
+	
+	chmod 700 "$flipKey_mount_override"
+	chown "$custom_user":"$custom_user" "$flipKey_mount_override"
+	if ! "$scriptAbsoluteLocation" __toss_flipKey "$flipKey_mount_override" "$custom_user"
+	then
+		_messageFAIL
+	fi
+	chmod 700 "$flipKey_mount_override"
+	chown "$custom_user":"$custom_user" "$flipKey_mount_override"
 }
 
 
 
-# WARNING: DANGER: Do NOT distribute!
-_force_install() {
-	_mustBeRoot
+
+
+_hook_fstab() {
+	# https://unix.stackexchange.com/questions/86297/what-can-go-wrong-if-var-tmp-is-on-a-temporary-filesystem
+	#  'What can go wrong if /var/tmp is on a temporary filesystem?'
+	# https://manpages.debian.org/buster/initscripts/tmpfs.5.en.html
+	#  'RAMTMP' ... 'ignored when systemd is used as init system.'
+	#echo -n $ubiquitousBashID | md5sum | head -c32 | md5sum | head -c32 | md5sum | head -c32 | md5sum | head -c32 | head -c18
+	#454caf2f2b9efc1da3
+	if ! cat /etc/fstab | grep '454caf2f2b9efc1da3' | grep 'rootGrab_tmp' > /dev/null 2>&1
+	then
+		echo '# 454caf2f2b9efc1da3 rootGrab_tmp' | tee -a /etc/fstab
+		echo 'tmpfs	/run	tmpfs	nodev,nosuid,size=10%,mode=755	0	0' | tee -a /etc/fstab
+		echo 'tmpfs	/run/lock	tmpfs	nodev,noexec,nosuid,size=52428800,mode=1777	0	0' | tee -a /etc/fstab
+		echo 'tmpfs	/run/shm	tmpfs	nosuid,nodev,size=40%,mode=1777	0	0' | tee -a /etc/fstab
+		echo 'tmpfs	/tmp	tmpfs	nodev,nosuid,size=80%,mode=1777	0	0' | tee -a /etc/fstab
+		
+		echo 'tmpfs	/var/tmp	tmpfs	nodev,nosuid,size=20%,mode=1777	0	0' | tee -a /etc/fstab
+	fi
+	return 0
+}
+
+# ATTENTION: Override with 'ops.sh' , or replacement , or similar.
+# Beware, small filesystems cannot directly include a usable copy of '~/core' .
+__grab_hook() {
+	# If liveCD/liveUSB, do not encrypt HOME. Usually ramfs/overlay .
+	_detect_live && return 0
 	
-	export current_nvidia_installAllKernels="true"
+	# If small (ie. root partition not resized >>35GB), do not encrypt HOME.
+	_detect_small && return 0
 	
-	_fetch_nvidia "$@"
-	_install_nvidia "$@"
+	
+	
+	# DANGER: Do NOT 'terminate user session' (ie. must wait for 'regenerate' which may run processes as user through sudo).
+	# Expected only to reduce risk of framebuffer issues.
+	systemctl stop sddm
+	systemctl stop gdm3
+	
+	_hook_fstab
+	
+	__grab "$@"
+}
+
+_hook() {
+	if ! crontab -l | grep '/root/_rootGrab.sh' > /dev/null
+	then
+		( crontab -l ; echo '@reboot sudo -n -u root /root/_rootGrab.sh __grab_hook > /var/log/_rootGrab.log 2>&1' ) | crontab '-'
+		return
+	fi
+	ln -s /var/log/_rootGrab.log /root/_rootGrab.log
+	
+	_hook_fstab
+	
+	return 0
 }
 
 
@@ -797,8 +987,10 @@ _force_install() {
 
 
 _enter() {
-	_autoinstall "$@"
+	"$scriptAbsoluteLocation" __grab "$@"
 }
+
+
 
 _test_prog() {
 	true
