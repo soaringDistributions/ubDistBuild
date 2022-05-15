@@ -156,6 +156,10 @@ jobs:
         shell: bash
         run: |
           ./_create_ubDistBuild-rotten_install-core | sudo -n tee ./_create_ubDistBuild-rotten_install-core.log
+      - name: _create_ubDistBuild-rotten_install-ubDistBuild
+        shell: bash
+        run: |
+          ./_create_ubDistBuild-rotten_install-ubDistBuild | sudo -n tee ./_create_ubDistBuild-rotten_install-ubDistBuild.log
       #- name: _create_ubDistBuild-bootOnce
         #shell: bash
         #run: |

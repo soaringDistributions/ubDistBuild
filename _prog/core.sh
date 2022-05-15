@@ -588,7 +588,8 @@ _create_ubDistBuild-rotten_install-ubDistBuild() {
 	sudo -n cp -r "$scriptAbsoluteFolder"/.git "$globalVirtFS"/home/user/ubDistBuild/
 	_chroot chown -R user:user /home/user/ubDistBuild
 	_chroot chmod 700 /home/user/ubDistBuild
-	_chroot sudo -n -u user bash -c 'cd /home/user/ubDistBuild ; git reset --hard ; git submodule update --recursive'
+	#--quiet
+	_chroot sudo -n -u user bash -c 'cd /home/user/ubDistBuild ; git reset --hard ; git submodule update --force --no-fetch --recursive'
 	
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
