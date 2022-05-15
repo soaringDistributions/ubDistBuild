@@ -760,6 +760,13 @@ __grab_flipKey() {
 		rm -f /regenerate_rootGrab
 	fi
 	
+	if [[ ! -e /root/core_rG/flipKey/_local/fs ]]
+	then
+		_messagePlain_bad 'bad: presume: fail: _create: __grab_flipKey: missing: /root/core_rG/flipKey/_local/fs'
+		_messageFAIL
+		return 1
+	fi
+	
 	
 	_messagePlain_nominal '__grab_flipKey'
 	
@@ -858,6 +865,13 @@ _terminate_user_session() {
 
 __grab_procedure() {
 	_messageNormal 'init: __grab'
+	
+	if [[ ! -e /regenerate_rootGrab ]] && [[ ! -e /root/core_rG/flipKey/_local/fs ]]
+	then
+		echo 'missing: /regenerate_rootGrab'
+		echo 'missing: /root/core_rG/flipKey/_local/fs'
+		return 1
+	fi
 	
 	! _wait_rootLock && _messageFAIL
 	
@@ -958,8 +972,12 @@ __grab_hook() {
 	
 	# DANGER: Do NOT 'terminate user session' (ie. must wait for 'regenerate' which may run processes as user through sudo).
 	# Expected only to reduce risk of framebuffer issues.
-	systemctl stop sddm
-	systemctl stop gdm3
+	if [[ -e /regenerate_rootGrab ]] || [[ -e /root/core_rG/flipKey/_local/fs ]]
+	then
+		_messagePlain_probe 'true: [[ -e /regenerate_rootGrab ]] || [[ -e /root/core_rG/flipKey/_local/fs ]]'
+		systemctl stop sddm
+		systemctl stop gdm3
+	fi
 	
 	_hook_fstab
 	
