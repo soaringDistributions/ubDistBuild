@@ -427,7 +427,8 @@ CZXWXcRMTo8EmM8i4d
 	#export ubVirtImageSwap=p2
 	#export ubVirtImagePartition=p3
 	
-	echo 'GRUB_TIMEOUT=1' | sudo -n tee -a "$globalVirtFS"/etc/default/grub
+	# TODO
+	#echo 'GRUB_TIMEOUT=1' | sudo -n tee -a "$globalVirtFS"/etc/default/grub
 	
 	
 	# https://linuxconfig.org/how-to-disable-blacklist-nouveau-nvidia-driver-on-ubuntu-20-04-focal-fossa-linux
@@ -577,7 +578,7 @@ _create_ubDistBuild-rotten_install-kde() {
 
 
 
-_create_ubDistBuild-rotten_install-ubDistBuild() {
+_create_ubDistBuild-install-ubDistBuild() {
 	_messageNormal 'chroot: install: ubDistBuild'
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
@@ -856,7 +857,7 @@ _create_ubDistBuild() {
 		_messageFAIL
 	fi
 	
-	if ! _create_ubDistBuild-rotten_install-ubDistBuild "$@"
+	if ! _create_ubDistBuild-install-ubDistBuild "$@"
 	then
 		_messageFAIL
 	fi
@@ -1467,14 +1468,14 @@ _refresh_anchors() {
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-rotten_install-kde
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-rotten_install-core
-	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-rotten_install-ubDistBuild
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-install-ubDistBuild
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-create
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-rotten_install
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-bootOnce
 	#cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-rotten_install-core
-	#cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-rotten_install-ubDistBuild
+	#cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-install-ubDistBuild
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_custom_ubDistBuild
 	
