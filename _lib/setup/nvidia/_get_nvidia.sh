@@ -486,6 +486,8 @@ true
 
 
 
+# https://www.nvidia.com/download/driverResults.aspx/187162/en-us
+# https://www.nvidia.com/Download/driverResults.aspx/44241/en-us
 export currentVersion=510.60.02
 
 
@@ -499,8 +501,8 @@ _wait_rootLock() {
 	local currentIteration
 	local currentIteration_continuing
 	currentIteration=0
-	currentIteration_continuing=99999
-	while [[ "$currentIteration" -lt 48000 ]] && [[ "$currentIteration_continuing" == 99999 ]] ; do
+	currentIteration_continuing=1234567890
+	while [[ "$currentIteration" -lt 384000 ]] && [[ "$currentIteration_continuing" == 1234567890 ]] ; do
 		_messagePlain_probe 'wait: rootLock'
 		
 		currentIteration_continuing=0
@@ -512,7 +514,7 @@ _wait_rootLock() {
 			#|| [[ $(ls -A -1 /lock* 2>/dev/null | wc -l | tr -dc '0-9') -gt "0" ]]
 			if [[ -e /regenerate ]] || [[ -e /lock_rootGrab ]]
 			then
-				currentIteration_continuing=99999
+				currentIteration_continuing=1234567890
 			fi
 			let currentIteration="$currentIteration"+1
 		done
@@ -520,7 +522,7 @@ _wait_rootLock() {
 	done
 	sleep 1
 	
-	[[ "$currentIteration_continuing" == 99999 ]] && return 1
+	[[ "$currentIteration_continuing" == 1234567890 ]] && return 1
 	return 0
 }
 

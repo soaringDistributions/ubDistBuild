@@ -41,6 +41,8 @@ _custom() {
 	#_regenerate
 	#_regenerate_rootGrab
 	
+	#_nouveau_enable
+	
 	# WARNING: DANGER: NOTICE: Do NOT distribute!
 	#_nvidia_fetch_nvidia
 	#_nvidia_force_install

@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1692765087'
+export ub_setScriptChecksum_contents='180032532'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -39269,15 +39269,40 @@ CZXWXcRMTo8EmM8i4d
 	_getMost_backend_aptGetInstall firmware-ivtv
 	
 	
+	# https://gist.github.com/eighthave/7285154
+	
 	sudo -n cp "$scriptLib"/setup/debian/firmware-realtek_20210818-1_all.deb "$globalVirtFS"/
 	if _chroot ls -A -1 /firmware-realtek_20210818-1_all.deb > /dev/null
 	then
 		_chroot dpkg -i /firmware-realtek_20210818-1_all.deb
 	else
-		_chroot wget http://ftp.us.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-realtek_20210818-1_all.deb
+		#_chroot wget http://ftp.us.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-realtek_20210818-1_all.deb
+		_chroot wget https://mirrorservice.org/sites/ftp.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-realtek_20210818-1_all.deb
+		
 		_chroot dpkg -i ./firmware-realtek_20210818-1_all.deb
 	fi
 	
+	sudo -n cp "$scriptLib"/setup/debian/firmware-amd-graphics_20210818-1_all.deb "$globalVirtFS"/
+	if _chroot ls -A -1 /firmware-amd-graphics_20210818-1_all.deb > /dev/null
+	then
+		_chroot dpkg -i /firmware-amd-graphics_20210818-1_all.deb
+	else
+		#_chroot wget http://ftp.us.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-amd-graphics_20210818-1_all.deb
+		_chroot wget https://mirrorservice.org/sites/ftp.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-amd-graphics_20210818-1_all.deb
+
+		_chroot dpkg -i ./firmware-amd-graphics_20210818-1_all.deb
+	fi
+	
+	# May include slightly more recent amdgpu firmware. May not be worth the ~500MB compressed disk usage. May interfere with debian firmware packages. Some firmware files (ie. for recent 'mainline' kernel) may still be missing.
+	#if _chroot ls -A -1 -d /linux-firmware > /dev/null
+	#then
+		#true
+	#else
+		## DANGER: Rare case of 'rm -rf' , called through '_chroot' instead of '_safeRMR' . If not called through '_chroot', very dangerous!
+		#_chroot git clone https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git /linux-firmware
+		#_chroot rm -rf /linux-firmware/.git
+		#_chroot rsync -ax /linux-firmware/. /lib/firmware
+	#fi
 	
 	
 	
@@ -39315,11 +39340,7 @@ CZXWXcRMTo8EmM8i4d
 	#export ubVirtImagePartition=p3
 	
 	
-	# https://linuxconfig.org/how-to-disable-blacklist-nouveau-nvidia-driver-on-ubuntu-20-04-focal-fossa-linux
-	# https://askubuntu.com/questions/747314/is-nomodeset-still-required
-	#echo 'GRUB_CMDLINE_LINUX="nouveau.modeset=0"' | sudo -n tee -a "$globalVirtFS"/etc/default/grub
-	echo 'blacklist nouveau' | sudo -n tee "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
-	echo 'options nouveau modeset=0' | sudo -n tee -a "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
+	_nouveau_disable_procedure
 	
 	# https://wiki.archlinux.org/title/NVIDIA#DRM_kernel_mode_setting
 	#  'NVIDIA driver does not provide an fbdev driver for the high-resolution console for the kernel compiled-in vesafb'
@@ -39682,7 +39703,7 @@ _create_ubDistBuild-bootOnce() {
 	# https://stackoverflow.com/questions/8579330/appending-to-crontab-with-a-shell-script-on-ubuntu
 	
 	( _chroot crontab -l ; echo '@reboot /root/_get_nvidia.sh _autoinstall > /var/log/_get_nvidia.log 2>&1' ) | _chroot crontab '-'
-	
+	_nouveau_disable_procedure
 	
 	
 	sudo -n mkdir -p "$globalVirtFS"/root/core_rG/flipKey/_local
@@ -40105,6 +40126,48 @@ _nvidia_fetch_nvidia() {
 	
 	
 	_chroot /root/_get_nvidia.sh _fetch_nvidia
+	
+	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	return 0
+}
+
+
+
+_nouveau_enable_procedure() {
+	_chroot rm -f /etc/modprobe.d/blacklist-nvidia-nouveau.conf
+	
+	_chroot chmod 644 /root/_get_nvidia.sh
+	
+	_chroot update-initramfs -u -k all
+}
+_nouveau_enable() {
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	
+	
+	_nouveau_enable_procedure "$@"
+	
+	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	return 0
+}
+
+_nouveau_disable_procedure() {
+	# https://linuxconfig.org/how-to-disable-blacklist-nouveau-nvidia-driver-on-ubuntu-20-04-focal-fossa-linux
+	# https://askubuntu.com/questions/747314/is-nomodeset-still-required
+	#echo 'GRUB_CMDLINE_LINUX="nouveau.modeset=0"' | sudo -n tee -a "$globalVirtFS"/etc/default/grub
+	echo 'blacklist nouveau' | sudo -n tee "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
+	echo 'options nouveau modeset=0' | sudo -n tee -a "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
+	
+	_chroot chmod 755 /root/_get_nvidia.sh
+	
+	_chroot update-initramfs -u -k all
+}
+_nouveau_disable() {
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	
+	
+	_nouveau_disable_procedure "$@"
 	
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
