@@ -31,7 +31,6 @@ One size fits all, mostly, defaults. Customization (eg. left-handedness, large f
  *) palette (developer workstations only... only if multiple projects in different folders will often share similar code snippets, etc)
 
 *) Dolphin File Manager Config
-
  *) Hide Places
  *) Up | Back Fwd Icons Compact Details Home   <uri>   | Open Terminal   Terminal
  *) Preferences
@@ -51,6 +50,7 @@ One size fits all, mostly, defaults. Customization (eg. left-handedness, large f
   *) Services (mostly Disable)
  *) Minimum Zoom
  *) Alt+. (Show Hidden Files)
+ *) General: Open new folders in tabs (DISABLE)
 
 *) Kate/KWrite Config
  *) Font to 11
