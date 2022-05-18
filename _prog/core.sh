@@ -372,6 +372,10 @@ CZXWXcRMTo8EmM8i4d
 	_getMost_backend_aptGetInstall bluez-firmware
 	_getMost_backend_aptGetInstall atmel-firmware
 	
+	_getMost_backend_aptGetInstall amd64-microcode
+	_getMost_backend_aptGetInstall intel-microcode
+	_getMost_backend_aptGetInstall iucode-tool
+	
 	
 	_getMost_backend_aptGetInstall firmware-ipw2x00
 	_chroot sh -c 'echo "debconf firmware-ipw2x00/license/accepted select true" | debconf-set-selections'
@@ -395,16 +399,19 @@ CZXWXcRMTo8EmM8i4d
 		_chroot dpkg -i ./firmware-realtek_20210818-1_all.deb
 	fi
 	
-	sudo -n cp "$scriptLib"/setup/debian/firmware-amd-graphics_20210818-1_all.deb "$globalVirtFS"/
-	if _chroot ls -A -1 /firmware-amd-graphics_20210818-1_all.deb > /dev/null
-	then
-		_chroot dpkg -i /firmware-amd-graphics_20210818-1_all.deb
-	else
-		#_chroot wget http://ftp.us.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-amd-graphics_20210818-1_all.deb
-		_chroot wget https://mirrorservice.org/sites/ftp.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-amd-graphics_20210818-1_all.deb
-
-		_chroot dpkg -i ./firmware-amd-graphics_20210818-1_all.deb
-	fi
+	#sudo -n cp "$scriptLib"/setup/debian/firmware-amd-graphics_20210818-1_all.deb "$globalVirtFS"/
+	#if _chroot ls -A -1 /firmware-amd-graphics_20210818-1_all.deb > /dev/null
+	#then
+		#_chroot dpkg -i /firmware-amd-graphics_20210818-1_all.deb
+		#_chroot env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" remove -y firmware-linux-nonfree firmware-linux
+		#_chroot env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" remove -y firmware-linux-nonfree
+		#_chroot env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" remove -y firmware-linux
+	#else
+		##_chroot wget http://ftp.us.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-amd-graphics_20210818-1_all.deb
+		#_chroot wget https://mirrorservice.org/sites/ftp.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-amd-graphics_20210818-1_all.deb
+		
+		#_chroot dpkg -i ./firmware-amd-graphics_20210818-1_all.deb
+	#fi
 	
 	# May include slightly more recent amdgpu firmware. May not be worth the ~500MB compressed disk usage. May interfere with debian firmware packages. Some firmware files (ie. for recent 'mainline' kernel) may still be missing.
 	#if _chroot ls -A -1 -d /linux-firmware > /dev/null
@@ -1238,6 +1245,9 @@ _nvidia_fetch_nvidia() {
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
 	
+	chmod u+x "$scriptLocal"/NVIDIA-Linux-*.run
+	ls -1 -A "$scriptLocal"/NVIDIA-Linux-*.run > /dev/null 2>&1 && sudo -n cp "$scriptLocal"/NVIDIA-Linux-*.run "$globalVirtFS"/root/
+	#sudo -n chmod u+x "$globalVirtFS"/root/NVIDIA-Linux-*.run
 	_chroot /root/_get_nvidia.sh _fetch_nvidia
 	
 	
@@ -1247,10 +1257,13 @@ _nvidia_fetch_nvidia() {
 
 
 
+# Minimal NVIDIA compatibility.
 _nouveau_enable_procedure() {
 	_chroot rm -f /etc/modprobe.d/blacklist-nvidia-nouveau.conf
+	echo 'options nouveau modeset=0' | sudo -n tee -a "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
 	
-	_chroot chmod 644 /root/_get_nvidia.sh
+	#_chroot chmod 644 /root/_get_nvidia.sh
+	_chroot chmod 755 /root/_get_nvidia.sh
 	
 	_chroot update-initramfs -u -k all
 }
@@ -1265,6 +1278,7 @@ _nouveau_enable() {
 	return 0
 }
 
+# No NVIDIA compatibility (at least not immediate compatibility). No NVIDIA compatibility may be a reasonable default until unambigious usability.
 _nouveau_disable_procedure() {
 	# https://linuxconfig.org/how-to-disable-blacklist-nouveau-nvidia-driver-on-ubuntu-20-04-focal-fossa-linux
 	# https://askubuntu.com/questions/747314/is-nomodeset-still-required
@@ -1589,5 +1603,8 @@ _refresh_anchors() {
 	
 	# WARNING: DANGER: NOTICE: Do NOT distribute!
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_nvidia_force_install
+	
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_nouveau_enable
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_nouveau_disable
 }
 

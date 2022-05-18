@@ -488,7 +488,7 @@ true
 
 # https://www.nvidia.com/download/driverResults.aspx/187162/en-us
 # https://www.nvidia.com/Download/driverResults.aspx/44241/en-us
-export currentVersion=510.60.02
+export currentVersion=515.43.04
 
 
 
@@ -573,6 +573,13 @@ _fetch_nvidia() {
 	
 	
 	
+	
+	
+	
+	# https://download.nvidia.com/XFree86/
+	
+	
+	
 	if [[ ! -e "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run ]]
 	then
 		wget https://us.download.nvidia.com/XFree86/Linux-x86_64/"$currentVersion"/NVIDIA-Linux-x86_64-"$currentVersion".run
@@ -620,19 +627,24 @@ _install_nvidia() {
 	
 	local currentLine
 	
+	# http://us.download.nvidia.com/XFree86/Linux-x86_64/515.43.04/README/kernel_open.html
+	#  'proprietary flavor supports the GPU architectures Maxwell, Pascal, Volta, Turing, Ampere, and forward'
+	#  'open kernel modules cannot support GPUs before Turing, because the open kernel modules depend on the GPU System Processor (GSP) first introduced in Turing'
+	#-m=kernel
+	#-m=kernel-open
 	if [[ "$current_nvidia_installAllKernels" == "true" ]]
 	then
 		# If headers for more than 12 kernels are installed, that is an issue.
 		ls -A -1 -d /usr/src/linux-headers-* | sort -r -V | head -n 12 | sed -s 's/.*linux-headers-//' | while read -r currentLine
 		do
 			_messagePlain_probe nvidia "$currentLine"
-			sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s -k "$currentLine" --dkms
+			sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s -k "$currentLine" --dkms -m=kernel
 			[[ "$?" != "0" ]] && currentExitStatus=1
 		done
 	else
 		local currentKernel=$(uname -r)
 		_messagePlain_probe nvidia uname -r "$currentKernel"
-		sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s -k "$currentKernel"
+		sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s -k "$currentKernel" -m=kernel
 	fi
 	
 	

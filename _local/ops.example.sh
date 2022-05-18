@@ -41,11 +41,16 @@ _custom() {
 	#_regenerate
 	#_regenerate_rootGrab
 	
+	
+	# ATTENTION: NOTICE: Seems, 'nouveau' and 'nvidia' can usually coexist. However, neither may be as dependable (eg. usable with recent hardware) as 'Intel', 'AMD', etc. Beware such choices may be hardware-specific, (ie. not portable) etc.
+	
 	#_nouveau_enable
 	
 	# WARNING: DANGER: NOTICE: Do NOT distribute!
 	#_nvidia_fetch_nvidia
 	#_nvidia_force_install
+	
+	
 	
 	# update-grub
 	#_create_ubDistBuild-bootOnce-qemu_sequence
