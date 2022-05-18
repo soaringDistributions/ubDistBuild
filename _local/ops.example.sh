@@ -46,7 +46,10 @@ _custom() {
 	
 	#_nouveau_enable
 	
+	
 	# WARNING: DANGER: NOTICE: Do NOT distribute!
+	#_chroot chmod 644 /root/_get_nvidia.sh
+	#_chroot chmod 755 /root/_get_nvidia.sh
 	#_nvidia_fetch_nvidia
 	#_nvidia_force_install
 	
