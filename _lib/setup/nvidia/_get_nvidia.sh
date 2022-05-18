@@ -486,6 +486,8 @@ true
 
 
 
+# https://www.nvidia.com/en-us/drivers/unix/
+#  'Latest Legacy GPU version'
 # https://www.nvidia.com/download/driverResults.aspx/187162/en-us
 # https://www.nvidia.com/Download/driverResults.aspx/44241/en-us
 export currentVersion=515.43.04
