@@ -702,6 +702,8 @@ CZXWXcRMTo8EmM8i4d
 _purge_flipKey() {
 	_messagePlain_nominal '_purge_flipKey'
 	
+	! _fetch_flipKey && _messageFAIL
+	
 	_write_disk_flipKey
 	
 	export flipKey_mount_override="$1"

@@ -6,11 +6,12 @@
 #_mustBeRoot
 #cd /root
 
-wget https://bit.ly/_rootGrab.sh
+wget https://bit.ly/rootGrabSh
+mv rootGrabSh _rootGrab.sh
 chmod u+x _rootGrab.sh
 ./_rootGrab.sh _hook
 echo > /regenerate_rootGrab
-./_rootGrab.sh _grab_hook
+./_rootGrab.sh __grab_hook
 
 
 ```
