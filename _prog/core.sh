@@ -927,6 +927,7 @@ _package_ubDistBuild_image() {
 
 
 
+# Call '_nouveau_enable', or similar, to create a 'vm-nouveau.img', or similar file.
 _upload_ubDistBuild_image() {
 	_package_ubDistBuild_image "$@"
 	cd "$scriptLocal"
@@ -1412,6 +1413,7 @@ _convert() {
 }
 
 
+# Call '_nouveau_enable' before, or similar, to create a 'vm-live-nouveau.iso', or similar file(s).
 # WARNING: Deletes 'vm.img' .
 _upload_convert() {
 	[[ ! -e "$scriptLocal"/vm.img ]] && _messageFAIL
