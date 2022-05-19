@@ -1,7 +1,7 @@
 
 ```
 
-# Terminates user session (display manager and processes), creates container (with flipKey), copies existing HOME directory, mounts over HOME directory.
+# Terminates user session (display manager and processes), creates container (with flipKey), copies existing HOME directory, mounts over HOME directory, restarts display manager (ie. sddm).
 
 #_mustBeRoot
 #cd /root
