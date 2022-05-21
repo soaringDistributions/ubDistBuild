@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3602331660'
+export ub_setScriptChecksum_contents='2958744071'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -7990,7 +7990,7 @@ _fetchDep_debianBullseye_special() {
 	if [[ "$1" == "VirtualBox" ]] || [[ "$1" == "VBoxSDL" ]] || [[ "$1" == "VBoxManage" ]] || [[ "$1" == "VBoxHeadless" ]]
 	then
 		sudo -n mkdir -p /etc/apt/sources.list.d
-		echo 'deb http://download.virtualbox.org/virtualbox/debian bullseye contrib' | sudo -n tee /etc/apt/sources.list.d/ub_vbox.list > /dev/null 2>&1
+		echo 'deb [arch=amd64] http://download.virtualbox.org/virtualbox/debian bullseye contrib' | sudo -n tee /etc/apt/sources.list.d/ub_vbox.list > /dev/null 2>&1
 		
 		"$scriptAbsoluteLocation" _getDep wget
 		! _wantDep wget && return 1
@@ -8082,7 +8082,7 @@ _fetchDep_debianBullseye_special() {
 		aptKeyFingerprint=$(sudo -n apt-key fingerprint 0EBFCD88 2> /dev/null)
 		[[ "$aptKeyFingerprint" == "" ]] && return 1
 		
-		sudo -n add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable"
+		sudo -n add-apt-repository -y "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable"
 		
 		sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -y update
 		
@@ -8427,7 +8427,7 @@ _fetchDep_debianBuster_special() {
 	if [[ "$1" == "VirtualBox" ]] || [[ "$1" == "VBoxSDL" ]] || [[ "$1" == "VBoxManage" ]] || [[ "$1" == "VBoxHeadless" ]]
 	then
 		sudo -n mkdir -p /etc/apt/sources.list.d
-		echo 'deb http://download.virtualbox.org/virtualbox/debian buster contrib' | sudo -n tee /etc/apt/sources.list.d/ub_vbox.list > /dev/null 2>&1
+		echo 'deb [arch=amd64] http://download.virtualbox.org/virtualbox/debian buster contrib' | sudo -n tee /etc/apt/sources.list.d/ub_vbox.list > /dev/null 2>&1
 		
 		"$scriptAbsoluteLocation" _getDep wget
 		! _wantDep wget && return 1
@@ -8510,7 +8510,7 @@ _fetchDep_debianBuster_special() {
 		aptKeyFingerprint=$(sudo -n apt-key fingerprint 0EBFCD88 2> /dev/null)
 		[[ "$aptKeyFingerprint" == "" ]] && return 1
 		
-		sudo -n add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable"
+		sudo -n add-apt-repository -y "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable"
 		
 		sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -y update
 		
@@ -8849,7 +8849,19 @@ _fetchDep_ubuntuFocalFossa_special() {
 	if [[ "$1" == "VirtualBox" ]] || [[ "$1" == "VBoxSDL" ]] || [[ "$1" == "VBoxManage" ]] || [[ "$1" == "VBoxHeadless" ]]
 	then
 		sudo -n mkdir -p /etc/apt/sources.list.d
-		echo 'deb http://download.virtualbox.org/virtualbox/debian focal contrib' | sudo -n tee /etc/apt/sources.list.d/ub_vbox.list > /dev/null 2>&1
+		if [[ -e /etc/issue ]] && cat /etc/issue | grep 'Ubuntu' | grep '20.04' > /dev/null 2>&1
+		then
+			echo 'deb [arch=amd64] http://download.virtualbox.org/virtualbox/debian focal contrib' | sudo -n tee /etc/apt/sources.list.d/ub_vbox.list > /dev/null 2>&1
+		fi
+		
+		if [[ -e /etc/issue ]] && cat /etc/issue | grep 'Ubuntu' | grep '21.10' > /dev/null 2>&1
+		then
+			echo 'deb [arch=amd64] http://download.virtualbox.org/virtualbox/debian impish contrib' | sudo -n tee /etc/apt/sources.list.d/ub_vbox.list > /dev/null 2>&1
+		fi
+		if [[ -e /etc/issue ]] && cat /etc/issue | grep 'Ubuntu' | grep '22.04' > /dev/null 2>&1
+		then
+			echo 'deb [arch=amd64] http://download.virtualbox.org/virtualbox/debian jammy contrib' | sudo -n tee /etc/apt/sources.list.d/ub_vbox.list > /dev/null 2>&1
+		fi
 		
 		"$scriptAbsoluteLocation" _getDep wget
 		! _wantDep wget && return 1
@@ -8932,7 +8944,7 @@ _fetchDep_ubuntuFocalFossa_special() {
 		aptKeyFingerprint=$(sudo -n apt-key fingerprint 0EBFCD88 2> /dev/null)
 		[[ "$aptKeyFingerprint" == "" ]] && return 1
 		
-		sudo -n add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable"
+		sudo -n add-apt-repository -y "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable"
 		
 		sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -y update
 		
@@ -9206,12 +9218,25 @@ _fetchDep_ubuntuFocalFossa() {
 	"$scriptAbsoluteLocation" _fetchDep_ubuntuFocalFossa_sequence "$@"
 }
 
+# WARNING: Workarounds may be by exception only (more dist/OS version specific workarounds for other dist/OS such as Debian).
 _fetchDep_ubuntu() {
 	if [[ -e /etc/issue ]] && cat /etc/issue | grep 'Ubuntu' | grep '20.04' > /dev/null 2>&1
 	then
 		_fetchDep_ubuntuFocalFossa "$@"
 		return
 	fi
+	
+	if [[ -e /etc/issue ]] && cat /etc/issue | grep 'Ubuntu' | grep '21.10' > /dev/null 2>&1
+	then
+		_fetchDep_ubuntuFocalFossa "$@"
+		return
+	fi
+	if [[ -e /etc/issue ]] && cat /etc/issue | grep 'Ubuntu' | grep '22.04' > /dev/null 2>&1
+	then
+		_fetchDep_ubuntuFocalFossa "$@"
+		return
+	fi
+	
 	
 	return 1
 }
@@ -9297,22 +9322,45 @@ _getMost_debian11_aptSources() {
 	
 	_getMost_backend mkdir -p /etc/apt/sources.list.d
 	
-	echo 'deb http://deb.debian.org/debian bullseye-backports main contrib' | _getMost_backend tee /etc/apt/sources.list.d/ub_backports.list > /dev/null 2>&1
-	echo 'deb http://download.virtualbox.org/virtualbox/debian bullseye contrib' | _getMost_backend tee /etc/apt/sources.list.d/ub_vbox.list > /dev/null 2>&1
-	echo 'deb [arch=amd64] https://download.docker.com/linux/debian bullseye stable' | _getMost_backend tee /etc/apt/sources.list.d/ub_docker.list > /dev/null 2>&1
+	#echo 'deb http://deb.debian.org/debian bullseye-backports main contrib' | _getMost_backend tee /etc/apt/sources.list.d/ub_backports.list > /dev/null 2>&1
+	#echo 'deb http://download.virtualbox.org/virtualbox/debian bullseye contrib' | _getMost_backend tee /etc/apt/sources.list.d/ub_vbox.list > /dev/null 2>&1
+	#echo 'deb [arch=amd64] https://download.docker.com/linux/debian bullseye stable' | _getMost_backend tee /etc/apt/sources.list.d/ub_docker.list > /dev/null 2>&1
 	
-	#if false && !  [[ -e /etc/issue ]] && cat /etc/issue | grep 'Ubuntu' > /dev/null 2>&1
-	#then
-		#echo 'deb http://deb.debian.org/debian bullseye-backports main contrib' | _getMost_backend tee /etc/apt/sources.list.d/ub_backports.list > /dev/null 2>&1
-		#echo 'deb http://download.virtualbox.org/virtualbox/debian bullseye contrib' | _getMost_backend tee /etc/apt/sources.list.d/ub_vbox.list > /dev/null 2>&1
-		#echo 'deb [arch=amd64] https://download.docker.com/linux/debian bullseye stable' | _getMost_backend tee /etc/apt/sources.list.d/ub_docker.list > /dev/null 2>&1
-	#elif [[ -e /etc/issue ]] && cat /etc/issue | grep 'Ubuntu' | grep '20.04' > /dev/null 2>&1
-	#then
-		#true
-		##echo 'deb http://download.virtualbox.org/virtualbox/debian focal contrib' | _getMost_backend tee /etc/apt/sources.list.d/ub_vbox.list > /dev/null 2>&1
-		##sudo -n add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable"
-	#fi
+	if ! ( [[ -e /etc/issue ]] && cat /etc/issue | grep 'Ubuntu' > /dev/null 2>&1 ) || ( [[ -e /etc/debian_version ]] && cat /etc/debian_version | head -c 2 | grep 11 > /dev/null 2>&1 )
+	then
+		echo 'deb http://deb.debian.org/debian bullseye-backports main contrib' | _getMost_backend tee /etc/apt/sources.list.d/ub_backports.list > /dev/null 2>&1
+		
+		wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | _getMost_backend apt-key add -
+		wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | _getMost_backend apt-key add -
+		echo 'deb [arch=amd64] http://download.virtualbox.org/virtualbox/debian bullseye contrib' | _getMost_backend tee /etc/apt/sources.list.d/ub_vbox.list > /dev/null 2>&1
+		
+		curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg | _getMost_backend apt-key add -
+		echo 'deb [arch=amd64] https://download.docker.com/linux/debian bullseye stable' | _getMost_backend tee /etc/apt/sources.list.d/ub_docker.list > /dev/null 2>&1
+	elif [[ -e /etc/issue ]] && cat /etc/issue | grep 'Ubuntu' | grep '20.04' > /dev/null 2>&1
+	then
+		true
+		
+		wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | _getMost_backend apt-key add -
+		wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | _getMost_backend apt-key add -
+		echo 'deb [arch=amd64] http://download.virtualbox.org/virtualbox/debian focal contrib' | _getMost_backend tee /etc/apt/sources.list.d/ub_vbox.list > /dev/null 2>&1
+		
+		curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg | _getMost_backend apt-key add -
+		_getMost_backend add-apt-repository -y "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable"
+		echo "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable" | _getMost_backend tee /etc/apt/sources.list.d/ub_docker.list > /dev/null 2>&1
+	elif [[ -e /etc/issue ]] && cat /etc/issue | grep 'Ubuntu' | grep '22.04' > /dev/null 2>&1
+	then
+		true
+		
+		wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | _getMost_backend apt-key add -
+		wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | _getMost_backend apt-key add -
+		echo 'deb [arch=amd64] http://download.virtualbox.org/virtualbox/debian jammy contrib' | _getMost_backend tee /etc/apt/sources.list.d/ub_vbox.list > /dev/null 2>&1
+		
+		curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg | _getMost_backend apt-key add -
+		_getMost_backend add-apt-repository -y "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable"
+		echo "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable" | _getMost_backend tee /etc/apt/sources.list.d/ub_docker.list > /dev/null 2>&1
+	fi
 	
+	curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg | _getMost_backend apt-key add -
 	_getMost_backend wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | _getMost_backend apt-key add -
 	_getMost_backend wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | _getMost_backend apt-key add -
 }
@@ -9389,7 +9437,18 @@ _getMost_debian11_install() {
 		_getMost_backend apt-get update
 	fi
 	_getMost_backend_aptGetInstall wmctrl xprintidle
-	_getMost_backend_aptGetInstall okular libreoffice firefox-esr xournal kwrite netcat-openbsd iperf axel unionfs-fuse samba
+	
+	_getMost_backend_aptGetInstall okular
+	_getMost_backend_aptGetInstall libreoffice
+	_getMost_backend_aptGetInstall firefox-esr
+	_getMost_backend_aptGetInstall xournal
+	_getMost_backend_aptGetInstall kwrite
+	_getMost_backend_aptGetInstall netcat-openbsd
+	_getMost_backend_aptGetInstall iperf
+	_getMost_backend_aptGetInstall axel
+	_getMost_backend_aptGetInstall unionfs-fuse
+	_getMost_backend_aptGetInstall samba
+	
 	_getMost_backend_aptGetInstall qemu
 	_getMost_backend_aptGetInstall qemu-system-x86
 	_getMost_backend_aptGetInstall qemu-system-arm
@@ -9729,24 +9788,26 @@ _getMost_debian11() {
 
 
 
-_getMost_ubuntu20_aptSources() {
-	# May be an image copied while dpkg was locked. Especially if 'chroot'.
-	_getMost_backend rm -f /var/lib/apt/lists/lock
-	_getMost_backend rm -f /var/lib/dpkg/lock
+_getMost_ubuntu22_aptSources() {
+	## May be an image copied while dpkg was locked. Especially if 'chroot'.
+	#_getMost_backend rm -f /var/lib/apt/lists/lock
+	#_getMost_backend rm -f /var/lib/dpkg/lock
 	
 	
-	_getMost_backend_aptGetInstall wget
-	_getMost_backend_aptGetInstall gpg
+	#_getMost_backend_aptGetInstall wget
+	#_getMost_backend_aptGetInstall gpg
 	
 	
-	_getMost_backend mkdir -p /etc/apt/sources.list.d
-	echo 'deb http://download.virtualbox.org/virtualbox/debian focal contrib' | _getMost_backend tee /etc/apt/sources.list.d/ub_vbox.list > /dev/null 2>&1
-	echo 'deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable' | _getMost_backend tee /etc/apt/sources.list.d/ub_docker.list > /dev/null 2>&1
+	#_getMost_backend mkdir -p /etc/apt/sources.list.d
+	#echo 'deb http://download.virtualbox.org/virtualbox/debian focal contrib' | _getMost_backend tee /etc/apt/sources.list.d/ub_vbox.list > /dev/null 2>&1
+	#echo 'deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable' | _getMost_backend tee /etc/apt/sources.list.d/ub_docker.list > /dev/null 2>&1
 	
-	_getMost_backend wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | _getMost_backend apt-key add -
-	_getMost_backend wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | _getMost_backend apt-key add -
+	#_getMost_backend wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | _getMost_backend apt-key add -
+	#_getMost_backend wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | _getMost_backend apt-key add -
+	
+	_getMost_debian11_aptSources "$@"
 }
-_getMost_ubuntu20_install() {
+_getMost_ubuntu22_install() {
 	_getMost_debian11_install "$@"
 	
 	# WARNING: Untested. May be old version of VirtualBox. May conflict with guest additions.
@@ -9767,8 +9828,8 @@ _getMost_ubuntu20_install() {
 }
 
 # ATTENTION: End user function.
-_getMost_ubuntu20() {
-	_messagePlain_probe 'begin: _getMost_ubuntu20'
+_getMost_ubuntu22() {
+	_messagePlain_probe 'begin: _getMost_ubuntu22'
 	
 	_set_getMost_backend "$@"
 	_set_getMost_backend_debian "$@"
@@ -9783,15 +9844,15 @@ _getMost_ubuntu20() {
 	export DEBIAN_FRONTEND=noninteractive
 	
 	
-	_getMost_ubuntu20_aptSources "$@"
+	_getMost_ubuntu22_aptSources "$@"
 	
-	_getMost_ubuntu20_install "$@"
+	_getMost_ubuntu22_install "$@"
 	
 	
 	_getMost_backend apt-get remove --autoremove -y plasma-discover
 	
 	
-	_messagePlain_probe 'end: _getMost_ubuntu20'
+	_messagePlain_probe 'end: _getMost_ubuntu22'
 }
 
 
@@ -9908,7 +9969,7 @@ _getMost() {
 	fi
 	if [[ -e /etc/issue ]] && cat /etc/issue | grep 'Ubuntu' > /dev/null 2>&1
 	then
-		_tryExecFull _getMost_ubuntu20 "$@"
+		_tryExecFull _getMost_ubuntu22 "$@"
 		return
 	fi
 	return 1
