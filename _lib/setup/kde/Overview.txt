@@ -5,6 +5,10 @@ Dark mode in particular may prevent 'welders flash' eye surface irritation, seve
 
 One size fits all, mostly, defaults. Customization (eg. left-handedness, large font for developer prolonged text reading, etc) begins from this, NOT vice versa.
 
+
+*) Alt+SysRq+k (just a reminder, this is and must be available instead of Ctrl+Alt+Backspace)
+
+
 *) Wallpaper Type   Plain Color (SEVERE VNC/RDP delays without this)   b 28 #00001c (VM/VPS)   r 20 g 17 #141100 (lodging/desktop)   r 22 b 22 #160016 (request)
 
 *) Clock
