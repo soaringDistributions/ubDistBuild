@@ -1,0 +1,19 @@
+
+*) Alt+SysRq+k (just a reminder, this is and must be available instead of Ctrl+Alt+Backspace)
+
+
+*) Wallpaper Type   Plain Color (SEVERE VNC/RDP delays without this)   b 28 #00001c (VM/VPS)   r 20 g 17 #141100 (lodging/desktop)   r 22 b 22 #160016 (request)
+ *) r 24 b 24 if the magenta request color should be more obvious
+
+
+
+*) Not preserved from 'package_kde' when battery is present.
+ *) Ctrl+Alt+Backspace   resetPlasma   /home/user/.ubcore/ubiquitous_bash/ubiquitous_bash.sh _reset_KDE
+ *) Power (ie. lid close, power button, etc)
+
+*) Keyboard Shotcuts (hardware specific)
+ *) _x220_tablet_flip
+
+
+
+
