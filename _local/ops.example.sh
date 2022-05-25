@@ -42,6 +42,24 @@ _custom() {
 	#_regenerate_rootGrab
 	
 	
+	
+	
+	! "$scriptAbsoluteLocation" _openChRoot && _messageFAIL
+	
+	
+	
+	[[ ! -e "$scriptLocal"/ops.sh ]] && touch "$scriptLocal"/ops.sh
+	sudo -n cp -f "$scriptLocal"/ops.sh "$globalVirtFS"/custom-ops.sh
+	_chroot chown root:root /custom-ops.sh
+	_chroot chmod 700 /custom-ops.sh
+	
+	
+	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messageFAIL
+	
+	
+	
+	
 	# ATTENTION: NOTICE: Seems, 'nouveau' and 'nvidia' can usually coexist. However, neither may be as dependable (eg. usable with recent hardware) as 'Intel', 'AMD', etc. Beware such choices may be hardware-specific, (ie. not portable) etc.
 	
 	#_nouveau_enable
