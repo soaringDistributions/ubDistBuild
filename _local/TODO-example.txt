@@ -14,6 +14,7 @@
 *) Keyboard Shotcuts (hardware specific)
  *) _x220_tablet_flip
 
+*) NVIDIA - force full composition pipeline (if appropriate) (hardware specific).
 
 
 
