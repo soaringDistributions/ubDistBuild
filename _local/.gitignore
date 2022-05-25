@@ -1,0 +1,16 @@
+
+*.img
+*.iso
+*.vdi
+*.vmdk
+
+
+*.github
+
+*.bak
+
+v/
+
+
+
+
