@@ -1,5 +1,5 @@
 
-*) Edit fstab (ie. may change discard setting for SATA SSD with rootGrab, may add autodefrag if necessary for QEMU/VirtualBox/VMWare images, etc).
+*) Edit fstab (ie. may change discard setting for SATA SSD with rootGrab, may add autodefrag if necessary for QEMU/VirtualBox/VMWare images, etc). Conversion to ext4 is instead possible and may be necessary for developer workstations using VMs casually.
 
 
 *) Alt+SysRq+k (just a reminder, this is and must be available instead of Ctrl+Alt+Backspace)
