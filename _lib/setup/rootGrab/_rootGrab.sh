@@ -543,7 +543,12 @@ _detect_small() {
 	_detect_live && return 0
 	
 	[[ $(find /root/core_rG/flipKey/_local/container.vc -size +35G | wc -l | tr -dc '0-9') -ge 1 ]] && return 1
-	[[ $(bc <<< "scale=0; "$(df --block-size=1 --output=avail /home/"$custom_user"/ | tr -dc '0-9')" / 1000000000") -le 35 ]] && return 0
+	
+	# Minimal. Will allow attempt by default to 'create' for any /home (presumably any /root filesystem should be similar) with more unused information storage than constrained CI build expected to have.
+	#[[ $(bc <<< "scale=0; "$(df --block-size=1 --output=avail /home/"$custom_user"/ | tr -dc '0-9')" / 1000000000") -le 35 ]] && return 0
+	
+	# Must be enough for multiple VM images. Will prevent 'create' unless filesystem definitely expanded enough for expected usual workstations, preventing undesired complexity during '_custom' and similar using 'chroot', 'qemu', etc.
+	[[ $(bc <<< "scale=0; "$(df --block-size=1 --output=avail /home/"$custom_user"/ | tr -dc '0-9')" / 1000000000") -le 60 ]] && return 0
 	
 	return 1
 }
