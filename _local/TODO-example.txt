@@ -1,4 +1,7 @@
 
+*) Edit fstab (ie. may change discard setting for SATA SSD with rootGrab, may add autodefrag if necessary for QEMU/VirtualBox/VMWare images, etc).
+
+
 *) Alt+SysRq+k (just a reminder, this is and must be available instead of Ctrl+Alt+Backspace)
 
 
@@ -17,4 +20,8 @@
 *) NVIDIA - force full composition pipeline (if appropriate) (hardware specific).
 
 
+
+
+_ Reference _
+https://unix.stackexchange.com/questions/394973/why-would-i-want-to-disable-copy-on-write-while-creating-qemu-images
 
