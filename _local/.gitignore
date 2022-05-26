@@ -5,6 +5,7 @@
 *.vmdk
 
 
+vm.img.*
 *.github
 
 *.bak
