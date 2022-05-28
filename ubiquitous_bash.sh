@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3991443566'
+export ub_setScriptChecksum_contents='2302070078'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -9346,6 +9346,15 @@ _getMost_debian11_aptSources() {
 		
 		curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg | _getMost_backend apt-key add -
 		echo 'deb [arch=amd64] https://download.docker.com/linux/debian bullseye stable' | _getMost_backend tee /etc/apt/sources.list.d/ub_docker.list > /dev/null 2>&1
+		
+		## https://fasttrack.debian.net/
+		#if ! grep 'fasttrack' /etc/apt/sources.list
+		#then
+			#_getMost_backend apt install -y fasttrack-archive-keyring
+			#echo 'deb https://fasttrack.debian.net/debian-fasttrack/ bullseye-fasttrack main contrib' | _getMost_backend tee -a /etc/apt/sources.list
+			#echo 'deb https://fasttrack.debian.net/debian-fasttrack/ bullseye-backports-staging main contrib' | _getMost_backend tee -a /etc/apt/sources.list
+		#fi
+		
 	elif [[ -e /etc/issue ]] && cat /etc/issue | grep 'Ubuntu' | grep '20.04' > /dev/null 2>&1
 	then
 		true
@@ -9470,15 +9479,32 @@ _getMost_debian11_install() {
 	_getMost_backend_aptGetInstall chromium
 	_getMost_backend_aptGetInstall openjdk-11-jdk openjdk-11-jre
 	
-	# ATTENTION: ONLY uncomment if needed to ensure a kernel is installed AND custom kernel is not in use.
+	# ATTENTION: ONLY change (eg. to 'remove') if needed to ensure a kernel is installed AND custom kernel is not in use.
 	_getMost_backend_aptGetInstall linux-image-amd64
 	
 	_getMost_backend_aptGetInstall net-tools wireless-tools rfkill
 	
 	
+	_getMost_backend_aptGetInstall p7zip
+	_getMost_backend_aptGetInstall p7zip-full
+	
+	
+	
+	_getMost_backend_aptGetInstall open-vm-tools-desktop
+	
+	#_getMost_backend_aptGetInstall virtualbox-guest-utils
+	#_getMost_backend_aptGetInstall virtualbox-guest-x11
+	
+	_getMost_backend wget -qO- 'https://download.virtualbox.org/virtualbox/6.1.34/VBoxGuestAdditions_6.1.34.iso' | _getMost_backend tee /VBoxGuestAdditions.iso > /dev/null
+	_getMost_backend 7z x /VBoxGuestAdditions.iso -o/VBoxGuestAdditions
+	_getMost_backend rm -f /VBoxGuestAdditions.iso
+	_getMost_backend chmod u+x /VBoxGuestAdditions/VBoxLinuxAdditions.run
+	_getMost_backend /VBoxGuestAdditions/VBoxLinuxAdditions.run
+	
+	
 	# https://docs.oracle.com/en/virtualization/virtualbox/6.0/user/install-linux-host.html
 	echo 'virtualbox virtualbox/module-compilation-allowed boolean true
-	virtualbox virtualbox/delete-old-modules boolean true' | sudo -n debconf-set-selections
+	virtualbox virtualbox/delete-old-modules boolean true' | _getMost_backend debconf-set-selections
 	
 	if false && !  [[ -e /etc/issue ]] && cat /etc/issue | grep 'Ubuntu' > /dev/null 2>&1
 	then
@@ -9491,6 +9517,12 @@ _getMost_debian11_install() {
 		#_getMost_backend_aptGetInstall docker-ce
 		_getMost_backend apt-get -d install -y docker-ce
 	fi
+	
+	
+	# https://en.wiktionary.org/wiki/poke_the_bear
+	# https://forums.virtualbox.org/viewtopic.php?t=25797
+	_getMost_backend VBoxManage setextradata global GUI/SuppressMessages "Update"
+	
 	
 	
 	# WARNING: Untested. May incorrectly remove supposedly 'old' kernel versions.
@@ -15820,6 +15852,7 @@ _createVMimage() {
 	return 0
 }
 # WARNING: No production use. No use as-is. Hybrid/UEFI is default.
+# WARNING: May necessitate 'update-grub' within 'qemu' or similar to remove incorrecly detected running kernel from menu.
 _convertVMimage_sequence() {
 	_messageNormal '_convertVMimage_sequence'
 	
@@ -15833,13 +15866,13 @@ _convertVMimage_sequence() {
 	# ATTENTION: Override if necessary (ie. with 'ops.sh' from an existing image).
 	export ubVirtImage_doNotOverride="true"
 	export ubVirtPlatformOverride='x64-efi'
-	export ubVirtImageBIOS=
-	export ubVirtImageEFI=p1
+	export ubVirtImageBIOS=p1
+	export ubVirtImageEFI=p2
 	export ubVirtImageNTFS=
 	export ubVirtImageRecovery=
-	export ubVirtImageSwap=p2
-	export ubVirtImageBoot=
-	export ubVirtImagePartition=p3
+	export ubVirtImageSwap=p3
+	export ubVirtImageBoot=p4
+	export ubVirtImagePartition=p5
 	
 	
 	_messagePlain_nominal '_convertVMimage_sequence: copy: out'
@@ -15856,8 +15889,15 @@ _convertVMimage_sequence() {
 		sudo -n mount "$imagedev""$ubVirtImageEFI" "$globalVirtFS"/boot/efi
 	fi
 	
+	
 	sudo -n rsync -ax "$globalVirtFS"/. "$safeTmp"/rootfs/.
 	[[ "$?" != "0" ]] && _messageFAIL
+	
+	sudo -n rsync -ax "$globalVirtFS"/boot/. "$safeTmp"/rootfs/boot/.
+	[[ "$?" != "0" ]] && _messageFAIL
+	sudo -n rsync -ax "$globalVirtFS"/boot/efi/. "$safeTmp"/rootfs/boot/efi/.
+	[[ "$?" != "0" ]] && _messageFAIL
+	
 	
 	sudo -n umount "$globalVirtFS"/boot/efi > /dev/null 2>&1
 	sudo -n umount "$globalVirtFS"/boot > /dev/null 2>&1
@@ -15883,8 +15923,15 @@ _convertVMimage_sequence() {
 		sudo -n mount "$imagedev""$ubVirtImageEFI" "$globalVirtFS"/boot/efi
 	fi
 	
+	
 	sudo -n rsync -ax "$safeTmp"/rootfs/. "$globalVirtFS"/.
 	[[ "$?" != "0" ]] && _messageFAIL
+	
+	sudo -n rsync -ax "$safeTmp"/rootfs/boot/. "$globalVirtFS"/boot/.
+	[[ "$?" != "0" ]] && _messageFAIL
+	sudo -n rsync -ax "$safeTmp"/rootfs/boot/efi/. "$globalVirtFS"/boot/efi/.
+	[[ "$?" != "0" ]] && _messageFAIL
+	
 	
 	sudo -n umount "$globalVirtFS"/boot/efi > /dev/null 2>&1
 	sudo -n umount "$globalVirtFS"/boot > /dev/null 2>&1
@@ -18130,6 +18177,7 @@ _create_instance_vbox() {
 
 	#Suppress annoying warnings.
 	! VBoxManage setextradata global GUI/SuppressMessages "remindAboutAutoCapture,remindAboutMouseIntegration,remindAboutMouseIntegrationOn,showRuntimeError.warning.HostAudioNotResponding,remindAboutGoingSeamless,remindAboutInputCapture,remindAboutGoingFullscreen,remindAboutMouseIntegrationOff,confirmGoingSeamless,confirmInputCapture,remindAboutPausedVMInput,confirmVMReset,confirmGoingFullscreen,remindAboutWrongColorDepth" && _messagePlain_warn 'fail: VBoxManage... suppress messages'
+	! VBoxManage setextradata global GUI/SuppressMessages "Update" && _messagePlain_warn 'fail: VBoxManage... suppress messages... Update'
 	
 	_set_instance_vbox_features_app_post
 	
@@ -28906,6 +28954,10 @@ _unix_renice_idle() {
 	# WARNING: Probably unnecessary and counterproductive. May risk halting important compile jobs.
 	#_priority_enumerate_pattern "^cc1$" >> "$processListFile"
 	#_priority_enumerate_pattern "^cc1plus$" >> "$processListFile"
+	
+	#_priority_enumerate_pattern "^tar$" >> "$processListFile"
+	#_priority_enumerate_pattern "^xz$" >> "$processListFile"
+	#_priority_enumerate_pattern "^kcompactd0$" >> "$processListFile"
 	
 	
 	local currentPID
