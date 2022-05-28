@@ -6,6 +6,7 @@ _set_ubDistBuild() {
 	#Enable search if "vm.img" and related files are missing.
 	export ubVirtImageLocal="true"
 	
+	export vboxOStype=Debian_64
 	
 	
 	# _vboxGUI() {
@@ -912,7 +913,13 @@ _custom_ubDistBuild() {
 _package_ubDistBuild_image() {
 	cd "$scriptLocal"
 	
-	! [[ -e "$scriptLocal"/ops.sh ]] && echo >> "$scriptLocal"/ops.sh
+	if ! [[ -e "$scriptLocal"/ops.sh ]]
+	then
+		#echo >> "$scriptLocal"/ops.sh
+		echo >> "$scriptLocal"/ops.sh
+		echo 'export vboxOStype=Debian_64' >> "$scriptLocal"/ops.sh
+		echo >> "$scriptLocal"/ops.sh
+	fi
 	
 	rm -f "$scriptLocal"/package_image.tar.xz > /dev/null 2>&1
 	

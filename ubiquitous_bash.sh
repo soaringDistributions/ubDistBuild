@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3320530154'
+export ub_setScriptChecksum_contents='207778639'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -17734,11 +17734,11 @@ _workaround_VirtualBoxVM() {
 }
 
 _vboxGUI() {
-	#_workaround_VirtualBoxVM "$@"
+	_workaround_VirtualBoxVM "$@"
 	
 	#VirtualBoxVM "$@"
 	#VirtualBox "$@"
-	VBoxSDL "$@"
+	#VBoxSDL "$@"
 }
 
 
@@ -39063,6 +39063,7 @@ _set_ubDistBuild() {
 	#Enable search if "vm.img" and related files are missing.
 	export ubVirtImageLocal="true"
 	
+	export vboxOStype=Debian_64
 	
 	
 	# _vboxGUI() {
@@ -39969,7 +39970,13 @@ _custom_ubDistBuild() {
 _package_ubDistBuild_image() {
 	cd "$scriptLocal"
 	
-	! [[ -e "$scriptLocal"/ops.sh ]] && echo >> "$scriptLocal"/ops.sh
+	if ! [[ -e "$scriptLocal"/ops.sh ]]
+	then
+		#echo >> "$scriptLocal"/ops.sh
+		echo >> "$scriptLocal"/ops.sh
+		echo 'export vboxOStype=Debian_64' >> "$scriptLocal"/ops.sh
+		echo >> "$scriptLocal"/ops.sh
+	fi
 	
 	rm -f "$scriptLocal"/package_image.tar.xz > /dev/null 2>&1
 	
