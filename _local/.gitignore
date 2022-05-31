@@ -15,6 +15,11 @@ v/
 
 NVIDIA*.run
 
+home/
+home*/
+home_tmp/
+home_tmp*/
+
 
 
 
