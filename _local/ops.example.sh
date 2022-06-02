@@ -188,7 +188,7 @@ CZXWXcRMTo8EmM8i4d
 	
 	
 	sudo -n rm -f "$globalVirtFS"/home/user/core/platformBuilder/_self/self/package_image.tar.xz
-	sudo -n rm -f "$globalVirtFS"/home/user/core/platformBuilder/distllc/package_image.tar.xz
+	sudo -n rm -f "$globalVirtFS"/home/user/core/platformBuilder/zz_distllc/package_image.tar.xz
 	sudo -n dd if=/dev/zero of="$globalVirtFS"/fill bs=1M status=progress
 	sudo -n rm -f "$globalVirtFS"/fill
 	
@@ -217,18 +217,18 @@ CZXWXcRMTo8EmM8i4d
 	sudo -n cp -f "$scriptLocal"/package_image.tar.xz "$globalVirtFS"/home/user/core/platformBuilder/_self/self/package_image.tar.xz
 	_chroot chown user:user /home/user/core/platformBuilder/_self/self/package_image.tar.xz
 	
-	sudo -n mkdir -p "$globalVirtFS"/home/user/core/platformBuilder/distllc
-	_chroot chown user:user /home/user/core/platformBuilder/distllc
+	sudo -n mkdir -p "$globalVirtFS"/home/user/core/platformBuilder/zz_distllc
+	_chroot chown user:user /home/user/core/platformBuilder/zz_distllc
 	_chroot chown user:user /home/user/core/platformBuilder
 	_chroot chown user:user /home/user/core
 	_chroot chown user:user /home/user
 	
-	sudo -n cp -a "$globalVirtFS"/home/user/ubDistBuild "$globalVirtFS"/home/user/core/platformBuilder/distllc/
-	sudo -n cp -f "$scriptAbsoluteFolder"/../distllc/package_image.tar.xz "$globalVirtFS"/home/user/core/platformBuilder/distllc/package_image.tar.xz
-	_chroot chown user:user /home/user/core/platformBuilder/distllc/package_image.tar.xz
+	sudo -n cp -a "$globalVirtFS"/home/user/ubDistBuild "$globalVirtFS"/home/user/core/platformBuilder/zz_distllc/
+	sudo -n cp -f "$scriptAbsoluteFolder"/../zz_distllc/package_image.tar.xz "$globalVirtFS"/home/user/core/platformBuilder/zz_distllc/package_image.tar.xz
+	_chroot chown user:user /home/user/core/platformBuilder/zz_distllc/package_image.tar.xz
 	
 	
-	sudo -n ln -s ../../distllc "$globalVirtFS"/home/user/core/platformBuilder/_self/self/distllc
+	sudo -n ln -s ../../zz_distllc "$globalVirtFS"/home/user/core/platformBuilder/_self/self/zz_distllc
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messageFAIL
 	
@@ -674,7 +674,7 @@ _preserve_home_tmp() {
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
 	#sudo -n rm -f "$globalVirtFS"/home/user/core/platformBuilder/_self/self/package_image.tar.xz
-	#sudo -n rm -f "$globalVirtFS"/home/user/core/platformBuilder/distllc/package_image.tar.xz
+	#sudo -n rm -f "$globalVirtFS"/home/user/core/platformBuilder/zz_distllc/package_image.tar.xz
 	
 	mkdir -p "$scriptLocal"/home_tmp/user
 	#sudo -n rsync -ax "$globalVirtFS"/home/user/. "$scriptLocal"/home_tmp/user/.
