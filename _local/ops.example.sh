@@ -11,11 +11,23 @@
 # *) Do NOT reboot inside qemu. Seems to cause severe KDE/plasma instability, which may cause corruption.
 
 
+
+
 ######## ######## ######## ######## ######## ######## ######## ######## ######## ########
 # errata
 ######## ######## ######## ######## ######## ######## ######## ######## ######## ########
 
 
+## As appropriate .
+
+##_convertVMimage
+##_import_home_tmp
+##_custom
+
+##_zSpecial_qemu
+	## ... some stuff from 'TODO.txt' , etc
+
+##_create
 
 
 
