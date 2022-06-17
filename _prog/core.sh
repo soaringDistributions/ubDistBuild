@@ -848,11 +848,15 @@ _create_ubDistBuild-bootOnce() {
 	
 	
 	# WARNING: Important. May drastically reduce image size, especially if large temporary files (ie. apt cache) have been used. *Very* compressible zeros.
+	# https://fedoraproject.org/wiki/Changes/BtrfsTransparentCompression
+	#  'btrfs property' 'Unsetting it is...tricky' 'doesn't unset compression, it prevents the compress mount option from working'
+	_chroot mount -o remount,compress=none /
 	_chroot rm -f /fill > /dev/null 2>&1
 	_chroot dd if=/dev/zero of=/fill bs=1M count=1 oflag=append conv=notrunc status=progress
-	_chroot btrfs property set /fill compression ""
+	#_chroot btrfs property set /fill compression ""
 	_chroot dd if=/dev/zero of=/fill bs=1M oflag=append conv=notrunc status=progress
 	_chroot rm -f /fill
+	_chroot mount -o remount,compress=zstd:9 /
 	
 	# Run only once. If used two or more times, apparently may decrease available storage by ~1GB .
 	# Apparently, if defrag is run once with compression, rootfs usage may reduce from ~6.6GB to ~5.9GB . However, running again may expand usage back to ~6.6GB.
