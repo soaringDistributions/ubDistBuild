@@ -1082,7 +1082,7 @@ _zSpecial_qemu_sequence() {
 	_start
 	
 	
-	if [[ "$qemuHeadless" == "true" ]]
+	if [[ "$qemuHeadless" == "true" ]] || [[ "$qemu_custom" == "true" ]]
 	then
 		#_commandBootdisc
 		
@@ -1178,7 +1178,7 @@ _zSpecial_qemu_sequence() {
 	if _testQEMU_hostArch_x64_hardwarevt
 	then
 		_messagePlain_good 'found: kvm'
-		if [[ "$qemuHeadless" == "true" ]]
+		if [[ "$qemuHeadless" == "true" ]] || [[ "$qemuNoKVM" == "true" ]]
 		then
 			# Apparently, qemu kvm, can be unreliable if nested (eg. within VMWare Workstation VM).
 			_messagePlain_good 'ignored: kvm'
