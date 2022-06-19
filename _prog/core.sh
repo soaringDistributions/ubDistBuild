@@ -1047,6 +1047,35 @@ _zSpecial_qemu_chroot() {
 	return 0
 }
 
+
+_zSpecial_qemu_sequence_prog() {
+	# A rather complicated issue with VirtualBox vboxdrv kernel module.
+	# Module vboxdrv build may be attempted for running kernel of ChRoot host.
+	# Sevice vboxdrv will attempt to build, may timeout in ~5 minutes (due to slow qemu without kvm), fail, every boot.
+	# Since this should not take much time or power for modern CPUs, and should only affect the ability run VirtualBox guests on first boot (ie. does not affect guest additions), this is expected at most a minor inconvenience.
+	
+	# sudo -n systemctl status vboxdrv
+	echo '#!/usr/bin/env bash' >> "$hostToGuestFiles"/cmd.sh
+	echo 'sudo -n update-grub' >> "$hostToGuestFiles"/cmd.sh
+	echo '_detect_process_compile() {
+	pgrep cc1 && return 0
+	pgrep apt && return 0
+	pgrep dpkg && return 0
+	top -b -n1 | tail -n+8 | head -n1 | grep packagekit && return 0
+	sudo -n systemctl status vboxdrv | grep loading && return 0
+	return 1
+} ' >> "$hostToGuestFiles"/cmd.sh
+	
+	# Commenting this may reduce first iteration 'currentIterationWait' by ~120s , possibly improving opportunity to successfully compile through slow qemu without kvm.
+	# If uncommented, any indefinite delay in '_detect_process_compile' may cause failure.
+	#echo 'while _detect_process_compile && sleep 27 && _detect_process_compile && sleep 27 && _detect_process_compile ; do sleep 27 ; done' >> "$hostToGuestFiles"/cmd.sh
+	
+	echo 'sleep 15' >> "$hostToGuestFiles"/cmd.sh
+	echo '! sudo -n lsmod | grep -i vboxdrv && sudo -n /sbin/vboxconfig' >> "$hostToGuestFiles"/cmd.sh
+	echo 'sleep 75' >> "$hostToGuestFiles"/cmd.sh
+	echo 'sudo -n poweroff' >> "$hostToGuestFiles"/cmd.sh
+}
+
 # ATTENTION: Override with 'ops.sh' or similar.
 _zSpecial_qemu_sequence() {
 	_messagePlain_nominal 'init: _zSpecial_qemu'
@@ -1063,31 +1092,9 @@ _zSpecial_qemu_sequence() {
 		"$scriptBin"/.ubrgbin.sh _ubrgbin_cpA "$scriptBin" "$hostToGuestFiles"/_bin
 		
 		
-		# A rather complicated issue with VirtualBox vboxdrv kernel module.
-		# Module vboxdrv build may be attempted for running kernel of ChRoot host.
-		# Sevice vboxdrv will attempt to build, may timeout in ~5 minutes (due to slow qemu without kvm), fail, every boot.
-		# Since this should not take much time or power for modern CPUs, and should only affect the ability run VirtualBox guests on first boot (ie. does not affect guest additions), this is expected at most a minor inconvenience.
+		_zSpecial_qemu_sequence_prog "$@"
 		
-		# sudo -n systemctl status vboxdrv
-		echo '#!/usr/bin/env bash' >> "$hostToGuestFiles"/cmd.sh
-		echo 'sudo -n update-grub' >> "$hostToGuestFiles"/cmd.sh
-		echo '_detect_process_compile() {
-	pgrep cc1 && return 0
-	pgrep apt && return 0
-	pgrep dpkg && return 0
-	top -b -n1 | tail -n+8 | head -n1 | grep packagekit && return 0
-	sudo -n systemctl status vboxdrv | grep loading && return 0
-	return 1
-} ' >> "$hostToGuestFiles"/cmd.sh
 		
-		# Commenting this may reduce first iteration 'currentIterationWait' by ~120s , possibly improving opportunity to successfully compile through slow qemu without kvm.
-		# If uncommented, any indefinite delay in '_detect_process_compile' may cause failure.
-		#echo 'while _detect_process_compile && sleep 27 && _detect_process_compile && sleep 27 && _detect_process_compile ; do sleep 27 ; done' >> "$hostToGuestFiles"/cmd.sh
-		
-		echo 'sleep 15' >> "$hostToGuestFiles"/cmd.sh
-		echo '! sudo -n lsmod | grep -i vboxdrv && sudo -n /sbin/vboxconfig' >> "$hostToGuestFiles"/cmd.sh
-		echo 'sleep 75' >> "$hostToGuestFiles"/cmd.sh
-		echo 'sudo -n poweroff' >> "$hostToGuestFiles"/cmd.sh
 		
 		! _writeBootdisc && _messageFAIL
 	fi
