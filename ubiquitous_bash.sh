@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='4238364156'
+export ub_setScriptChecksum_contents='2189051544'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -659,7 +659,7 @@ then
 	if [[ $(echo "$MSWEXTPATH" | grep -o ';\|:' | wc -l | tr -dc '0-9') -le 32 ]] && [[ $(echo "$PATH" | grep -o ':' | wc -l | tr -dc '0-9') -le 32 ]]
 	then
 		export convertedMSWEXTPATH=$(cygpath -p "$MSWEXTPATH")
-		export PATH="$PATH":"$convertedMSWEXTPATH"
+		export PATH=/usr/bin:"$convertedMSWEXTPATH":"$PATH"
 	fi
 fi
 
@@ -9308,7 +9308,7 @@ _wait_debianInstall() {
 			sleep 0.1
 			echo 'busy: '"$currentIteration_continuing"
 			let currentIteration_continuing="$currentIteration_continuing"+1
-			if pgrep "^tasksel$" || pgrep "^apt-get$" || pgrep "^dpkg$" || ( fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || ( type -p sudo > /dev/null 2>&1 && sudo -n fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 ) )
+			if pgrep ^tasksel$ || pgrep ^apt-get$ || pgrep ^dpkg$ || ( fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || ( type -p sudo > /dev/null 2>&1 && sudo -n fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 ) )
 			then
 				currentIteration_continuing=99999
 			fi
@@ -9467,6 +9467,8 @@ _getMost_debian11_install() {
 	_getMost_backend_aptGetInstall axel
 	_getMost_backend_aptGetInstall unionfs-fuse
 	_getMost_backend_aptGetInstall samba
+	
+	_getMost_backend_aptGetInstall aria2
 	
 	_getMost_backend_aptGetInstall qemu
 	_getMost_backend_aptGetInstall qemu-system-x86
@@ -9808,11 +9810,22 @@ _getMost_debian11_install() {
 	
 	
 	
+	#_getMost_backend_aptGetInstall nvflash
+	
+	_getMost_backend_aptGetInstall usbutils
+	
+	_getMost_backend_aptGetInstall lm-sensors
+	_getMost_backend_aptGetInstall hddtemp
+	_getMost_backend_aptGetInstall aptitude
+	_getMost_backend_aptGetInstall recode
+	_getMost_backend_aptGetInstall asciidoc
+	
+	
+	
 	_getMost_backend_aptGetInstall pavucontrol
 	_getMost_backend_aptGetInstall filelight
 	
 	_getMost_backend_aptGetInstall obs-studio
-	
 	
 	
 	_getMost_backend_aptGetInstall lepton-eda
@@ -9822,9 +9835,25 @@ _getMost_debian11_install() {
 	_getMost_backend_aptGetInstall electronics-pcb
 	_getMost_backend_aptGetInstall pcb2gcode
 	
+	_getMost_backend_aptGetInstall inkscape
+	_getMost_backend_aptGetInstall libgdl-3-5
+	_getMost_backend_aptGetInstall libgdl-3-common
+	_getMost_backend_aptGetInstall libgtkspell3-3-0
+	_getMost_backend_aptGetInstall libimage-magick-perl
+	_getMost_backend_aptGetInstall libimage-magick-q16-perl
+	_getMost_backend_aptGetInstall libpotrace0
+	_getMost_backend_aptGetInstall libwmf-bin
+	_getMost_backend_aptGetInstall python3-scour
+	
+	
 	_getMost_backend_aptGetInstall kicad
 	
 	_getMost_backend_aptGetInstall electric
+	
+	
+	
+	_getMost_backend python -m pip install --upgrade pip
+	_getMost_backend sudo -n pip install --upgrade pip
 	
 	_getMost_backend_aptGetInstall freecad
 	
@@ -10380,6 +10409,31 @@ _getMinimal_cloud() {
 	
 	
 }
+
+
+
+_get_from_nix-user() {
+	local currentUser
+	currentUser="$1"
+	[[ "$currentUser" == "" ]] && currentUser="user"
+	
+	
+	#_custom_installDeb /root/core/installations/Wire.deb
+	_getMost_backend sudo -n -u "$currentUser" /bin/bash -i -c 'nix-env -iA nixpkgs.wire-desktop'
+	_getMost_backend sudo -n -u "$currentUser" xdg-desktop-menu install /home/user/.nix-profile/share/applications/wire-desktop.desktop
+	_getMost_backend sudo -n -u "$currentUser" cp -a /home/user/.nix-profile/share/icons /home/user/.local/share/
+	
+	_getMost_backend sudo -n -u "$currentUser" /bin/bash -i -c 'nix-env -iA nixpkgs.geda'
+	_getMost_backend sudo -n -u "$currentUser" xdg-desktop-menu install /home/user/.nix-profile/share/applications/geda-gschem.desktop
+	_getMost_backend sudo -n -u "$currentUser" xdg-desktop-menu install /home/user/.nix-profile/share/applications/geda-gattrib.desktop
+	_getMost_backend sudo -n -u "$currentUser" cp -a /home/user/.nix-profile/share/icons /home/user/.local/share/
+}
+
+_get_from_nix() {
+	_get_from_nix-user "$@"
+}
+
+
 
 
 
@@ -12819,12 +12873,12 @@ cat << CZXWXcRMTo8EmM8i4d
 	current_x11_clipboard=\$(xclip -out -selection clipboard)
 	current_x11_clipboard=\$(_removeFilePrefix "\$current_x11_clipboard")
 	
-	# Replace ./../.. ... /../home/user/ ... with /home/"\$USER"/ .
+	# Replace (if relevant) ./../.. ... /../home/user/ ... with /home/"\$USER"/ .
 	#current_x11_clipboard=\${current_x11_clipboard/*\/home\//\/home\/}
 	#current_x11_clipboard=\$(_safeEcho "\$current_x11_clipboard" | sed 's/^\([\.\/]\)*home\//\/home\//')
-	#current_x11_clipboard=\$(_safeEcho "\$current_x11_clipboard" | sed 's/^\([\.\/]\)*home\/'"$USER"'/\/home\/'"$USER"'/')
-	#current_x11_clipboard=\$(_safeEcho "\$current_x11_clipboard" | sed 's/^\([\.\/]\)*home\/[a-zA-Z0-9_\-]*/\/home\/'"$USER"'/')
-	current_x11_clipboard=\$(_safeEcho "\$current_x11_clipboard" | sed 's/^\([\.\/]\)*home\/[^/]*/\/home\/'"$USER"'/')
+	#current_x11_clipboard=\$(_safeEcho "\$current_x11_clipboard" | sed 's/^\([\.\/]\)*home\/'"\$USER"'/\/home\/'"\$USER"'/')
+	#current_x11_clipboard=\$(_safeEcho "\$current_x11_clipboard" | sed 's/^\([\.\/]\)*home\/[a-zA-Z0-9_\-]*/\/home\/'"\$USER"'/')
+	current_x11_clipboard=\$(_safeEcho "\$current_x11_clipboard" | sed 's/^\([\.\/]\)*home\/[^/]*/\/home\/'"\$USER"'/')
 	
 	#if [[ -e "\${processedArgs[0]}" ]]
 	if [[ -e "\$current_x11_clipboard" ]]
@@ -16967,13 +17021,13 @@ _testQEMU_x64-raspi() {
 	
 	
 	
-	if ! sudo -n cat /proc/sys/fs/binfmt_misc/* 2> /dev/null | grep qemu | grep 'arm$\|arm-static$\|arm-binfmt-P$\|arm-binfmt' > /dev/null 2>&1
+	if ! sudo -n cat /proc/sys/fs/binfmt_misc/* 2> /dev/null | grep qemu | grep 'arm$\|arm-static$\|arm-binfmt-P$\|arm-binfmt' > /dev/null 2>&1 && ! _if_cygwin
 	then
 		echo 'binfmts does not mention qemu-arm'
 		[[ "$INSTANCE_ID" == "" ]] && _stop 1
 	fi
 	
-	if ! sudo -n cat /proc/sys/fs/binfmt_misc/* 2> /dev/null | grep qemu | grep 'armeb$\|armeb-static$\|armeb-binfmt-P$\|armeb-binfmt' > /dev/null 2>&1
+	if ! sudo -n cat /proc/sys/fs/binfmt_misc/* 2> /dev/null | grep qemu | grep 'armeb$\|armeb-static$\|armeb-binfmt-P$\|armeb-binfmt' > /dev/null 2>&1 && ! _if_cygwin
 	then
 		echo 'binfmts does not mention qemu-armeb'
 		[[ "$INSTANCE_ID" == "" ]] && _stop 1
@@ -18970,32 +19024,41 @@ _test_docker() {
 	_checkDep gosu-amd64
 	_checkDep gosu-i386
 	
-	#https://docs.docker.com/engine/installation/linux/docker-ce/debian/#install-using-the-repository
-	#https://wiki.archlinux.org/index.php/Docker#Installation
-	#sudo -n usermod -a -G docker "$USER"
 	
-	_getDep /sbin/losetup
-	if ! [[ -e "/dev/loop-control" ]] || ! [[ -e "/sbin/losetup" ]]
+	if ! _if_cygwin
 	then
-		echo 'may be missing loopback interface'
-		_stop 1
+		
+		#https://docs.docker.com/engine/installation/linux/docker-ce/debian/#install-using-the-repository
+		#https://wiki.archlinux.org/index.php/Docker#Installation
+		#sudo -n usermod -a -G docker "$USER"
+		
+		_getDep /sbin/losetup
+		if ! [[ -e "/dev/loop-control" ]] || ! [[ -e "/sbin/losetup" ]]
+		then
+			echo 'may be missing loopback interface'
+			_stop 1
+		fi
+		
+		_getDep docker
+		
+		local dockerPermission
+		dockerPermission=$(_permitDocker echo true 2> /dev/null)
+		if [[ "$dockerPermission" != "true" ]]
+		then
+			echo 'no permissions to run docker'
+			_stop 1
+		fi
+		
+		
+		#if ! _permitDocker docker run hello-world 2>&1 | grep 'Hello from Docker' > /dev/null 2>&1
+		#then
+		#	echo 'failed docker hello world'
+		#	_stop 1
+		#fi
+		
 	fi
 	
-	_getDep docker
 	
-	local dockerPermission
-	dockerPermission=$(_permitDocker echo true 2> /dev/null)
-	if [[ "$dockerPermission" != "true" ]]
-	then
-		echo 'no permissions to run docker'
-		_stop 1
-	fi
-	
-	#if ! _permitDocker docker run hello-world 2>&1 | grep 'Hello from Docker' > /dev/null 2>&1
-	#then
-	#	echo 'failed docker hello world'
-	#	_stop 1
-	#fi
 	
 	if ! _discoverResource moby/contrib/mkimage.sh > /dev/null 2>&1 && ! _discoverResource docker/contrib/mkimage.sh
 	#if true
@@ -19013,6 +19076,11 @@ _test_docker() {
 	
 	
 	
+	if _if_cygwin
+	then
+		return 0
+	fi
+	
 	sudo -n systemctl status docker 2>&1 | head -n 2 | grep -i 'chroot' > /dev/null && return 0
 	systemctl status docker 2>&1 | head -n 2 | grep -i 'chroot' > /dev/null && return 0
 	
@@ -19025,6 +19093,7 @@ _test_docker() {
 		echo 'sudo -n update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy'
 		_stop 1
 	fi
+	
 }
 
 
@@ -19158,7 +19227,14 @@ _visualPrompt() {
 	
 	#export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${debian_chroot:+($debian_chroot)}\[\033[01;33m\]\u\[\033[01;32m\]@\h\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]'"$prompt_nixShell"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[37m\][\w]\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '
 	
-	export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${currentChroot:+($currentChroot)}\[\033[01;33m\]\u\[\033[01;32m\]@'"$currentHostname"'\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]'"$prompt_nixShell"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[37m\][\w]\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '
+	
+	
+	if ! _if_cygwin
+	then
+		export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${currentChroot:+($currentChroot)}\[\033[01;33m\]\u\[\033[01;32m\]@'"$currentHostname"'\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]'"$prompt_nixShell"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[37m\][\w]\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '
+	else
+		export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${currentChroot:+($currentChroot)}\[\033[01;33m\]\u\[\033[01;32m\]@'"$currentHostname"'\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]'"$prompt_nixShell"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]\[\033[37m\]\w\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '
+	fi
 	
 	#export PS1="$prompt_nixShell""$PS1"
 }
@@ -19271,7 +19347,15 @@ then
 		_octave_nsolve "$@"
 	}
 
+	# WARNING: Mostly intended as apparent MSW/Cygwin workaround. May cause incorrectly written equations with inappropriate non-numeric output to pass regression tests.
 	_clc() {
+		# https://www.cyberciti.biz/faq/linux-unix-bash-check-interactive-shell/
+		if [ -z "$PS1" ]
+		then
+			_octave "$@" | tr -dc '0-9.'
+			return
+		fi
+		
 		_octave "$@"
 	}
 	clc() {
@@ -19279,6 +19363,10 @@ then
 	}
 	c() {
 		_octave "$@"
+	}
+	
+	_num() {
+		_clc "$@" | tr -dc '0-9.'
 	}
 fi
 
@@ -19666,7 +19754,15 @@ then
 		_qalculate_solve "$@"
 	}
 
+	# WARNING: Mostly intended as apparent MSW/Cygwin workaround. May cause incorrectly written equations with inappropriate non-numeric output to pass regression tests.
 	_clc() {
+		# https://www.cyberciti.biz/faq/linux-unix-bash-check-interactive-shell/
+		if [ -z "$PS1" ]
+		then
+			_qalculate "$@" | tr -dc '0-9.'
+			return
+		fi
+		
 		_qalculate "$@"
 	}
 	clc() {
@@ -19674,6 +19770,10 @@ then
 	}
 	c() {
 		_qalculate "$@"
+	}
+	
+	_num() {
+		_clc "$@" | tr -dc '0-9.'
 	}
 fi
 
@@ -21367,7 +21467,13 @@ _scopePrompt() {
 	
 	
 	_visualPrompt
-	export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${debian_chroot:+($debian_chroot)}\[\033[01;33m\]\u\[\033[01;32m\]@\h\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-(\[\033[01;35m\]$(date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[37m\][\w]\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$PS1_lineNumberText\[\033[01;34m\]) \[\033[36m\]'"$ub_scope_name"'>\[\033[00m\] '
+	
+	if ! _if_cygwin
+	then
+		export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${debian_chroot:+($debian_chroot)}\[\033[01;33m\]\u\[\033[01;32m\]@\h\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-(\[\033[01;35m\]$(date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[37m\][\w]\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$PS1_lineNumberText\[\033[01;34m\]) \[\033[36m\]'"$ub_scope_name"'>\[\033[00m\] '
+	else
+		export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${debian_chroot:+($debian_chroot)}\[\033[01;33m\]\u\[\033[01;32m\]@\h\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-(\[\033[01;35m\]$(date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]\[\033[37m\]\w\n\[\033[01;36m\]\[\033[01;34m\]|$PS1_lineNumberText\[\033[01;34m\]) \[\033[36m\]'"$ub_scope_name"'>\[\033[00m\] '
+	fi
 }
 
 _scope_terminal_procedure() {
@@ -28877,27 +28983,27 @@ _unix_renice_critical() {
 	local processListFile
 	processListFile="$tmpSelf"/.pidlist_$(_uid)
 	
-	_priority_enumerate_pattern "^ksysguard$" >> "$processListFile"
-	_priority_enumerate_pattern "^ksysguardd$" >> "$processListFile"
-	_priority_enumerate_pattern "^top$" >> "$processListFile"
-	_priority_enumerate_pattern "^iotop$" >> "$processListFile"
-	_priority_enumerate_pattern "^latencytop$" >> "$processListFile"
+	_priority_enumerate_pattern ^ksysguard$ >> "$processListFile"
+	_priority_enumerate_pattern ^ksysguardd$ >> "$processListFile"
+	_priority_enumerate_pattern ^top$ >> "$processListFile"
+	_priority_enumerate_pattern ^iotop$ >> "$processListFile"
+	_priority_enumerate_pattern ^latencytop$ >> "$processListFile"
 	
-	_priority_enumerate_pattern "^Xorg$" >> "$processListFile"
-	_priority_enumerate_pattern "^modeset$" >> "$processListFile"
+	_priority_enumerate_pattern ^Xorg$ >> "$processListFile"
+	_priority_enumerate_pattern ^modeset$ >> "$processListFile"
 	
-	_priority_enumerate_pattern "^smbd$" >> "$processListFile"
-	_priority_enumerate_pattern "^nmbd$" >> "$processListFile"
+	_priority_enumerate_pattern ^smbd$ >> "$processListFile"
+	_priority_enumerate_pattern ^nmbd$ >> "$processListFile"
 	
-	_priority_enumerate_pattern "^ssh$" >> "$processListFile"
-	_priority_enumerate_pattern "^sshd$" >> "$processListFile"
-	_priority_enumerate_pattern "^ssh-agent$" >> "$processListFile"
+	_priority_enumerate_pattern ^ssh$ >> "$processListFile"
+	_priority_enumerate_pattern ^sshd$ >> "$processListFile"
+	_priority_enumerate_pattern ^ssh-agent$ >> "$processListFile"
 	
-	_priority_enumerate_pattern "^sshfs$" >> "$processListFile"
+	_priority_enumerate_pattern ^sshfs$ >> "$processListFile"
 	
-	_priority_enumerate_pattern "^socat$" >> "$processListFile"
+	_priority_enumerate_pattern ^socat$ >> "$processListFile"
 	
-	#_priority_enumerate_pattern "^cron$" >> "$processListFile"
+	#_priority_enumerate_pattern ^cron$ >> "$processListFile"
 	
 	local currentPID
 	
@@ -28913,17 +29019,17 @@ _unix_renice_interactive() {
 	local processListFile
 	processListFile="$tmpSelf"/.pidlist_$(_uid)
 	
-	_priority_enumerate_pattern "^kwin$" >> "$processListFile"
-	_priority_enumerate_pattern "^pager$" >> "$processListFile"
+	_priority_enumerate_pattern ^kwin$ >> "$processListFile"
+	_priority_enumerate_pattern ^pager$ >> "$processListFile"
 	
-	_priority_enumerate_pattern "^pulseaudio$" >> "$processListFile"
+	_priority_enumerate_pattern ^pulseaudio$ >> "$processListFile"
 	
-	_priority_enumerate_pattern "^synergy$" >> "$processListFile"
-	_priority_enumerate_pattern "^synergys$" >> "$processListFile"
+	_priority_enumerate_pattern ^synergy$ >> "$processListFile"
+	_priority_enumerate_pattern ^synergys$ >> "$processListFile"
 	
-	_priority_enumerate_pattern "^kactivitymanagerd$" >> "$processListFile"
+	_priority_enumerate_pattern ^kactivitymanagerd$ >> "$processListFile"
 	
-	_priority_enumerate_pattern "^dbus" >> "$processListFile"
+	_priority_enumerate_pattern ^dbus >> "$processListFile"
 	
 	local currentPID
 	
@@ -28939,28 +29045,28 @@ _unix_renice_app() {
 	local processListFile
 	processListFile="$tmpSelf"/.pidlist_$(_uid)
 	
-	_priority_enumerate_pattern "^plasmashell$" >> "$processListFile"
+	_priority_enumerate_pattern ^plasmashell$ >> "$processListFile"
 	
-	_priority_enumerate_pattern "^audacious$" >> "$processListFile"
-	_priority_enumerate_pattern "^vlc$" >> "$processListFile"
+	_priority_enumerate_pattern ^audacious$ >> "$processListFile"
+	_priority_enumerate_pattern ^vlc$ >> "$processListFile"
 	
-	_priority_enumerate_pattern "^firefox$" >> "$processListFile"
+	_priority_enumerate_pattern ^firefox$ >> "$processListFile"
 	
-	_priority_enumerate_pattern "^dolphin$" >> "$processListFile"
+	_priority_enumerate_pattern ^dolphin$ >> "$processListFile"
 	
-	_priority_enumerate_pattern "^kwrite$" >> "$processListFile"
+	_priority_enumerate_pattern ^kwrite$ >> "$processListFile"
 	
-	_priority_enumerate_pattern "^konsole$" >> "$processListFile"
-	
-	
-	_priority_enumerate_pattern "^okular$" >> "$processListFile"
-	
-	_priority_enumerate_pattern "^xournal$" >> "$processListFile"
-	
-	_priority_enumerate_pattern "^soffice.bin$" >> "$processListFile"
+	_priority_enumerate_pattern ^konsole$ >> "$processListFile"
 	
 	
-	_priority_enumerate_pattern "^pavucontrol$" >> "$processListFile"
+	_priority_enumerate_pattern ^okular$ >> "$processListFile"
+	
+	_priority_enumerate_pattern ^xournal$ >> "$processListFile"
+	
+	_priority_enumerate_pattern ^soffice.bin$ >> "$processListFile"
+	
+	
+	_priority_enumerate_pattern ^pavucontrol$ >> "$processListFile"
 	
 	local currentPID
 	
@@ -28976,44 +29082,44 @@ _unix_renice_idle() {
 	local processListFile
 	processListFile="$tmpSelf"/.pidlist_$(_uid)
 	
-	_priority_enumerate_pattern "^packagekitd$" >> "$processListFile"
+	_priority_enumerate_pattern ^packagekitd$ >> "$processListFile"
 	
-	_priority_enumerate_pattern "^apt-config$" >> "$processListFile"
+	_priority_enumerate_pattern ^apt-config$ >> "$processListFile"
 	
-	#_priority_enumerate_pattern "^ModemManager$" >> "$processListFile"
+	#_priority_enumerate_pattern ^ModemManager$ >> "$processListFile"
 	
-	#_priority_enumerate_pattern "^sddm$" >> "$processListFile"
+	#_priority_enumerate_pattern ^sddm$ >> "$processListFile"
 	
-	#_priority_enumerate_pattern "^lpqd$" >> "$processListFile"
-	#_priority_enumerate_pattern "^cupsd$" >> "$processListFile"
-	#_priority_enumerate_pattern "^cups-browsed$" >> "$processListFile"
+	#_priority_enumerate_pattern ^lpqd$ >> "$processListFile"
+	#_priority_enumerate_pattern ^cupsd$ >> "$processListFile"
+	#_priority_enumerate_pattern ^cups-browsed$ >> "$processListFile"
 	
-	_priority_enumerate_pattern "^akonadi" >> "$processListFile"
-	_priority_enumerate_pattern "^akonadi_indexing_agent$" >> "$processListFile"
+	_priority_enumerate_pattern ^akonadi >> "$processListFile"
+	_priority_enumerate_pattern ^akonadi_indexing_agent$ >> "$processListFile"
 	
-	#_priority_enumerate_pattern "^kdeconnectd$" >> "$processListFile"
-	#_priority_enumerate_pattern "^kacceessibleapp$" >> "$processListFile"
-	#_priority_enumerate_pattern "^kglobalaccel5$" >> "$processListFile"
+	#_priority_enumerate_pattern ^kdeconnectd$ >> "$processListFile"
+	#_priority_enumerate_pattern ^kacceessibleapp$ >> "$processListFile"
+	#_priority_enumerate_pattern ^kglobalaccel5$ >> "$processListFile"
 	
-	#_priority_enumerate_pattern "^kded4$" >> "$processListFile"
-	#_priority_enumerate_pattern "^ksmserver$" >> "$processListFile"
+	#_priority_enumerate_pattern ^kded4$ >> "$processListFile"
+	#_priority_enumerate_pattern ^ksmserver$ >> "$processListFile"
 	
-	_priority_enumerate_pattern "^sleep$" >> "$processListFile"
+	_priority_enumerate_pattern ^sleep$ >> "$processListFile"
 	
-	_priority_enumerate_pattern "^exim4$" >> "$processListFile"
-	_priority_enumerate_pattern "^apache2$" >> "$processListFile"
-	_priority_enumerate_pattern "^mysqld$" >> "$processListFile"
-	_priority_enumerate_pattern "^ntpd$" >> "$processListFile"
-	#_priority_enumerate_pattern "^avahi-daemon$" >> "$processListFile"
+	_priority_enumerate_pattern ^exim4$ >> "$processListFile"
+	_priority_enumerate_pattern ^apache2$ >> "$processListFile"
+	_priority_enumerate_pattern ^mysqld$ >> "$processListFile"
+	_priority_enumerate_pattern ^ntpd$ >> "$processListFile"
+	#_priority_enumerate_pattern ^avahi-daemon$ >> "$processListFile"
 	
 	
 	# WARNING: Probably unnecessary and counterproductive. May risk halting important compile jobs.
-	#_priority_enumerate_pattern "^cc1$" >> "$processListFile"
-	#_priority_enumerate_pattern "^cc1plus$" >> "$processListFile"
+	#_priority_enumerate_pattern ^cc1$ >> "$processListFile"
+	#_priority_enumerate_pattern ^cc1plus$ >> "$processListFile"
 	
-	#_priority_enumerate_pattern "^tar$" >> "$processListFile"
-	#_priority_enumerate_pattern "^xz$" >> "$processListFile"
-	#_priority_enumerate_pattern "^kcompactd0$" >> "$processListFile"
+	#_priority_enumerate_pattern ^tar$ >> "$processListFile"
+	#_priority_enumerate_pattern ^xz$ >> "$processListFile"
+	#_priority_enumerate_pattern ^kcompactd0$ >> "$processListFile"
 	
 	
 	local currentPID
@@ -29088,7 +29194,9 @@ _opsauto_blockchain() {
 }
 
 _test_ethereum() {
-
+	
+	_if_cygwin && return 0
+	
 	_getDep xterm
 	
 	#OpenGL/OpenCL runtime dependency for mining.
@@ -29209,6 +29317,8 @@ _parity_import() {
 }
 
 _test_ethereum_parity() {
+	_if_cygwin && return 0
+	
 	_getDep gcc
 	_getDep g++
 	
@@ -29389,7 +29499,7 @@ _synergys_terminate() {
 		#kill -KILL $(cat "$synergyPIDfile")
 		rm "$synergyPIDfile"
 		
-		pgrep "^synergy$" && _messagePlain_warn 'found: synergy process'
+		pgrep ^synergy$ && _messagePlain_warn 'found: synergy process'
 		
 		return 0
 	fi
@@ -29414,7 +29524,7 @@ _synergyc_terminate() {
 		#kill -KILL $(cat "$synergyPIDfile")
 		rm "$synergyPIDfile"
 		
-		pgrep "^synergyc$" && _messagePlain_warn 'found: synergyc process'
+		pgrep ^synergyc$ && _messagePlain_warn 'found: synergyc process'
 		
 		return 0
 	fi
@@ -29858,7 +29968,7 @@ _test_h1060p() {
 	#_wantGetDep 'X11/xorg.conf.d/50-digimend.conf'
 	
 	
-	if ! _wantDep digimend-debug
+	if ! _wantDep digimend-debug && ! _if_cygwin
 	then
 		_messagePlain_request 'request: user please install: digimend-dkms_10 (or newer)'
 	fi
