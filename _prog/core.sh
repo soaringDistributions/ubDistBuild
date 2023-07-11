@@ -1159,8 +1159,13 @@ _zSpecial_qemu_sequence() {
 	
 	#qemuArgs+=(-device ich9-intel-hda -device hda-duplex)
 	
-	qemuArgs+=(-show-cursor)
-	
+	# https://github.com/elisa-tech/meta-elisa/issues/23
+	# https://wiki.qemu.org/ChangeLog/6.0
+	# qemuArgs+=(-show-cursor)
+	if [[ $(_qemu_system_x86_64 -version | grep version | sed 's/.*version\ //' | sed 's/\ .*//' | cut -f1 -d\. | tr -dc '0-9') -lt "6" ]]
+	then
+		qemuArgs+=(-show-cursor)
+	fi
 	
 	
 	#qemuArgs+=(-device virtio-vga,virgl=on -display gtk,gl=off)
