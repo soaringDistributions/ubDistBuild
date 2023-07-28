@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2452293519'
+export ub_setScriptChecksum_contents='1744393089'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -272,6 +272,21 @@ then
 fi
 
 
+# ATTENTION: Highly irregular. Workaround due to gsch2pcb installed by nix package manager not searching for installed footprints.
+if [[ "$NIX_PROFILES" != "" ]]
+then
+	if [[ -e "$HOME"/.nix-profile/bin/gsch2pcb ]] && [[ -e /usr/local/share/pcb/newlib ]] && [[ -e /usr/local/lib/pcb_lib ]]
+	then
+		gsch2pcb() {
+			"$HOME"/.nix-profile/bin/gsch2pcb --elements-dir /usr/local/share/pcb/newlib --elements-dir /usr/local/lib/pcb_lib "$@"
+		}
+	elif [[ -e /usr/share/pcb/pcblib-newlib ]]
+	then
+		gsch2pcb() {
+			"$HOME"/.nix-profile/bin/gsch2pcb --elements-dir /usr/share/pcb/pcblib-newlib "$@"
+		}
+	fi
+fi
 
 
 # Only production use is Inter-Process Communication (IPC) loops which may be theoretically impossible to make fully deterministic under Operating Systems which do not have hard-real-time kernels and/or may serve an unlimited number of processes.
@@ -1091,6 +1106,11 @@ then
 	then
 		export cygwinOverride_measureDateA=$(date +%s%N | cut -b1-13)
 		export ub_setScriptChecksum_contents_cygwinOverride="$ub_setScriptChecksum_contents"
+		
+		
+		_discoverResource-cygwinNative-ProgramFiles 'ykman' 'Yubico/YubiKey Manager' false
+		
+		
 		
 		_discoverResource-cygwinNative-ProgramFiles 'nmap' 'Nmap' false
 		
@@ -5505,7 +5525,8 @@ _prepare_ssh_fifo() {
 }
 
 _vnc_ssh() {
-	"$scriptAbsoluteLocation" _ssh -C -c aes256-gcm@openssh.com -m hmac-sha1 -o ConnectionAttempts=2 -o ServerAliveInterval=5 -o ServerAliveCountMax=5 -o ExitOnForwardFailure=yes "$@" 
+	#-c aes256-gcm@openssh.com -m hmac-sha1
+	"$scriptAbsoluteLocation" _ssh -C -o ConnectionAttempts=2 -o ServerAliveInterval=5 -o ServerAliveCountMax=5 -o ExitOnForwardFailure=yes "$@" 
 }
 
 _findPort_vnc() {
@@ -7004,8 +7025,9 @@ _vncserver_operations() {
 	_messagePlain_nominal 'init: _vncserver_operations'
 	
 	#[[ "$desktopEnvironmentLaunch" == "" ]] && desktopEnvironmentLaunch="true"
-	[[ "$desktopEnvironmentLaunch" == "" ]] && desktopEnvironmentLaunch="startlxde"
-	[[ "$desktopEnvironmentGeometry" == "" ]] && desktopEnvironmentGeometry='1920x1080'
+	#[[ "$desktopEnvironmentLaunch" == "" ]] && desktopEnvironmentLaunch="startlxde"
+	[[ "$desktopEnvironmentLaunch" == "" ]] && desktopEnvironmentLaunch="startplasma-x11"
+	[[ "$desktopEnvironmentGeometry" == "" ]] && desktopEnvironmentGeometry='1920x1200'
 	
 	_messagePlain_nominal 'Searching for unused X11 display.'
 	local vncDisplay
@@ -7336,6 +7358,178 @@ _x11vnc_operations() {
 	
 	return 1
 }
+
+
+
+_vnchost-custom_kde() {
+	"$scriptLib"/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh _custom_kde
+	
+}
+
+
+_vnchost-setup-sddm() {
+	sudo -n mv /etc/X11/xorg.conf /etc/X11/xorg.conf.bak_$(uid _8)
+	cat << 'CZXWXcRMTo8EmM8i4d' | sudo -n tee /etc/X11/xorg.conf
+Section "Device"
+    Identifier  "Configured Video Device"
+    Driver      "dummy"
+    # Default is 4MiB, this sets it to 16MiB
+    VideoRam    16384
+EndSection
+
+Section "Monitor"
+    Identifier  "Configured Monitor"
+    HorizSync 31.5-48.5
+    VertRefresh 50-70
+EndSection
+
+Section "Screen"
+    Identifier  "Default Screen"
+    Monitor     "Configured Monitor"
+    Device      "Configured Video Device"
+    DefaultDepth 24
+    SubSection "Display"
+    Depth 24
+    Modes "1920x1200"
+    EndSubSection
+EndSection
+CZXWXcRMTo8EmM8i4d
+
+
+	cat << 'CZXWXcRMTo8EmM8i4d' | sudo -n tee -a /etc/pam.conf
+
+auth        sufficient  pam_succeed_if.so user ingroup nopasswdlogin
+auth        include     system-login
+
+CZXWXcRMTo8EmM8i4d
+	
+	sudo -n usermod -a -G nopasswdlogin user
+	sudo -n usermod -a -G nopasswdlogin codespace
+	
+	
+	
+	sudo -n systemctl restart sddm
+	systemctl restart sddm
+	sudo -n service sddm restart
+	service sddm restart
+	service sddm status
+}
+
+
+
+_vnchost-setup() {
+	_set_getMost_backend
+	
+	_getMost_backend apt-get update
+	
+	_getMost_backend_aptGetInstall xserver-xorg-video-dummy
+	_getMost_backend_aptGetInstall sddm
+	
+	_getMost_backend_aptGetInstall plasma-desktop
+	_getMost_backend_aptGetInstall lxde-core
+	
+	_getMost_backend_aptGetInstall tigervnc-viewer
+	#_getMost_backend_aptGetInstall x11vnc
+	_getMost_backend_aptGetInstall tigervnc-standalone-server
+	_getMost_backend_aptGetInstall tigervnc-scraping-server
+	
+	
+	_getMost_backend_aptGetInstall novnc
+	_getMost_backend_aptGetInstall websockify
+	
+	
+	
+	#_vnchost-setup-sddm
+	
+	
+	true
+}
+
+
+_vnchost_sequence() {
+	#_mustBeRoot
+	
+	#sudo -n systemctl start sddm
+	#systemctl start sddm
+	#sudo -n service sddm start
+	#service sddm start
+	#service sddm status
+	
+	_findPort_vnc() {
+		currentPort=51001
+		echo "$currentPort"
+	}
+	
+	_findPort_novnc() {
+		currentPort_novnc=51002
+		echo "$currentPort_novnc"
+	}
+	
+	_prepare_vnc() {
+		
+		echo > "$vncPasswdFile".pln
+		chmod 600 "$vncPasswdFile".pln
+		_uid 8 > "$vncPasswdFile".pln
+		
+		export vncPort=$(_findPort_vnc)
+		export vncPort_novnc=$(_findPort_novnc)
+		
+		export vncPIDfile="$safeTmp"/.vncpid
+		export vncPIDfile_local="$safeTmp"/.vncpid
+		
+	}
+	
+	_start
+	
+	_prepare_vnc
+	
+	_vncpasswd
+	
+	_report_vncpasswd
+	
+	_messagePlain_request '____________________________________________________________'
+	_messagePlain_request 'ubcp CLI (fast and convenient)'
+	_messagePlain_request 'echo -n '$(cat "$vncPasswdFile".pln)' | _vncviewer localhost::'"$vncPort"
+	_messagePlain_request '____________________________________________________________'
+	_messagePlain_request 'Through Browser Port Forward (may be slow)'
+	_messagePlain_request 'http://127.0.0.1:'"$vncPort_novnc"'/vnc.html?password='$(cat "$vncPasswdFile".pln)
+	_messagePlain_request '____________________________________________________________'
+	_messagePlain_request 'VSCode VNC Extension (fast and convenient)'
+	_messagePlain_request 'localhost:'"$vncPort"'   password: '$(cat "$vncPasswdFile".pln)
+	_messagePlain_request '____________________________________________________________'
+	_messagePlain_request 'Through GitHub WebUI (may be slow)'
+	_messagePlain_request 'https://'"$CODESPACE_NAME"'-'"$vncPort_novnc"'.preview.app.github.dev/vnc.html?password='$(cat "$vncPasswdFile".pln)
+	_messagePlain_request '____________________________________________________________'
+	_messagePlain_request 'KDE: Consider '"'"'_vnchost-custom_kde'"'"' for a preconfigured desktop UI.'
+	sleep 1
+	
+	
+	
+	
+	
+	#_x11vnc_operations
+	
+
+	websockify -D --web=/usr/share/novnc/ --cert=/home/debian/novnc.pem "$vncPort_novnc" localhost:"$vncPort"
+	_vncserver_operations
+	#novnc --listen "$vncPort_novnc" --vnc localhost:"$vncPort"
+	
+	sleep 18000
+	
+	_stop
+}
+
+_vnchost() {
+	#_mustGetSudo
+	#sudo -n "$scriptAbsoluteLocation" _vnchost_sequence
+	
+	#export desktopEnvironmentLaunch="startlxde"
+	export desktopEnvironmentLaunch="startplasma-x11"
+	"$scriptAbsoluteLocation" _vnchost_sequence
+}
+
+
+
 
 
 
@@ -9710,6 +9904,8 @@ _getMost_debian11_install() {
 	_getMost_backend_aptGetInstall pv
 	_getMost_backend_aptGetInstall expect
 	
+	_getMost_backend_aptGetInstall libfuse2
+	
 	_getMost_backend_aptGetInstall libgtk2.0-0
 	
 	_getMost_backend_aptGetInstall libwxgtk3.0-gtk3-0v5
@@ -10159,6 +10355,10 @@ _getMinimal_cloud() {
 	_getMost_backend_aptGetInstall mawk
 	_getMost_backend_aptGetInstall nano
 	
+	_getMost_backend_aptGetInstall jq
+	
+	_getMost_backend_aptGetInstall sloccount
+	
 	_getMost_backend_aptGetInstall build-essential
 	_getMost_backend_aptGetInstall bison
 	_getMost_backend_aptGetInstall libelf-dev
@@ -10292,6 +10492,8 @@ _getMinimal_cloud() {
 	_getMost_backend_aptGetInstall pv
 	_getMost_backend_aptGetInstall expect
 	
+	_getMost_backend_aptGetInstall libfuse2
+	
 	_getMost_backend_aptGetInstall libgtk2.0-0
 	
 	_getMost_backend_aptGetInstall libwxgtk3.0-gtk3-0v5
@@ -10377,6 +10579,7 @@ _getMinimal_cloud() {
 	_getMost_backend_aptGetInstall mksquashfs
 	_getMost_backend_aptGetInstall grub-mkstandalone
 	_getMost_backend_aptGetInstall mkfs.vfat
+	_getMost_backend_aptGetInstall dosfstools
 	_getMost_backend_aptGetInstall mkswap
 	_getMost_backend_aptGetInstall mmd
 	_getMost_backend_aptGetInstall mcopy
@@ -10449,11 +10652,13 @@ _get_from_nix-user() {
 	
 	
 	#_custom_installDeb /root/core/installations/Wire.deb
-	_getMost_backend sudo -n -u "$currentUser" /bin/bash -i -c 'nix-env -iA nixpkgs.wire-desktop'
+	_getMost_backend sudo -n -u "$currentUser" /bin/bash -l -c 'nix-env -iA nixpkgs.wire-desktop'
 	_getMost_backend sudo -n -u "$currentUser" xdg-desktop-menu install /home/user/.nix-profile/share/applications/wire-desktop.desktop
 	_getMost_backend sudo -n -u "$currentUser" cp -a /home/user/.nix-profile/share/icons /home/user/.local/share/
 	
-	_getMost_backend sudo -n -u "$currentUser" /bin/bash -i -c 'nix-env -iA nixpkgs.geda'
+	sleep 3
+	
+	_getMost_backend sudo -n -u "$currentUser" /bin/bash -l -c 'nix-env -iA nixpkgs.geda'
 	_getMost_backend sudo -n -u "$currentUser" xdg-desktop-menu install /home/user/.nix-profile/share/applications/geda-gschem.desktop
 	_getMost_backend sudo -n -u "$currentUser" xdg-desktop-menu install /home/user/.nix-profile/share/applications/geda-gattrib.desktop
 	_getMost_backend sudo -n -u "$currentUser" cp -a /home/user/.nix-profile/share/icons /home/user/.local/share/
@@ -10496,6 +10701,9 @@ _get_veracrypt() {
 	functionEntryPWD="$PWD"
 	
 	cd "$safeTmp"
+	
+	
+	_getDep libfuse.so.2
 	
 	
 	
@@ -17053,7 +17261,8 @@ _testQEMU_x64-raspi() {
 	sudo -n systemctl status binfmt-support 2>&1 | head -n 2 | grep -i 'chroot' > /dev/null && return 0
 	systemctl status binfmt-support 2>&1 | head -n 2 | grep -i 'chroot' > /dev/null && return 0
 	
-	
+	sudo -n service binfmt-support --full-restart
+	service binfmt-support --full-restart
 	
 	if ! sudo -n cat /proc/sys/fs/binfmt_misc/* 2> /dev/null | grep qemu | grep 'arm$\|arm-static$\|arm-binfmt-P$\|arm-binfmt' > /dev/null 2>&1 && ! _if_cygwin
 	then
@@ -17318,7 +17527,15 @@ _integratedQemu_x64() {
 	
 	[[ "$qemuArgs_audio" == "" ]] && qemuArgs+=(-device ich9-intel-hda -device hda-duplex)
 	
-	qemuArgs+=(-show-cursor)
+	# https://github.com/elisa-tech/meta-elisa/issues/23
+	# https://wiki.qemu.org/ChangeLog/6.0
+	# qemuArgs+=(-show-cursor)
+	local current_qemu_version_cursor
+	current_qemu_version_cursor=$(_qemu_system_x86_64 -version | grep version | sed 's/.*version\ //' | sed 's/\ .*//' | cut -f1 -d\. | tr -dc '0-9')
+	if [[ "$current_qemu_version_cursor" -lt "6" ]] && [[ "$current_qemu_version_cursor" != "" ]]
+	then
+		qemuArgs+=(-show-cursor)
+	fi
 	
 	if _testQEMU_hostArch_x64_hardwarevt
 	then
@@ -19724,11 +19941,17 @@ _qalculate_terse() {
 	
 	if [[ "$1" != "" ]]
 	then
-		_safeEcho_newline "$@" | qalc -t | grep -v '^>\ ' | grep -v '^$' | sed 's/^  //' | grep -v '^\s*$' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g"
+		#_safeEcho_newline "$@" | qalc -t | grep -v '^>\ ' | grep -v '^$' | sed 's/^  //' | grep -v '^\s*$' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g"
+		
+		# Preferred for Cygwin .
+		_safeEcho_newline "$@" | qalc -t | grep -v '^> ' | grep -v '^$' | sed 's/^  //' | grep -v '^\s*$' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g"
 		return
 	fi
 	
-	qalc -t "$@" | grep -v '^>\ ' | grep -v '^$' | sed 's/^  //' | grep -v '^\s*$' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g"
+	#qalc -t "$@" | grep -v '^>\ ' | grep -v '^$' | sed 's/^  //' | grep -v '^\s*$' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g"
+	
+	# Preferred for Cygwin .
+	qalc -t "$@" | grep -v '^> ' | grep -v '^$' | sed 's/^  //' | grep -v '^\s*$' | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g"
 	return
 }
 
@@ -21875,13 +22098,13 @@ _gitBest_detect_github_procedure() {
 	then
 		_messagePlain_request 'performance: export current_gitBest_source_GitHub=$("'"$scriptAbsoluteLocation"'" _gitBest_detect_github_sequence | tail -n1)'
 		
-		if [[ -e "$HOME"/core ]]
+		if [[ -e "$HOME"/core ]] && [[ "$gitBestNoCore" != "true" ]]
 		then
 			export current_gitBest_source_GitHub="github_core"
 		fi
 		
 		local currentSSHoutput
-		if currentSSHoutput=$(ssh -o StrictHostKeyChecking=no -o Compression=yes -o ConnectionAttempts=3 -o ServerAliveInterval=6 -o ServerAliveCountMax=9 -o ConnectTimeout="$netTimeout" -o PubkeyAuthentication=yes -o PasswordAuthentication=no git@github.com 2>&1 ; true) && _safeEcho_newline "$currentSSHoutput" | grep 'successfully authenticated'
+		if ( [[ -e "$HOME"/.ssh/id_rsa ]] || [[ -e "$HOME"/.ssh/config ]] || ( [[ ! -e "$HOME"/.ssh/id_ed25519_sk ]] && [[ ! -e "$HOME"/.ssh/ecdsa-sk ]] ) ) && currentSSHoutput=$(ssh -o StrictHostKeyChecking=no -o Compression=yes -o ConnectionAttempts=3 -o ServerAliveInterval=6 -o ServerAliveCountMax=9 -o ConnectTimeout="$netTimeout" -o PubkeyAuthentication=yes -o PasswordAuthentication=no git@github.com 2>&1 ; true) && _safeEcho_newline "$currentSSHoutput" | grep 'successfully authenticated'
 		then
 			export current_gitBest_source_GitHub="github_ssh"
 			return
@@ -21955,7 +22178,14 @@ _gitBest_override_github-github_core() {
 	_gitBest_override_config_insteadOf-core zipTiePanel
 }
 _gitBest_override_github-github_https() {
-	git config --global url."https://github.com/".insteadOf git@github.com:
+	# && [[ "$1" == "push" ]]
+	if [[ "$INPUT_GITHUB_TOKEN" == "" ]]
+	then
+		git config --global url."https://github.com/".insteadOf git@github.com:
+	elif [[ "$INPUT_GITHUB_TOKEN" != "" ]]
+	then
+		git config --global url."https://""$INPUT_GITHUB_TOKEN""@github.com/".insteadOf git@github.com:
+	fi
 }
 
 
@@ -21972,7 +22202,7 @@ _gitBest_override_github() {
 	
 	if [[ "$current_gitBest_source_GitHub" == "github_https" ]]
 	then
-		_gitBest_override_github-github_https
+		_gitBest_override_github-github_https "$@"
 	fi
 	
 	if [[ "$current_gitBest_source_GitHub" == "github_ssh" ]]
@@ -22008,7 +22238,7 @@ _gitBest_sequence() {
 	_messagePlain_probe_var HOME
 	
 	
-	_gitBest_override_github
+	_gitBest_override_github "$@"
 	
 	if ! [[ -e "$HOME"/.gitconfig ]]
 	then
@@ -25375,7 +25605,10 @@ _create_msw_qemu_sequence() {
 	
 	_checkDep qemu-system-x86_64
 	
-	qemu-system-x86_64 -smp 4 -machine accel=kvm -drive format=raw,file="$scriptLocal"/vm.img -cdrom "$scriptLocal"/msw.iso -boot d -m 1536 -net nic,model=rtl8139 -net user -usbdevice tablet -vga cirrus -show-cursor
+	# https://github.com/elisa-tech/meta-elisa/issues/23
+	# https://wiki.qemu.org/ChangeLog/6.0
+	#qemu-system-x86_64 -smp 4 -machine accel=kvm -drive format=raw,file="$scriptLocal"/vm.img -cdrom "$scriptLocal"/msw.iso -boot d -m 1536 -net nic,model=rtl8139 -net user -usbdevice tablet -vga cirrus -show-cursor
+	qemu-system-x86_64 -smp 4 -machine accel=kvm -drive format=raw,file="$scriptLocal"/vm.img -cdrom "$scriptLocal"/msw.iso -boot d -m 1536 -net nic,model=rtl8139 -net user -usbdevice tablet -vga cirrus
 	
 	_stop
 }
@@ -26969,7 +27202,10 @@ CZXWXcRMTo8EmM8i4d
 
 
 _kernelConfig_reject-comments() {
-	grep -v '^\#\|\#'
+	#grep -v '^\#\|\#'
+	
+	# Preferred for Cygwin.
+	grep -v '^#\|#'
 }
 
 _kernelConfig_request() {
@@ -27071,17 +27307,29 @@ _kernelConfig_require-tradeoff-perform() {
 	
 	_kernelConfig__bad-n__ CONFIG_RETPOLINE
 	_kernelConfig__bad-n__ CONFIG_PAGE_TABLE_ISOLATION
-	_kernelConfig__bad-n__ CONFIG_X86_SMAP
 	
-	_kernelConfig_warn-n__ AMD_MEM_ENCRYPT
+	# May have been removed from upstream.
+	#_kernelConfig__bad-n__ CONFIG_X86_SMAP
 	
-	_kernelConfig_warn-y__ CONFIG_X86_INTEL_TSX_MODE_ON
-	_kernelConfig__bad-y__ CONFIG_X86_INTEL_TSX_MODE_AUTO
+	_kernelConfig_warn-n__ CONFIG_X86_INTEL_TSX_MODE_OFF
+	_kernelConfig_warn-n__ CONFIG_X86_INTEL_TSX_MODE_AUTO
+	_kernelConfig__bad-y__ CONFIG_X86_INTEL_TSX_MODE_ON
 	
 	
 	_kernelConfig__bad-n__ CONFIG_SLAB_FREELIST_HARDENED
+	
+	# Uncertain.
+	_kernelConfig__bad-__n CONFIG_X86_SGX
+	_kernelConfig__bad-__n CONFIG_INTEL_TDX_GUEST
+	_kernelConfig__bad-__n CONFIG_X86_SGX_kVM
+	_kernelConfig__bad-__n CONFIG_KVM_AMD_SEV
+	
+	
+	_kernelConfig__bad-__n CONFIG_RANDOMIZE_BASE
+	_kernelConfig__bad-__n CONFIG_RANDOMIZE_MEMORY
 }
 
+# May become increasing tolerable and preferable for the vast majority of use cases.
 # WARNING: Risk must be evaluated for specific use cases.
 # WARNING: BREAKS some high-performance real-time applicatons (eg. flight sim, VR, AR).
 # Standalone simulators (eg. flight sim):
@@ -27099,16 +27347,36 @@ _kernelConfig_require-tradeoff-harden() {
 	
 	_kernelConfig__bad-y__ CONFIG_RETPOLINE
 	_kernelConfig__bad-y__ CONFIG_PAGE_TABLE_ISOLATION
-	_kernelConfig__bad-y__ CONFIG_X86_SMAP
 	
-	# Uncertain.
-	#_kernelConfig_warn-y__ AMD_MEM_ENCRYPT
+	_kernelConfig__bad-y__ CONFIG_RETHUNK
+	_kernelConfig__bad-y__ CONFIG_CPU_UNRET_ENTRY
+	_kernelConfig__bad-y__ CONFIG_CPU_IBPB_ENTRY
+	_kernelConfig__bad-y__ CONFIG_CPU_IBRS_ENTRY
+	_kernelConfig__bad-y__ CONFIG_SLS
 	
-	_kernelConfig_warn-y__ CONFIG_X86_INTEL_TSX_MODE_OFF
-	_kernelConfig__bad-y__ CONFIG_X86_INTEL_TSX_MODE_AUTO
+	# May have been removed from upstream.
+	#_kernelConfig__bad-y__ CONFIG_X86_SMAP
+	
+	# Uncertain. VM guest should be tested.
+	_kernelConfig_warn-y__ AMD_MEM_ENCRYPT
+	_kernelConfig_warn-y__ CONFIG_AMD_MEM_ENCRYPT_ACTIVE_BY_DEFAULT
+	
+	_kernelConfig_warn-n__ CONFIG_X86_INTEL_TSX_MODE_ON
+	_kernelConfig_warn-n__ CONFIG_X86_INTEL_TSX_MODE_AUTO
+	_kernelConfig__bad-y__ CONFIG_X86_INTEL_TSX_MODE_OFF
 	
 	
 	_kernelConfig_warn-y__ CONFIG_SLAB_FREELIST_HARDENED
+	
+	# Uncertain.
+	_kernelConfig_warn-y__ CONFIG_X86_SGX
+	_kernelConfig_warn-y__ CONFIG_INTEL_TDX_GUEST
+	_kernelConfig_warn-y__ CONFIG_X86_SGX_kVM
+	_kernelConfig_warn-y__ CONFIG_KVM_AMD_SEV
+	
+	
+	_kernelConfig__bad-y__ CONFIG_RANDOMIZE_BASE
+	_kernelConfig__bad-y__ CONFIG_RANDOMIZE_MEMORY
 }
 
 # ATTENTION: Override with 'ops.sh' or similar.
@@ -27151,6 +27419,8 @@ _kernelConfig_require-virtualization-accessory() {
 	_kernelConfig_warn-y__ VIRTIO_MENU
 	_kernelConfig_warn-y__ CONFIG_VIRTIO_PCI
 	_kernelConfig_warn-y__ CONFIG_VIRTIO_PCI_LEGACY
+	_kernelConfig_warn-y__ CONFIG_VIRTIO_PCI_LIB
+	_kernelConfig_warn-y__ CONFIG_VIRTIO_PCI_LIB_LEGACY
 	_kernelConfig__bad-y_m CONFIG_VIRTIO_BALLOON
 	_kernelConfig__bad-y_m CONFIG_VIRTIO_INPUT
 	_kernelConfig__bad-y_m CONFIG_VIRTIO_MMIO
@@ -27194,7 +27464,8 @@ _kernelConfig_require-virtualbox() {
 	_messagePlain_nominal 'kernelConfig: virtualbox'
 	export kernelConfig_file="$1"
 	
-	_kernelConfig__bad-y__ CONFIG_X86_SYSFB
+	#_kernelConfig__bad-y__ CONFIG_X86_SYSFB
+	_kernelConfig__bad-y__ CONFIG_SYSFB
 	
 	_kernelConfig__bad-y__ CONFIG_ATA
 	_kernelConfig__bad-y__ CONFIG_SATA_AHCI
@@ -27228,6 +27499,7 @@ _kernelConfig_require-virtualbox() {
 	_kernelConfig__bad-y__ CONFIG_SND_PCI
 	_kernelConfig__bad-y__ CONFIG_SND_INTEL8X0
 	
+	_kernelConfig__bad-y__ CONFIG_USB
 	_kernelConfig__bad-y__ CONFIG_USB_SUPPORT
 	_kernelConfig__bad-y__ CONFIG_USB_XHCI_HCD
 	_kernelConfig__bad-y__ CONFIG_USB_EHCI_HCD
@@ -27299,6 +27571,8 @@ _kernelConfig_require-boot() {
 	
 	_kernelConfig__bad-y__ USB_OHCI_HCD_PCI
 	
+	_kernelConfig__bad-y__ USB_UHCI_HCD
+	
 	_kernelConfig__bad-y__ CONFIG_HID
 	_kernelConfig__bad-y__ CONFIG_HID_GENERIC
 	_kernelConfig__bad-y__ CONFIG_HID_BATTERY_STRENGTH
@@ -27311,7 +27585,9 @@ _kernelConfig_require-boot() {
 	_kernelConfig__bad-y__ CONFIG_EFI_STUB
 	_kernelConfig__bad-y__ CONFIG_EFI_MIXED
 	
-	_kernelConfig__bad-y__ CONFIG_EFI_VARS
+	# Seems 'EFI_VARS' has disappeared from recent kernel versions.
+	#_kernelConfig__bad-y__ CONFIG_EFI_VARS
+	_kernelConfig__bad-y__ CONFIG_EFIVAR_FS
 }
 
 
@@ -27337,7 +27613,7 @@ _kernelConfig_require-arch-x64() {
 	#_kernelConfig_warn-y__ CONFIG_INTEL_RDT
 	
 	# Maintenance may be easier with this enabled.
-	_kernelConfig_warn-y_m CONFIG_EFIVAR_FS
+	_kernelConfig_warn-y__ CONFIG_EFIVAR_FS
 	
 	# Presumably mixing entropy may be preferable.
 	_kernelConfig__bad-n__ CONFIG_RANDOM_TRUST_CPU
@@ -27356,7 +27632,7 @@ _kernelConfig_require-arch-x64() {
 	
 	_kernelConfig__bad-y__ CONFIG_IA32_EMULATION
 	_kernelConfig_warn-n__ IA32_AOUT
-	_kernelConfig__bad-y__ CONFIG_X86_X32
+	_kernelConfig__bad-y__ CONFIG_X86_X32_ABI
 	
 	_kernelConfig__bad-y__ CONFIG_BINFMT_ELF
 	_kernelConfig__bad-y_m CONFIG_BINFMT_MISC
@@ -27505,17 +27781,24 @@ _kernelConfig_require-latency() {
 	_kernelConfig__bad-y__ CONFIG_SCHED_AUTOGROUP
 	
 	
-	# CRITICAL!
-	# Default cannot be set currently.
-	_messagePlain_request 'request: Set '\''bfq'\'' as default IO scheduler (strongly recommended).'
-	#_kernelConfig__bad-y__ DEFAULT_IOSCHED
-	#_kernelConfig__bad-y__ DEFAULT_BFQ
 	
-	# CRITICAL!
-	# Expected to protect interactive applications from background IO.
-	# https://www.youtube.com/watch?v=ANfqNiJVoVE
-	_kernelConfig__bad-y__ CONFIG_IOSCHED_BFQ
-	_kernelConfig__bad-y__ CONFIG_BFQ_GROUP_IOSCHED
+	
+	# Newer information suggests BFQ may have worst case latency issues.
+	# https://bugzilla.redhat.com/show_bug.cgi?id=1851783
+	## CRITICAL!
+	## Default cannot be set currently.
+	#_messagePlain_request 'request: Set '\''bfq'\'' as default IO scheduler (strongly recommended).'
+	##_kernelConfig__bad-y__ DEFAULT_IOSCHED
+	##_kernelConfig__bad-y__ DEFAULT_BFQ
+	
+	## CRITICAL!
+	## Expected to protect interactive applications from background IO.
+	## https://www.youtube.com/watch?v=ANfqNiJVoVE
+	#_kernelConfig__bad-y__ CONFIG_IOSCHED_BFQ
+	#_kernelConfig__bad-y__ CONFIG_BFQ_GROUP_IOSCHED
+	
+	
+	
 	
 	
 	# Uncertain.
@@ -27551,7 +27834,7 @@ _kernelConfig_require-memory() {
 	
 	# Uncertain.
 	_kernelConfig_warn-y__ CONFIG_TRANSPARENT_HUGEPAGE
-	_kernelConfig_warn-y__ CONFIG_CLEANCACHE
+	#_kernelConfig_warn-y__ CONFIG_CLEANCACHE
 	_kernelConfig_warn-y__ CONFIG_FRONTSWAP
 	_kernelConfig_warn-y__ CONFIG_ZSWAP
 	
@@ -27602,7 +27885,8 @@ _kernelConfig_require-investigation_docker() {
 	
 	# Apparently, 'CONFIG_MEMCG_SWAP_ENABLED' missing from recent 'menuconfig' .
 	#_kernelConfig_warn-y__ CONFIG_MEMCG_SWAP_ENABLED
-	_kernelConfig_warn-y__ CONFIG_MEMCG_SWAP
+	#_kernelConfig_warn-y__ CONFIG_MEMCG_SWAP
+	_kernelConfig_warn-y__ CONFIG_MEMCG
 	
 	_kernelConfig_warn-y__ CONFIG_CGROUP_HUGETLB
 	_kernelConfig_warn-y__ CONFIG_RT_GROUP_SCHED
@@ -27711,6 +27995,7 @@ _kernelConfig_request_build() {
 }
 
 
+# NOTICE: Usually, 'desktop' will be preferable.
 # ATTENTION: As desired, ignore, or override with 'ops.sh' or similar.
 _kernelConfig_panel() {
 	_messageNormal 'kernelConfig: panel'
@@ -27749,6 +28034,7 @@ _kernelConfig_panel() {
 	_kernelConfig_request_build
 }
 
+# NOTICE: Usually, 'desktop' will be preferable.
 # ATTENTION: As desired, ignore, or override with 'ops.sh' or similar.
 _kernelConfig_mobile() {
 	_messageNormal 'kernelConfig: mobile'
@@ -27787,6 +28073,7 @@ _kernelConfig_mobile() {
 	_kernelConfig_request_build
 }
 
+# NOTICE: Recommended! Most 'mobile' and 'panel' use cases will not benefit enough from power efficiency, reduced CPU cycles, or performance.
 # ATTENTION: As desired, ignore, or override with 'ops.sh' or similar.
 _kernelConfig_desktop() {
 	_messageNormal 'kernelConfig: desktop'
@@ -28841,6 +29128,8 @@ _anchor() {
 	
 	_anchor_configure
 	_anchor_configure "$scriptAbsoluteFolder"/_anchor.bat
+
+	_tryExec "_anchor_special"
 	
 	! [[ -e "$scriptAbsoluteFolder"/_anchor ]] && ! [[ -e "$scriptAbsoluteFolder"/_anchor.bat ]] && return 1
 	
@@ -29448,6 +29737,11 @@ _here_synergy_config() {
 	true
 }
 
+
+# DANGER: Strongly discourage any use of 'synergy' or any similar software.
+
+
+
 _test_synergy() {
 	"$scriptAbsoluteLocation" _getDep synergy
 	"$scriptAbsoluteLocation" _getDep synergyc
@@ -29455,8 +29749,10 @@ _test_synergy() {
 	##_getDep quicksynergy
 }
 
+# DANGER: Strongly discourage any use of 'synergy' or any similar software.
 _synergy_ssh() {
-	"$scriptAbsoluteLocation" _ssh -C -c aes256-gcm@openssh.com -m hmac-sha1 -o ConnectionAttempts=2 -o ServerAliveInterval=5 -o ServerAliveCountMax=5 -o ExitOnForwardFailure=yes "$@" 
+	#-c aes256-gcm@openssh.com -m hmac-sha1
+	"$scriptAbsoluteLocation" _ssh -C -o ConnectionAttempts=2 -o ServerAliveInterval=5 -o ServerAliveCountMax=5 -o ExitOnForwardFailure=yes "$@" 
 }
 
 _findPort_synergy() {
@@ -43326,6 +43622,7 @@ _compile_bash_utilities() {
 	[[ "$enUb_proxy" == "true" ]] && includeScriptList+=( "generic/net/proxy/vnc"/vnc_vncserver_operations.sh )
 	[[ "$enUb_proxy" == "true" ]] && includeScriptList+=( "generic/net/proxy/vnc"/vnc_vncviewer_operations.sh )
 	[[ "$enUb_proxy" == "true" ]] && includeScriptList+=( "generic/net/proxy/vnc"/vnc_x11vnc_operations.sh )
+	( [[ "$enUb_proxy" == "true" ]] || [[ "$enUb_cloud" == "true" ]] ) && includeScriptList+=( "generic/net/proxy/vnc"/vnchost.sh )
 	
 	[[ "$enUb_proxy" == "true" ]] && includeScriptList+=( "generic/net/proxy/proxyrouter"/here_proxyrouter.sh )
 	[[ "$enUb_proxy" == "true" ]] && includeScriptList+=( "generic/net/proxy/proxyrouter"/proxyrouter.sh )
@@ -44019,14 +44316,22 @@ _compile_bash() {
 		includeScriptList+=( "structure"/localenv_prog.sh )
 		
 		
-		if [[ "$1" == "rotten_test" ]]
+		if [[ "$1" == "rotten_test" ]] || [[ "$1" == "rotten_test"* ]]
 		then
 			includeScriptList+=( "structure"/installation.sh )
 			includeScriptList+=( "structure"/installation_prog.sh )
 		fi
 		
-		#includeScriptList+=( "structure"/program.sh )
-		
+		if [[ "$1" == "rotten_test-extendedInterface" ]] || [[ "$1" == "rotten"*"-extendedInterface"* ]] || [[ "$1" == "rotten_test-"*"-MSW" ]] || [[ "$1" == "rotten_test-"*"-MSW"* ]]
+		then
+			# ATTENTION: May split anchor functions to 'setupUbiquitous-anchor.sh' .
+			includeScriptList+=( "shortcuts"/setupUbiquitous.sh )
+			#_compile_bash_shortcuts_setup
+			
+			includeScriptList+=( "structure"/program.sh )
+			_compile_bash_program
+			_compile_bash_program_prog
+		fi
 		
 		
 		#####Hardcoded
