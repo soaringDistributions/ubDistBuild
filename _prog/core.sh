@@ -938,7 +938,21 @@ _package_ubDistBuild_image() {
 }
 
 
+_ubDistBuild_split() {
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
 
+
+	cd "$scriptLocal"
+	split -b 1856000000 -d package_image.tar.xz package_image.tar.xz.part
+
+
+	cd "$functionEntryPWD"
+}
+
+
+
+# WARNING: OBSOLETE .
 # Call '_nouveau_enable', or similar, to create a 'vm-nouveau.img', or similar file.
 _upload_ubDistBuild_image() {
 	_package_ubDistBuild_image "$@"
@@ -959,6 +973,7 @@ _upload_ubDistBuild_image() {
 	return 0
 }
 
+# WARNING: OBSOLETE .
 _upload_ubDistBuild_custom() {
 	cd "$scriptLocal"
 	
@@ -1374,7 +1389,7 @@ _ubDistBuild() {
 	rm -f "$scriptLocal"/core.tar.xz > /dev/null 2>&1
 	
 	
-	_upload_ubDistBuild_image
+	#_upload_ubDistBuild_image
 	
 	
 	
