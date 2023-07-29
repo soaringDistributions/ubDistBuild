@@ -91,13 +91,6 @@ jobs:
         run: |
           ~/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _getMinimal_cloud
         timeout-minutes: 90
-      - name: write! secrets
-        shell: bash
-        run: |
-          ~/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _prepare_rclone_limited_file
-        env:
-          rclone_limited_conf_base64: ${{ secrets.rclone_limited_conf_base64 }}
-        timeout-minutes: 5
       #- name: changeDisk
         #shell: bash
         #run: |
@@ -114,7 +107,6 @@ jobs:
         #shell: bash
         #timeout-minutes: 355
         #run: |
-          ##rclone --progress --config /rclone.conf copy distLLC_release:/ubDistFetch/core.tar.xz ./_lib/
           #./_getCore_ubDistFetch | sudo -n tee ./_local/_getCore_ubDistFetch.log
       #- name: _get_ubDistHome
         #shell: bash
