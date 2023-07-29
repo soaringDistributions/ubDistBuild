@@ -148,7 +148,8 @@ _create_ubDistBuild-create() {
 	# https://gist.github.com/dyejon/8e78b97c4eba954ddbda7ae482821879
 	#http://deb.debian.org/debian/
 	#--components=main --include=inetutils-ping,iproute
-	! sudo -n debootstrap --variant=minbase --arch amd64 bullseye "$globalVirtFS" && _messageFAIL
+	#! sudo -n debootstrap --variant=minbase --arch amd64 bullseye "$globalVirtFS" && _messageFAIL
+	! sudo -n debootstrap --variant=minbase --arch amd64 bookworm "$globalVirtFS" && _messageFAIL
 	
 	
 	

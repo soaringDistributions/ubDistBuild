@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1744393089'
+export ub_setScriptChecksum_contents='2648855220'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -39764,7 +39764,8 @@ _create_ubDistBuild-create() {
 	# https://gist.github.com/dyejon/8e78b97c4eba954ddbda7ae482821879
 	#http://deb.debian.org/debian/
 	#--components=main --include=inetutils-ping,iproute
-	! sudo -n debootstrap --variant=minbase --arch amd64 bullseye "$globalVirtFS" && _messageFAIL
+	#! sudo -n debootstrap --variant=minbase --arch amd64 bullseye "$globalVirtFS" && _messageFAIL
+	! sudo -n debootstrap --variant=minbase --arch amd64 bookworm "$globalVirtFS" && _messageFAIL
 	
 	
 	
