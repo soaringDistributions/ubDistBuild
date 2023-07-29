@@ -930,7 +930,7 @@ _package_ubDistBuild_image() {
 	
 	# https://www.rootusers.com/gzip-vs-bzip2-vs-xz-performance-comparison/
 	# https://stephane.lesimple.fr/blog/lzop-vs-compress-vs-gzip-vs-bzip2-vs-lzma-vs-lzma2xz-benchmark-reloaded/
-	env XZ_OPT="-2 -T0" tar -cJvf "$scriptLocal"/package_image.tar.xz ./vm.img ./ops.sh
+	env XZ_OPT="-1 -T0" tar -cJvf "$scriptLocal"/package_image.tar.xz ./vm.img ./ops.sh
 	
 	! [[ -e "$scriptLocal"/package_image.tar.xz ]] && _messageFAIL
 	
