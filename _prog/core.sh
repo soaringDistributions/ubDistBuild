@@ -446,7 +446,7 @@ CZXWXcRMTo8EmM8i4d
 	_messageNormal 'chroot: _getMost'
 	
 	export getMost_backend="chroot"
-	_getMost_debian11
+	_getMost_debian12
 	
 	_chroot env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --install-recommends -y upgrade
 	
