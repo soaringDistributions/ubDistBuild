@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3725156819'
+export ub_setScriptChecksum_contents='461277878'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -22886,6 +22886,15 @@ _test_gitBest() {
 
 
 
+
+_wget_githubRelease_internal() {
+	local currentURL=$(curl -s "https://api.github.com/repos/""$1""/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \""$2"\") | .browser_download_url" | sort -n -r | head -n 1)
+	_messagePlain_probe curl -L -o "$2" "$currentURL"
+	curl -L -o "$2" "$currentURL"
+	[[ ! -e "$2" ]] && _messagePlain_bad 'missing: '"$1"' '"$2" && return 1
+	return 0
+}
+
 _test_bup() {
 	# Forced removal of 'python2' caused some apparent disruption.
 	#! _wantDep bup && echo 'warn: no bup'
@@ -41206,6 +41215,32 @@ _upload_ubDistBuild_custom() {
 
 
 
+_download_ubDistBuild_image() {
+	cd "$scriptLocal"
+	
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part00"
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part01" 2> /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part02" 2> /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part03" 2> /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part04" 2> /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part05" 2> /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part06" 2> /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part07" 2> /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part08" 2> /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part09" 2> /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part10" 2> /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part11" 2> /dev/null
+
+	cat "package_image.tar.xz.part"* > "package_image.tar.xz"
+	rm -f "package_image.tar.xz.part"*
+
+	! [[ -e "$scriptLocal"/package_image.tar.xz ]] && _messageFAIL
+
+	tar -xvf "$scriptLocal"/package_image.tar.xz
+}
+
+
+
 _croc_ubDistBuild_image_out_message() {
 	sleep 3
 	while pgrep '^croc$' || ps -p "$currentPID"
@@ -41859,6 +41894,8 @@ _refresh_anchors() {
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_upload_ubDistBuild_image
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_upload_ubDistBuild_custom
+
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_download_ubDistBuild_image
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_croc_ubDistBuild_image
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_croc_ubDistBuild_image_out
@@ -44409,6 +44446,7 @@ _compile_bash_shortcuts() {
 	( [[ "$enUb_repo" == "true" ]] && [[ "$enUb_git" == "true" ]] ) && includeScriptList+=( "shortcuts/git"/git.sh )
 	( [[ "$enUb_repo" == "true" ]] && [[ "$enUb_git" == "true" ]] ) && includeScriptList+=( "shortcuts/git"/gitBare.sh )
 	includeScriptList+=( "shortcuts/git"/gitBest.sh )
+	includeScriptList+=( "shortcuts/git"/wget_githubRelease_internal.sh )
 	
 	[[ "$enUb_bup" == "true" ]] && includeScriptList+=( "shortcuts/bup"/bup.sh )
 	
@@ -44907,6 +44945,9 @@ _compile_bash() {
 		includeScriptList+=( "shortcuts"/importShortcuts.sh )
 		
 		includeScriptList+=( "shortcuts/prompt"/visualPrompt.sh )
+		
+		
+		includeScriptList+=( "shortcuts"/git/wget_githubRelease_internal.sh )
 		
 		
 		

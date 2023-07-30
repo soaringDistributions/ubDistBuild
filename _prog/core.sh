@@ -985,6 +985,32 @@ _upload_ubDistBuild_custom() {
 
 
 
+_download_ubDistBuild_image() {
+	cd "$scriptLocal"
+	
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part00"
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part01" 2> /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part02" 2> /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part03" 2> /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part04" 2> /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part05" 2> /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part06" 2> /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part07" 2> /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part08" 2> /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part09" 2> /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part10" 2> /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part11" 2> /dev/null
+
+	cat "package_image.tar.xz.part"* > "package_image.tar.xz"
+	rm -f "package_image.tar.xz.part"*
+
+	! [[ -e "$scriptLocal"/package_image.tar.xz ]] && _messageFAIL
+
+	tar -xvf "$scriptLocal"/package_image.tar.xz
+}
+
+
+
 _croc_ubDistBuild_image_out_message() {
 	sleep 3
 	while pgrep '^croc$' || ps -p "$currentPID"
@@ -1638,6 +1664,8 @@ _refresh_anchors() {
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_upload_ubDistBuild_image
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_upload_ubDistBuild_custom
+
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_download_ubDistBuild_image
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_croc_ubDistBuild_image
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_croc_ubDistBuild_image_out
