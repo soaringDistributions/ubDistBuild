@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='461277878'
+export ub_setScriptChecksum_contents='638725851'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -41219,17 +41219,17 @@ _download_ubDistBuild_image() {
 	cd "$scriptLocal"
 	
 	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part00"
-	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part01" 2> /dev/null
-	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part02" 2> /dev/null
-	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part03" 2> /dev/null
-	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part04" 2> /dev/null
-	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part05" 2> /dev/null
-	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part06" 2> /dev/null
-	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part07" 2> /dev/null
-	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part08" 2> /dev/null
-	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part09" 2> /dev/null
-	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part10" 2> /dev/null
-	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part11" 2> /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part01" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part02" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part03" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part04" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part05" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part06" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part07" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part08" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part09" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part10" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part11" > /dev/null
 
 	cat "package_image.tar.xz.part"* > "package_image.tar.xz"
 	rm -f "package_image.tar.xz.part"*
