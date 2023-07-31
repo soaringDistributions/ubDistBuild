@@ -118,7 +118,7 @@ jobs:
       - name: _false
         shell: bash
         run: |
-          ! ./_false | sudo -n tee ./_local/_false.log && exit ${PIPESTATUS[0]}
+          ( ! ./_false ) | sudo -n tee ./_local/_false.log && exit ${PIPESTATUS[0]}
       - name: _create_ubDistBuild-create
         shell: bash
         run: |
