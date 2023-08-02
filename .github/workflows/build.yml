@@ -86,7 +86,7 @@ jobs:
         uses: easimon/maximize-build-space@master
         with:
           #root-reserve-mb: 512
-          #root-reserve-mb: 1792
+          root-reserve-mb: 1792
           #temp-reserve-mb: 100
           temp-reserve-mb: 300
           #swap-size-mb: 128
@@ -106,7 +106,7 @@ jobs:
       - name: _getMinimal_cloud
         shell: bash
         run: |
-          ~/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _getMinimal_cloud
+          ! ~/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _getMinimal_cloud && exit 1
           sudo -n apt-get -y clean
         timeout-minutes: 90
       #- name: changeDisk
@@ -119,13 +119,14 @@ jobs:
       - name: _getMinimal_cloud
         shell: bash
         run: |
-          ./ubiquitous_bash.sh _getMinimal_cloud
+          ! ./ubiquitous_bash.sh _getMinimal_cloud && exit 1
+          sudo -n apt-get -y clean
         timeout-minutes: 355
       # For VBoxManage for _convert . Otherwise historically not apparently necessary.
       - name: _getMost
         shell: bash
         run: |
-          ./ubiquitous_bash.sh _getMost
+          ! ./ubiquitous_bash.sh _getMost && exit 1
           sudo -n apt-get -y clean
         timeout-minutes: 355
       #- name: _create_ubDistBuild
