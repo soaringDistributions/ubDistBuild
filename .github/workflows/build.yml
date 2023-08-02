@@ -107,6 +107,7 @@ jobs:
         shell: bash
         run: |
           ! ~/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _getMinimal_cloud && exit 1
+          true
           #sudo -n apt-get -y clean
         timeout-minutes: 90
       #- name: changeDisk
@@ -120,6 +121,7 @@ jobs:
         shell: bash
         run: |
           ! ./ubiquitous_bash.sh _getMinimal_cloud && exit 1
+          true
           #sudo -n apt-get -y clean
         timeout-minutes: 355
       # For VBoxManage for _convert . Otherwise historically not apparently necessary.
@@ -127,6 +129,7 @@ jobs:
         shell: bash
         run: |
           ! ./ubiquitous_bash.sh _getMost && exit 1
+          true
           #sudo -n apt-get -y clean
         timeout-minutes: 355
       #- name: _create_ubDistBuild
