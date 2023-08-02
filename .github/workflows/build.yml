@@ -11,6 +11,22 @@
 # ATTENTION: NOTICE: Consider replacing the current directory with a symlink to a larger filesystem, before checkout of repository.
 
 name: build
+
+
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#permissions
+permissions:
+  actions: write
+  checks: read
+  contents: write
+  deployments: read
+  issues: read
+  packages: read
+  pull-requests: read
+  repository-projects: read
+  security-events: none
+  statuses: read
+
+
 on:
   #push:
   workflow_dispatch:
@@ -49,6 +65,7 @@ jobs:
     #  '7 GB of RAM memory'
     #  '14 GB of SSD disk space'
     runs-on: ubuntu-latest
+    #runs-on: ubuntu-22.04
     #runs-on: ubuntu-20.04
     #runs-on: ubuntu-18.04
     # Apparently both 'buildjet-2vcpu-ubuntu-2004' and 'buildjet-16vcpu-ubuntu-2004' have 61GB .
@@ -103,6 +120,12 @@ jobs:
         run: |
           ./ubiquitous_bash.sh _getMinimal_cloud
         timeout-minutes: 355
+      # For VBoxManage for _convert . Otherwise historically not apparently necessary.
+      - name: _getMost
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _getMost
+        timeout-minutes: 355
       #- name: _create_ubDistBuild
         #shell: bash
         #run: |
@@ -139,6 +162,8 @@ jobs:
         shell: bash
         run: |
           ./_create_ubDistBuild-rotten_install-core | sudo -n tee ./_create_ubDistBuild-rotten_install-core.log && exit ${PIPESTATUS[0]}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: _create_ubDistBuild-install-ubDistBuild
         shell: bash
         run: |
@@ -253,10 +278,105 @@ jobs:
         #run: |
           #./ubiquitous_bash.sh _croc_ubDistBuild_image_out | sudo -n tee ./_lib/_croc_ubDistBuild_image_out.log
         #timeout-minutes: 355
-      - name: _assessment
+      - name: _convert-live
         shell: bash
         run: |
-          ./_assessment | sudo -n tee ./_local/_assessment.log && exit ${PIPESTATUS[0]}
+          export current_diskConstrained="true"
+          ./ubiquitous_bash.sh _convert_rm
+          ./ubiquitous_bash.sh _convert-live | sudo -n tee ./_convert-live.log && exit ${PIPESTATUS[0]}
+          ./ubiquitous_bash.sh _safeRMR ./_local/livefs
+      - name: _ubDistBuild_split-live
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _ubDistBuild_split-live
+      - name: release! core
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part00
+      - name: release! core
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part01
+      - name: release! core
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part02
+      - name: release! core
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part03
+      - name: release! core
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part04
+      - name: release! core
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part05
+      - name: release! core
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part06
+      - name: release! core
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part07
+      - name: release! core
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part08
+      - name: release! core
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part09
+      - name: release! core
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part10
+      - name: release! core
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part11
+      #- name: _assessment
+        #shell: bash
+        #run: |
+          #./_assessment | sudo -n tee ./_local/_assessment.log && exit ${PIPESTATUS[0]}
       #- name: Setup tmate session
         #if: ${{ failure() }}
         #uses: mxschmitt/action-tmate@v3

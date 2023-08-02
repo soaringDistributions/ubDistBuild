@@ -950,6 +950,18 @@ _ubDistBuild_split() {
 	cd "$functionEntryPWD"
 }
 
+_ubDistBuild_split-live() {
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+
+
+	cd "$scriptLocal"
+	split -b 1856000000 -d vm-live.iso vm-live.iso.part
+
+
+	cd "$functionEntryPWD"
+}
+
 
 
 # WARNING: OBSOLETE .
@@ -984,8 +996,8 @@ _upload_ubDistBuild_custom() {
 }
 
 
-
-_download_ubDistBuild_image() {
+# WARNING: OBSOLETE .
+_get_vmImg_ubDistBuild-tempFile() {
 	cd "$scriptLocal"
 	
 	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part00"
@@ -1448,26 +1460,38 @@ _create_kde() {
 }
 
 
+_convert_rm() {
+	rm -f "$scriptLocal"/vm.vdi
+	rm -f "$scriptLocal"/vm.vmdk
+	rm -f "$scriptLocal"/vm.vhdx
+	return 0
+}
 
+_convert-vdi() {
+	# NOTICE: _convert_rm
 
-_convert() {
 	[[ ! -e "$scriptLocal"/vm.img ]] && _messageFAIL
 	rm -f "$scriptLocal"/package_image.tar.xz
-	
-	
-	
+	rm -f "$scriptLocal"/package_image.tar.xz.part*
 	
 	_messageNormal '_convert: vm.vdi'
 	_vm_convert_vdi
 	[[ ! -e "$scriptLocal"/vm.vdi ]] && _messageFAIL
+}
+
+_convert-vmdk() {
+	# NOTICE: _convert_rm
 	
+	[[ ! -e "$scriptLocal"/vm.img ]] && _messageFAIL
+	rm -f "$scriptLocal"/package_image.tar.xz
+	rm -f "$scriptLocal"/package_image.tar.xz.part*
 	
 	_messageNormal '_convert: vm.vmdk'
 	_vm_convert_vmdk
 	[[ ! -e "$scriptLocal"/vm.vmdk ]] && _messageFAIL
-	
-	
-	
+}
+
+_convert-live() {
 	_messageNormal '_convert: vm-live.iso'
 	
 	if ! "$scriptAbsoluteLocation" _live_sequence_in "$@"
@@ -1475,7 +1499,7 @@ _convert() {
 		_stop 1
 	fi
 	
-	#rm -f "$scriptLocal"/vm.img
+	[[ "$current_diskConstrained" == "true" ]] && rm -f "$scriptLocal"/vm.img
 	
 	if ! "$scriptAbsoluteLocation" _live_sequence_out "$@"
 	then
@@ -1483,6 +1507,27 @@ _convert() {
 	fi
 	
 	_safeRMR "$scriptLocal"/livefs
+}
+
+
+_convert() {
+	# NOTICE: _convert_rm
+
+	[[ ! -e "$scriptLocal"/vm.img ]] && _messageFAIL
+	rm -f "$scriptLocal"/package_image.tar.xz
+	rm -f "$scriptLocal"/package_image.tar.xz.part*
+
+
+	_convert-vdi "$@"
+	
+
+	_convert-vmdk "$@"
+	
+	
+	_messageNormal '_convert: vm-live.iso'
+	
+	#export current_diskConstrained="false"
+	_convert-live "$@"
 	
 	
 	
@@ -1664,8 +1709,6 @@ _refresh_anchors() {
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_upload_ubDistBuild_image
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_upload_ubDistBuild_custom
-
-	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_download_ubDistBuild_image
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_croc_ubDistBuild_image
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_croc_ubDistBuild_image_out

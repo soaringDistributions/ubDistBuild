@@ -5,7 +5,8 @@
 
 _get_extract_ubDistBuild() {
 	# https://unix.stackexchange.com/questions/85194/how-to-download-an-archive-and-extract-it-without-saving-the-archive-to-disk
-	pv | xz -d | tar xv --overwrite "$@"
+	#pv | xz -d | tar xv --overwrite "$@"
+	xz -d | tar xv --overwrite "$@"
 }
 
 
@@ -21,6 +22,7 @@ _get_vmImg_ubDistBuild_sequence() {
 	
 	# Only extracted vm img.
 	rm -f "$scriptLocal"/package_image.tar.xz
+	rm -f "$scriptLocal"/package_image.tar.xz.part*
 	
 	if [[ -e "$scriptLocal"/vm.img ]]
 	then
@@ -34,21 +36,34 @@ _get_vmImg_ubDistBuild_sequence() {
 	fi
 	
 	cd "$scriptLocal"
-	
-	
-	
-	# https://unix.stackexchange.com/questions/85194/how-to-download-an-archive-and-extract-it-without-saving-the-archive-to-disk
-	_messagePlain_probe 'wget | pv | xz -d | tar xv'
-	wget -qO- --user u298813-sub10 --password OJgZTe0yNilixhRy 'https://u298813-sub10.your-storagebox.de/zSpecial/build_ubDistBuild/dump/package_image.tar.xz' | _get_extract_ubDistBuild
+	_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$1" "package_image.tar.xz" | _get_extract_ubDistBuild
 	[[ "$?" != "0" ]] && _messageFAIL
-	
-	
-	
-	cd "$PWD"
+
+	cd "$functionEntryPWD"
 }
 _get_vmImg_ubDistBuild() {
 	"$scriptAbsoluteLocation" _get_vmImg_ubDistBuild_sequence "$@"
 }
+
+_get_vmImg_ubDistBuild-live_sequence() {
+	_messageNormal 'init: _get_vmImg'
+	
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+	
+	
+	mkdir -p "$scriptLocal"
+	cd "$scriptLocal"
+	_wget_githubRelease_join "soaringDistributions/ubDistBuild" "$1" "vm-live.iso"
+	[[ "$?" != "0" ]] && _messageFAIL
+
+	cd "$functionEntryPWD"
+}
+_get_vmImg_ubDistBuild-live() {
+	"$scriptAbsoluteLocation" _get_vmImg_ubDistBuild-live_sequence "$@"
+}
+
+
 
 
 
@@ -91,7 +106,7 @@ _get_core_ubDistFetch_sequence() {
 	wget --user u298813-sub10 --password OJgZTe0yNilixhRy 'https://u298813-sub10.your-storagebox.de/zSpecial/build_ubDistFetch/dump/core.tar.xz'
 	[[ "$?" != "0" ]] && _messageFAIL
 	
-	cd "$PWD"
+	cd "$functionEntryPWD"
 }
 _get_core_ubDistFetch() {
 	"$scriptAbsoluteLocation" _get_core_ubDistFetch_sequence "$@"

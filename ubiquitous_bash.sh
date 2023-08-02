@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1154679100'
+export ub_setScriptChecksum_contents='4104556780'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -10886,14 +10886,19 @@ _test_getMost_backend() {
 
 # WARNING: No production use. Installation commands may be called through 'chroot' or 'ssh' , expected as such not reasonably able to detect the OS distribution . User is expected to instead call the correct function with the correct configuration.
 _getMost() {
-	if [[ -e /etc/issue ]] && cat /etc/issue | grep 'Debian\|Raspbian' > /dev/null 2>&1
+	if [[ -e /etc/issue ]] && cat /etc/issue | grep 'Debian\|Raspbian' > /dev/null 2>&1 && [[ -e /etc/debian_version ]] && cat /etc/debian_version | head -c 2 | grep 12 > /dev/null 2>&1
+	then
+		_tryExecFull _getMost_debian12 "$@"
+	elif [[ -e /etc/issue ]] && cat /etc/issue | grep 'Debian\|Raspbian' > /dev/null 2>&1
 	then
 		_tryExecFull _getMost_debian11 "$@"
 		return
-	fi
-	if [[ -e /etc/issue ]] && cat /etc/issue | grep 'Ubuntu' > /dev/null 2>&1
+	elif [[ -e /etc/issue ]] && cat /etc/issue | grep 'Ubuntu' > /dev/null 2>&1
 	then
 		_tryExecFull _getMost_ubuntu22 "$@"
+		return
+	else
+		_tryExecFull _getMost_debian12 "$@"
 		return
 	fi
 	return 1
@@ -22888,13 +22893,90 @@ _test_gitBest() {
 
 
 
-_wget_githubRelease_internal() {
-	local currentURL=$(curl -s "https://api.github.com/repos/""$1""/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \""$2"\") | .browser_download_url" | sort -n -r | head -n 1)
-	_messagePlain_probe curl -L -o "$2" "$currentURL"
-	curl -L -o "$2" "$currentURL"
-	[[ ! -e "$2" ]] && _messagePlain_bad 'missing: '"$1"' '"$2" && return 1
+_wget_githubRelease-URL() {
+	local currentURL
+	if [[ "$2" != "" ]]
+	then
+		if [[ "$GH_TOKEN" == "" ]]
+		then
+			currentURL=$(curl -6 -s "https://api.github.com/repos/""$1""/releases" | jq -r ".[] | select(.name == \"""$2""\") | .assets[] | select(.name == \"""$3""\") | .browser_download_url" | sort -n -r | head -n 1)
+			[[ "$currentURL" == "" ]] && currentURL=$(curl -4 -s "https://api.github.com/repos/""$1""/releases" | jq -r ".[] | select(.name == \"""$2""\") | .assets[] | select(.name == \"""$3""\") | .browser_download_url" | sort -n -r | head -n 1)
+			echo "$currentURL"
+			return
+		else
+			currentURL=$(curl -6 -H "Authorization: Bearer $GH_TOKEN" -s "https://api.github.com/repos/""$1""/releases" | jq -r ".[] | select(.name == \"""$2""\") | .assets[] | select(.name == \"""$3""\") | .browser_download_url" | sort -n -r | head -n 1)
+			[[ "$currentURL" == "" ]] && currentURL=$(curl -4 -H "Authorization: Bearer $GH_TOKEN" -s "https://api.github.com/repos/""$1""/releases" | jq -r ".[] | select(.name == \"""$2""\") | .assets[] | select(.name == \"""$3""\") | .browser_download_url" | sort -n -r | head -n 1)
+			echo "$currentURL"
+			return
+		fi
+	else
+		if [[ "$GH_TOKEN" == "" ]]
+		then
+			currentURL=$(curl -6 -s "https://api.github.com/repos/""$1""/releases/latest" | jq -r ".assets[] | select(.name == \"""$3""\") | .browser_download_url" | sort -n -r | head -n 1)
+			[[ "$currentURL" == "" ]] && currentURL=$(curl -4 -s "https://api.github.com/repos/""$1""/releases/latest" | jq -r ".assets[] | select(.name == \"""$3""\") | .browser_download_url" | sort -n -r | head -n 1)
+			echo "$currentURL"
+			return
+		else
+			currentURL=$(curl -6 -H "Authorization: Bearer $GH_TOKEN" -s "https://api.github.com/repos/""$1""/releases/latest" | jq -r ".assets[] | select(.name == \"""$3""\") | .browser_download_url" | sort -n -r | head -n 1)
+			[[ "$currentURL" == "" ]] && currentURL=$(curl -4 -H "Authorization: Bearer $GH_TOKEN" -s "https://api.github.com/repos/""$1""/releases/latest" | jq -r ".assets[] | select(.name == \"""$3""\") | .browser_download_url" | sort -n -r | head -n 1)
+			echo "$currentURL"
+			return
+		fi
+	fi
+}
+
+_wget_githubRelease() {
+	local currentURL=$(_wget_githubRelease_internal-URL "$@")
+	_messagePlain_probe curl -L -o "$3" "$currentURL" >&2
+	curl -L -o "$3" "$currentURL"
+	[[ ! -e "$3" ]] && _messagePlain_bad 'missing: '"$1"' '"$2"' '"$3" && return 1
 	return 0
 }
+
+_wget_githubRelease-stdout() {
+	local currentURL=$(_wget_githubRelease_internal-URL "$@")
+	_messagePlain_probe curl -L -o - "$currentURL" >&2
+	curl -L -o - "$currentURL"
+}
+
+
+_wget_githubRelease_join-stdout() {
+	local currentURL
+	local currentURL_array
+	local currentIteration
+
+	currentIteration=0
+	for currentIteration in $(seq -f "%02g" 0 32)
+	do
+		currentURL=$(_wget_githubRelease-URL "$1" "$2" "$3"".part""$currentIteration")
+		[[ "$currentURL" == "" ]] && break
+		[[ "$currentURL" != "" ]] && currentURL_array+=( "$currentURL" )
+	done
+	
+	_messagePlain_probe curl -L "${currentURL_array[@]}" >&2
+
+	curl -L "${currentURL_array[@]}"
+}
+
+_wget_githubRelease_join() {
+	_messagePlain_probe _wget_githubRelease_join-stdout "$@" '>' "$3" >&2
+	_wget_githubRelease_join-stdout "$@" > "$3"
+	[[ ! -e "$3" ]] && _messagePlain_bad 'missing: '"$1"' '"$2"' '"$3" && return 1
+	return 0
+}
+
+
+_wget_githubRelease_internal-URL() {
+	_wget_githubRelease-URL "$1" "internal" "$2"
+}
+
+_wget_githubRelease_internal() {
+	_wget_githubRelease "$1" "internal" "$2"
+}
+
+
+
+
 
 _test_bup() {
 	# Forced removal of 'python2' caused some apparent disruption.
@@ -41181,6 +41263,18 @@ _ubDistBuild_split() {
 	cd "$functionEntryPWD"
 }
 
+_ubDistBuild_split-live() {
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+
+
+	cd "$scriptLocal"
+	split -b 1856000000 -d vm-live.iso vm-live.iso.part
+
+
+	cd "$functionEntryPWD"
+}
+
 
 
 # WARNING: OBSOLETE .
@@ -41215,8 +41309,8 @@ _upload_ubDistBuild_custom() {
 }
 
 
-
-_download_ubDistBuild_image() {
+# WARNING: OBSOLETE .
+_get_vmImg_ubDistBuild-tempFile() {
 	cd "$scriptLocal"
 	
 	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part00"
@@ -41679,26 +41773,38 @@ _create_kde() {
 }
 
 
+_convert_rm() {
+	rm -f "$scriptLocal"/vm.vdi
+	rm -f "$scriptLocal"/vm.vmdk
+	rm -f "$scriptLocal"/vm.vhdx
+	return 0
+}
 
+_convert-vdi() {
+	# NOTICE: _convert_rm
 
-_convert() {
 	[[ ! -e "$scriptLocal"/vm.img ]] && _messageFAIL
 	rm -f "$scriptLocal"/package_image.tar.xz
-	
-	
-	
+	rm -f "$scriptLocal"/package_image.tar.xz.part*
 	
 	_messageNormal '_convert: vm.vdi'
 	_vm_convert_vdi
 	[[ ! -e "$scriptLocal"/vm.vdi ]] && _messageFAIL
+}
+
+_convert-vmdk() {
+	# NOTICE: _convert_rm
 	
+	[[ ! -e "$scriptLocal"/vm.img ]] && _messageFAIL
+	rm -f "$scriptLocal"/package_image.tar.xz
+	rm -f "$scriptLocal"/package_image.tar.xz.part*
 	
 	_messageNormal '_convert: vm.vmdk'
 	_vm_convert_vmdk
 	[[ ! -e "$scriptLocal"/vm.vmdk ]] && _messageFAIL
-	
-	
-	
+}
+
+_convert-live() {
 	_messageNormal '_convert: vm-live.iso'
 	
 	if ! "$scriptAbsoluteLocation" _live_sequence_in "$@"
@@ -41706,7 +41812,7 @@ _convert() {
 		_stop 1
 	fi
 	
-	#rm -f "$scriptLocal"/vm.img
+	[[ "$current_diskConstrained" == "true" ]] && rm -f "$scriptLocal"/vm.img
 	
 	if ! "$scriptAbsoluteLocation" _live_sequence_out "$@"
 	then
@@ -41714,6 +41820,27 @@ _convert() {
 	fi
 	
 	_safeRMR "$scriptLocal"/livefs
+}
+
+
+_convert() {
+	# NOTICE: _convert_rm
+
+	[[ ! -e "$scriptLocal"/vm.img ]] && _messageFAIL
+	rm -f "$scriptLocal"/package_image.tar.xz
+	rm -f "$scriptLocal"/package_image.tar.xz.part*
+
+
+	_convert-vdi "$@"
+	
+
+	_convert-vmdk "$@"
+	
+	
+	_messageNormal '_convert: vm-live.iso'
+	
+	#export current_diskConstrained="false"
+	_convert-live "$@"
 	
 	
 	
@@ -41895,8 +42022,6 @@ _refresh_anchors() {
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_upload_ubDistBuild_image
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_upload_ubDistBuild_custom
-
-	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_download_ubDistBuild_image
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_croc_ubDistBuild_image
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_croc_ubDistBuild_image_out
@@ -41980,7 +42105,8 @@ _main() {
 
 _get_extract_ubDistBuild() {
 	# https://unix.stackexchange.com/questions/85194/how-to-download-an-archive-and-extract-it-without-saving-the-archive-to-disk
-	pv | xz -d | tar xv --overwrite "$@"
+	#pv | xz -d | tar xv --overwrite "$@"
+	xz -d | tar xv --overwrite "$@"
 }
 
 
@@ -41996,6 +42122,7 @@ _get_vmImg_ubDistBuild_sequence() {
 	
 	# Only extracted vm img.
 	rm -f "$scriptLocal"/package_image.tar.xz
+	rm -f "$scriptLocal"/package_image.tar.xz.part*
 	
 	if [[ -e "$scriptLocal"/vm.img ]]
 	then
@@ -42009,21 +42136,34 @@ _get_vmImg_ubDistBuild_sequence() {
 	fi
 	
 	cd "$scriptLocal"
-	
-	
-	
-	# https://unix.stackexchange.com/questions/85194/how-to-download-an-archive-and-extract-it-without-saving-the-archive-to-disk
-	_messagePlain_probe 'wget | pv | xz -d | tar xv'
-	wget -qO- --user u298813-sub10 --password OJgZTe0yNilixhRy 'https://u298813-sub10.your-storagebox.de/zSpecial/build_ubDistBuild/dump/package_image.tar.xz' | _get_extract_ubDistBuild
+	_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$1" "package_image.tar.xz" | _get_extract_ubDistBuild
 	[[ "$?" != "0" ]] && _messageFAIL
-	
-	
-	
-	cd "$PWD"
+
+	cd "$functionEntryPWD"
 }
 _get_vmImg_ubDistBuild() {
 	"$scriptAbsoluteLocation" _get_vmImg_ubDistBuild_sequence "$@"
 }
+
+_get_vmImg_ubDistBuild-live_sequence() {
+	_messageNormal 'init: _get_vmImg'
+	
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+	
+	
+	mkdir -p "$scriptLocal"
+	cd "$scriptLocal"
+	_wget_githubRelease_join "soaringDistributions/ubDistBuild" "$1" "vm-live.iso"
+	[[ "$?" != "0" ]] && _messageFAIL
+
+	cd "$functionEntryPWD"
+}
+_get_vmImg_ubDistBuild-live() {
+	"$scriptAbsoluteLocation" _get_vmImg_ubDistBuild-live_sequence "$@"
+}
+
+
 
 
 
@@ -42066,7 +42206,7 @@ _get_core_ubDistFetch_sequence() {
 	wget --user u298813-sub10 --password OJgZTe0yNilixhRy 'https://u298813-sub10.your-storagebox.de/zSpecial/build_ubDistFetch/dump/core.tar.xz'
 	[[ "$?" != "0" ]] && _messageFAIL
 	
-	cd "$PWD"
+	cd "$functionEntryPWD"
 }
 _get_core_ubDistFetch() {
 	"$scriptAbsoluteLocation" _get_core_ubDistFetch_sequence "$@"
