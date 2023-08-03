@@ -88,7 +88,7 @@ jobs:
           #root-reserve-mb: 512
           root-reserve-mb: 8000
           #temp-reserve-mb: 100
-          temp-reserve-mb: 300
+          temp-reserve-mb: 5000
           #swap-size-mb: 128
           swap-size-mb: 192
           remove-dotnet: 'true'
