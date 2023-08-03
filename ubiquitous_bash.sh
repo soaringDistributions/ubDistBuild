@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1206190091'
+export ub_setScriptChecksum_contents='3611823342'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -41287,7 +41287,15 @@ _ubDistBuild_split() {
 
 
 	cd "$scriptLocal"
-	split -b 1856000000 -d package_image.tar.xz package_image.tar.xz.part
+	#split -b 1856000000 -d package_image.tar.xz package_image.tar.xz.part
+
+	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
+	local currentIteration
+	for currentIteration in $(seq 1 24)
+	do
+		[[ ! -s ./package_image.tar.xz ]] && [[ -e ./package_image.tar.xz ]] && tail -c 1856000000 package_image.tar.xz > package_image.tar.xz.part."$currentIteration" && truncate -s -1856000000 package_image.tar.xz;
+	done
+
 
 
 	cd "$functionEntryPWD"
@@ -41299,7 +41307,15 @@ _ubDistBuild_split-live() {
 
 
 	cd "$scriptLocal"
-	split -b 1856000000 -d vm-live.iso vm-live.iso.part
+	#split -b 1856000000 -d vm-live.iso vm-live.iso.part
+
+
+	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
+	local currentIteration
+	for currentIteration in $(seq 1 24)
+	do
+		[[ ! -s ./vm-live.iso ]] && [[ -e ./vm-live.iso ]] && tail -c 1856000000 vm-live.iso > vm-live.iso.part."$currentIteration" && truncate -s -1856000000 vm-live.iso;
+	done
 
 
 	cd "$functionEntryPWD"

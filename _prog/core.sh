@@ -944,7 +944,15 @@ _ubDistBuild_split() {
 
 
 	cd "$scriptLocal"
-	split -b 1856000000 -d package_image.tar.xz package_image.tar.xz.part
+	#split -b 1856000000 -d package_image.tar.xz package_image.tar.xz.part
+
+	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
+	local currentIteration
+	for currentIteration in $(seq 1 24)
+	do
+		[[ ! -s ./package_image.tar.xz ]] && [[ -e ./package_image.tar.xz ]] && tail -c 1856000000 package_image.tar.xz > package_image.tar.xz.part."$currentIteration" && truncate -s -1856000000 package_image.tar.xz;
+	done
+
 
 
 	cd "$functionEntryPWD"
@@ -956,7 +964,15 @@ _ubDistBuild_split-live() {
 
 
 	cd "$scriptLocal"
-	split -b 1856000000 -d vm-live.iso vm-live.iso.part
+	#split -b 1856000000 -d vm-live.iso vm-live.iso.part
+
+
+	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
+	local currentIteration
+	for currentIteration in $(seq 1 24)
+	do
+		[[ ! -s ./vm-live.iso ]] && [[ -e ./vm-live.iso ]] && tail -c 1856000000 vm-live.iso > vm-live.iso.part."$currentIteration" && truncate -s -1856000000 vm-live.iso;
+	done
 
 
 	cd "$functionEntryPWD"
