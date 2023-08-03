@@ -86,9 +86,9 @@ jobs:
         uses: easimon/maximize-build-space@master
         with:
           #root-reserve-mb: 512
-          root-reserve-mb: 8000
+          root-reserve-mb: 1450
           #temp-reserve-mb: 100
-          temp-reserve-mb: 5000
+          temp-reserve-mb: 300
           #swap-size-mb: 128
           swap-size-mb: 192
           remove-dotnet: 'true'
@@ -129,12 +129,15 @@ jobs:
           df -h /
         timeout-minutes: 355
       # For VBoxManage for _convert . Otherwise historically not apparently necessary.
-      - name: _getMost
+      - name: _getMost-VBoxManage
         shell: bash
         run: |
-          ! ./ubiquitous_bash.sh _getMost && exit 1
-          true
+          #! ./ubiquitous_bash.sh _getMost && exit 1
+          #true
           #! sudo -n apt-get -y clean && exit 1
+          ! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
+          sudo -n apt-get update
+          ! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
           df -h
           df -h /
         timeout-minutes: 355
