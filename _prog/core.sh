@@ -668,6 +668,8 @@ _create_ubDistBuild-rotten_install-core() {
 
 _create_ubDistBuild-bootOnce-qemu_sequence() {
 	! type qemu-system-x86_64 > /dev/null 2>&1 && _stop 1
+
+	local currentExitStatus
 	
 	export qemuHeadless="true"
 	
@@ -698,7 +700,7 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 		let currentIterationWait=currentIterationWait+1
 	done
 	_messagePlain_probe_var currentIterationWait
-	[[ "$currentIterationWait" -ge 2800 ]] && _messagePlain_bad 'bad: fail: bootdisc: poweroff'
+	[[ "$currentIterationWait" -ge 2800 ]] && _messagePlain_bad 'bad: fail: bootdisc: poweroff' && currentExitStatus=1
 	sleep 27
 	
 	
@@ -731,6 +733,7 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	fi
 	
 	echo
+	[[ "$currentExitStatus" == "1" ]] && return 1
 	return 0
 }
 _create_ubDistBuild-bootOnce-fsck_sequence() {
@@ -802,7 +805,8 @@ _create_ubDistBuild-bootOnce() {
 	
 	local currentIteration
 	
-	for currentIteration in $(seq 1 3)
+	#for currentIteration in $(seq 1 3)
+	for currentIteration in $(seq 1 2)
 	do
 		_messagePlain_probe_var currentIteration
 		
@@ -948,9 +952,9 @@ _ubDistBuild_split() {
 
 	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
 	local currentIteration
-	for currentIteration in $(seq 1 24)
+	for currentIteration in $(seq -w 1 24)
 	do
-		[[ ! -s ./package_image.tar.xz ]] && [[ -e ./package_image.tar.xz ]] && tail -c 1856000000 package_image.tar.xz > package_image.tar.xz.part."$currentIteration" && truncate -s -1856000000 package_image.tar.xz;
+		[[ -s ./package_image.tar.xz ]] && [[ -e ./package_image.tar.xz ]] && tail -c 1856000000 package_image.tar.xz > package_image.tar.xz.part."$currentIteration" && truncate -s -1856000000 package_image.tar.xz
 	done
 
 
@@ -969,9 +973,9 @@ _ubDistBuild_split-live() {
 
 	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
 	local currentIteration
-	for currentIteration in $(seq 1 24)
+	for currentIteration in $(seq -w 1 24)
 	do
-		[[ ! -s ./vm-live.iso ]] && [[ -e ./vm-live.iso ]] && tail -c 1856000000 vm-live.iso > vm-live.iso.part."$currentIteration" && truncate -s -1856000000 vm-live.iso;
+		[[ -s ./vm-live.iso ]] && [[ -e ./vm-live.iso ]] && tail -c 1856000000 vm-live.iso > vm-live.iso.part."$currentIteration" && truncate -s -1856000000 vm-live.iso
 	done
 
 
@@ -1180,8 +1184,10 @@ _zSpecial_qemu_sequence() {
 	#qemuArgs+=(-cpu host)
 	
 	# CPU >2 may force more compatible SMP kernel, etc.
-	qemuArgs+=(-smp 2)
-	
+	#qemuArgs+=(-smp 2)
+	local hostThreadCount
+	hostThreadCount=$(cat /proc/cpuinfo | grep MHz | wc -l | tr -dc '0-9')
+	qemuArgs+=(-smp "$hostThreadCount")
 	
 	
 	
@@ -1475,6 +1481,12 @@ _create_kde() {
 	rmdir "$HOME"/.license_package_kde
 }
 
+
+_package_rm() {
+	rm -f "$scriptLocal"/package_image.tar.xz
+	rm -f "$scriptLocal"/package_image.tar.xz.part*
+	return
+}
 
 _convert_rm() {
 	rm -f "$scriptLocal"/vm.vdi

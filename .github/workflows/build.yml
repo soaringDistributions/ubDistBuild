@@ -30,6 +30,10 @@ permissions:
 on:
   #push:
   workflow_dispatch:
+    inputs:
+      devfast:
+        type: boolean
+        default: true
   # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
   schedule:
     - cron: '5 7 * * 6'
@@ -85,15 +89,18 @@ jobs:
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
         with:
-          #root-reserve-mb: 512
-          #root-reserve-mb: 1450
-          root-reserve-mb: 950
-          #temp-reserve-mb: 100
+          ##root-reserve-mb: 512
+          ##root-reserve-mb: 1450
+          #root-reserve-mb: 950
+          root-reserve-mb: 1750
+          ##temp-reserve-mb: 100
+          ##temp-reserve-mb: 300
           #temp-reserve-mb: 300
-          temp-reserve-mb: 300
-          #swap-size-mb: 128
-          #swap-size-mb: 192
-          swap-size-mb: 8
+          temp-reserve-mb: 700
+          ##swap-size-mb: 128
+          ##swap-size-mb: 192
+          #swap-size-mb: 8
+          swap-size-mb: 384
           remove-dotnet: 'true'
           remove-android: 'true'
           remove-haskell: 'true'
@@ -164,14 +171,20 @@ jobs:
       - name: _create_ubDistBuild-create
         shell: bash
         run: |
+          export devfast=${{ inputs.devfast }}
+          echo $devfast
           ./_create_ubDistBuild-create | sudo -n tee ./_local/_create_ubDistBuild-create.log && exit ${PIPESTATUS[0]}
       - name: _create_ubDistBuild-rotten_install
         shell: bash
         run: |
+          export devfast=${{ inputs.devfast }}
+          echo $devfast
           ./_create_ubDistBuild-rotten_install | sudo -n tee ./_local/_create_ubDistBuild-rotten_install.log && exit ${PIPESTATUS[0]}
       - name: _chroot_test
         shell: bash
         run: |
+          export devfast=${{ inputs.devfast }}
+          echo $devfast
           ./_chroot_test | sudo -n tee ./_local/_chroot_test.log && exit ${PIPESTATUS[0]}
       - name: _create_ubDistBuild-bootOnce
         shell: bash
@@ -200,7 +213,7 @@ jobs:
         run: |
           ./ubiquitous_bash.sh _ubDistBuild_split | sudo -n tee ./_lib/_ubDistBuild_split.log && exit ${PIPESTATUS[0]}
         timeout-minutes: 355
-      - name: release! core
+      - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
@@ -208,84 +221,84 @@ jobs:
           files: |
             #./_local/package_image.tar.xz.part*
             ./_local/ops.sh
-      - name: release! core
+      - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
             ./_local/package_image.tar.xz.part00
-      - name: release! core
+      - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
             ./_local/package_image.tar.xz.part01
-      - name: release! core
+      - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
             ./_local/package_image.tar.xz.part02
-      - name: release! core
+      - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
             ./_local/package_image.tar.xz.part03
-      - name: release! core
+      - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
             ./_local/package_image.tar.xz.part04
-      - name: release! core
+      - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
             ./_local/package_image.tar.xz.part05
-      - name: release! core
+      - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
             ./_local/package_image.tar.xz.part06
-      - name: release! core
+      - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
             ./_local/package_image.tar.xz.part07
-      - name: release! core
+      - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
             ./_local/package_image.tar.xz.part08
-      - name: release! core
+      - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
             ./_local/package_image.tar.xz.part09
-      - name: release! core
+      - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
             ./_local/package_image.tar.xz.part10
-      - name: release! core
+      - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
@@ -297,6 +310,10 @@ jobs:
         #run: |
           #./ubiquitous_bash.sh _croc_ubDistBuild_image_out | sudo -n tee ./_lib/_croc_ubDistBuild_image_out.log
         #timeout-minutes: 355
+      - name: _package_rm
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _package_rm
       - name: _convert-live
         shell: bash
         run: |
@@ -308,84 +325,84 @@ jobs:
         shell: bash
         run: |
           ./ubiquitous_bash.sh _ubDistBuild_split-live
-      - name: release! core
+      - name: release! live
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
             ./_local/vm-live.iso.part00
-      - name: release! core
+      - name: release! corelive
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
             ./_local/vm-live.iso.part01
-      - name: release! core
+      - name: release! live
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
             ./_local/vm-live.iso.part02
-      - name: release! core
+      - name: release! live
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
             ./_local/vm-live.iso.part03
-      - name: release! core
+      - name: release! live
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
             ./_local/vm-live.iso.part04
-      - name: release! core
+      - name: release! live
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
             ./_local/vm-live.iso.part05
-      - name: release! core
+      - name: release! live
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
             ./_local/vm-live.iso.part06
-      - name: release! core
+      - name: release! live
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
             ./_local/vm-live.iso.part07
-      - name: release! core
+      - name: release! live
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
             ./_local/vm-live.iso.part08
-      - name: release! core
+      - name: release! live
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
             ./_local/vm-live.iso.part09
-      - name: release! core
+      - name: release! live
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
             ./_local/vm-live.iso.part10
-      - name: release! core
+      - name: release! live
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
