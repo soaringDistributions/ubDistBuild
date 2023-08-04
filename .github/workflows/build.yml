@@ -94,16 +94,16 @@ jobs:
         with:
           ##root-reserve-mb: 512
           ##root-reserve-mb: 1450
-          #root-reserve-mb: 950
-          root-reserve-mb: 1750
+          root-reserve-mb: 950
+          #root-reserve-mb: 1750
           ##temp-reserve-mb: 100
           ##temp-reserve-mb: 300
-          #temp-reserve-mb: 300
-          temp-reserve-mb: 700
+          temp-reserve-mb: 300
+          #temp-reserve-mb: 700
           ##swap-size-mb: 128
           ##swap-size-mb: 192
-          #swap-size-mb: 8
-          swap-size-mb: 384
+          swap-size-mb: 8
+          #swap-size-mb: 384
           remove-dotnet: 'true'
           remove-android: 'true'
           remove-haskell: 'true'
@@ -164,13 +164,23 @@ jobs:
         run: |
           mkdir -p ./_local
       - name: _true
+        if: ${{ github.event.inputs.skimfast != 'true' }}
         shell: bash
         run: |
           ./_true | sudo -n tee ./_local/_true.log && exit ${PIPESTATUS[0]}
       - name: _false
+        if: ${{ github.event.inputs.skimfast != 'true' }}
         shell: bash
         run: |
           ( ! ./_false ) | sudo -n tee ./_local/_false.log && exit ${PIPESTATUS[0]}
+      - name: lscpu
+        shell: bash
+        run: |
+          lscpu
+      - name: cpuinfo
+        shell: bash
+        run: |
+          cat /proc/cpuinfo
       - name: _create_ubDistBuild-create
         shell: bash
         run: |
@@ -212,6 +222,8 @@ jobs:
       - name: _package_ubDistBuild_image
         shell: bash
         run: |
+          export skimfast=${{ inputs.skimfast }}
+          echo $skimfast
           ./_package_ubDistBuild_image | sudo -n tee ./_local/_package_ubDistBuild_image.log && exit ${PIPESTATUS[0]}
       - name: _ubDistBuild_split
         shell: bash
@@ -226,6 +238,9 @@ jobs:
           files: |
             #./_local/package_image.tar.xz.part*
             ./_local/ops.sh
+            ./_local/dpkg
+            ./_local/binReport
+            /proc/cpuinfo
       - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:

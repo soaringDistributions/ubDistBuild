@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='4089203629'
+export ub_setScriptChecksum_contents='262972462'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -41328,13 +41328,24 @@ _package_ubDistBuild_image() {
 		echo >> "$scriptLocal"/ops.sh
 	fi
 	
-	rm -f "$scriptLocal"/package_image.tar.xz > /dev/null 2>&1
+	rm -f "$scriptLocal"/package_image.tar.flx > /dev/null 2>&1
 	
 	# https://www.rootusers.com/gzip-vs-bzip2-vs-xz-performance-comparison/
 	# https://stephane.lesimple.fr/blog/lzop-vs-compress-vs-gzip-vs-bzip2-vs-lzma-vs-lzma2xz-benchmark-reloaded/
-	env XZ_OPT="-1 -T0" tar -cJvf "$scriptLocal"/package_image.tar.xz ./vm.img ./ops.sh
+	#if [[ "$skimfast" != "true" ]]
+	#then
+		#env XZ_OPT="-1 -T0" tar -cJvf "$scriptLocal"/package_image.tar.flx ./vm.img ./ops.sh
+	#else
+		#env XZ_OPT="-0 -T0" tar -cJvf "$scriptLocal"/package_image.tar.flx ./vm.img ./ops.sh
+	#fi
+
+	# https://unix.stackexchange.com/questions/724795/lz4-what-is-the-max-ultra-fast-compression-level
+	# https://github.com/lz4/lz4/blob/e3974e5a1476190afdd8b44e67106cfb7097a1d5/doc/lz4_manual.html#L144
+	# each successive value providing roughly +~3% to speed
+	#--fast=65537
+	tar -cvf - ./vm.img ./ops.sh | lz4 -z --fast=1 - "$scriptLocal"/package_image.tar.flx
 	
-	! [[ -e "$scriptLocal"/package_image.tar.xz ]] && _messageFAIL
+	! [[ -e "$scriptLocal"/package_image.tar.flx ]] && _messageFAIL
 	
 	return 0
 }
@@ -41346,13 +41357,13 @@ _ubDistBuild_split() {
 
 
 	cd "$scriptLocal"
-	#split -b 1856000000 -d package_image.tar.xz package_image.tar.xz.part
+	#split -b 1856000000 -d package_image.tar.flx package_image.tar.flx.part
 
 	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
 	local currentIteration
-	for currentIteration in $(seq -w 1 24)
+	for currentIteration in $(seq -w 0 24)
 	do
-		[[ -s ./package_image.tar.xz ]] && [[ -e ./package_image.tar.xz ]] && tail -c 1856000000 package_image.tar.xz > package_image.tar.xz.part"$currentIteration" && truncate -s -1856000000 package_image.tar.xz
+		[[ -s ./package_image.tar.flx ]] && [[ -e ./package_image.tar.flx ]] && tail -c 1856000000 package_image.tar.flx > package_image.tar.flx.part"$currentIteration" && truncate -s -1856000000 package_image.tar.flx
 	done
 
 
@@ -41371,7 +41382,7 @@ _ubDistBuild_split-live() {
 
 	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
 	local currentIteration
-	for currentIteration in $(seq -w 1 24)
+	for currentIteration in $(seq -w 0 24)
 	do
 		[[ -s ./vm-live.iso ]] && [[ -e ./vm-live.iso ]] && tail -c 1856000000 vm-live.iso > vm-live.iso.part"$currentIteration" && truncate -s -1856000000 vm-live.iso
 	done
@@ -41388,9 +41399,9 @@ _upload_ubDistBuild_image() {
 	_package_ubDistBuild_image "$@"
 	cd "$scriptLocal"
 	
-	! [[ -e "$scriptLocal"/package_image.tar.xz ]] && _messageFAIL
+	! [[ -e "$scriptLocal"/package_image.tar.flx ]] && _messageFAIL
 	
-	_rclone_limited --progress copy "$scriptLocal"/package_image.tar.xz distLLC_build_ubDistBuild:
+	_rclone_limited --progress copy "$scriptLocal"/package_image.tar.flx distLLC_build_ubDistBuild:
 	[[ "$?" != "0" ]] && _messageFAIL
 	
 	if ls -A -1 "$scriptLocal"/*.log
@@ -41418,25 +41429,25 @@ _upload_ubDistBuild_custom() {
 _get_vmImg_ubDistBuild-tempFile() {
 	cd "$scriptLocal"
 	
-	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part00"
-	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part01" > /dev/null
-	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part02" > /dev/null
-	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part03" > /dev/null
-	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part04" > /dev/null
-	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part05" > /dev/null
-	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part06" > /dev/null
-	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part07" > /dev/null
-	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part08" > /dev/null
-	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part09" > /dev/null
-	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part10" > /dev/null
-	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.xz.part11" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part00"
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part01" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part02" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part03" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part04" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part05" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part06" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part07" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part08" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part09" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part10" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part11" > /dev/null
 
-	cat "package_image.tar.xz.part"* > "package_image.tar.xz"
-	rm -f "package_image.tar.xz.part"*
+	cat "package_image.tar.flx.part"* > "package_image.tar.flx"
+	rm -f "package_image.tar.flx.part"*
 
-	! [[ -e "$scriptLocal"/package_image.tar.xz ]] && _messageFAIL
+	! [[ -e "$scriptLocal"/package_image.tar.flx ]] && _messageFAIL
 
-	tar -xvf "$scriptLocal"/package_image.tar.xz
+	tar -xvf "$scriptLocal"/package_image.tar.flx
 }
 
 
@@ -41455,7 +41466,7 @@ _croc_ubDistBuild_image_out() {
 	_mustHaveCroc
 	cd "$scriptLocal"
 	
-	! [[ -e "$scriptLocal"/package_image.tar.xz ]] && _messageFAIL
+	! [[ -e "$scriptLocal"/package_image.tar.flx ]] && _messageFAIL
 	
 	
 	local currentPID
@@ -41465,7 +41476,7 @@ _croc_ubDistBuild_image_out() {
 	currentPID="$!"
 	
 	
-	croc send "$scriptLocal"/package_image.tar.xz 2>&1 | tee "$scriptLocal"/croc.log
+	croc send "$scriptLocal"/package_image.tar.flx 2>&1 | tee "$scriptLocal"/croc.log
 	
 	
 	
@@ -41506,7 +41517,10 @@ _zSpecial_qemu_chroot() {
 	
 	
 	_chroot dpkg -l | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
+	sudo -n cp "$globalVirtFS"/dpkg "$scriptLocal"/dpkg
 	
+	_chroot find /bin/ /usr/bin/ /sbin/ /usr/sbin/ | sudo -n tee "$globalVirtFS"/binReport > /dev/null
+	sudo -n cp "$globalVirtFS"/binReport "$scriptLocal"/binReport
 	
 	_chroot rmdir /var/lib/docker/runtimes
 	
@@ -41881,8 +41895,8 @@ _create_kde() {
 
 
 _package_rm() {
-	rm -f "$scriptLocal"/package_image.tar.xz
-	rm -f "$scriptLocal"/package_image.tar.xz.part*
+	rm -f "$scriptLocal"/package_image.tar.flx
+	rm -f "$scriptLocal"/package_image.tar.flx.part*
 	return
 }
 
@@ -41897,8 +41911,8 @@ _convert-vdi() {
 	# NOTICE: _convert_rm
 
 	[[ ! -e "$scriptLocal"/vm.img ]] && _messageFAIL
-	rm -f "$scriptLocal"/package_image.tar.xz
-	rm -f "$scriptLocal"/package_image.tar.xz.part*
+	rm -f "$scriptLocal"/package_image.tar.flx
+	rm -f "$scriptLocal"/package_image.tar.flx.part*
 	
 	_messageNormal '_convert: vm.vdi'
 	_vm_convert_vdi
@@ -41909,8 +41923,8 @@ _convert-vmdk() {
 	# NOTICE: _convert_rm
 	
 	[[ ! -e "$scriptLocal"/vm.img ]] && _messageFAIL
-	rm -f "$scriptLocal"/package_image.tar.xz
-	rm -f "$scriptLocal"/package_image.tar.xz.part*
+	rm -f "$scriptLocal"/package_image.tar.flx
+	rm -f "$scriptLocal"/package_image.tar.flx.part*
 	
 	_messageNormal '_convert: vm.vmdk'
 	_vm_convert_vmdk
@@ -41940,8 +41954,8 @@ _convert() {
 	# NOTICE: _convert_rm
 
 	[[ ! -e "$scriptLocal"/vm.img ]] && _messageFAIL
-	rm -f "$scriptLocal"/package_image.tar.xz
-	rm -f "$scriptLocal"/package_image.tar.xz.part*
+	rm -f "$scriptLocal"/package_image.tar.flx
+	rm -f "$scriptLocal"/package_image.tar.flx.part*
 
 
 	_convert-vdi "$@"
@@ -41988,7 +42002,7 @@ _convert() {
 # WARNING: Deletes 'vm.img' .
 _upload_convert() {
 	[[ ! -e "$scriptLocal"/vm.img ]] && _messageFAIL
-	rm -f "$scriptLocal"/package_image.tar.xz
+	rm -f "$scriptLocal"/package_image.tar.flx
 	
 	
 	
@@ -42080,7 +42094,7 @@ _upload_convert() {
 # WARNING: Deletes 'vm.img' .
 _assessment() {
 	[[ ! -e "$scriptLocal"/vm.img ]] && _messageFAIL
-	rm -f "$scriptLocal"/package_image.tar.xz
+	rm -f "$scriptLocal"/package_image.tar.flx
 	
 	
 	_messageNormal '_convert: vm-live.iso'
@@ -42219,7 +42233,10 @@ _main() {
 _get_extract_ubDistBuild() {
 	# https://unix.stackexchange.com/questions/85194/how-to-download-an-archive-and-extract-it-without-saving-the-archive-to-disk
 	#pv | xz -d | tar xv --overwrite "$@"
-	xz -d | tar xv --overwrite "$@"
+
+	#xz -d | tar xv --overwrite "$@"
+
+	lz4 -d -c | tar xv --overwrite "$@"
 }
 
 
@@ -42234,8 +42251,8 @@ _get_vmImg_ubDistBuild_sequence() {
 	mkdir -p "$scriptLocal"
 	
 	# Only extracted vm img.
-	rm -f "$scriptLocal"/package_image.tar.xz
-	rm -f "$scriptLocal"/package_image.tar.xz.part*
+	rm -f "$scriptLocal"/package_image.tar.flx
+	rm -f "$scriptLocal"/package_image.tar.flx.part*
 	
 	if [[ -e "$scriptLocal"/vm.img ]]
 	then
@@ -42249,7 +42266,7 @@ _get_vmImg_ubDistBuild_sequence() {
 	fi
 	
 	cd "$scriptLocal"
-	_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$1" "package_image.tar.xz" | _get_extract_ubDistBuild
+	_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$1" "package_image.tar.flx" | _get_extract_ubDistBuild
 	[[ "$?" != "0" ]] && _messageFAIL
 
 	cd "$functionEntryPWD"

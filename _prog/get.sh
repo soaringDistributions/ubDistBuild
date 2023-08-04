@@ -6,7 +6,10 @@
 _get_extract_ubDistBuild() {
 	# https://unix.stackexchange.com/questions/85194/how-to-download-an-archive-and-extract-it-without-saving-the-archive-to-disk
 	#pv | xz -d | tar xv --overwrite "$@"
-	xz -d | tar xv --overwrite "$@"
+
+	#xz -d | tar xv --overwrite "$@"
+
+	lz4 -d -c | tar xv --overwrite "$@"
 }
 
 
@@ -21,8 +24,8 @@ _get_vmImg_ubDistBuild_sequence() {
 	mkdir -p "$scriptLocal"
 	
 	# Only extracted vm img.
-	rm -f "$scriptLocal"/package_image.tar.xz
-	rm -f "$scriptLocal"/package_image.tar.xz.part*
+	rm -f "$scriptLocal"/package_image.tar.flx
+	rm -f "$scriptLocal"/package_image.tar.flx.part*
 	
 	if [[ -e "$scriptLocal"/vm.img ]]
 	then
@@ -36,7 +39,7 @@ _get_vmImg_ubDistBuild_sequence() {
 	fi
 	
 	cd "$scriptLocal"
-	_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$1" "package_image.tar.xz" | _get_extract_ubDistBuild
+	_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$1" "package_image.tar.flx" | _get_extract_ubDistBuild
 	[[ "$?" != "0" ]] && _messageFAIL
 
 	cd "$functionEntryPWD"
