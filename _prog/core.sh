@@ -793,20 +793,65 @@ _create_ubDistBuild-bootOnce() {
 	
 	##( _chroot sudo -n -u user bash -c "crontab -l" ; echo '@reboot cd /home/'"$custom_user"'/.ubcore/ubiquitous_bash/lean.sh _unix_renice_execDaemon' ) | _chroot sudo -n -u user bash -c "crontab -"
 	
+
+
+
+
+	sudo -n mv "$globalVirtFS"/usr/bin/uname "$globalVirtFS"/usr/bin/uname-orig
+	sudo -n mv "$globalVirtFS"/bin/uname "$globalVirtFS"/bin/uname-orig
+
+	cat << 'CZXWXcRMTo8EmM8i4d' | sudo -n tee "$globalVirtFS"/usr/bin/uname > /dev/null
+#!/bin/bash
+
+local currentTopKernel
+currentTopKernel=$(sudo -n cat /boot/grub/grub.cfg | awk -F\' '/menuentry / {print $2}' | grep -v "Advanced options" | grep 'Linux [0-9]' | sed 's/ (.*//' | awk '{print $NF}' | head -n1)
+
+if [[ "$1" == "-r" ]]
+then
+	echo "$currentTopKernel"
+	return
+fi
+
+if [[ -e /usr/bin/uname-orig ]]
+then
+	/usr/bin/uname-orig "$@"
+	return
+fi
+
+if [[ -e /bin/uname-orig ]]
+then
+	/bin/uname-orig "$@"
+	return
+fi
+
+return 1
+CZXWXcRMTo8EmM8i4d
+
+	sudo -n chown root:root "$globalVirtFS"/usr/bin/uname
+	sudo -n chmod 755 "$globalVirtFS"/usr/bin/uname
+
+
 	_chroot /sbin/vboxconfig
 	
+
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
+	sudo -n mv -f "$globalVirtFS"/usr/bin/uname-orig "$globalVirtFS"/usr/bin/uname
+	sudo -n mv -f "$globalVirtFS"/bin/uname-orig "$globalVirtFS"/bin/uname
 	
-	
+
+
 	
 	
 	_messageNormal 'qemu'
 	
 	local currentIteration
-	
+	local currentIterationTotal
+	currentIterationTotal=3
+	[[ "$skimfast" == "true" ]] && currentIterationTotal=1
+
 	#for currentIteration in $(seq 1 3)
-	for currentIteration in $(seq 1 2)
+	for currentIteration in $(seq 1 "$currentIterationTotal")
 	do
 		_messagePlain_probe_var currentIteration
 		
@@ -954,7 +999,7 @@ _ubDistBuild_split() {
 	local currentIteration
 	for currentIteration in $(seq -w 1 24)
 	do
-		[[ -s ./package_image.tar.xz ]] && [[ -e ./package_image.tar.xz ]] && tail -c 1856000000 package_image.tar.xz > package_image.tar.xz.part."$currentIteration" && truncate -s -1856000000 package_image.tar.xz
+		[[ -s ./package_image.tar.xz ]] && [[ -e ./package_image.tar.xz ]] && tail -c 1856000000 package_image.tar.xz > package_image.tar.xz.part"$currentIteration" && truncate -s -1856000000 package_image.tar.xz
 	done
 
 
@@ -975,7 +1020,7 @@ _ubDistBuild_split-live() {
 	local currentIteration
 	for currentIteration in $(seq -w 1 24)
 	do
-		[[ -s ./vm-live.iso ]] && [[ -e ./vm-live.iso ]] && tail -c 1856000000 vm-live.iso > vm-live.iso.part."$currentIteration" && truncate -s -1856000000 vm-live.iso
+		[[ -s ./vm-live.iso ]] && [[ -e ./vm-live.iso ]] && tail -c 1856000000 vm-live.iso > vm-live.iso.part"$currentIteration" && truncate -s -1856000000 vm-live.iso
 	done
 
 

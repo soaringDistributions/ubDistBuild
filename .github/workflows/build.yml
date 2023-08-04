@@ -34,6 +34,9 @@ on:
       devfast:
         type: boolean
         default: true
+      skimfast:
+        type: boolean
+        default: true
   # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
   schedule:
     - cron: '5 7 * * 6'
@@ -189,6 +192,8 @@ jobs:
       - name: _create_ubDistBuild-bootOnce
         shell: bash
         run: |
+          export skimfast=${{ inputs.skimfast }}
+          echo $skimfast
           ./_create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log && exit ${PIPESTATUS[0]}
       - name: _create_ubDistBuild-rotten_install-core
         shell: bash
@@ -332,7 +337,7 @@ jobs:
           name: build
           files: |
             ./_local/vm-live.iso.part00
-      - name: release! corelive
+      - name: release! live
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
