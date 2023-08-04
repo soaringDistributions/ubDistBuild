@@ -909,9 +909,9 @@ CZXWXcRMTo8EmM8i4d
 	
 	if [[ "$skimfast" == "true" ]]
 	then
-		_chroot mount -o remount,compress=zstd:9 /
-	else
 		_chroot mount -o remount,compress=zstd:2 /
+	else
+		_chroot mount -o remount,compress=zstd:9 /
 	fi
 	
 	# Run only once. If used two or more times, apparently may decrease available storage by ~1GB .
@@ -1019,7 +1019,7 @@ _ubDistBuild_split() {
 		[[ -s ./package_image.tar.flx ]] && [[ -e ./package_image.tar.flx ]] && tail -c 1856000000 package_image.tar.flx > package_image.tar.flx.part"$currentIteration" && truncate -s -1856000000 package_image.tar.flx
 	done
 
-
+	rm -f ./package_image.tar.flx
 
 	cd "$functionEntryPWD"
 }
@@ -1040,6 +1040,7 @@ _ubDistBuild_split-live() {
 		[[ -s ./vm-live.iso ]] && [[ -e ./vm-live.iso ]] && tail -c 1856000000 vm-live.iso > vm-live.iso.part"$currentIteration" && truncate -s -1856000000 vm-live.iso
 	done
 
+	rm -f ./vm-live.iso
 
 	cd "$functionEntryPWD"
 }
@@ -1783,6 +1784,7 @@ _assessment() {
 
 _refresh_anchors() {
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild-live
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_core_ubDistFetch
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-rotten_install-kde

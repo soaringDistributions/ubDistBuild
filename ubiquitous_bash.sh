@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='4046467830'
+export ub_setScriptChecksum_contents='3056202899'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -14745,9 +14745,9 @@ _mountImageFS_sequence() {
 	then
 		if [[ "$skimfast" == "true" ]]
 		then
-			sudo -n mount -o compress=zstd:9 "$current_imagepart" "$currentDestinationDir" || _stop 1
-		else
 			sudo -n mount -o compress=zstd:2 "$current_imagepart" "$currentDestinationDir" || _stop 1
+		else
+			sudo -n mount -o compress=zstd:9 "$current_imagepart" "$currentDestinationDir" || _stop 1
 		fi
 	else
 		sudo -n mount "$current_imagepart" "$currentDestinationDir" || _stop 1
@@ -41267,9 +41267,9 @@ CZXWXcRMTo8EmM8i4d
 	
 	if [[ "$skimfast" == "true" ]]
 	then
-		_chroot mount -o remount,compress=zstd:9 /
-	else
 		_chroot mount -o remount,compress=zstd:2 /
+	else
+		_chroot mount -o remount,compress=zstd:9 /
 	fi
 	
 	# Run only once. If used two or more times, apparently may decrease available storage by ~1GB .
@@ -41377,7 +41377,7 @@ _ubDistBuild_split() {
 		[[ -s ./package_image.tar.flx ]] && [[ -e ./package_image.tar.flx ]] && tail -c 1856000000 package_image.tar.flx > package_image.tar.flx.part"$currentIteration" && truncate -s -1856000000 package_image.tar.flx
 	done
 
-
+	rm -f ./package_image.tar.flx
 
 	cd "$functionEntryPWD"
 }
@@ -41398,6 +41398,7 @@ _ubDistBuild_split-live() {
 		[[ -s ./vm-live.iso ]] && [[ -e ./vm-live.iso ]] && tail -c 1856000000 vm-live.iso > vm-live.iso.part"$currentIteration" && truncate -s -1856000000 vm-live.iso
 	done
 
+	rm -f ./vm-live.iso
 
 	cd "$functionEntryPWD"
 }
@@ -42141,6 +42142,7 @@ _assessment() {
 
 _refresh_anchors() {
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild-live
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_core_ubDistFetch
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-rotten_install-kde
@@ -42254,6 +42256,11 @@ _get_extract_ubDistBuild() {
 
 _get_vmImg_ubDistBuild_sequence() {
 	_messageNormal 'init: _get_vmImg'
+
+	local releaseLabel
+	releaseLabel="internal"
+	[[ "$1" != "" ]] && releaseLabel="$1"
+	[[ "$1" == "latest" ]] && releaseLabel=
 	
 	local functionEntryPWD
 	functionEntryPWD="$PWD"
@@ -42277,7 +42284,7 @@ _get_vmImg_ubDistBuild_sequence() {
 	fi
 	
 	cd "$scriptLocal"
-	_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$1" "package_image.tar.flx" | _get_extract_ubDistBuild
+	_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild
 	[[ "$?" != "0" ]] && _messageFAIL
 
 	cd "$functionEntryPWD"
@@ -42289,13 +42296,18 @@ _get_vmImg_ubDistBuild() {
 _get_vmImg_ubDistBuild-live_sequence() {
 	_messageNormal 'init: _get_vmImg'
 	
+	local releaseLabel
+	releaseLabel="internal"
+	[[ "$1" != "" ]] && releaseLabel="$1"
+	[[ "$1" == "latest" ]] && releaseLabel=
+
 	local functionEntryPWD
 	functionEntryPWD="$PWD"
 	
 	
 	mkdir -p "$scriptLocal"
 	cd "$scriptLocal"
-	_wget_githubRelease_join "soaringDistributions/ubDistBuild" "$1" "vm-live.iso"
+	_wget_githubRelease_join "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso"
 	[[ "$?" != "0" ]] && _messageFAIL
 
 	cd "$functionEntryPWD"

@@ -16,6 +16,11 @@ _get_extract_ubDistBuild() {
 
 _get_vmImg_ubDistBuild_sequence() {
 	_messageNormal 'init: _get_vmImg'
+
+	local releaseLabel
+	releaseLabel="internal"
+	[[ "$1" != "" ]] && releaseLabel="$1"
+	[[ "$1" == "latest" ]] && releaseLabel=
 	
 	local functionEntryPWD
 	functionEntryPWD="$PWD"
@@ -39,7 +44,7 @@ _get_vmImg_ubDistBuild_sequence() {
 	fi
 	
 	cd "$scriptLocal"
-	_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$1" "package_image.tar.flx" | _get_extract_ubDistBuild
+	_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild
 	[[ "$?" != "0" ]] && _messageFAIL
 
 	cd "$functionEntryPWD"
@@ -51,13 +56,18 @@ _get_vmImg_ubDistBuild() {
 _get_vmImg_ubDistBuild-live_sequence() {
 	_messageNormal 'init: _get_vmImg'
 	
+	local releaseLabel
+	releaseLabel="internal"
+	[[ "$1" != "" ]] && releaseLabel="$1"
+	[[ "$1" == "latest" ]] && releaseLabel=
+
 	local functionEntryPWD
 	functionEntryPWD="$PWD"
 	
 	
 	mkdir -p "$scriptLocal"
 	cd "$scriptLocal"
-	_wget_githubRelease_join "soaringDistributions/ubDistBuild" "$1" "vm-live.iso"
+	_wget_githubRelease_join "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso"
 	[[ "$?" != "0" ]] && _messageFAIL
 
 	cd "$functionEntryPWD"
