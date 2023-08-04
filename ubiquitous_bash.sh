@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1974107262'
+export ub_setScriptChecksum_contents='552134150'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -10807,6 +10807,8 @@ _getMost_ubuntu22-VBoxManage() {
 	
 	_getMost_backend apt-get remove --autoremove -y plasma-discover
 	
+	_getMost_backend apt-get -y clean
+	
 	
 	_messagePlain_probe 'end: _getMost_ubuntu22-VBoxManage'
 }
@@ -11264,7 +11266,7 @@ _getMinimal_cloud() {
 	#unset devfast
 	
 	
-	
+	return 0
 }
 
 
@@ -22975,19 +22977,25 @@ _wget_githubRelease-stdout() {
 _wget_githubRelease_join-stdout() {
 	local currentURL
 	local currentURL_array
-	local currentIteration
 
-	currentIteration=0
+	local currentIterationcurrentIteration=0
 	for currentIteration in $(seq -f "%02g" 0 32)
 	do
 		currentURL=$(_wget_githubRelease-URL "$1" "$2" "$3"".part""$currentIteration")
 		[[ "$currentURL" == "" ]] && break
 		[[ "$currentURL" != "" ]] && currentURL_array+=( "$currentURL" )
 	done
-	
-	_messagePlain_probe curl -L "${currentURL_array[@]}" >&2
 
-	curl -L "${currentURL_array[@]}"
+	# https://unix.stackexchange.com/questions/412868/bash-reverse-an-array
+	local currentValue
+	for currentValue in "${currentURL_array[@]}"
+	do
+		currentURL_array_reversed=("$currentValue" "${currentURL_array_reversed[@]}")
+	done
+	
+	_messagePlain_probe curl -L "${currentURL_array_reversed[@]}" >&2
+
+	curl -L "${currentURL_array_reversed[@]}"
 }
 
 _wget_githubRelease_join() {
@@ -41013,6 +41021,8 @@ _create_ubDistBuild-rotten_install-core() {
 
 _create_ubDistBuild-bootOnce-qemu_sequence() {
 	! type qemu-system-x86_64 > /dev/null 2>&1 && _stop 1
+
+	local currentExitStatus
 	
 	export qemuHeadless="true"
 	
@@ -41043,7 +41053,7 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 		let currentIterationWait=currentIterationWait+1
 	done
 	_messagePlain_probe_var currentIterationWait
-	[[ "$currentIterationWait" -ge 2800 ]] && _messagePlain_bad 'bad: fail: bootdisc: poweroff'
+	[[ "$currentIterationWait" -ge 2800 ]] && _messagePlain_bad 'bad: fail: bootdisc: poweroff' && currentExitStatus=1
 	sleep 27
 	
 	
@@ -41076,6 +41086,7 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	fi
 	
 	echo
+	[[ "$currentExitStatus" == "1" ]] && return 1
 	return 0
 }
 _create_ubDistBuild-bootOnce-fsck_sequence() {
@@ -41147,7 +41158,8 @@ _create_ubDistBuild-bootOnce() {
 	
 	local currentIteration
 	
-	for currentIteration in $(seq 1 3)
+	#for currentIteration in $(seq 1 3)
+	for currentIteration in $(seq 1 2)
 	do
 		_messagePlain_probe_var currentIteration
 		
@@ -41293,9 +41305,9 @@ _ubDistBuild_split() {
 
 	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
 	local currentIteration
-	for currentIteration in $(seq 1 24)
+	for currentIteration in $(seq -w 1 24)
 	do
-		[[ ! -s ./package_image.tar.xz ]] && [[ -e ./package_image.tar.xz ]] && tail -c 1856000000 package_image.tar.xz > package_image.tar.xz.part."$currentIteration" && truncate -s -1856000000 package_image.tar.xz;
+		[[ -s ./package_image.tar.xz ]] && [[ -e ./package_image.tar.xz ]] && tail -c 1856000000 package_image.tar.xz > package_image.tar.xz.part."$currentIteration" && truncate -s -1856000000 package_image.tar.xz
 	done
 
 
@@ -41314,9 +41326,9 @@ _ubDistBuild_split-live() {
 
 	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
 	local currentIteration
-	for currentIteration in $(seq 1 24)
+	for currentIteration in $(seq -w 1 24)
 	do
-		[[ ! -s ./vm-live.iso ]] && [[ -e ./vm-live.iso ]] && tail -c 1856000000 vm-live.iso > vm-live.iso.part."$currentIteration" && truncate -s -1856000000 vm-live.iso;
+		[[ -s ./vm-live.iso ]] && [[ -e ./vm-live.iso ]] && tail -c 1856000000 vm-live.iso > vm-live.iso.part."$currentIteration" && truncate -s -1856000000 vm-live.iso
 	done
 
 
@@ -41481,14 +41493,10 @@ _zSpecial_qemu_sequence_prog() {
 	return 1
 } ' >> "$hostToGuestFiles"/cmd.sh
 	
-	# WARNING: Discouraged. Apparently unnecessary.
 	# Commenting this may reduce first iteration 'currentIterationWait' by ~120s , possibly improving opportunity to successfully compile through slow qemu without kvm.
 	# If uncommented, any indefinite delay in '_detect_process_compile' may cause failure.
 	#echo 'while _detect_process_compile && sleep 27 && _detect_process_compile && sleep 27 && _detect_process_compile ; do sleep 27 ; done' >> "$hostToGuestFiles"/cmd.sh
 	
-
-	# Compile by '/sbin/vboxconfig' should be parallel already, through 'MAKE_JOBS' variable of '/usr/share/virtualbox/src/vboxhost/build_in_tmp' .
-
 	echo 'sleep 15' >> "$hostToGuestFiles"/cmd.sh
 	echo '! sudo -n lsmod | grep -i vboxdrv && sudo -n /sbin/vboxconfig' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sleep 75' >> "$hostToGuestFiles"/cmd.sh
@@ -41529,8 +41537,10 @@ _zSpecial_qemu_sequence() {
 	#qemuArgs+=(-cpu host)
 	
 	# CPU >2 may force more compatible SMP kernel, etc.
-	qemuArgs+=(-smp 2)
-	
+	#qemuArgs+=(-smp 2)
+	local hostThreadCount
+	hostThreadCount=$(cat /proc/cpuinfo | grep MHz | wc -l | tr -dc '0-9')
+	qemuArgs+=(-smp "$hostThreadCount")
 	
 	
 	
@@ -41824,6 +41834,12 @@ _create_kde() {
 	rmdir "$HOME"/.license_package_kde
 }
 
+
+_package_rm() {
+	rm -f "$scriptLocal"/package_image.tar.xz
+	rm -f "$scriptLocal"/package_image.tar.xz.part*
+	return
+}
 
 _convert_rm() {
 	rm -f "$scriptLocal"/vm.vdi
