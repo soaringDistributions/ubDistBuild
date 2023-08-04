@@ -906,7 +906,13 @@ CZXWXcRMTo8EmM8i4d
 	#_chroot btrfs property set /fill compression ""
 	_chroot dd if=/dev/zero of=/fill bs=1M oflag=append conv=notrunc status=progress
 	_chroot rm -f /fill
-	_chroot mount -o remount,compress=zstd:9 /
+	
+	if [[ "$skimfast" == "true" ]]
+	then
+		_chroot mount -o remount,compress=zstd:9 /
+	else
+		_chroot mount -o remount,compress=zstd:2 /
+	fi
 	
 	# Run only once. If used two or more times, apparently may decrease available storage by ~1GB .
 	# Apparently, if defrag is run once with compression, rootfs usage may reduce from ~6.6GB to ~5.9GB . However, running again may expand usage back to ~6.6GB.

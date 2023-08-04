@@ -236,7 +236,7 @@ jobs:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
-            #./_local/package_image.tar.xz.part*
+            #./_local/package_image.tar.flx.part*
             ./_local/ops.sh
             ./_local/dpkg
             ./_local/binReport
@@ -247,84 +247,84 @@ jobs:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
-            ./_local/package_image.tar.xz.part00
+            ./_local/package_image.tar.flx.part00
       - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
-            ./_local/package_image.tar.xz.part01
+            ./_local/package_image.tar.flx.part01
       - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
-            ./_local/package_image.tar.xz.part02
+            ./_local/package_image.tar.flx.part02
       - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
-            ./_local/package_image.tar.xz.part03
+            ./_local/package_image.tar.flx.part03
       - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
-            ./_local/package_image.tar.xz.part04
+            ./_local/package_image.tar.flx.part04
       - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
-            ./_local/package_image.tar.xz.part05
+            ./_local/package_image.tar.flx.part05
       - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
-            ./_local/package_image.tar.xz.part06
+            ./_local/package_image.tar.flx.part06
       - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
-            ./_local/package_image.tar.xz.part07
+            ./_local/package_image.tar.flx.part07
       - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
-            ./_local/package_image.tar.xz.part08
+            ./_local/package_image.tar.flx.part08
       - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
-            ./_local/package_image.tar.xz.part09
+            ./_local/package_image.tar.flx.part09
       - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
-            ./_local/package_image.tar.xz.part10
+            ./_local/package_image.tar.flx.part10
       - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
-            ./_local/package_image.tar.xz.part11
+            ./_local/package_image.tar.flx.part11
       #- name: _croc_ubDistBuild_image_out
         #shell: bash
         #run: |

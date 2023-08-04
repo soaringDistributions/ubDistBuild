@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='262972462'
+export ub_setScriptChecksum_contents='4046467830'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -14743,7 +14743,12 @@ _mountImageFS_sequence() {
 	
 	if [[ "$loopdevfs" == "btrfs" ]] && [[ "$ub_disable_fs_compression" != "true" ]]
 	then
-		sudo -n mount -o compress=zstd:9 "$current_imagepart" "$currentDestinationDir" || _stop 1
+		if [[ "$skimfast" == "true" ]]
+		then
+			sudo -n mount -o compress=zstd:9 "$current_imagepart" "$currentDestinationDir" || _stop 1
+		else
+			sudo -n mount -o compress=zstd:2 "$current_imagepart" "$currentDestinationDir" || _stop 1
+		fi
 	else
 		sudo -n mount "$current_imagepart" "$currentDestinationDir" || _stop 1
 	fi
@@ -41259,7 +41264,13 @@ CZXWXcRMTo8EmM8i4d
 	#_chroot btrfs property set /fill compression ""
 	_chroot dd if=/dev/zero of=/fill bs=1M oflag=append conv=notrunc status=progress
 	_chroot rm -f /fill
-	_chroot mount -o remount,compress=zstd:9 /
+	
+	if [[ "$skimfast" == "true" ]]
+	then
+		_chroot mount -o remount,compress=zstd:9 /
+	else
+		_chroot mount -o remount,compress=zstd:2 /
+	fi
 	
 	# Run only once. If used two or more times, apparently may decrease available storage by ~1GB .
 	# Apparently, if defrag is run once with compression, rootfs usage may reduce from ~6.6GB to ~5.9GB . However, running again may expand usage back to ~6.6GB.
