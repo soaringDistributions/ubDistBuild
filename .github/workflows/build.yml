@@ -438,7 +438,7 @@ jobs:
         #run: |
           #./_assessment | sudo -n tee ./_local/_assessment.log && exit ${PIPESTATUS[0]}
       # ATTRIBUTION: Largely attributable to ChatGPT through Copilot Chat 2023-08-04 .
-      - name: missing-binaries
+      - name: analysis! missing-binaries
         shell: bash
         run: |
           mkdir -p ./_local/analysis
