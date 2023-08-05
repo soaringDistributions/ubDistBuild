@@ -470,7 +470,7 @@ jobs:
         env:
           currentReleaseTag: build-${{ github.run_id }}-${{ github.run_attempt }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: release! analysis
+      - name: release! analysis! missing-binaries
         uses: softprops/action-gh-release@v1
         with:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
