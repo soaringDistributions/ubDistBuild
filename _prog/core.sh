@@ -280,7 +280,7 @@ CZXWXcRMTo8EmM8i4d
 deb https://mirror.hetzner.com/debian/packages  bookworm           main contrib non-free
 deb https://mirror.hetzner.com/debian/packages  bookworm-updates   main contrib non-free
 deb https://mirror.hetzner.com/debian/security  bookworm-security  main contrib non-free
-deb https://mirror.hetzner.com/debian/packages  bookworm-backports main contrib non-free
+#deb https://mirror.hetzner.com/debian/packages  bookworm-backports main contrib non-free
 
 
 
@@ -298,13 +298,15 @@ deb-src https://security.debian.org/debian-security bookworm-security main contr
 deb https://deb.debian.org/debian/ bookworm-updates main contrib non-free
 deb-src https://deb.debian.org/debian/ bookworm-updates main contrib non-free
 
-deb http://deb.debian.org/debian bookworm-backports main contrib non-free
-deb-src http://deb.debian.org/debian bookworm-backports main contrib non-free
+#deb http://deb.debian.org/debian bookworm-backports main contrib non-free
+#deb-src http://deb.debian.org/debian bookworm-backports main contrib non-free
 
 
 
 CZXWXcRMTo8EmM8i4d
 	
+	echo 'deb http://deb.debian.org/debian bookworm-backports main contrib' | _getMost_backend tee /etc/apt/sources.list.d/ub_backports.list > /dev/null 2>&1
+
 	_getMost_backend apt-get update
 	
 	
@@ -1171,10 +1173,16 @@ _zSpecial_qemu_chroot() {
 	
 	
 	_chroot dpkg -l | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
-	sudo -n cp "$globalVirtFS"/dpkg "$scriptLocal"/dpkg
+	sudo -n cp -f "$globalVirtFS"/dpkg "$scriptLocal"/dpkg
 	
 	_chroot find /bin/ /usr/bin/ /sbin/ /usr/sbin/ | sudo -n tee "$globalVirtFS"/binReport > /dev/null
-	sudo -n cp "$globalVirtFS"/binReport "$scriptLocal"/binReport
+	_chroot find /home/user/.nix-profile/bin | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null
+	_chroot find /home/user/.gcloud/google-cloud-sdk/bin | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null
+	_chroot find /home/user/.ebcli-virtual-env/executables | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null
+	sudo -n cp -f "$globalVirtFS"/binReport "$scriptLocal"/binReport
+
+	_chroot find /home/user/core/installations /home/user/core/infrastructure | sudo -n tee "$globalVirtFS"/coreReport > /dev/null
+	sudo -n cp -f "$globalVirtFS"/coreReport "$scriptLocal"/coreReport
 	
 	_chroot rmdir /var/lib/docker/runtimes
 	
@@ -1399,14 +1407,18 @@ _chroot_test() {
 	
 	_chroot chown -R root:root /root/temp/test_"$ubiquitiousBashIDnano"/
 	
-	if ! _chroot /root/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test
+	#if ! _chroot /root/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test
+	if ! _chroot sudo -n -u user bash -c 'cd /root/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ && /root/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test'
 	then
 		_messageFAIL
 	fi
 	
 	
 	# DANGER: Rare case of 'rm -rf' , called through '_chroot' instead of '_safeRMR' . If not called through '_chroot', very dangerous!
-	_chroot rm -rf /root/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test
+	#_chroot rm -rf /root/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test
+	_chroot rm -rf /root/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/
+	_chroot rmdir /root/temp/test_"$ubiquitiousBashIDnano"/
+	_chroot rmdir /root/temp/
 	
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL

@@ -174,10 +174,12 @@ jobs:
         run: |
           ( ! ./_false ) | sudo -n tee ./_local/_false.log && exit ${PIPESTATUS[0]}
       - name: lscpu
+        if: ${{ github.event.inputs.skimfast != 'true' }}
         shell: bash
         run: |
           lscpu
       - name: cpuinfo
+        if: ${{ github.event.inputs.skimfast != 'true' }}
         shell: bash
         run: |
           cat /proc/cpuinfo
@@ -223,6 +225,52 @@ jobs:
         #shell: bash
         #run: |
           #./_create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log
+      - name: analysis! missing-binaries
+        shell: bash
+        run: |
+          mkdir -p ./_local/analysis
+
+          cp ./_local/binReport ./_local/analysis/binReport
+          cp ./_local/coreReport ./_local/analysis/coreReport
+          cp ./_local/dpkg ./_local/analysis/dpkg
+
+          cd ./_local/analysis
+
+          # Get the list of releases
+          RELEASES=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/soaringDistributions/ubDistBuild/releases)
+
+          # Loop through each release
+          for RELEASE in $(echo "$RELEASES" | jq -r '.[].tag_name' | sort --reverse); do
+            # Download the binReport file for this release
+            curl -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/binReport"
+            curl -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/binReport"
+            curl -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/dpkg"
+
+            # Compare the list of binaries in this release to the current release
+            if [ "$RELEASE" != "$currentReleaseTag" ]; then
+              echo | tee -a ./missing-binReport
+              echo "Binaries (filesystem) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-binReport
+              comm -23 <(sort "binReport-$RELEASE") <(sort "binReport-$currentReleaseTag") | tee -a ./missing-binReport
+              echo | tee -a ./missing-binReport
+              echo "Binaries (core) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-coreReport
+              comm -23 <(sort "coreReport-$RELEASE") <(sort "coreReport-$currentReleaseTag") | tee -a ./missing-coreReport
+              echo | tee -a ./missing-dpkg
+              echo "Binaries (dpkg) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-dpkg
+              comm -23 <(sort "dpkg-$RELEASE") <(sort "dpkg-$currentReleaseTag") | tee -a ./missing-dpkg
+            fi
+          done
+        env:
+          currentReleaseTag: build-${{ github.run_id }}-${{ github.run_attempt }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: release! analysis! missing-binaries
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/analysis/missing-binReport
+            ./_local/analysis/missing-coreReport
+            ./_local/analysis/missing-dpkg
       - name: _package_ubDistBuild_image
         shell: bash
         run: |
@@ -438,46 +486,6 @@ jobs:
         #run: |
           #./_assessment | sudo -n tee ./_local/_assessment.log && exit ${PIPESTATUS[0]}
       # ATTRIBUTION: Largely attributable to ChatGPT through Copilot Chat 2023-08-04 .
-      - name: analysis! missing-binaries
-        shell: bash
-        run: |
-          mkdir -p ./_local/analysis
-
-          cp ./_local/binReport ./_local/analysis/binReport
-          cp ./_local/dpkg ./_local/analysis/dpkg
-
-          cd ./_local/analysis
-
-          # Get the list of releases
-          RELEASES=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/soaringDistributions/ubDistBuild/releases)
-
-          # Loop through each release
-          for RELEASE in $(echo "$RELEASES" | jq -r '.[].tag_name' | sort --reverse); do
-            # Download the binReport file for this release
-            curl -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/binReport"
-            curl -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/dpkg"
-
-            # Compare the list of binaries in this release to the current release
-            if [ "$RELEASE" != "$currentReleaseTag" ]; then
-              echo | tee -a ./missing-binReport
-              echo "Binaries (filesystem) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-binReport
-              comm -23 <(sort "binReport-$RELEASE") <(sort "binReport-$currentReleaseTag") | tee -a ./missing-binReport
-              echo | tee -a ./missing-dpkg
-              echo "Binaries (dpkg) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-dpkg
-              comm -23 <(sort "dpkg-$RELEASE") <(sort "dpkg-$currentReleaseTag") | tee -a ./missing-dpkg
-            fi
-          done
-        env:
-          currentReleaseTag: build-${{ github.run_id }}-${{ github.run_attempt }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: release! analysis! missing-binaries
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
-          name: build
-          files: |
-            ./_local/analysis/missing-binReport
-            ./_local/analysis/missing-dpkg
           
 
 
