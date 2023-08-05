@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3509446971'
+export ub_setScriptChecksum_contents='356702501'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -41441,24 +41441,39 @@ _chroot_test() {
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
 	
-	sudo -n mkdir -p "$globalVirtFS"/root/temp/test_"$ubiquitiousBashIDnano"
-	sudo -n cp -a "$scriptLib"/ubiquitous_bash "$globalVirtFS"/root/temp/test_"$ubiquitousBashIDnano"/
+
+	#sudo -n mkdir -p "$globalVirtFS"/root/temp/test_"$ubiquitiousBashIDnano"
+	#sudo -n cp -a "$scriptLib"/ubiquitous_bash "$globalVirtFS"/root/temp/test_"$ubiquitousBashIDnano"/
 	
-	_chroot chown -R root:root /root/temp/test_"$ubiquitiousBashIDnano"/
+	#_chroot chown -R root:root /root/temp/test_"$ubiquitiousBashIDnano"/
 	
 	#if ! _chroot /root/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test
-	if ! _chroot sudo -n -u user bash -c 'cd /root/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ && /root/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test'
+	#then
+		#_messageFAIL
+	#fi
+
+	## DANGER: Rare case of 'rm -rf' , called through '_chroot' instead of '_safeRMR' . If not called through '_chroot', very dangerous!
+	##_chroot rm -rf /root/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test
+	#_chroot rm -rf /root/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/
+	#_chroot rmdir /root/temp/test_"$ubiquitiousBashIDnano"/
+	#_chroot rmdir /root/temp/
+	
+
+	sudo -n mkdir -p "$globalVirtFS"/home/user/temp/test_"$ubiquitiousBashIDnano"
+	sudo -n cp -a "$scriptLib"/ubiquitous_bash "$globalVirtFS"/home/user/temp/test_"$ubiquitousBashIDnano"/
+	
+	_chroot chown -R user:user /home/user/temp/test_"$ubiquitiousBashIDnano"/
+
+	if ! _chroot sudo -n -u user bash -c 'cd /home/user/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ && /home/user/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test'
 	then
 		_messageFAIL
 	fi
-	
-	
-	# DANGER: Rare case of 'rm -rf' , called through '_chroot' instead of '_safeRMR' . If not called through '_chroot', very dangerous!
-	#_chroot rm -rf /root/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test
-	_chroot rm -rf /root/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/
-	_chroot rmdir /root/temp/test_"$ubiquitiousBashIDnano"/
-	_chroot rmdir /root/temp/
-	
+
+	## DANGER: Rare case of 'rm -rf' , called through '_chroot' instead of '_safeRMR' . If not called through '_chroot', very dangerous!
+	#_chroot rm -rf /home/user/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test
+	_chroot rm -rf /home/user/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/
+	_chroot rmdir /home/user/temp/test_"$ubiquitiousBashIDnano"/
+	_chroot rmdir /home/user/temp/
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0

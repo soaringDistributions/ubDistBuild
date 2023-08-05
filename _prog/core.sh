@@ -1402,24 +1402,39 @@ _chroot_test() {
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
 	
-	sudo -n mkdir -p "$globalVirtFS"/root/temp/test_"$ubiquitiousBashIDnano"
-	sudo -n cp -a "$scriptLib"/ubiquitous_bash "$globalVirtFS"/root/temp/test_"$ubiquitousBashIDnano"/
+
+	#sudo -n mkdir -p "$globalVirtFS"/root/temp/test_"$ubiquitiousBashIDnano"
+	#sudo -n cp -a "$scriptLib"/ubiquitous_bash "$globalVirtFS"/root/temp/test_"$ubiquitousBashIDnano"/
 	
-	_chroot chown -R root:root /root/temp/test_"$ubiquitiousBashIDnano"/
+	#_chroot chown -R root:root /root/temp/test_"$ubiquitiousBashIDnano"/
 	
 	#if ! _chroot /root/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test
-	if ! _chroot sudo -n -u user bash -c 'cd /root/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ && /root/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test'
+	#then
+		#_messageFAIL
+	#fi
+
+	## DANGER: Rare case of 'rm -rf' , called through '_chroot' instead of '_safeRMR' . If not called through '_chroot', very dangerous!
+	##_chroot rm -rf /root/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test
+	#_chroot rm -rf /root/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/
+	#_chroot rmdir /root/temp/test_"$ubiquitiousBashIDnano"/
+	#_chroot rmdir /root/temp/
+	
+
+	sudo -n mkdir -p "$globalVirtFS"/home/user/temp/test_"$ubiquitiousBashIDnano"
+	sudo -n cp -a "$scriptLib"/ubiquitous_bash "$globalVirtFS"/home/user/temp/test_"$ubiquitousBashIDnano"/
+	
+	_chroot chown -R user:user /home/user/temp/test_"$ubiquitiousBashIDnano"/
+
+	if ! _chroot sudo -n -u user bash -c 'cd /home/user/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ && /home/user/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test'
 	then
 		_messageFAIL
 	fi
-	
-	
-	# DANGER: Rare case of 'rm -rf' , called through '_chroot' instead of '_safeRMR' . If not called through '_chroot', very dangerous!
-	#_chroot rm -rf /root/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test
-	_chroot rm -rf /root/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/
-	_chroot rmdir /root/temp/test_"$ubiquitiousBashIDnano"/
-	_chroot rmdir /root/temp/
-	
+
+	## DANGER: Rare case of 'rm -rf' , called through '_chroot' instead of '_safeRMR' . If not called through '_chroot', very dangerous!
+	#_chroot rm -rf /home/user/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test
+	_chroot rm -rf /home/user/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/
+	_chroot rmdir /home/user/temp/test_"$ubiquitiousBashIDnano"/
+	_chroot rmdir /home/user/temp/
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0
