@@ -1425,7 +1425,7 @@ _chroot_test() {
 	
 	_chroot chown -R user:user /home/user/temp/test_"$ubiquitiousBashIDnano"/
 
-	if ! _chroot sudo -n -u user bash -c 'cd /home/user/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ && /home/user/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test'
+	if ! _chroot sudo -n -u user bash -c 'cd /home/user/temp/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ ; /home/user/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh _test'
 	then
 		_messageFAIL
 	fi
