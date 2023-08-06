@@ -174,7 +174,7 @@ jobs:
         run: |
           ( ! ./_false ) | sudo -n tee ./_local/_false.log && exit ${PIPESTATUS[0]}
       - name: lscpu
-        if: ${{ github.event.inputs.skimfast != 'true' }}
+        #if: ${{ github.event.inputs.skimfast != 'true' }}
         shell: bash
         run: |
           lscpu
