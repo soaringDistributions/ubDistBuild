@@ -662,6 +662,13 @@ _create_ubDistBuild-rotten_install-core() {
 	! _chroot /rotten_install.sh _custom_core_drop && _messageFAIL
 	#sudo rm -f "$globalVirtFS"/in_chroot
 	
+
+
+
+	_chroot find /home/user/core/installations /home/user/core/infrastructure | sudo -n tee "$globalVirtFS"/coreReport > /dev/null
+	sudo -n cp -f "$globalVirtFS"/coreReport "$scriptLocal"/coreReport
+	sudo -n chown "$USER":"$USER" "$scriptLocal"/coreReport
+
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0
@@ -1175,17 +1182,22 @@ _zSpecial_qemu_chroot() {
 	#_chroot dpkg -l | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
 	_chroot dpkg --get-selections | cut -f1 | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
 	sudo -n cp -f "$globalVirtFS"/dpkg "$scriptLocal"/dpkg
+	sudo -n chown "$USER":"$USER" "$scriptLocal"/dpkg
 	
 	_chroot find /bin/ /usr/bin/ /sbin/ /usr/sbin/ | sudo -n tee "$globalVirtFS"/binReport > /dev/null
 	_chroot find /home/user/.nix-profile/bin | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null
 	_chroot find /home/user/.gcloud/google-cloud-sdk/bin | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null
 	_chroot find /home/user/.ebcli-virtual-env/executables | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null
 	sudo -n cp -f "$globalVirtFS"/binReport "$scriptLocal"/binReport
+	sudo -n chown "$USER":"$USER" "$scriptLocal"/binReport
 
-	_chroot find /home/user/core/installations /home/user/core/infrastructure | sudo -n tee "$globalVirtFS"/coreReport > /dev/null
-	sudo -n cp -f "$globalVirtFS"/coreReport "$scriptLocal"/coreReport
-	
+
+
+
 	_chroot rmdir /var/lib/docker/runtimes
+	
+
+
 	
 	echo | sudo -n tee "$globalVirtFS"/regenerate > /dev/null
 	
