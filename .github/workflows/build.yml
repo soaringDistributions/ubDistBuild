@@ -224,7 +224,17 @@ jobs:
       #- name: _create_ubDistBuild-bootOnce
         #shell: bash
         #run: |
-          #./_create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log
+          #./_create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log- name: release! package_image
+      - name: release! report! internal
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/dpkg
+            ./_local/binReport
+            ./_local/coreReport
+            /proc/cpuinfo
       - name: analysis! missing-binaries
         shell: bash
         run: |
@@ -290,9 +300,6 @@ jobs:
           files: |
             #./_local/package_image.tar.flx.part*
             ./_local/ops.sh
-            ./_local/dpkg
-            ./_local/binReport
-            /proc/cpuinfo
       - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:

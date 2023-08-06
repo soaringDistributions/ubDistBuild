@@ -1172,7 +1172,8 @@ _zSpecial_qemu_chroot() {
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
 	
-	_chroot dpkg -l | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
+	#_chroot dpkg -l | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
+	_chroot dpkg --get-selections | cut -f1 | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
 	sudo -n cp -f "$globalVirtFS"/dpkg "$scriptLocal"/dpkg
 	
 	_chroot find /bin/ /usr/bin/ /sbin/ /usr/sbin/ | sudo -n tee "$globalVirtFS"/binReport > /dev/null
