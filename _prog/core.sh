@@ -812,28 +812,28 @@ _create_ubDistBuild-bootOnce() {
 	cat << 'CZXWXcRMTo8EmM8i4d' | sudo -n tee "$globalVirtFS"/usr/bin/uname > /dev/null
 #!/bin/bash
 
-local currentTopKernel
-currentTopKernel=$(sudo -n cat /boot/grub/grub.cfg | awk -F\' '/menuentry / {print $2}' | grep -v "Advanced options" | grep 'Linux [0-9]' | sed 's/ (.*//' | awk '{print $NF}' | head -n1)
+local currentTopKernel 2>/dev/null
+currentTopKernel=$(sudo -n cat /boot/grub/grub.cfg 2>/dev/null | awk -F\' '/menuentry / {print $2}' | grep -v "Advanced options" | grep 'Linux [0-9]' | sed 's/ (.*//' | awk '{print $NF}' | head -n1)
 
-if [[ "$1" == "-r" ]]
+if [[ "$1" == "-r" ]] && [[ "$currentTopKernel" != "" ]]
 then
 	echo "$currentTopKernel"
-	return
+	exit "$?"
 fi
 
 if [[ -e /usr/bin/uname-orig ]]
 then
 	/usr/bin/uname-orig "$@"
-	return
+	exit "$?"
 fi
 
 if [[ -e /bin/uname-orig ]]
 then
 	/bin/uname-orig "$@"
-	return
+	exit "$?"
 fi
 
-return 1
+exit 1
 CZXWXcRMTo8EmM8i4d
 
 	sudo -n chown root:root "$globalVirtFS"/usr/bin/uname
@@ -842,11 +842,11 @@ CZXWXcRMTo8EmM8i4d
 
 	_chroot /sbin/vboxconfig
 	
-
-	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
 	sudo -n mv -f "$globalVirtFS"/usr/bin/uname-orig "$globalVirtFS"/usr/bin/uname
 	sudo -n mv -f "$globalVirtFS"/bin/uname-orig "$globalVirtFS"/bin/uname
+
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
 
 

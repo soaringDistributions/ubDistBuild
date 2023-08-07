@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1784085063'
+export ub_setScriptChecksum_contents='2012589641'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -40895,28 +40895,28 @@ _create_ubDistBuild-bootOnce() {
 	cat << 'CZXWXcRMTo8EmM8i4d' | sudo -n tee "$globalVirtFS"/usr/bin/uname > /dev/null
 #!/bin/bash
 
-local currentTopKernel
-currentTopKernel=$(sudo -n cat /boot/grub/grub.cfg | awk -F\' '/menuentry / {print $2}' | grep -v "Advanced options" | grep 'Linux [0-9]' | sed 's/ (.*//' | awk '{print $NF}' | head -n1)
+local currentTopKernel 2>/dev/null
+currentTopKernel=$(sudo -n cat /boot/grub/grub.cfg 2>/dev/null | awk -F\' '/menuentry / {print $2}' | grep -v "Advanced options" | grep 'Linux [0-9]' | sed 's/ (.*//' | awk '{print $NF}' | head -n1)
 
-if [[ "$1" == "-r" ]]
+if [[ "$1" == "-r" ]] && [[ "$currentTopKernel" != "" ]]
 then
 	echo "$currentTopKernel"
-	return
+	exit "$?"
 fi
 
 if [[ -e /usr/bin/uname-orig ]]
 then
 	/usr/bin/uname-orig "$@"
-	return
+	exit "$?"
 fi
 
 if [[ -e /bin/uname-orig ]]
 then
 	/bin/uname-orig "$@"
-	return
+	exit "$?"
 fi
 
-return 1
+exit 1
 CZXWXcRMTo8EmM8i4d
 
 	sudo -n chown root:root "$globalVirtFS"/usr/bin/uname
@@ -40925,11 +40925,11 @@ CZXWXcRMTo8EmM8i4d
 
 	_chroot /sbin/vboxconfig
 	
-
-	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
 	sudo -n mv -f "$globalVirtFS"/usr/bin/uname-orig "$globalVirtFS"/usr/bin/uname
 	sudo -n mv -f "$globalVirtFS"/bin/uname-orig "$globalVirtFS"/bin/uname
+
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
 
 
