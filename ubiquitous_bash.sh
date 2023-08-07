@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3755130885'
+export ub_setScriptChecksum_contents='1784085063'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -41696,6 +41696,7 @@ _convert-vdi() {
 	_messageNormal '_convert: vm.vdi'
 	_vm_convert_vdi
 	[[ ! -e "$scriptLocal"/vm.vdi ]] && _messageFAIL
+	return 0
 }
 
 _convert-vmdk() {
@@ -41710,6 +41711,7 @@ _convert-vmdk() {
 	_messageNormal '_convert: vm.vmdk'
 	_vm_convert_vmdk
 	[[ ! -e "$scriptLocal"/vm.vmdk ]] && _messageFAIL
+	return 0
 }
 
 # https://learn.microsoft.com/en-us/powershell/module/hyper-v/convert-vhd?view=windowsserver2022-ps
@@ -41733,6 +41735,7 @@ _convert-vhdx() {
 	rm -f "$scriptLocal"/vm.vhd
 
 	[[ ! -e "$scriptLocal"/vm.vhdx ]] && _messageFAIL
+	return 0
 }
 
 _convert-live() {
