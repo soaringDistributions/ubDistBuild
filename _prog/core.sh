@@ -1602,6 +1602,8 @@ _convert_rm() {
 }
 
 _convert-vdi() {
+	_override_bin_vbox
+	
 	# NOTICE: _convert_rm
 
 	[[ ! -e "$scriptLocal"/vm.img ]] && _messageFAIL
@@ -1611,9 +1613,12 @@ _convert-vdi() {
 	_messageNormal '_convert: vm.vdi'
 	_vm_convert_vdi
 	[[ ! -e "$scriptLocal"/vm.vdi ]] && _messageFAIL
+	return 0
 }
 
 _convert-vmdk() {
+	_override_bin_vbox
+	
 	# NOTICE: _convert_rm
 	
 	[[ ! -e "$scriptLocal"/vm.img ]] && _messageFAIL
@@ -1623,6 +1628,31 @@ _convert-vmdk() {
 	_messageNormal '_convert: vm.vmdk'
 	_vm_convert_vmdk
 	[[ ! -e "$scriptLocal"/vm.vmdk ]] && _messageFAIL
+	return 0
+}
+
+# https://learn.microsoft.com/en-us/powershell/module/hyper-v/convert-vhd?view=windowsserver2022-ps
+_convert-vhdx() {
+	_override_bin_vbox
+	
+	# NOTICE: _convert_rm
+	
+	[[ ! -e "$scriptLocal"/vm.img ]] && _messageFAIL
+	rm -f "$scriptLocal"/package_image.tar.flx
+	rm -f "$scriptLocal"/package_image.tar.flx.part*
+	
+	_messageNormal '_convert: vm.vhdx: convert: vm.vhd'
+	_vm_convert_vhd
+
+	_at_userMSW_probeCmd_discoverResource-cygwinNative-ProgramFiles qemu-img qemu false
+
+	# https://bugs.launchpad.net/cinder/+bug/1692816
+	qemu-img convert -f vpc -O vhdx "$scriptLocal"/vm.vhd "$scriptLocal"/vm.vhdx -p
+
+	rm -f "$scriptLocal"/vm.vhd
+
+	[[ ! -e "$scriptLocal"/vm.vhdx ]] && _messageFAIL
+	return 0
 }
 
 _convert-live() {

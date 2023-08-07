@@ -1,0 +1,12 @@
+
+./_get_vmImg_ubDistBuild internal
+
+./_get_vmImg_ubDistBuild-live internal
+
+./ubiquitous_bash.sh _convert-vdi
+./ubiquitous_bash.sh _convert-vmdk
+./ubiquitous_bash.sh _convert-vhdx
+
+dd if=/dev/zero bs=1M count=384000 >> _local/vm.img
+
+btrfs filesystem resize max /
