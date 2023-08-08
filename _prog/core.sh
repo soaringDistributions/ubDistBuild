@@ -1005,11 +1005,53 @@ _package_ubDistBuild_image() {
 	# https://github.com/lz4/lz4/blob/e3974e5a1476190afdd8b44e67106cfb7097a1d5/doc/lz4_manual.html#L144
 	# each successive value providing roughly +~3% to speed
 	#--fast=65537
-	tar -cvf - ./vm.img ./ops.sh | lz4 -z --fast=1 - "$scriptLocal"/package_image.tar.flx
+	tar -cf - ./vm.img ./ops.sh | lz4 -z --fast=1 - "$scriptLocal"/package_image.tar.flx
 	
 	! [[ -e "$scriptLocal"/package_image.tar.flx ]] && _messageFAIL
 	
 	return 0
+}
+
+# CAUTION: WSL2 can be used to host this conversion, but Cygwin/MSW cannot.
+# For WSL2.
+_package_ubDistBuild_rootfs() {
+	cd "$scriptLocal"
+	
+	_set_ubDistBuild
+	
+	rm -f "$scriptLocal"/package_rootfs.tar.flx > /dev/null 2>&1
+	
+	cd "$scriptLocal"
+	! "$scriptAbsoluteLocation" _openImage && _messagePlain_bad 'fail: _openImage' && _messageFAIL
+	#_mountChRoot_image_x64_prog
+	_mountChRoot_image_x64_prog
+
+
+
+
+	cd "$globalVirtFS"
+	_messagePlain_probe_cmd ls .
+	_messagePlain_probe_cmd ls ./boot
+	
+	#--exclude './usr/bin/ksplashqml'
+	sudo -n tar -cf - --exclude='./etc/fstab' --exclude='./etc/resolv.conf' --exclude='./etc/hosts' --exclude='./root/_rootGrab.sh' . | lz4 -z --fast=1 - "$scriptLocal"/package_rootfs.tar.flx
+
+
+
+
+	cd "$scriptLocal"
+	#_umountChRoot_image
+	[[ -d "$globalVirtFS"/boot/efi ]] && mountpoint "$globalVirtFS"/boot/efi >/dev/null 2>&1 && _wait_umount "$globalVirtFS"/boot/efi >/dev/null 2>&1
+	[[ -d "$globalVirtFS"/boot ]] && mountpoint "$globalVirtFS"/boot >/dev/null 2>&1 && _wait_umount "$globalVirtFS"/boot >/dev/null 2>&1
+	! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
+
+
+	#! [[ -e "$scriptLocal"/package_image.tar.flx ]] && _messageFAIL
+	
+	return 0
+}
+_convert-rootfs() {
+	_package_ubDistBuild_rootfs "$@"
 }
 
 
@@ -1050,6 +1092,25 @@ _ubDistBuild_split-live() {
 	done
 
 	rm -f ./vm-live.iso
+
+	cd "$functionEntryPWD"
+}
+
+_ubDistBuild_split-rootfs() {
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+
+
+	cd "$scriptLocal"
+
+	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
+	local currentIteration
+	for currentIteration in $(seq -w 0 24)
+	do
+		[[ -s ./package_rootfs.tar.flx ]] && [[ -e ./package_rootfs.tar.flx ]] && tail -c 1856000000 package_rootfs.tar.flx > package_rootfs.tar.flx.part"$currentIteration" && truncate -s -1856000000 package_rootfs.tar.flx
+	done
+
+	rm -f ./package_rootfs.tar.flx
 
 	cd "$functionEntryPWD"
 }
@@ -1686,6 +1747,9 @@ _convert() {
 	
 
 	_convert-vmdk "$@"
+
+
+	_convert-rootfs "$@"
 	
 	
 	_messageNormal '_convert: vm-live.iso'
@@ -1906,6 +1970,9 @@ _refresh_anchors() {
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_convert
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_upload_convert
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_assessment
+
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_install_vm-wsl2
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_install_wsl2
 	
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_true

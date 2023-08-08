@@ -109,6 +109,8 @@ _compile_bash_program_prog() {
 	export includeScriptList
 	
 	includeScriptList+=( get.sh )
+
+	includeScriptList+=( features.sh )
 	
 	true
 }

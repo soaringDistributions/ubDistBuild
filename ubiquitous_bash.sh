@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2012589641'
+export ub_setScriptChecksum_contents='1016769362'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -760,6 +760,43 @@ then
 	ionice() {
 		false
 	}
+
+	_wsl() {
+		local currentBin_wsl
+		currentBin_wsl=$(type -p wsl)
+
+		if ( [[ "$1" != "-"* ]] || [[ "$1" == "-u" ]] || [[ "$1" == "-e" ]] || [[ "$1" == "--exec" ]] ) && ( [[ "$1" != "-d" ]] || [[ "$2" != "-d" ]] || [[ "$3" != "-d" ]] || [[ "$4" != "-d" ]] || [[ "$5" != "-d" ]] || [[ "$6" != "-d" ]] )
+		then
+			if "$currentBin_wsl" --list | tr -dc 'a-zA-Z0-9\n' | grep '^ubdist' > /dev/null 2>&1
+			then
+				#"$currentBin_wsl" -u root -d ubdist "$@"
+				"$currentBin_wsl" -d ubdist "$@"
+				return
+			elif "$currentBin_wsl" --list | tr -dc 'a-zA-Z0-9\n' | grep '^ubDistBuild' > /dev/null 2>&1
+			then
+				#"$currentBin_wsl" -u root -d ubDistBuild "$@"
+				"$currentBin_wsl" -d ubDistBuild "$@"
+				return
+			elif "$currentBin_wsl" --list | tr -dc 'a-zA-Z0-9\n' | grep '^ubdist_embedded' > /dev/null 2>&1
+			then
+				#"$currentBin_wsl" -u root -d ubdist_embedded "$@"
+				"$currentBin_wsl" -d ubdist_embedded "$@"
+				return
+			elif "$currentBin_wsl" --list | tr -dc 'a-zA-Z0-9\n' | grep '^Debian' > /dev/null 2>&1
+			then
+				#"$currentBin_wsl" -u root -d Debian "$@"
+				"$currentBin_wsl" -d Debian "$@"
+				return
+			fi
+			"$currentBin_wsl" "$@"
+			return
+		fi
+		"$currentBin_wsl" "$@"
+		return
+	}
+	l() {
+		_wsl "$@"
+	}
 fi
 
 
@@ -791,12 +828,26 @@ _sudo_cygwin_sequence() {
 	chmod u+x "$safeTmp"/cygwin_sudo_temp.sh
 	
 	
-	
+		
 	cp "$scriptAbsoluteLocation" "$safeTmp"/
-	chmod u+x "$safeTmp"/$(basename "$scriptAbsoluteLocation")
+	local currentScriptBasename
+	currentScriptBasename=$(basename "$scriptAbsoluteLocation")
+	chmod u+x "$safeTmp"/"$currentScriptBasename"
 	
-	cp "$scriptAbsoluteFolder"/_bin.bat "$safeTmp"/_bin.bat
+	cp "$scriptLib"/ubiquitous_bash/_bin.bat "$safeTmp"/_bin.bat 2>/dev/null
+	cp -f "$scriptAbsoluteFolder"/_bin.bat "$safeTmp"/_bin.bat 2>/dev/null
 	chmod u+x "$safeTmp"/_bin.bat
+
+	[[ ! -e "$safeTmp"/_bin.bat ]] && _messagePlain_bad 'bad: missing: _bin.bat' && _messageFAIL && _stop 1
+
+	if type _anchor_configure > /dev/null 2>&1
+	then
+		"$safeTmp"/"$currentScriptBasename" _anchor_configure "$safeTmp"/_bin.bat
+	else
+		_messagePlain_bad 'bad: missing: _anchor_configure'
+		_messageFAIL && _stop 1
+		_stop 1
+	fi
 	
 
 	# 'Do it as Administrator.'
@@ -805,7 +856,9 @@ _sudo_cygwin_sequence() {
 	if [[ "$scriptAbsoluteFolder" == "/cygdrive/c"* ]]
 	then
 		# WARNING: May be untested, or (especially under interactive shell) may call obsolete code.
-		cygstart --action=runas "$scriptAbsoluteFolder"/_bin.bat "$safeTmp"/cygwin_sudo_temp.sh
+		#cygstart --action=runas "$scriptAbsoluteFolder"/_bin.bat "$safeTmp"/cygwin_sudo_temp.sh
+
+		cygstart --action=runas "$safeTmp"/_bin.bat "$safeTmp"/cygwin_sudo_temp.sh
 	else
 		cygstart --action=runas "$safeTmp"/_bin.bat "$safeTmp"/cygwin_sudo_temp.sh
 	fi
@@ -823,6 +876,7 @@ _sudo_cygwin() {
 }
 
 # CAUTION: BROKEN !
+# (at least historically this did not work reliably though it may or may not be reliable now)
 if _if_cygwin && type cygstart > /dev/null 2>&1
 then
 	sudo_cygwin() {
@@ -840,6 +894,11 @@ then
 		
 		return 1
 	}
+	sudoc() {
+		[[ "$1" == "-n" ]] && return 1
+		sudo_cygwin "$@"
+	}
+	alias sudo=sudoc
 fi
 
 
@@ -875,6 +934,16 @@ _userMSW() {
 }
 
 
+_powershell() {
+    local currentPowershellBinary
+    currentPowershellBinary=$(find /cygdrive/c/Windows/System32/WindowsPowerShell/ -name powershell.exe 2>/dev/null | head -n 1)
+    [[ "$currentPowershellBinary" == "" ]] && currentPowershellBinary=$(find /cygdrive/d/Windows/System32/WindowsPowerShell/ -name powershell.exe 2>/dev/null | head -n 1)
+    [[ "$currentPowershellBinary" == "" ]] && currentPowershellBinary=$(find /cygdrive/e/Windows/System32/WindowsPowerShell/ -name powershell.exe 2>/dev/null | head -n 1)
+    [[ "$currentPowershellBinary" == "" ]] && currentPowershellBinary=$(find /cygdrive/f/Windows/System32/WindowsPowerShell/ -name powershell.exe 2>/dev/null | head -n 1)
+
+	#_userMSW "$currentPowershellBinary" "$@"
+    "$currentPowershellBinary" "$@"
+}
 
 
 
@@ -9880,6 +9949,9 @@ _getMost_debian11_install() {
 	_getMost_backend_aptGetInstall axel
 	_getMost_backend_aptGetInstall unionfs-fuse
 	_getMost_backend_aptGetInstall samba
+
+	_getMost_backend_aptGetInstall gimp
+	_getMost_backend_aptGetInstall gimp-data-extras
 	
 	_getMost_backend_aptGetInstall aria2
 	
@@ -10277,6 +10349,18 @@ _getMost_debian11_install() {
 	
 	_getMost_backend_aptGetInstall freecad
 	
+	
+
+	_getMost_backend_aptGetInstall xclip
+
+	_getMost_backend_aptGetInstall tcl
+	_getMost_backend_aptGetInstall tk
+
+	_getMost_backend_aptGetInstall xserver-xephyr
+
+
+	_getMost_backend_aptGetInstall qt5-style-plugins
+	_getMost_backend_aptGetInstall qt5ct
 	
 	
 	_getMost_backend apt-get remove --autoremove -y plasma-discover
@@ -19734,6 +19818,209 @@ _userDocker() {
 	return "$?"
 }
 
+
+_here_wsl_conf() {
+    cat << 'CZXWXcRMTo8EmM8i4d'
+
+[boot]
+systemd = true
+command = /bin/bash -c 'systemctl stop sddm ; rm -f /root/_rootGrab.sh ; ( rm /home/user/___quick/mount.sh ; rmdir /home/user/___quick ; ( [[ ! -e /home/user/___quick ]] && ln -s /mnt/c/q /home/user/___quick ) ; rm -f /home/user/___quick/q )'
+
+[user]
+default = user
+
+[wsl2]
+nestedVirtualization=true
+
+
+CZXWXcRMTo8EmM8i4d
+}
+
+
+
+
+
+
+
+
+
+_here_wsl_qt5ct_conf() {
+    cat << 'CZXWXcRMTo8EmM8i4d'
+
+[Appearance]
+color_scheme_path=/usr/share/qt5ct/colors/airy.conf
+custom_palette=false
+icon_theme=breeze-dark
+standard_dialogs=default
+style=Breeze
+
+[Interface]
+activate_item_on_single_click=1
+buttonbox_layout=0
+cursor_flash_time=1000
+dialog_buttons_have_icons=1
+double_click_interval=400
+gui_effects=@Invalid()
+keyboard_scheme=2
+menus_have_icons=true
+show_shortcuts_in_context_menus=true
+stylesheets=@Invalid()
+toolbutton_style=4
+underline_shortcut=1
+wheel_scroll_lines=3
+
+[Troubleshooting]
+force_raster_widgets=1
+ignored_applications=@Invalid()
+
+CZXWXcRMTo8EmM8i4d
+}
+
+_write_wsl_qt5ct_conf() {
+    if [[ "$HOME" == "/root" ]] || [[ $(id -u) == 0 ]]
+    then
+        _messagePlain_bad 'bad: root'
+        _messageFAIL
+    fi
+
+    local currentHome
+    currentHome="$HOME"
+    [[ "$currentHome" == "/root" ]] && currentHome="/home/user"
+    [[ "$1" != "" ]] && currentHome="$1"
+
+    [[ -e "$currentHome"/.config/qt5ct/qt5ct.conf ]] && return 0
+    
+    mkdir -p "$currentHome"/.config/qt5ct
+    mkdir -p "$currentHome"/.config/qt5ct/colors
+    mkdir -p "$currentHome"/.config/qt5ct/qss
+    
+    _here_wsl_qt5ct_conf > "$currentHome"/.config/qt5ct/qt5ct.conf
+
+    [[ -e "$currentHome"/.config/qt5ct/qt5ct.conf ]] && return 0
+
+    return 1
+}
+
+# WARNING: Experimental. Installer use only. May cause issues with applications running natively from the MSW side. Fortunately, it seems QT_QPA_PLATFORMTHEME is ignored if qt5ct is not present, as expected in the case of 'native' QT MSW applications.
+_write_msw_qt5ct() {
+    _messagePlain_request 'request: If the value of system variable WSLENV is important to you, the previous value is noted here.'
+    _messagePlain_probe_var WSLENV
+    
+    setx QT_QPA_PLATFORMTHEME qt5ct /m
+    setx WSLENV QT_QPA_PLATFORMTHEME /m
+}
+
+
+
+
+
+_set_msw_qt5ct() {
+    ! _if_cygwin && return 1
+
+    export QT_QPA_PLATFORMTHEME=qt5ct
+    if [[ "$WSLENV" != "QT_QPA_PLATFORMTHEME" ]] && [[ "$WSLENV" != "QT_QPA_PLATFORMTHEME"* ]] && [[ "$WSLENV" != *"QT_QPA_PLATFORMTHEME" ]] && [[ "$WSLENV" != *"QT_QPA_PLATFORMTHEME"* ]]
+    then
+        export WSLENV="$WSLENV:QT_QPA_PLATFORMTHEME"
+    fi
+    return 0
+}
+
+
+# wsl printenv | grep QT_QPA_PLATFORMTHEME
+# ATTENTION: Will also unset QT_QPA_PLATFORMTHEME if appropriate (and for this reason absolutely should be hooked by 'Linux' shells).
+# Strongly recommend writing the ' export QT_QPA_PLATFORMTHEME=qt5ct ' or equivalent statement to ' /etc/environment.d/ub_wsl2_qt5ct.sh ' , '/etc/environment.d/90ub_wsl2_qt5ct.conf' , or similarly effective non-login non-interactive shell startup script.
+#  Unfortunately, '/etc/environment.d' is usually ignored by (eg. Debian) Linux distributions, to the point that variables declared by files provided by installed packages are not exported to any apparent environment.
+#  Alternatives attempted include:
+#  /etc/security/pam_env.conf
+#  ~/.bashrc
+#  ~/.bash_profile
+#  ~/.profile
+_set_qt5ct() {
+    ! uname -a | grep -i 'microsoft' > /dev/null 2>&1 && return 1
+    ! uname -a | grep -i 'WSL2' > /dev/null 2>&1 && return 1
+
+    if [[ "$DISPLAY" != ":0" ]]
+    then
+        export QT_QPA_PLATFORMTHEME=
+        unset QT_QPA_PLATFORMTHEME
+    fi
+    
+    _write_wsl_qt5ct_conf "$@"
+
+
+    export QT_QPA_PLATFORMTHEME=qt5ct
+
+    return 0
+}
+
+
+# WARNING: Experimental. Installer use only. May cause issues with applications running natively from the MSW side.
+_write_msw_qt5ct() {
+    _messagePlain_request 'request: if the value of system variable WSLENV is important to you, the previous value is noted here'
+    _messagePlain_probe_var WSLENV
+    
+    setx QT_QPA_PLATFORMTHEME qt5ct /m
+    setx WSLENV QT_QPA_PLATFORMTHEME /m
+}
+
+
+_wsl_desktop() {
+    (
+        _messageNormal "init: _wsl_desktop"
+
+        export QT_QPA_PLATFORMTHEME=
+        unset QT_QPA_PLATFORMTHEME
+        _set_qt5ct
+
+        
+        # https://stackoverflow.com/questions/12153552/how-high-do-x11-display-numbers-go
+        # https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
+        _messagePlain_nominal 'Searching for unused X11 display.'
+        local xephyrDisplay
+        local xephyrDisplayValid
+        xephyrDisplayValid="false"
+        for (( xephyrDisplay = 20 ; xephyrDisplay <= 60 ; xephyrDisplay++ ))
+        do
+            ! [[ -e /tmp/.X"$xephyrDisplay"-lock ]] && ! [[ -e /tmp/.X11-unix/X"$xephyrDisplay" ]] && xephyrDisplayValid="true" && _messagePlain_good 'found: unused X11 display= '"$xephyrDisplay" && break
+        done
+
+        _messagePlain_nominal 'Xephyr.'
+        local xephyrResolution
+        xephyrResolution="1600x1200"
+        [[ "$1" != "" ]] && xephyrResolution="$1"
+        if type -p dbus-run-session > /dev/null 2>&1 && type -p startplasma-x11 > /dev/null 2>&1
+        then
+            ( Xephyr -screen "$xephyrResolution" :"$xephyrDisplay" & ( export DISPLAY=:"$xephyrDisplay" ; "$HOME"/core/installations/xclipsync/xclipsync & dbus-run-session startplasma-x11 2>/dev/null ) )
+            return 0
+        fi
+        _messagePlain_bad 'bad: missing: GUI'
+        _messageFAIL
+
+        return 0
+    )
+}
+ldesk() {
+    _wsl_desktop "$@"
+}
+
+
+
+
+
+
+
+
+_test_wsl2_internal() {
+    _getDep 'xclip'
+
+    _getDep 'tclsh'
+    _getDep 'wish'
+
+    _getDep Xephyr
+
+    _wantGetDep dbus-run-session
+    _wantGetDep startplasma-x11
+}
 #####Shortcuts
 
 # https://unix.stackexchange.com/questions/434409/make-a-bash-ps1-that-counts-streak-of-correct-commands
@@ -19803,11 +20090,14 @@ _visualPrompt() {
 	
 	
 	
-	if ! _if_cygwin
+	if _if_cygwin
 	then
-		export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${currentChroot:+($currentChroot)}\[\033[01;33m\]\u\[\033[01;32m\]@'"$currentHostname"'\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]'"$prompt_nixShell"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[37m\][\w]\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '
-	else
 		export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${currentChroot:+($currentChroot)}\[\033[01;33m\]\u\[\033[01;32m\]@'"$currentHostname"'\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]'"$prompt_nixShell"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]\[\033[37m\]\w\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '
+	elif ( uname -a | grep -i 'microsoft' > /dev/null 2>&1 || uname -a | grep -i 'WSL2' > /dev/null 2>&1 )
+	then
+		export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${currentChroot:+($currentChroot)}\[\033[01;33m\]\u\[\033[01;32m\]@'"$currentHostname"-wsl2'\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]'"$prompt_nixShell"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]\[\033[37m\]\w\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '
+	else
+		export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${currentChroot:+($currentChroot)}\[\033[01;33m\]\u\[\033[01;32m\]@'"$currentHostname"'\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]'"$prompt_nixShell"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[37m\][\w]\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '	
 	fi
 	
 	#export PS1="$prompt_nixShell""$PS1"
@@ -31287,6 +31577,52 @@ _prepare_ssh() {
 
 
 
+_set_msw_qt5ct() {
+    ! _if_cygwin && return 1
+
+    [[ "$QT_QPA_PLATFORMTHEME" != "qt5ct" ]] && export QT_QPA_PLATFORMTHEME=qt5ct
+    if [[ "$WSLENV" != "QT_QPA_PLATFORMTHEME" ]] && [[ "$WSLENV" != "QT_QPA_PLATFORMTHEME"* ]] && [[ "$WSLENV" != *"QT_QPA_PLATFORMTHEME" ]] && [[ "$WSLENV" != *"QT_QPA_PLATFORMTHEME"* ]]
+    then
+        export WSLENV="$WSLENV:QT_QPA_PLATFORMTHEME"
+    fi
+    return 0
+}
+
+
+# wsl printenv | grep QT_QPA_PLATFORMTHEME
+# ATTENTION: Will also unset QT_QPA_PLATFORMTHEME if appropriate (and for this reason absolutely should be hooked by 'Linux' shells).
+# Strongly recommend writing the ' export QT_QPA_PLATFORMTHEME=qt5ct ' or equivalent statement to ' /etc/environment.d/ub_wsl2_qt5ct.sh ' , '/etc/environment.d/90ub_wsl2_qt5ct.conf' , or similarly effective non-login non-interactive shell startup script.
+#  Unfortunately, '/etc/environment.d' is usually ignored by (eg. Debian) Linux distributions, to the point that variables declared by files provided by installed packages are not exported to any apparent environment.
+#  Alternatives attempted include:
+#  /etc/security/pam_env.conf
+#  ~/.bashrc
+#  ~/.bash_profile
+#  ~/.profile
+_set_qt5ct() {
+    ! uname -a | grep -i 'microsoft' > /dev/null 2>&1 && return 1
+    ! uname -a | grep -i 'WSL2' > /dev/null 2>&1 && return 1
+
+    if [[ "$DISPLAY" != ":0" ]]
+    then
+        export QT_QPA_PLATFORMTHEME=
+        unset QT_QPA_PLATFORMTHEME
+    fi
+    
+    _write_wsl_qt5ct_conf "$@"
+
+
+    export QT_QPA_PLATFORMTHEME=qt5ct
+
+    return 0
+}
+
+! _set_msw_qt5ct && _set_qt5ct
+
+
+
+
+
+
 
 _prepareFakeHome() {
 	mkdir -p "$actualFakeHome"
@@ -39593,6 +39929,10 @@ _test() {
 	
 	_tryExec "_test_packetDriveDevice"
 	_tryExec "_test_gparted"
+
+
+	_tryExec "_test_wsl2_internal"
+
 	
 	# WARNING: Disabled by default. Newer FLOSS (ie. 'barrier'), seems to have displaced the older 'synergy' software.
 	# ATTENTION: Override with 'ops' or similar.
@@ -41088,11 +41428,53 @@ _package_ubDistBuild_image() {
 	# https://github.com/lz4/lz4/blob/e3974e5a1476190afdd8b44e67106cfb7097a1d5/doc/lz4_manual.html#L144
 	# each successive value providing roughly +~3% to speed
 	#--fast=65537
-	tar -cvf - ./vm.img ./ops.sh | lz4 -z --fast=1 - "$scriptLocal"/package_image.tar.flx
+	tar -cf - ./vm.img ./ops.sh | lz4 -z --fast=1 - "$scriptLocal"/package_image.tar.flx
 	
 	! [[ -e "$scriptLocal"/package_image.tar.flx ]] && _messageFAIL
 	
 	return 0
+}
+
+# CAUTION: WSL2 can be used to host this conversion, but Cygwin/MSW cannot.
+# For WSL2.
+_package_ubDistBuild_rootfs() {
+	cd "$scriptLocal"
+	
+	_set_ubDistBuild
+	
+	rm -f "$scriptLocal"/package_rootfs.tar.flx > /dev/null 2>&1
+	
+	cd "$scriptLocal"
+	! "$scriptAbsoluteLocation" _openImage && _messagePlain_bad 'fail: _openImage' && _messageFAIL
+	#_mountChRoot_image_x64_prog
+	_mountChRoot_image_x64_prog
+
+
+
+
+	cd "$globalVirtFS"
+	_messagePlain_probe_cmd ls .
+	_messagePlain_probe_cmd ls ./boot
+	
+	#--exclude './usr/bin/ksplashqml'
+	sudo -n tar -cf - --exclude='./etc/fstab' --exclude='./etc/resolv.conf' --exclude='./etc/hosts' --exclude='./root/_rootGrab.sh' . | lz4 -z --fast=1 - "$scriptLocal"/package_rootfs.tar.flx
+
+
+
+
+	cd "$scriptLocal"
+	#_umountChRoot_image
+	[[ -d "$globalVirtFS"/boot/efi ]] && mountpoint "$globalVirtFS"/boot/efi >/dev/null 2>&1 && _wait_umount "$globalVirtFS"/boot/efi >/dev/null 2>&1
+	[[ -d "$globalVirtFS"/boot ]] && mountpoint "$globalVirtFS"/boot >/dev/null 2>&1 && _wait_umount "$globalVirtFS"/boot >/dev/null 2>&1
+	! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
+
+
+	#! [[ -e "$scriptLocal"/package_image.tar.flx ]] && _messageFAIL
+	
+	return 0
+}
+_convert-rootfs() {
+	_package_ubDistBuild_rootfs "$@"
 }
 
 
@@ -41133,6 +41515,25 @@ _ubDistBuild_split-live() {
 	done
 
 	rm -f ./vm-live.iso
+
+	cd "$functionEntryPWD"
+}
+
+_ubDistBuild_split-rootfs() {
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+
+
+	cd "$scriptLocal"
+
+	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
+	local currentIteration
+	for currentIteration in $(seq -w 0 24)
+	do
+		[[ -s ./package_rootfs.tar.flx ]] && [[ -e ./package_rootfs.tar.flx ]] && tail -c 1856000000 package_rootfs.tar.flx > package_rootfs.tar.flx.part"$currentIteration" && truncate -s -1856000000 package_rootfs.tar.flx
+	done
+
+	rm -f ./package_rootfs.tar.flx
 
 	cd "$functionEntryPWD"
 }
@@ -41769,6 +42170,9 @@ _convert() {
 	
 
 	_convert-vmdk "$@"
+
+
+	_convert-rootfs "$@"
 	
 	
 	_messageNormal '_convert: vm-live.iso'
@@ -41989,6 +42393,9 @@ _refresh_anchors() {
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_convert
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_upload_convert
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_assessment
+
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_install_vm-wsl2
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_install_wsl2
 	
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_true
@@ -42158,6 +42565,145 @@ _get_core_ubDistFetch_sequence() {
 }
 _get_core_ubDistFetch() {
 	"$scriptAbsoluteLocation" _get_core_ubDistFetch_sequence "$@"
+}
+
+
+
+
+
+# End user function .
+_install_wsl2() {
+    _messageNormal 'init: _install_wsl2'
+    
+    _messagePlain_nominal 'install: write: _write_msw_qt5ct'
+    _write_msw_qt5ct
+
+
+    _messagePlain_nominal 'install: wsl2'
+    
+    # https://www.omgubuntu.co.uk/how-to-install-wsl2-on-windows-10
+    
+    _messagePlain_probe dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+    dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+
+    _messagePlain_probe dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+    dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+
+    _messagePlain_probe wsl --set-default-version 2
+    wsl --set-default-version 2
+}
+_install_wsl() {
+    _install_wsl2 "$@"
+}
+
+# End user function .
+_install_vm-wsl2() {
+    _start
+    local functionEntryPWD
+    functionEntryPWD="$PWD"
+
+    if [[ -e "$scriptLocal"/package_rootfs.tar.flx ]] && [[ ! -e "$scriptLocal"/package_rootfs.tar ]]
+    then
+        cat "$scriptLocal"/package_rootfs.tar.flx | lz4 -d -c > "$scriptLocal"/package_rootfs.tar
+        rm -f "$scriptLocal"/package_rootfs.tar.flx
+    fi
+
+    [[ ! -e "$scriptLocal"/package_rootfs.tar ]] && _messagePlain_bad 'bad: missing: package_rootfs.tar' && _messageFAIL && _stop 1
+
+
+    mkdir -p '/cygdrive/c/core/infrastructure/ubdist_wsl'
+    _userMSW _messagePlain_probe wsl --import ubdist '/cygdrive/c/core/infrastructure/ubdist_wsl' "$scriptLocal"/package_rootfs.tar --version 2
+    _userMSW wsl --import ubdist '/cygdrive/c/core/infrastructure/ubdist_wsl' "$scriptLocal"/package_rootfs.tar --version 2
+
+    _messagePlain_probe wsl --set-default ubdist
+    wsl --set-default ubdist
+
+    #wsl --unregister ubdist
+
+    cd "$functionEntryPWD"
+    _stop
+}
+_install_vm-wsl() {
+    _install_vm-wsl2 "$@"
+}
+
+
+
+
+
+
+# DANGER: Untested.
+# BROKEN
+_install_chroot-appx() {
+    _start
+    local functionEntryPWD
+    functionEntryPWD="$PWD"
+
+    [[ ! -e "$scriptLocal"/Debian.AppxBundle ]] && curl -L -o "$scriptLocal"/Debian.AppxBundle https://aka.ms/wsl-debian-gnulinux
+    
+    cp -f "$scriptLocal"/Debian.AppxBundle "$scriptLocal"/Debian.AppxBundle.zip
+    unzip "$scriptLocal"/Debian.AppxBundle.zip -d "$safeTmp"/ubDistBuild
+    rm -f "$scriptLocal"/Debian.AppxBundle.zip
+
+    _messagePlain_request 'request: enter to continue'
+    read > /dev/null 2>&1
+
+    
+    #_messagePlain_probe wsl --install -d Debian
+    #wsl --install -d Debian
+
+    _userMSW _messagePlain_probe _powershell Add-AppxPackage "$safeTmp"/ubDistBuild/DistroLauncher-Appx_1.12.2.0_x64.appx
+    _userMSW _powershell Add-AppxPackage "$safeTmp"/ubDistBuild/DistroLauncher-Appx_1.12.2.0_x64.appx
+
+
+    cd "$functionEntryPWD"
+    _stop
+}
+
+# DANGER: Not adequately proven. No production use. May notbe tested.
+# Not very practical. Debian install process asks for a password. Breaks automatic install, and doesn't prevent 'wsl -u root -d Debian' anyway.
+_install_chroot() {
+    _start
+    local functionEntryPWD
+    functionEntryPWD="$PWD"
+
+    # https://stackoverflow.com/questions/76404375/wsl2-debian-automatic-unattended-re-installation
+    # https://www.sindastra.de/p/679/no-sudo-password-in-wsl
+
+    _messagePlain_request 'request: enter to continue'
+    read > /dev/null 2>&1
+
+    #_messagePlain_probe wsl --install -d Debian
+    #wsl --install -d Debian
+    #wsl --install -d Debian --no-launch
+
+    #echo "`whoami` ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/`whoami` && sudo chmod 0440 /etc/sudoers.d/`whoami`
+    #wsl -u root -d Debian
+
+    #wsl --unregister Debian
+
+    (echo 'user' ; echo pass ; echo pass) | wsl --install -d Debian
+
+
+
+    cd "$functionEntryPWD"
+    _stop
+}
+
+# DANGER: BROKEN
+_install_vm-wsl2-from_VHDX() {
+    [[ ! -e "$scriptLocal"/vm.vhdx ]] && _messagePlain_bad 'bad: missing: vm.vhdx' && _messageFAIL && _stop 1
+
+    #_userMSW _messagePlain_probe wsl --import-in-place ubdist "$scriptLocal"/vm.vhdx --version 2
+    #_userMSW wsl --import-in-place ubdist "$scriptLocal"/vm.vhdx --version 2
+
+    _messagePlain_probe wsl --set-default ubdist
+    wsl --set-default ubdist
+
+    # https://superuser.com/questions/1667969/create-wsl2-instance-from-vhdx
+}
+_install_vm-wsl-from_VHDX() {
+    _install_vm-wsl2 "$@"
 }
 
 
@@ -43015,6 +43561,8 @@ _init_deps() {
 	export enUb_abstractfs=""
 	export enUb_buildBash=""
 	export enUb_buildBashUbiquitous=""
+
+	export enUb_virt_translation_gui=""
 	
 	export enUb_command=""
 	export enUb_synergy=""
@@ -43289,6 +43837,12 @@ _deps_abstractfs() {
 	_deps_bup
 	_deps_virt
 	export enUb_abstractfs="true"
+}
+
+_deps_virt_translation_gui() {
+	_deps_virt_translation
+	
+	export enUb_virt_translation_gui="true"
 }
 
 _deps_command() {
@@ -43872,6 +44426,8 @@ _compile_bash_deps() {
 		_deps_abstractfs
 		
 		_deps_virt_translation
+
+		_deps_virt_translation_gui
 		
 		_deps_stopwatch
 		
@@ -44015,6 +44571,8 @@ _compile_bash_deps() {
 		
 		_deps_virt
 		#_deps_virt_thick
+
+		#_deps_virt_translation_gui
 		
 		#_deps_chroot
 		#_deps_bios
@@ -44104,6 +44662,8 @@ _compile_bash_deps() {
 		
 		_deps_virt
 		_deps_virt_thick
+
+		_deps_virt_translation_gui
 		
 		_deps_chroot
 		_deps_bios
@@ -44193,6 +44753,8 @@ _compile_bash_deps() {
 		
 		_deps_virt
 		_deps_virt_thick
+
+		_deps_virt_translation_gui
 		
 		_deps_chroot
 		_deps_bios
@@ -44492,6 +45054,17 @@ _compile_bash_utilities_virtualization() {
 	[[ "$enUb_docker" == "true" ]] && includeScriptList+=( "virtualization/docker"/dockertest.sh )
 	[[ "$enUb_docker" == "true" ]] && includeScriptList+=( "virtualization/docker"/dockerchecks.sh )
 	[[ "$enUb_docker" == "true" ]] && includeScriptList+=( "virtualization/docker"/dockeruser.sh )
+
+
+	if ( [[ "$enUb_notLean" == "true" ]] || [[ "$enUb_image" == "true" ]] || [[ "$enUb_docker" == "true" ]] || [[ "$enUb_virt" == "true" ]] || [[ "$enUb_virt_thick" == "true" ]] || [[ "$enUb_virt_translation" == "true" ]] || [[ "$enUb_virt_translation_gui" == "true" ]] )
+	then
+		includeScriptList+=( "virtualization/wsl2"/here_wsl2.sh )
+		includeScriptList+=( "virtualization/wsl2"/wsl2_internal.sh )
+
+		includeScriptList+=( "virtualization/wsl2"/here_wsl2_gui.sh )
+	fi
+
+	( [[ "$enUb_virt_translation_gui" == "true" ]] ) && includeScriptList+=( "virtualization/wsl2"/wsl2_gui_internal.sh )
 }
 
 # WARNING: Shortcuts must NOT cause _stop/exit failures in _test/_setup procedures!
@@ -44708,6 +45281,11 @@ _compile_bash_vars_spec() {
 	[[ "$enUb_virt" == "true" ]] && includeScriptList+=( "virtualization"/image/imagevars.sh )
 	
 	[[ "$enUb_proxy" == "true" ]] && includeScriptList+=( "generic/net/proxy/ssh"/sshvars.sh )
+
+	if ( [[ "$enUb_notLean" == "true" ]] || [[ "$enUb_image" == "true" ]] || [[ "$enUb_docker" == "true" ]] || [[ "$enUb_virt" == "true" ]] || [[ "$enUb_virt_thick" == "true" ]] || [[ "$enUb_virt_translation" == "true" ]] || [[ "$enUb_virt_translation_gui" == "true" ]] )
+	then
+		includeScriptList+=( "virtualization"/wsl2vars.sh )
+	fi
 	
 	
 	includeScriptList+=( "structure"/specglobalvars.sh )
@@ -45234,6 +45812,8 @@ _compile_bash_program_prog() {
 	export includeScriptList
 	
 	includeScriptList+=( get.sh )
+
+	includeScriptList+=( features.sh )
 	
 	true
 }

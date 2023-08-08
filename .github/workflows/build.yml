@@ -488,6 +488,102 @@ jobs:
           name: build
           files: |
             ./_local/vm-live.iso.part11
+      - name: _ubDistBuild_split-rootfs
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _ubDistBuild_split-rootfs | sudo -n tee ./_lib/_ubDistBuild_split-rootfs.log && exit ${PIPESTATUS[0]}
+        timeout-minutes: 355
+      - name: release! package_rootfs
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            #./_local/package_rootfs.tar.flx.part*
+      - name: release! package_rootfs
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/package_rootfs.tar.flx.part00
+      - name: release! package_rootfs
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/package_rootfs.tar.flx.part01
+      - name: release! package_rootfs
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/package_rootfs.tar.flx.part02
+      - name: release! package_rootfs
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/package_rootfs.tar.flx.part03
+      - name: release! package_rootfs
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/package_rootfs.tar.flx.part04
+      - name: release! package_rootfs
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/package_rootfs.tar.flx.part05
+      - name: release! package_rootfs
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/package_rootfs.tar.flx.part06
+      - name: release! package_rootfs
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/package_rootfs.tar.flx.part07
+      - name: release! package_rootfs
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/package_rootfs.tar.flx.part08
+      - name: release! package_rootfs
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/package_rootfs.tar.flx.part09
+      - name: release! package_rootfs
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/package_rootfs.tar.flx.part10
+      - name: release! package_rootfs
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/package_rootfs.tar.flx.part11
       #- name: _assessment
         #shell: bash
         #run: |
