@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2818198537'
+export ub_setScriptChecksum_contents='777758616'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -42300,6 +42300,7 @@ _assessment() {
 _refresh_anchors() {
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild-live
+	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild-rootfs
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_core_ubDistFetch
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_create_ubDistBuild-rotten_install-kde
@@ -42476,7 +42477,28 @@ _get_vmImg_ubDistBuild-live() {
 	"$scriptAbsoluteLocation" _get_vmImg_ubDistBuild-live_sequence "$@"
 }
 
+_get_vmImg_ubDistBuild-rootfs_sequence() {
+	_messageNormal 'init: _get_vmImg'
+	
+	local releaseLabel
+	releaseLabel="internal"
+	[[ "$1" != "" ]] && releaseLabel="$1"
+	[[ "$1" == "latest" ]] && releaseLabel=
 
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+	
+	
+	mkdir -p "$scriptLocal"
+	cd "$scriptLocal"
+	_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_rootfs.tar.flx" | lz4 -d -c > ./package_rootfs.tar
+	[[ "$?" != "0" ]] && _messageFAIL
+
+	cd "$functionEntryPWD"
+}
+_get_vmImg_ubDistBuild-rootfs() {
+	"$scriptAbsoluteLocation" _get_vmImg_ubDistBuild-rootfs_sequence "$@"
+}
 
 
 

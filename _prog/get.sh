@@ -76,7 +76,28 @@ _get_vmImg_ubDistBuild-live() {
 	"$scriptAbsoluteLocation" _get_vmImg_ubDistBuild-live_sequence "$@"
 }
 
+_get_vmImg_ubDistBuild-rootfs_sequence() {
+	_messageNormal 'init: _get_vmImg'
+	
+	local releaseLabel
+	releaseLabel="internal"
+	[[ "$1" != "" ]] && releaseLabel="$1"
+	[[ "$1" == "latest" ]] && releaseLabel=
 
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+	
+	
+	mkdir -p "$scriptLocal"
+	cd "$scriptLocal"
+	_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_rootfs.tar.flx" | lz4 -d -c > ./package_rootfs.tar
+	[[ "$?" != "0" ]] && _messageFAIL
+
+	cd "$functionEntryPWD"
+}
+_get_vmImg_ubDistBuild-rootfs() {
+	"$scriptAbsoluteLocation" _get_vmImg_ubDistBuild-rootfs_sequence "$@"
+}
 
 
 
