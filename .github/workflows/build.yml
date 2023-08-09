@@ -488,6 +488,16 @@ jobs:
           name: build
           files: |
             ./_local/vm-live.iso.part11
+      - name: _package_rm
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _package_rm
+      - name: _convert-rootfs
+        shell: bash
+        run: |
+          export current_diskConstrained="true"
+          ./ubiquitous_bash.sh _convert_rm
+          ./ubiquitous_bash.sh _convert-rootfs | sudo -n tee ./_convert-rootfs.log && exit ${PIPESTATUS[0]}
       - name: _ubDistBuild_split-rootfs
         shell: bash
         run: |
@@ -584,6 +594,10 @@ jobs:
           name: build
           files: |
             ./_local/package_rootfs.tar.flx.part11
+      - name: _package_rm
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _package_rm
       #- name: _assessment
         #shell: bash
         #run: |

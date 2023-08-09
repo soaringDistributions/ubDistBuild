@@ -1652,7 +1652,12 @@ _create_kde() {
 _package_rm() {
 	rm -f "$scriptLocal"/package_image.tar.flx
 	rm -f "$scriptLocal"/package_image.tar.flx.part*
-	return
+	
+	rm -f "$scriptLocal"/vm-live.iso
+
+	rm -f "$scriptLocal"/package_rootfs.tar
+
+	return 0
 }
 
 _convert_rm() {
