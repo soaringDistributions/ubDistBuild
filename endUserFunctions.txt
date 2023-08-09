@@ -3,6 +3,9 @@
 
 ./_get_vmImg_ubDistBuild-live internal
 
+./_get_vmImg_ubDistBuild-rootfs internal
+
+
 ./ubiquitous_bash.sh _convert-vdi
 ./ubiquitous_bash.sh _convert-vmdk
 ./ubiquitous_bash.sh _convert-vhdx
