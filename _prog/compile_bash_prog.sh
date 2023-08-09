@@ -1,5 +1,11 @@
 _compile_bash_deps_prog() {
-	true
+	if [[ "$1" == "ubDistBuild" ]]
+	then
+		_compile_bash_deps "core"
+		_deps_virt_translation_gui
+		return 0
+	fi
+	return 1
 }
 
 #Default is to include all, or run a specified configuration. For this reason, it will be more typical to override this entire function, rather than append any additional code.
