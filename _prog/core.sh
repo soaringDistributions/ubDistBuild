@@ -1654,8 +1654,11 @@ _package_rm() {
 	rm -f "$scriptLocal"/package_image.tar.flx.part*
 	
 	rm -f "$scriptLocal"/vm-live.iso
+	rm -f "$scriptLocal"/vm-live.iso.part*
 
 	rm -f "$scriptLocal"/package_rootfs.tar
+	rm -f "$scriptLocal"/package_rootfs.tar.flx
+	rm -f "$scriptLocal"/package_rootfs.tar.flx.part*
 
 	return 0
 }
@@ -1664,6 +1667,9 @@ _convert_rm() {
 	rm -f "$scriptLocal"/vm.vdi
 	rm -f "$scriptLocal"/vm.vmdk
 	rm -f "$scriptLocal"/vm.vhdx
+
+	rm -f "$scriptLocal"/package_rootfs.tar
+	
 	return 0
 }
 
