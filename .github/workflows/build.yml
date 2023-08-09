@@ -393,105 +393,6 @@ jobs:
         shell: bash
         run: |
           ./ubiquitous_bash.sh _package_rm
-      - name: _convert-live
-        shell: bash
-        run: |
-          export current_diskConstrained="true"
-          ./ubiquitous_bash.sh _convert_rm
-          ./ubiquitous_bash.sh _convert-live | sudo -n tee ./_convert-live.log && exit ${PIPESTATUS[0]}
-          ./ubiquitous_bash.sh _safeRMR ./_local/livefs
-      - name: _ubDistBuild_split-live
-        shell: bash
-        run: |
-          ./ubiquitous_bash.sh _ubDistBuild_split-live
-      - name: release! live
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
-          name: build
-          files: |
-            ./_local/vm-live.iso.part00
-      - name: release! live
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
-          name: build
-          files: |
-            ./_local/vm-live.iso.part01
-      - name: release! live
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
-          name: build
-          files: |
-            ./_local/vm-live.iso.part02
-      - name: release! live
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
-          name: build
-          files: |
-            ./_local/vm-live.iso.part03
-      - name: release! live
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
-          name: build
-          files: |
-            ./_local/vm-live.iso.part04
-      - name: release! live
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
-          name: build
-          files: |
-            ./_local/vm-live.iso.part05
-      - name: release! live
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
-          name: build
-          files: |
-            ./_local/vm-live.iso.part06
-      - name: release! live
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
-          name: build
-          files: |
-            ./_local/vm-live.iso.part07
-      - name: release! live
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
-          name: build
-          files: |
-            ./_local/vm-live.iso.part08
-      - name: release! live
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
-          name: build
-          files: |
-            ./_local/vm-live.iso.part09
-      - name: release! live
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
-          name: build
-          files: |
-            ./_local/vm-live.iso.part10
-      - name: release! live
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
-          name: build
-          files: |
-            ./_local/vm-live.iso.part11
-      - name: _package_rm
-        shell: bash
-        run: |
-          ./ubiquitous_bash.sh _package_rm
       - name: _convert-rootfs
         shell: bash
         run: |
@@ -594,6 +495,105 @@ jobs:
           name: build
           files: |
             ./_local/package_rootfs.tar.flx.part11
+      - name: _package_rm
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _package_rm
+      - name: _convert-live
+        shell: bash
+        run: |
+          export current_diskConstrained="true"
+          ./ubiquitous_bash.sh _convert_rm
+          ./ubiquitous_bash.sh _convert-live | sudo -n tee ./_convert-live.log && exit ${PIPESTATUS[0]}
+          ./ubiquitous_bash.sh _safeRMR ./_local/livefs
+      - name: _ubDistBuild_split-live
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _ubDistBuild_split-live
+      - name: release! live
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part00
+      - name: release! live
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part01
+      - name: release! live
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part02
+      - name: release! live
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part03
+      - name: release! live
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part04
+      - name: release! live
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part05
+      - name: release! live
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part06
+      - name: release! live
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part07
+      - name: release! live
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part08
+      - name: release! live
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part09
+      - name: release! live
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part10
+      - name: release! live
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part11
       - name: _package_rm
         shell: bash
         run: |
