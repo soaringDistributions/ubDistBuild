@@ -79,7 +79,7 @@ jobs:
     #  '7 GB of RAM memory'
     #  '14 GB of SSD disk space'
     # ATTRIBUTION: Github Copilot Chat 2023-08-10 .
-    runs-on: ${{ github.event.inputs.runnerName }}
+    runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
     #runs-on: ubuntu-latest
     #runs-on: ubuntu-22.04
     #runs-on: ubuntu-20.04
