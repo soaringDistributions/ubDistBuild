@@ -802,12 +802,19 @@ _create_ubDistBuild-bootOnce() {
 	
 	##( _chroot sudo -n -u user bash -c "crontab -l" ; echo '@reboot cd /home/'"$custom_user"'/.ubcore/ubiquitous_bash/lean.sh _unix_renice_execDaemon' ) | _chroot sudo -n -u user bash -c "crontab -"
 	
-
-
+	# ### NOTICE
+	# /usr/lib/virtualbox/vboxdrv.sh
+	#  KERN_VER=`uname -r`
+	#  ! $MODPROBE vboxdrv > /dev/null 2>&1
+	# /usr/share/virtualbox/src/vboxhost/build_in_tmp
+	#  MAKE_JOBS
 
 
 	sudo -n mv "$globalVirtFS"/usr/bin/uname "$globalVirtFS"/usr/bin/uname-orig
 	sudo -n mv "$globalVirtFS"/bin/uname "$globalVirtFS"/bin/uname-orig
+
+	sudo -n rm -f "$globalVirtFS"/usr/bin/uname
+	sudo -n rm -f "$globalVirtFS"/bin/uname
 
 	cat << 'CZXWXcRMTo8EmM8i4d' | sudo -n tee "$globalVirtFS"/usr/bin/uname > /dev/null
 #!/bin/bash
@@ -840,9 +847,17 @@ CZXWXcRMTo8EmM8i4d
 	sudo -n chmod 755 "$globalVirtFS"/usr/bin/uname
 
 
+	_chroot /sbin/rcvboxdrv setup
+	_chroot /sbin/rcvboxdrv setup all
+	_chroot /sbin/rcvboxdrv setup $(_chroot cat /boot/grub/grub.cfg 2>/dev/null | awk -F\' '/menuentry / {print $2}' | grep -v "Advanced options" | grep 'Linux [0-9]' | sed 's/ (.*//' | awk '{print $NF}' | head -n1)
+
 	_chroot /sbin/vboxconfig
+	_chroot /sbin/vboxconfig --nostart
 	
-	
+
+	sudo -n rm -f "$globalVirtFS"/usr/bin/uname
+	sudo -n rm -f "$globalVirtFS"/bin/uname
+
 	sudo -n mv -f "$globalVirtFS"/usr/bin/uname-orig "$globalVirtFS"/usr/bin/uname
 	sudo -n mv -f "$globalVirtFS"/bin/uname-orig "$globalVirtFS"/bin/uname
 
