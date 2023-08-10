@@ -1,4 +1,11 @@
 
+
+./ubiquitous_bash.sh _install_wsl2
+./ubiquitous_bash.sh _install_vm-wsl2
+
+
+
+
 ./_get_vmImg_ubDistBuild internal
 
 ./_get_vmImg_ubDistBuild-live internal
@@ -13,3 +20,9 @@
 dd if=/dev/zero bs=1M count=384000 >> _local/vm.img
 
 btrfs filesystem resize max /
+
+
+
+
+
+

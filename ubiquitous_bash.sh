@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='61000706'
+export ub_setScriptChecksum_contents='3475864855'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -19824,7 +19824,7 @@ _here_wsl_conf() {
 
 [boot]
 systemd = true
-command = /bin/bash -c 'systemctl stop sddm ; rm -f /root/_rootGrab.sh ; ( rm /home/user/___quick/mount.sh ; rmdir /home/user/___quick ; ( [[ ! -e /home/user/___quick ]] && ln -s /mnt/c/q /home/user/___quick ) ; rm -f /home/user/___quick/q )'
+command = /bin/bash -c 'systemctl stop sddm ; rm -f /root/_rootGrab.sh ; usermod -a -G kvm user ; chown -v root:kvm /dev/kvm ; chmod 660 /dev/kvm ; ( rm /home/user/___quick/mount.sh ; rmdir /home/user/___quick ; ( [[ ! -e /home/user/___quick ]] && ln -s /mnt/c/q /home/user/___quick ) ; rm -f /home/user/___quick/q )'
 
 [user]
 default = user
@@ -41621,17 +41621,23 @@ _zSpecial_qemu_chroot() {
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
 	
-	#_chroot dpkg -l | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
-	_chroot dpkg --get-selections | cut -f1 | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
-	sudo -n cp -f "$globalVirtFS"/dpkg "$scriptLocal"/dpkg
-	sudo -n chown "$USER":"$USER" "$scriptLocal"/dpkg
+	if [[ ! -e "$globalVirtFS"/dpkg ]]
+	then
+		#_chroot dpkg -l | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
+		_chroot dpkg --get-selections | cut -f1 | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
+		sudo -n cp -f "$globalVirtFS"/dpkg "$scriptLocal"/dpkg
+		sudo -n chown "$USER":"$USER" "$scriptLocal"/dpkg
+	fi
 	
-	_chroot find /bin/ /usr/bin/ /sbin/ /usr/sbin/ | sudo -n tee "$globalVirtFS"/binReport > /dev/null
-	_chroot find /home/user/.nix-profile/bin | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null
-	_chroot find /home/user/.gcloud/google-cloud-sdk/bin | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null
-	_chroot find /home/user/.ebcli-virtual-env/executables | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null
-	sudo -n cp -f "$globalVirtFS"/binReport "$scriptLocal"/binReport
-	sudo -n chown "$USER":"$USER" "$scriptLocal"/binReport
+	if [[ ! -e "$globalVirtFS"/binReport ]]
+	then
+		_chroot find /bin/ /usr/bin/ /sbin/ /usr/sbin/ | sudo -n tee "$globalVirtFS"/binReport > /dev/null
+		_chroot find /home/user/.nix-profile/bin | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null 2>&1
+		_chroot find /home/user/.gcloud/google-cloud-sdk/bin | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null
+		_chroot find /home/user/.ebcli-virtual-env/executables | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null 2>&1
+		sudo -n cp -f "$globalVirtFS"/binReport "$scriptLocal"/binReport
+		sudo -n chown "$USER":"$USER" "$scriptLocal"/binReport
+	fi
 
 
 
@@ -42022,7 +42028,7 @@ _create_kde() {
 	
 	rm -f "$scriptLocal"/package_kde.tar.xz > /dev/null 2>&1
 	#-T0
-	env XZ_OPT="-e9" tar --exclude='./.config/chromium' --exclude='./.config/autostart/startup.desktop' --exclude='./.config/plasma-workspace/env/startup.sh' -cJvf "$scriptLocal"/package_kde.tar.xz ./.config ./.kde ./.local ./.xournal/config ./.license_package_kde
+	env XZ_OPT="-e9" tar --exclude='./.config/chromium' --exclude='./.config/autostart/startup.desktop' --exclude='./.config/plasma-workspace/env/startup.sh' --exclude'./.config/qt5ct' -cJvf "$scriptLocal"/package_kde.tar.xz ./.config ./.kde ./.local ./.xournal/config ./.license_package_kde
 	
 	rm -f "$HOME"/.license_package_kde/license.txt
 	rm -f "$HOME"/.license_package_kde/CC0_license.txt
@@ -42050,7 +42056,7 @@ _convert_rm() {
 	rm -f "$scriptLocal"/vm.vhdx
 
 	rm -f "$scriptLocal"/package_rootfs.tar
-	
+
 	return 0
 }
 

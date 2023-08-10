@@ -1240,17 +1240,23 @@ _zSpecial_qemu_chroot() {
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
 	
-	#_chroot dpkg -l | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
-	_chroot dpkg --get-selections | cut -f1 | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
-	sudo -n cp -f "$globalVirtFS"/dpkg "$scriptLocal"/dpkg
-	sudo -n chown "$USER":"$USER" "$scriptLocal"/dpkg
+	if [[ ! -e "$globalVirtFS"/dpkg ]]
+	then
+		#_chroot dpkg -l | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
+		_chroot dpkg --get-selections | cut -f1 | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
+		sudo -n cp -f "$globalVirtFS"/dpkg "$scriptLocal"/dpkg
+		sudo -n chown "$USER":"$USER" "$scriptLocal"/dpkg
+	fi
 	
-	_chroot find /bin/ /usr/bin/ /sbin/ /usr/sbin/ | sudo -n tee "$globalVirtFS"/binReport > /dev/null
-	_chroot find /home/user/.nix-profile/bin | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null
-	_chroot find /home/user/.gcloud/google-cloud-sdk/bin | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null
-	_chroot find /home/user/.ebcli-virtual-env/executables | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null
-	sudo -n cp -f "$globalVirtFS"/binReport "$scriptLocal"/binReport
-	sudo -n chown "$USER":"$USER" "$scriptLocal"/binReport
+	if [[ ! -e "$globalVirtFS"/binReport ]]
+	then
+		_chroot find /bin/ /usr/bin/ /sbin/ /usr/sbin/ | sudo -n tee "$globalVirtFS"/binReport > /dev/null
+		_chroot find /home/user/.nix-profile/bin | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null 2>&1
+		_chroot find /home/user/.gcloud/google-cloud-sdk/bin | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null
+		_chroot find /home/user/.ebcli-virtual-env/executables | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null 2>&1
+		sudo -n cp -f "$globalVirtFS"/binReport "$scriptLocal"/binReport
+		sudo -n chown "$USER":"$USER" "$scriptLocal"/binReport
+	fi
 
 
 
@@ -1641,7 +1647,7 @@ _create_kde() {
 	
 	rm -f "$scriptLocal"/package_kde.tar.xz > /dev/null 2>&1
 	#-T0
-	env XZ_OPT="-e9" tar --exclude='./.config/chromium' --exclude='./.config/autostart/startup.desktop' --exclude='./.config/plasma-workspace/env/startup.sh' -cJvf "$scriptLocal"/package_kde.tar.xz ./.config ./.kde ./.local ./.xournal/config ./.license_package_kde
+	env XZ_OPT="-e9" tar --exclude='./.config/chromium' --exclude='./.config/autostart/startup.desktop' --exclude='./.config/plasma-workspace/env/startup.sh' --exclude'./.config/qt5ct' -cJvf "$scriptLocal"/package_kde.tar.xz ./.config ./.kde ./.local ./.xournal/config ./.license_package_kde
 	
 	rm -f "$HOME"/.license_package_kde/license.txt
 	rm -f "$HOME"/.license_package_kde/CC0_license.txt
@@ -1669,7 +1675,7 @@ _convert_rm() {
 	rm -f "$scriptLocal"/vm.vhdx
 
 	rm -f "$scriptLocal"/package_rootfs.tar
-	
+
 	return 0
 }
 
