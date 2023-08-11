@@ -847,13 +847,27 @@ CZXWXcRMTo8EmM8i4d
 	sudo -n chmod 755 "$globalVirtFS"/usr/bin/uname
 
 
+	_messagePlain_probe _chroot /sbin/rcvboxdrv setup
 	_chroot /sbin/rcvboxdrv setup
+
+	_messagePlain_probe /sbin/rcvboxdrv setup all
 	_chroot /sbin/rcvboxdrv setup all
+
+	_messagePlain_probe /sbin/rcvboxdrv setup $(_chroot cat /boot/grub/grub.cfg 2>/dev/null | awk -F\' '/menuentry / {print $2}' | grep -v "Advanced options" | grep 'Linux [0-9]' | sed 's/ (.*//' | awk '{print $NF}' | head -n1)
 	_chroot /sbin/rcvboxdrv setup $(_chroot cat /boot/grub/grub.cfg 2>/dev/null | awk -F\' '/menuentry / {print $2}' | grep -v "Advanced options" | grep 'Linux [0-9]' | sed 's/ (.*//' | awk '{print $NF}' | head -n1)
 
+
+	_messagePlain_probe _chroot /sbin/vboxconfig
 	_chroot /sbin/vboxconfig
+
+	_messagePlain_probe _chroot /sbin/vboxconfig
 	_chroot /sbin/vboxconfig --nostart
 	
+	_messagePlain_probe '__________________________________________________'
+	_messagePlain_probe 'probe: kernel modules: '"sudo -n find / -xdev -name 'vboxdrv.*'"
+	sudo -n find "$globalVirtFS" -xdev -name 'vboxdrv.*'
+	sudo -n find "$globalVirtFS" -xdev -name 'vboxdrv.ko'
+	_messagePlain_probe '__________________________________________________'
 
 	sudo -n rm -f "$globalVirtFS"/usr/bin/uname
 	sudo -n rm -f "$globalVirtFS"/bin/uname
