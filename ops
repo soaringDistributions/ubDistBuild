@@ -1,0 +1,7 @@
+
+# Unusual. 
+if [[ -e "$objectDir"/.devops/workflows/build.sh ]]
+then
+    . "$objectDir"/.devops/workflows/build.sh
+fi
+
