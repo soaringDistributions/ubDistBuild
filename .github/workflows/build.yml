@@ -104,12 +104,12 @@ jobs:
         with:
           ##root-reserve-mb: 512
           ##root-reserve-mb: 1450
-          root-reserve-mb: 950
-          #root-reserve-mb: 1750
+          #root-reserve-mb: 950
+          root-reserve-mb: 1750
           ##temp-reserve-mb: 100
           ##temp-reserve-mb: 300
-          temp-reserve-mb: 300
-          #temp-reserve-mb: 700
+          #temp-reserve-mb: 300
+          temp-reserve-mb: 700
           ##swap-size-mb: 128
           ##swap-size-mb: 192
           swap-size-mb: 8

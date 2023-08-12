@@ -864,8 +864,7 @@ CZXWXcRMTo8EmM8i4d
 	_chroot /sbin/vboxconfig --nostart
 	
 	_messagePlain_probe '__________________________________________________'
-	_messagePlain_probe 'probe: kernel modules: '"sudo -n find / -xdev -name 'vboxdrv.*'"
-	sudo -n find "$globalVirtFS" -xdev -name 'vboxdrv.*'
+	_messagePlain_probe 'probe: kernel modules: '"sudo -n find / -xdev -name 'vboxdrv.ko'"
 	sudo -n find "$globalVirtFS" -xdev -name 'vboxdrv.ko'
 	_messagePlain_probe '__________________________________________________'
 

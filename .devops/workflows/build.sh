@@ -166,7 +166,7 @@ _devops() {
     
     #_devops_install
 
-    rm -f "$scriptLocal"/ubcp
+    sudo -n rm -f "$scriptLocal"/vm.img
     _dof _create_ubDistBuild-create
     _dof _create_ubDistBuild-rotten_install
 }
