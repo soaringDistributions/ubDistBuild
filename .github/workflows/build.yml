@@ -99,7 +99,7 @@ jobs:
       # Apparently may increase buildJet 'runner' to 77GB (instead of 61GB).
       # Apparently may increase Github Actions 'runner' to 59GB (instead of 31GB) .
       - name: Maximize build space
-        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest' }}
+        if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
         uses: easimon/maximize-build-space@master
         with:
           ##root-reserve-mb: 512
@@ -114,14 +114,14 @@ jobs:
           ##swap-size-mb: 192
           swap-size-mb: 8
           #swap-size-mb: 384
-          #remove-dotnet: ${{ github.event.inputs.runnerName == 'ubuntu-latest' }}
+          #remove-dotnet: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
           remove-dotnet: 'true'
-          #remove-android: ${{ github.event.inputs.runnerName == 'ubuntu-latest' }}
+          #remove-android: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
           remove-android: 'true'
-          #remove-haskell: ${{ github.event.inputs.runnerName == 'ubuntu-latest' }}
+          #remove-haskell: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
           remove-haskell: 'true'
       - name: Enable KVM group perms
-        if: ${{ github.event.inputs.runnerName != 'ubuntu-latest' }}
+        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
         run: |
             echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
             sudo udevadm control --reload-rules
