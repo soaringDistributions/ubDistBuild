@@ -63,7 +63,7 @@ _backup_restore_vm-wsl2-rsync-exclude() {
 		return 1
 	fi
 
-	_messagePlain_probe_cmd rsync -ax --delete --exclude ".Xauthority" --exclude ".bash_history" --exclude ".bash_logout" --exclude ".cache" --exclude ".face" --exclude ".face.icon" --exclude ".gEDA" --exclude ".gcloud" --exclude ".gnome" --exclude ".kde.bak" --exclude ".nix-channels" --exclude ".nix-defexpr" --exclude ".nix-profile" --exclude ".python_history" --exclude ".pythonrc" --exclude ".sudo_as_admin_successful" --exclude ".terraform.d" --exclude ".xsession-errors" --exclude "Downloads" --exclude "___quick" --exclude "_unix_renice_execDaemon.log" --exclude "core" --exclude "package_kde.tar.xz" --exclude "project" --exclude "rottenScript.sh" --exclude "ubDistBuild" --exclude "ubDistFetch" --exclude ".config" --exclude ".kde" --exclude ".local" --exclude ".xournal" --exclude ".license_package_kde" --exclude ".bash_profile" --exclude ".bashrc" --exclude ".config" --exclude ".gitconfig" --exclude ".inputrc" --exclude ".lesshst" --exclude ".octave_hist" --exclude ".octaverc" --exclude ".profile" --exclude ".ubcore" --exclude ".ubcorerc_pythonrc.py" --exclude ".ubcorerc-gnuoctave.m" --exclude ".viminfo" --exclude ".wget-hsts" --exclude "bin" "$currentSource" "$currentDestination"
+	_messagePlain_probe_cmd rsync -ax --delete --exclude ".Xauthority" --exclude ".bash_history" --exclude ".bash_logout" --exclude ".cache" --exclude ".face" --exclude ".face.icon" --exclude ".gEDA" --exclude ".gcloud" --exclude ".gnome" --exclude ".kde.bak" --exclude ".nix-channels" --exclude ".nix-defexpr" --exclude ".nix-profile" --exclude ".python_history" --exclude ".pythonrc" --exclude ".sudo_as_admin_successful" --exclude ".terraform.d" --exclude ".xsession-errors" --exclude "Downloads" --exclude "___quick" --exclude "_unix_renice_execDaemon.log" --exclude "core" --exclude "package_kde.tar.xz" --exclude "project" --exclude "rottenScript.sh" --exclude "ubDistBuild" --exclude "ubDistFetch" --exclude "ubiquitous_bash.sh" --exclude ".config" --exclude ".kde" --exclude ".local" --exclude ".xournal" --exclude ".license_package_kde" --exclude ".bash_profile" --exclude ".bashrc" --exclude ".config" --exclude ".gitconfig" --exclude ".inputrc" --exclude ".lesshst" --exclude ".octave_hist" --exclude ".octaverc" --exclude ".profile" --exclude ".ubcore" --exclude ".ubcorerc_pythonrc.py" --exclude ".ubcorerc-gnuoctave.m" --exclude ".viminfo" --exclude ".wget-hsts" --exclude "bin" "$currentSource" "$currentDestination"
 }
 _backup_restore_vm-wsl2-rsync-basic() {
     local currentSource
@@ -132,6 +132,8 @@ _backup_restore_vm-wsl2-rsync-basic() {
 	_messagePlain_probe_cmd rsync -ax --delete "$currentSource" "$currentDestination"
 }
 
+# ATTENTION: Override with 'ops.sh' if necessary.
+# WARNING: Incorrect parameters may delete data from host - rsync is used with '--delete' !
 _backup_vm-wsl2() {
    ! _if_cygwin && _messagePlain_bad 'fail: Cygwin/MSW only' && return 1
 
@@ -161,16 +163,21 @@ _backup_vm-wsl2() {
     local currentBackupLocationMSW
     currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX")
 
-    wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _backup_restore_vm-wsl2-rsync-exclude /home/user/. "'""$currentBackupLocationMSW""'"
+    #wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _backup_restore_vm-wsl2-rsync-exclude /home/user/. "'""$currentBackupLocationMSW""'"
     echo
 
     local currentBackupLocationMSW
     currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX"/.ssh)
-    #wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _backup_restore_vm-wsl2-rsync-basic /home/user/.ssh/. "'""$currentBackupLocationMSW""'"
+    mkdir -p "$currentBackupLocationUNIX"/.ssh
+    wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _backup_restore_vm-wsl2-rsync-basic /home/user/.ssh/. "'""$currentBackupLocationMSW""'"
 }
 
+# ATTENTION: Override with 'ops.sh' if necessary.
+# WARNING: Incorrect parameters may delete data from host - rsync is used with '--delete' !
 _restore_vm-wsl2() {
     ! _if_cygwin && _messagePlain_bad 'fail: Cygwin/MSW only' && return 1
+
+    [[ ! -e /cygdrive/c/core/infrastructure/uwsl-h-b-"$1" ]] && _messagePlain_probe 'not found: /cygdrive/c/core/infrastructure/uwsl-h-b'-"$1" && return 1
 
     _messagePlain_request 'request: Restore is on a limited best effort basis only.'
     echo "If you don't know what this means, and you haven't extensively used 'ubdist' through WSL, then you probably have nothing to worry about."
@@ -192,12 +199,13 @@ _restore_vm-wsl2() {
     local currentBackupLocationMSW
     currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX")
 
-    wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _backup_restore_vm-wsl2-rsync-exclude "'""$currentBackupLocationMSW""'" /home/user/.
+    #wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _backup_restore_vm-wsl2-rsync-exclude "'""$currentBackupLocationMSW""'" /home/user/.
     echo
     
     local currentBackupLocationMSW
     currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX"/.ssh)
-    #wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _backup_restore_vm-wsl2-rsync-basic "'""$currentBackupLocationMSW""'" /home/user/.ssh/.
+    mkdir -p "$currentBackupLocationUNIX"/.ssh
+    wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _backup_restore_vm-wsl2-rsync-basic "'""$currentBackupLocationMSW""'" /home/user/.ssh/.
 }
 
 
@@ -206,6 +214,10 @@ _setup_vm-wsl2_sequence() {
     _start
     local functionEntryPWD
     functionEntryPWD="$PWD"
+
+    local backupID
+    backupID=
+    wsl --list | tr -dc 'a-zA-Z0-9\n' | grep '^ubdist' > /dev/null 2>&1 && backupID=$(_uid 14)
 
     ! _if_cygwin && _messagePlain_bad 'fail: Cygwin/MSW only' && _stop 1
 
@@ -218,12 +230,27 @@ _setup_vm-wsl2_sequence() {
     [[ ! -e "$scriptLocal"/package_rootfs.tar ]] && _messagePlain_bad 'bad: missing: package_rootfs.tar' && _messageFAIL && _stop 1
 
 
+    if [[ "$backupID" != "" ]]
+    then
+        _backup_vm-wsl2 "$backupID"
+        wsl --unregister ubdist
+    fi
+
     mkdir -p '/cygdrive/c/core/infrastructure/ubdist_wsl'
     _userMSW _messagePlain_probe wsl --import ubdist '/cygdrive/c/core/infrastructure/ubdist_wsl' "$scriptLocal"/package_rootfs.tar --version 2
     _userMSW wsl --import ubdist '/cygdrive/c/core/infrastructure/ubdist_wsl' "$scriptLocal"/package_rootfs.tar --version 2
 
     _messagePlain_probe wsl --set-default ubdist
     wsl --set-default ubdist
+
+
+    if [[ "$backupID" != "" ]]
+    then
+        _restore_vm-wsl2 "$backupID"
+    else
+        _restore_vm-wsl2 "uninstalled"
+    fi
+
 
     #wsl --unregister ubdist
 
@@ -235,6 +262,14 @@ _setup_vm-wsl2() {
 }
 _setup_vm-wsl() {
     _setup_vm-wsl2 "$@"
+}
+
+_uninstall_vm-wsl2() {
+    if wsl --list | tr -dc 'a-zA-Z0-9\n' | grep '^ubdist' > /dev/null 2>&1
+    then
+        _backup_vm-wsl2 "uninstalled"
+        wsl --unregister ubdist
+    fi
 }
 
 
