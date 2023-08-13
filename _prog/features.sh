@@ -1,4 +1,204 @@
 
+_backup_restore_vm-wsl2-rsync-exclude() {
+    local currentSource
+    local currentDestination
+
+    currentSource="$1"
+    currentDestination="$2"
+
+    if [[ "$currentSource" == "" ]] || [[ "$currentSource" == "./." ]]
+    then
+        _messagePlain_bad 'fail: empty: source'
+        return 1
+    fi
+    if [[ "$currentDestination" == "" ]] || [[ "$currentDestination" == "./." ]]
+    then
+        _messagePlain_bad 'fail: empty: destination'
+        return 1
+    fi
+
+    if [[ ! -e "$currentSource" ]]
+	then
+		_messagePlain_bad 'fail: missing source: '"$currentSource"
+		return 1
+	fi
+	if [[ ! -e "$currentDestination" ]]
+	then
+		_messagePlain_bad 'fail: missing destination: '"$currentDestination"
+		return 1
+	fi
+	if ! mkdir -p "$currentSource"
+	then
+		_messagePlain_bad 'fail: mkdir: source: '"$currentSource"
+		return 1
+	fi
+	if ! mkdir -p "$currentDestination"
+	then
+		_messagePlain_bad 'fail: missing destination: '"$currentDestination"
+		return 1
+	fi
+
+    [[ "$currentSource" != *"/." ]] && currentSource="$1"/.
+    [[ "$currentDestination" != *"/." ]] && currentDestination="$2"/.
+
+
+	if [[ ! -e "$currentSource" ]]
+	then
+		_messagePlain_bad 'fail: missing source: '"$currentSource"
+		return 1
+	fi
+	if [[ ! -e "$currentDestination" ]]
+	then
+		_messagePlain_bad 'fail: missing destination: '"$currentDestination"
+		return 1
+	fi
+	if ! mkdir -p "$currentSource"
+	then
+		_messagePlain_bad 'fail: mkdir: source: '"$currentSource"
+		return 1
+	fi
+	if ! mkdir -p "$currentDestination"
+	then
+		_messagePlain_bad 'fail: missing destination: '"$currentDestination"
+		return 1
+	fi
+
+	_messagePlain_probe_cmd rsync -ax --delete --exclude ".Xauthority" --exclude ".bash_history" --exclude ".bash_logout" --exclude ".cache" --exclude ".face" --exclude ".face.icon" --exclude ".gEDA" --exclude ".gcloud" --exclude ".gnome" --exclude ".kde.bak" --exclude ".nix-channels" --exclude ".nix-defexpr" --exclude ".nix-profile" --exclude ".python_history" --exclude ".pythonrc" --exclude ".sudo_as_admin_successful" --exclude ".terraform.d" --exclude ".xsession-errors" --exclude "Downloads" --exclude "___quick" --exclude "_unix_renice_execDaemon.log" --exclude "core" --exclude "package_kde.tar.xz" --exclude "project" --exclude "rottenScript.sh" --exclude "ubDistBuild" --exclude "ubDistFetch" --exclude ".config" --exclude ".kde" --exclude ".local" --exclude ".xournal" --exclude ".license_package_kde" --exclude ".bash_profile" --exclude ".bashrc" --exclude ".config" --exclude ".gitconfig" --exclude ".inputrc" --exclude ".lesshst" --exclude ".octave_hist" --exclude ".octaverc" --exclude ".profile" --exclude ".ubcore" --exclude ".ubcorerc_pythonrc.py" --exclude ".ubcorerc-gnuoctave.m" --exclude ".viminfo" --exclude ".wget-hsts" --exclude "bin" "$currentSource" "$currentDestination"
+}
+_backup_restore_vm-wsl2-rsync-basic() {
+    local currentSource
+    local currentDestination
+
+    currentSource="$1"
+    currentDestination="$2"
+
+    if [[ "$currentSource" == "" ]] || [[ "$currentSource" == "./." ]]
+    then
+        _messagePlain_bad 'fail: empty: source'
+        return 1
+    fi
+    if [[ "$currentDestination" == "" ]] || [[ "$currentDestination" == "./." ]]
+    then
+        _messagePlain_bad 'fail: empty: destination'
+        return 1
+    fi
+
+    if [[ ! -e "$currentSource" ]]
+	then
+		_messagePlain_bad 'fail: missing source: '"$currentSource"
+		return 1
+	fi
+	if [[ ! -e "$currentDestination" ]]
+	then
+		_messagePlain_bad 'fail: missing destination: '"$currentDestination"
+		return 1
+	fi
+	if ! mkdir -p "$currentSource"
+	then
+		_messagePlain_bad 'fail: mkdir: source: '"$currentSource"
+		return 1
+	fi
+	if ! mkdir -p "$currentDestination"
+	then
+		_messagePlain_bad 'fail: missing destination: '"$currentDestination"
+		return 1
+	fi
+
+    [[ "$currentSource" != *"/." ]] && currentSource="$1"/.
+    [[ "$currentDestination" != *"/." ]] && currentDestination="$2"/.
+
+
+	if [[ ! -e "$currentSource" ]]
+	then
+		_messagePlain_bad 'fail: missing source: '"$currentSource"
+		return 1
+	fi
+	if [[ ! -e "$currentDestination" ]]
+	then
+		_messagePlain_bad 'fail: missing destination: '"$currentDestination"
+		return 1
+	fi
+	if ! mkdir -p "$currentSource"
+	then
+		_messagePlain_bad 'fail: mkdir: source: '"$currentSource"
+		return 1
+	fi
+	if ! mkdir -p "$currentDestination"
+	then
+		_messagePlain_bad 'fail: missing destination: '"$currentDestination"
+		return 1
+	fi
+
+	_messagePlain_probe_cmd rsync -ax --delete "$currentSource" "$currentDestination"
+}
+
+_backup_vm-wsl2() {
+   ! _if_cygwin && _messagePlain_bad 'fail: Cygwin/MSW only' && return 1
+
+    _messagePlain_request 'request: Backup is on a limited best effort basis only.'
+    echo 'wait: 5seconds: Ctrl+c repeatedly to cancel'
+    echo "If you don't know what this means, and you haven't extensively used 'ubdist' through WSL, then you probably have nothing to worry about."
+    echo "Otherwise - you should copy your data out of WSL2 before upgrading or uninstalling."
+	local currentIteration
+	for currentIteration in $(seq 1 5)
+	do
+		sleep 1
+	done
+	echo 'NOT cancelled.'
+    echo
+    echo
+
+    if ! mkdir -p /cygdrive/c/core/infrastructure/uwsl-h-b-"$1" || [[ ! -e /cygdrive/c/core/infrastructure/uwsl-h-b-"$1" ]]
+    then
+        _messagePlain_bad 'fail: mkdir: /cygdrive/c/core/infrastructure/uwsl-h-b'-"$1"
+        return 1
+    fi
+
+    local currentScriptAbsoluteLocationMSW
+    currentScriptAbsoluteLocationMSW=$(cygpath -w "$scriptAbsoluteLocation")
+    local currentBackupLocationUNIX
+    currentBackupLocationUNIX=/cygdrive/c/core/infrastructure/uwsl-h-b-"$1"
+    local currentBackupLocationMSW
+    currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX")
+
+    wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _backup_restore_vm-wsl2-rsync-exclude /home/user/. "'""$currentBackupLocationMSW""'"
+    echo
+
+    local currentBackupLocationMSW
+    currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX"/.ssh)
+    #wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _backup_restore_vm-wsl2-rsync-basic /home/user/.ssh/. "'""$currentBackupLocationMSW""'"
+}
+
+_restore_vm-wsl2() {
+    ! _if_cygwin && _messagePlain_bad 'fail: Cygwin/MSW only' && return 1
+
+    _messagePlain_request 'request: Restore is on a limited best effort basis only.'
+    echo "If you don't know what this means, and you haven't extensively used 'ubdist' through WSL, then you probably have nothing to worry about."
+    echo "Otherwise - you should copy your data out of WSL2 before upgrading or uninstalling."
+    echo
+    echo
+
+    if ! mkdir -p /cygdrive/c/core/infrastructure/uwsl-h-b-"$1" || [[ ! -e /cygdrive/c/core/infrastructure/uwsl-h-b-"$1" ]]
+    then
+        _messagePlain_bad 'fail: mkdir: /cygdrive/c/core/infrastructure/uwsl-h-b'-"$1"
+        return 1
+    fi
+
+    local currentScriptAbsoluteLocationMSW
+    currentScriptAbsoluteLocationMSW
+    currentScriptAbsoluteLocationMSW=$(cygpath -w "$scriptAbsoluteLocation")
+    local currentBackupLocationUNIX
+    currentBackupLocationUNIX=/cygdrive/c/core/infrastructure/uwsl-h-b-"$1"
+    local currentBackupLocationMSW
+    currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX")
+
+    wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _backup_restore_vm-wsl2-rsync-exclude "'""$currentBackupLocationMSW""'" /home/user/.
+    echo
+    
+    local currentBackupLocationMSW
+    currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX"/.ssh)
+    #wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _backup_restore_vm-wsl2-rsync-basic "'""$currentBackupLocationMSW""'" /home/user/.ssh/.
+}
 
 
 # End user function .
