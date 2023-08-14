@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2459425078'
+export ub_setScriptChecksum_contents='3914587213'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -9998,6 +9998,11 @@ _getMost_debian11_install() {
 	
 	
 	_getMost_backend_aptGetInstall build-essential
+	_getMost_backend_aptGetInstall flex
+	_getMost_backend_aptGetInstall libelf-dev
+	_getMost_backend_aptGetInstall libncurses-dev
+	_getMost_backend_aptGetInstall autoconf
+	_getMost_backend_aptGetInstall libudev-dev
 	
 	# ATTENTION: ONLY change (eg. to 'remove') if needed to ensure a kernel is installed AND custom kernel is not in use.
 	_getMost_backend_aptGetInstall linux-image-amd64
@@ -19952,8 +19957,14 @@ _here_wsl_config() {
     cat << 'CZXWXcRMTo8EmM8i4d'
 [wsl2]
 memory=999GB
-
 CZXWXcRMTo8EmM8i4d
+
+    if [[ -e /cygdrive/c/core/infrastructure/ubdist-kernel/ubdist-kernel ]]
+    then
+        kernel=C:\\core\\infrastructure\\ubdist-kernel\\ubdist-kernel
+    fi
+
+    echo
 }
 
 
@@ -46467,6 +46478,30 @@ fi
 _wrap() {
 	[[ "$LANG" != "C" ]] && export LANG=C
 	. "$HOME"/.ubcore/.ubcorerc
+	
+	if uname -a | grep -i 'microsoft' > /dev/null 2>&1 && uname -a | grep -i 'WSL2' > /dev/null 2>&1
+	then
+		local currentArg
+		local currentResult
+		processedArgs=()
+		for currentArg in "$@"
+		do
+			currentResult=$(wslpath -u "$currentArg")
+			if [[ -e "$currentResult" ]]
+			then
+				true
+			else
+				currentResult="$currentArg"
+			fi
+			
+			processedArgs+=("$currentResult")
+		done
+		
+		
+		"${processedArgs[@]}"
+		return
+	fi
+	
 	"$@"
 }
 
