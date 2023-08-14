@@ -1962,16 +1962,18 @@ _assessment() {
 
 
 _refresh_anchors() {
-	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild
-	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild-live
-	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild-rootfs
+	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild.bat
+	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild-live.bat
+	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild-rootfs.bat
 
-	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_install_wsl2
-	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_install_vm-wsl2
+	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_install_wsl2.bat
+	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_install_vm-wsl2.bat
+	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_uninstall_vm-wsl2.bat
+	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_install_vm-wsl2-kernel.bat
 
-	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_convert-vdi
-	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_convert-vmdk
-	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_convert-vhdx
+	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_convert-vdi.bat
+	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_convert-vmdk.bat
+	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_convert-vhdx.bat
 
 
 
