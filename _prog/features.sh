@@ -170,6 +170,9 @@ _backup_vm-wsl2() {
     currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX"/.ssh)
     mkdir -p "$currentBackupLocationUNIX"/.ssh
     wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _backup_restore_vm-wsl2-rsync-basic /home/user/.ssh/. "'""$currentBackupLocationMSW""'"
+
+    wsl -d "ubdist" chmod 600 '~/.ssh/id_*'
+    wsl -d "ubdist" chmod 755 '~/.ssh/id_*.pub'
 }
 
 # ATTENTION: Override with 'ops.sh' if necessary.
@@ -642,8 +645,8 @@ _install_vm-wsl2-kernel() {
     # https://en.linuxportal.info/tutorials/troubleshooting/how-to-clear-the-not-authorized-to-perform-operation-error-message-when-automatically-attaching-USB-flash-drives-and-other-external-USB-storage-devices
     _messagePlain_probe wsl -d "ubdist" sudo -n sed -i 's/auth_admin/yes/g' /usr/share/polkit-1/actions/org.freedesktop.UDisks2.policy
     wsl -d "ubdist" sudo -n sed -i 's/auth_admin/yes/g' /usr/share/polkit-1/actions/org.freedesktop.UDisks2.policy
-    _messagePlain_probe wsl -d "ubdist" sudo -n sed -i 's/auth_admin/yes_keep/g' /usr/share/polkit-1/actions/org.freedesktop.UDisks2.policy
-    wsl -d "ubdist" sudo -n sed -i 's/auth_admin/yes_keep/g' /usr/share/polkit-1/actions/org.freedesktop.UDisks2.policy
+    _messagePlain_probe wsl -d "ubdist" sudo -n sed -i 's/yes_keep/yes/g' /usr/share/polkit-1/actions/org.freedesktop.UDisks2.policy
+    wsl -d "ubdist" sudo -n sed -i 's/yes_keep/yes/g' /usr/share/polkit-1/actions/org.freedesktop.UDisks2.policy
 
     # https://github.com/dorssel/usbipd-win/discussions/127
     _messagePlain_probe 'echo udev | wsl tee'
