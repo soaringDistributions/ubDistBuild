@@ -133,6 +133,7 @@ _backup_restore_vm-wsl2-rsync-basic() {
 }
 
 _backup_vm-wsl2-tar-basic() {
+    rm -f "$2"
     _messagePlain_probe 'tar -cf - '"$1"' | lz4 -z --fast=1 - '"$2"
     tar -cf - "$1" | lz4 -z --fast=1 - "$2"
 }
