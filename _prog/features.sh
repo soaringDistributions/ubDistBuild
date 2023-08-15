@@ -170,9 +170,6 @@ _backup_vm-wsl2() {
     currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX"/.ssh)
     mkdir -p "$currentBackupLocationUNIX"/.ssh
     wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _backup_restore_vm-wsl2-rsync-basic /home/user/.ssh/. "'""$currentBackupLocationMSW""'"
-
-    wsl -d "ubdist" chmod 600 '~/.ssh/id_*'
-    wsl -d "ubdist" chmod 755 '~/.ssh/id_*.pub'
 }
 
 # ATTENTION: Override with 'ops.sh' if necessary.
@@ -208,6 +205,9 @@ _restore_vm-wsl2() {
     currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX"/.ssh)
     mkdir -p "$currentBackupLocationUNIX"/.ssh
     wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _backup_restore_vm-wsl2-rsync-basic "'""$currentBackupLocationMSW""'" /home/user/.ssh/.
+
+    wsl -d "ubdist" chmod 600 '~/.ssh/id_*'
+    wsl -d "ubdist" chmod 755 '~/.ssh/id_*.pub'
 }
 
 
