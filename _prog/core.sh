@@ -2042,9 +2042,6 @@ _refresh_anchors() {
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_convert
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_upload_convert
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_assessment
-
-	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_install_vm-wsl2
-	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_install_wsl2
 	
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor "$scriptAbsoluteFolder"/_true
