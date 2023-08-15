@@ -85,13 +85,6 @@ _build_ubDistBuild-fetch() {
     7za -y x "$currentAccessoriesDir"/integrations/ubcp/package_ubcp-core.7z
     cd "$functionEntryPWD"
 
-    cp "$scriptAbsoluteFolder"/support/000-OS/MSW/root/_bash_bat_lnk.zip "$currentAccessoriesDir"/parts/
-    cd "$currentAccessoriesDir"/parts/
-    rm -f "$currentAccessoriesDir"/parts/_bash.bat.lnk
-    unzip -o "$currentAccessoriesDir"/parts/_bash_bat_lnk.zip
-    rm -f "$currentAccessoriesDir"/parts/_bash_bat_lnk.zip
-    cd "$functionEntryPWD"
-
 
 
     mkdir -p "$currentAccessoriesDir"/parts/ubDistBuild
