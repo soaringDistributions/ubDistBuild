@@ -111,7 +111,7 @@ Section "Install"
   DetailPrint '"$0"'
   Sleep 2500
 
-
+  Exec "explorer.exe C:\core\infrastructure\extendedInterface\README-installer.pdf"
 
   # Uninstaller - See function un.onInit and section "uninstall" for configuration
 	writeUninstaller "C:\core\infrastructure\ubDistBuild-uninst.exe"

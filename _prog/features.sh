@@ -132,6 +132,11 @@ _backup_restore_vm-wsl2-rsync-basic() {
 	_messagePlain_probe_cmd rsync -ax --delete "$currentSource" "$currentDestination"
 }
 
+_backup_vm-wsl2-tar-basic() {
+    tar -cf - "$1" | lz4 -z --fast=1 - "$2"
+}
+
+
 # ATTENTION: Override with 'ops.sh' if necessary.
 # WARNING: Incorrect parameters may delete data from host - rsync is used with '--delete' !
 _backup_vm-wsl2() {
@@ -150,26 +155,51 @@ _backup_vm-wsl2() {
     echo
     echo
 
-    if ! mkdir -p /cygdrive/c/core/infrastructure/uwsl-h-b-"$1" || [[ ! -e /cygdrive/c/core/infrastructure/uwsl-h-b-"$1" ]]
+    local currentBackupRootUNIX
+    currentBackupRootUNIX=/cygdrive/c/core/infrastructure/uwsl-h-b-"$1"
+
+
+    local currentBackupLocationUNIX
+    currentBackupLocationUNIX="$currentBackupRootUNIX"/home
+
+    if ! mkdir -p "$currentBackupLocationUNIX" || [[ ! -e "$currentBackupLocationUNIX" ]]
     then
-        _messagePlain_bad 'fail: mkdir: /cygdrive/c/core/infrastructure/uwsl-h-b'-"$1"
+        _messagePlain_bad 'fail: mkdir: /cygdrive/c/core/infrastructure/uwsl-h-b'-"$1"/home
         return 1
     fi
 
     local currentScriptAbsoluteLocationMSW
     currentScriptAbsoluteLocationMSW=$(cygpath -w "$scriptAbsoluteLocation")
-    local currentBackupLocationUNIX
-    currentBackupLocationUNIX=/cygdrive/c/core/infrastructure/uwsl-h-b-"$1"
     local currentBackupLocationMSW
     currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX")
 
     #wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _backup_restore_vm-wsl2-rsync-exclude /home/user/. "'""$currentBackupLocationMSW""'"
     echo
 
-    local currentBackupLocationMSW
-    currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX"/.ssh)
-    mkdir -p "$currentBackupLocationUNIX"/.ssh
+
+    currentBackupLocationUNIX="$currentBackupRootUNIX"/home/.ssh
+    currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX")
+     if ! mkdir -p "$currentBackupLocationUNIX" || [[ ! -e "$currentBackupLocationUNIX" ]]
+    then
+        _messagePlain_bad 'fail: mkdir: /cygdrive/c/core/infrastructure/uwsl-h-b'-"$1"/home
+        return 1
+    fi
+    currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX")
     wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _backup_restore_vm-wsl2-rsync-basic /home/user/.ssh/. "'""$currentBackupLocationMSW""'"
+
+
+
+
+
+    currentBackupLocationUNIX="$currentBackupRootUNIX"/project.tar.lz4
+    currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX")
+     if ! mkdir -p "$currentBackupRootUNIX" || [[ ! -e "$currentBackupRootUNIX" ]]
+    then
+        _messagePlain_bad 'fail: mkdir: /cygdrive/c/core/infrastructure/uwsl-h-b'-"$1"/home
+        return 1
+    fi
+    currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX")
+    wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _backup_vm-wsl2-tar-basic /home/user/project "'""$currentBackupLocationMSW""'"
 }
 
 # ATTENTION: Override with 'ops.sh' if necessary.
