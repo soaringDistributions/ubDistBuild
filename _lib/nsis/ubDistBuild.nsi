@@ -70,8 +70,19 @@ Section "Install"
   SetOutPath "C:\core\infrastructure\ubDistBuild\_local\ubcp"
   File /r "..\..\..\ubDistBuild-accessories\parts\ubcp\package_ubcp-core\ubcp\*"
 
+  ;ATTENTION
+  Rename "C:\core\infrastructure\ubDistBuild-backup-uninstalled\_local\vm.img" "C:\core\infrastructure\ubDistBuild\_local\vm.img"
+  Rename "C:\core\infrastructure\ubDistBuild-backup-uninstalled\_local\vm-live.iso" "C:\core\infrastructure\ubDistBuild\_local\vm.img"
+  Rename "C:\core\infrastructure\ubDistBuild-backup-uninstalled\_local\package_rootfs.iso" "C:\core\infrastructure\ubDistBuild\_local\vm.img"
+  RMDir "C:\core\infrastructure\ubDistBuild-backup-uninstalled\_local"
+  RMDir "C:\core\infrastructure\ubDistBuild-backup-uninstalled"
 
-
+  ;ATTENTION
+  Rename "C:\core\infrastructure\ubDistBuild-backup-$0\_local\vm.img" "C:\core\infrastructure\ubDistBuild\_local\vm.img"
+  Rename "C:\core\infrastructure\ubDistBuild-backup-$0\_local\vm-live.iso" "C:\core\infrastructure\ubDistBuild\_local\vm.img"
+  Rename "C:\core\infrastructure\ubDistBuild-backup-$0\_local\package_rootfs.iso" "C:\core\infrastructure\ubDistBuild\_local\vm.img"
+  RMDir "C:\core\infrastructure\ubDistBuild-backup-$0\_local"
+  RMDir "C:\core\infrastructure\ubDistBuild-backup-$0"
 
 
   SetShellVarContext all

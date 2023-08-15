@@ -19,11 +19,13 @@ _setup_install() {
 	
 	_install_wsl2
     #_install_vm-wsl2 "$@"
+
+	sleep 5
 }
 
 _setup_uninstall() {
 	true
-	
+
 	#_uninstall_vm-wsl2
 }
 
