@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2758190503'
+export ub_setScriptChecksum_contents='3703416806'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -43792,7 +43792,69 @@ _install_vm-wsl2-kernel() {
 }
 
 
+_import_wsl2-sshid-wsl2() {
+    local currentExitStatus
 
+    cd "$1"
+    cp "$1"/id_* "$HOME"/.ssh/
+    currentExitStatus="$?"
+
+    chmod 600 "$HOME"/.ssh/id_*
+    chmod 755 "$HOME"/.ssh/id_*.pub
+
+    return "$currentExitStatus"
+}
+_export_wsl2-sshid-wsl2() {
+    chmod 600 "$HOME"/.ssh/id_*
+    chmod 755 "$HOME"/.ssh/id_*.pub
+
+    local currentExitStatus
+
+    cd "$1"
+    cp --preserve=all "$HOME"/.ssh/id_* ./
+    currentExitStatus="$?"
+
+    chmod 600 "$1"/id_*
+    chmod 755 "$1"/id_*.pub
+
+    return "$currentExitStatus"
+}
+_sshid-import-wsl2() {
+    ! _if_cygwin && return 1
+    local currentScriptAbsoluteLocationMSW
+    currentScriptAbsoluteLocationMSW=$(cygpath -w "$scriptAbsoluteLocation")
+
+    local current_ssh_UNIX
+    current_ssh_UNIX="/cygdrive/c/core/infrastructure/ubcp/cygwin/home/root/.ssh"
+    mkdir -p "$current_ssh_UNIX"
+    chmod 600 "$current_ssh_UNIX"
+    [[ ! -e "$current_ssh_UNIX" ]] && return 1
+    local current_ssh_MSW
+    current_ssh_MSW=$(cygpath -w "$current_ssh_UNIX")
+    wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _import_wsl2-sshid-wsl2 "'""$current_ssh_MSW""'"
+}
+_sshid-export-wsl2() {
+    ! _if_cygwin && return 1
+    local currentScriptAbsoluteLocationMSW
+    currentScriptAbsoluteLocationMSW=$(cygpath -w "$scriptAbsoluteLocation")
+
+    local currentExitStatus
+
+    local current_ssh_UNIX
+    current_ssh_UNIX="/cygdrive/c/core/infrastructure/ubcp/cygwin/home/root/.ssh"
+    mkdir -p "$current_ssh_UNIX"
+    chmod 600 "$current_ssh_UNIX"
+    [[ ! -e "$current_ssh_UNIX" ]] && return 1
+    local current_ssh_MSW
+    current_ssh_MSW=$(cygpath -w "$current_ssh_UNIX")
+    wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _export_wsl2-sshid-wsl2 "'""$current_ssh_MSW""'"
+    currentExitStatus="$?"
+
+    chmod 600 "$current_ssh_UNIX"/id_*
+    chmod 755 "$current_ssh_UNIX"/id_*.pub
+
+    return "$currentExitStatus"
+}
 
 
 
