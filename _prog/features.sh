@@ -740,6 +740,8 @@ _import_wsl2-sshid-wsl2() {
     local currentExitStatus
 
     cd "$1"
+    _messagePlain_probe_var PWD
+    _messagePlain_probe cp "$1"/id_'*' "$HOME"/.ssh/
     cp "$1"/id_* "$HOME"/.ssh/
     currentExitStatus="$?"
 
@@ -755,6 +757,8 @@ _export_wsl2-sshid-wsl2() {
     local currentExitStatus
 
     cd "$1"
+    _messagePlain_probe_var PWD
+    _messagePlain_probe cp --preserve=all "$HOME"/.ssh/id_'*' ./
     cp --preserve=all "$HOME"/.ssh/id_* ./
     currentExitStatus="$?"
 
@@ -794,8 +798,14 @@ _sshid-export-wsl2() {
     wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _export_wsl2-sshid-wsl2 "'""$current_ssh_MSW""'"
     currentExitStatus="$?"
 
+    _messagePlain_probe chmod 600 "$current_ssh_UNIX"/id_'*'
     chmod 600 "$current_ssh_UNIX"/id_*
     chmod 755 "$current_ssh_UNIX"/id_*.pub
+
+    # Permissions apparently are NOT usable through 'cygdrive' .
+    _messagePlain_probe chmod 600 "$HOME"/.ssh/id_'*'
+    chmod 600 "$HOME"/.ssh/id_*
+    chmod 755 "$HOME"/.ssh/id_*.pub
 
     return "$currentExitStatus"
 }

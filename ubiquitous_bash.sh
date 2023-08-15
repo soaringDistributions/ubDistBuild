@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3703416806'
+export ub_setScriptChecksum_contents='488971328'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -43796,6 +43796,8 @@ _import_wsl2-sshid-wsl2() {
     local currentExitStatus
 
     cd "$1"
+    _messagePlain_probe_var PWD
+    _messagePlain_probe cp "$1"/id_'*' "$HOME"/.ssh/
     cp "$1"/id_* "$HOME"/.ssh/
     currentExitStatus="$?"
 
@@ -43811,6 +43813,8 @@ _export_wsl2-sshid-wsl2() {
     local currentExitStatus
 
     cd "$1"
+    _messagePlain_probe_var PWD
+    _messagePlain_probe cp --preserve=all "$HOME"/.ssh/id_'*' ./
     cp --preserve=all "$HOME"/.ssh/id_* ./
     currentExitStatus="$?"
 
@@ -43850,8 +43854,14 @@ _sshid-export-wsl2() {
     wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _export_wsl2-sshid-wsl2 "'""$current_ssh_MSW""'"
     currentExitStatus="$?"
 
+    _messagePlain_probe chmod 600 "$current_ssh_UNIX"/id_'*'
     chmod 600 "$current_ssh_UNIX"/id_*
     chmod 755 "$current_ssh_UNIX"/id_*.pub
+
+    # Permissions apparently are NOT usable through 'cygdrive' .
+    _messagePlain_probe chmod 600 "$HOME"/.ssh/id_'*'
+    chmod 600 "$HOME"/.ssh/id_*
+    chmod 755 "$HOME"/.ssh/id_*.pub
 
     return "$currentExitStatus"
 }
