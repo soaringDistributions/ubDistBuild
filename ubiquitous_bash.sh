@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1663745187'
+export ub_setScriptChecksum_contents='4144355312'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -43189,6 +43189,7 @@ _backup_restore_vm-wsl2-rsync-basic() {
 }
 
 _backup_vm-wsl2-tar-basic() {
+    _messagePlain_probe 'tar -cf - '"$1"' | lz4 -z --fast=1 - '"$2"
     tar -cf - "$1" | lz4 -z --fast=1 - "$2"
 }
 
@@ -43220,7 +43221,7 @@ _backup_vm-wsl2() {
 
     if ! mkdir -p "$currentBackupLocationUNIX" || [[ ! -e "$currentBackupLocationUNIX" ]]
     then
-        _messagePlain_bad 'fail: mkdir: /cygdrive/c/core/infrastructure/uwsl-h-b'-"$1"/home
+        _messagePlain_bad 'fail: mkdir: '"$currentBackupRootUNIX"/home
         return 1
     fi
 
@@ -43237,7 +43238,7 @@ _backup_vm-wsl2() {
     currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX")
      if ! mkdir -p "$currentBackupLocationUNIX" || [[ ! -e "$currentBackupLocationUNIX" ]]
     then
-        _messagePlain_bad 'fail: mkdir: /cygdrive/c/core/infrastructure/uwsl-h-b'-"$1"/home
+        _messagePlain_bad 'fail: mkdir: '"$currentBackupRootUNIX"/home/.ssh
         return 1
     fi
     currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX")
@@ -43249,9 +43250,14 @@ _backup_vm-wsl2() {
 
     currentBackupLocationUNIX="$currentBackupRootUNIX"/project.tar.lz4
     currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX")
-     if ! mkdir -p "$currentBackupRootUNIX" || [[ ! -e "$currentBackupRootUNIX" ]]
+    if ! mkdir -p "$currentBackupRootUNIX" || [[ ! -e "$currentBackupRootUNIX" ]]
     then
-        _messagePlain_bad 'fail: mkdir: /cygdrive/c/core/infrastructure/uwsl-h-b'-"$1"/home
+        _messagePlain_bad 'fail: mkdir: '"$currentBackupRootUNIX"
+        return 1
+    fi
+    if echo > "$currentBackupLocationUNIX" || [[ ! -e "$currentBackupLocationUNIX" ]]
+    then
+        _messagePlain_bad 'fail: tee: '"$currentBackupLocationUNIX"
         return 1
     fi
     currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX")

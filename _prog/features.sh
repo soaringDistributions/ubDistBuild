@@ -133,6 +133,7 @@ _backup_restore_vm-wsl2-rsync-basic() {
 }
 
 _backup_vm-wsl2-tar-basic() {
+    _messagePlain_probe 'tar -cf - '"$1"' | lz4 -z --fast=1 - '"$2"
     tar -cf - "$1" | lz4 -z --fast=1 - "$2"
 }
 
@@ -164,7 +165,7 @@ _backup_vm-wsl2() {
 
     if ! mkdir -p "$currentBackupLocationUNIX" || [[ ! -e "$currentBackupLocationUNIX" ]]
     then
-        _messagePlain_bad 'fail: mkdir: /cygdrive/c/core/infrastructure/uwsl-h-b'-"$1"/home
+        _messagePlain_bad 'fail: mkdir: '"$currentBackupRootUNIX"/home
         return 1
     fi
 
@@ -181,7 +182,7 @@ _backup_vm-wsl2() {
     currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX")
      if ! mkdir -p "$currentBackupLocationUNIX" || [[ ! -e "$currentBackupLocationUNIX" ]]
     then
-        _messagePlain_bad 'fail: mkdir: /cygdrive/c/core/infrastructure/uwsl-h-b'-"$1"/home
+        _messagePlain_bad 'fail: mkdir: '"$currentBackupRootUNIX"/home/.ssh
         return 1
     fi
     currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX")
@@ -193,9 +194,14 @@ _backup_vm-wsl2() {
 
     currentBackupLocationUNIX="$currentBackupRootUNIX"/project.tar.lz4
     currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX")
-     if ! mkdir -p "$currentBackupRootUNIX" || [[ ! -e "$currentBackupRootUNIX" ]]
+    if ! mkdir -p "$currentBackupRootUNIX" || [[ ! -e "$currentBackupRootUNIX" ]]
     then
-        _messagePlain_bad 'fail: mkdir: /cygdrive/c/core/infrastructure/uwsl-h-b'-"$1"/home
+        _messagePlain_bad 'fail: mkdir: '"$currentBackupRootUNIX"
+        return 1
+    fi
+    if echo > "$currentBackupLocationUNIX" || [[ ! -e "$currentBackupLocationUNIX" ]]
+    then
+        _messagePlain_bad 'fail: tee: '"$currentBackupLocationUNIX"
         return 1
     fi
     currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX")
