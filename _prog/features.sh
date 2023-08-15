@@ -192,7 +192,6 @@ _restore_vm-wsl2() {
     fi
 
     local currentScriptAbsoluteLocationMSW
-    currentScriptAbsoluteLocationMSW
     currentScriptAbsoluteLocationMSW=$(cygpath -w "$scriptAbsoluteLocation")
     local currentBackupLocationUNIX
     currentBackupLocationUNIX=/cygdrive/c/core/infrastructure/uwsl-h-b-"$1"
@@ -549,6 +548,13 @@ _write_kernelConfig_wsl2() {
 
 
 _install_vm-wsl2-kernel-wsl2() {
+    _messageNormal 'init: _install_vm-wsl2-kernel-wsl2: guest'
+    
+    _messagePlain_probe '$1= '"$1"
+
+    #mv "$1" "$1"-$(_uid 14)
+    mkdir -p "$1"
+    
     git config --global checkout.workers -1
     
     cd "$HOME"/core/infrastructure
@@ -564,6 +570,16 @@ _install_vm-wsl2-kernel-wsl2() {
 
     cd WSL2-Linux-Kernel
 
+    # https://stackoverflow.com/questions/3404936/show-which-git-tag-you-are-on
+    local currentTag_checkout
+    currentTag_checkout=$(git describe --tags --exact-match | tr -dc "a-zA-Z0-9.:\-_")
+
+    local currentTag_isObsolete
+    currentTag_isObsolete="true"
+
+    [[ "$currentTag_checkout" == "$currentTag" ]] && currentTag_isObsolete="false"
+    
+
     # https://stackoverflow.com/questions/26617862/git-shallow-fetch-of-a-new-tag
     git fetch --depth 1 origin tag "$currentTag"
 
@@ -572,15 +588,17 @@ _install_vm-wsl2-kernel-wsl2() {
 
     _write_kernelConfig_wsl2
 
+    [[ "$currentTag_isObsolete" == "true" ]] && make clean
+
     local currentProcessors
     currentProcessors=$(nproc)
     [[ "$currentProcessors" -gt "6" ]] && currentProcessors=6
     make -j$(nproc)
     
-    cp arch/x86/boot/bzImage "$1"
+    cp arch/x86/boot/bzImage "$1"/ubdist-kernel
 
     local currentOutDirectory
-    currentOutDirectory=$(_getAbsoluteFolder "$1")
+    currentOutDirectory="$1"
 
     cp ./.config "$currentOutDirectory"/.config
     mkdir -p "$currentOutDirectory"/wsl-source/
@@ -597,17 +615,29 @@ _install_vm-wsl2-kernel-wsl2() {
 
 }
 _install_vm-wsl2-kernel() {
+    _messageNormal 'init: _install_vm-wsl2-kernel'
+    
+
+    wsl --shutdown -d ubdist
+    wsl --shutdown
+    _write_wslconfig "ub_ignore_kernel_wsl"
+
+    
     local currentScriptAbsoluteLocationMSW
-    currentScriptAbsoluteLocationMSW
     currentScriptAbsoluteLocationMSW=$(cygpath -w "$scriptAbsoluteLocation")
     local currentKernelLocationUNIX
-    currentKernelLocationUNIX=/cygdrive/c/core/infrastructure/ubdist-kernel/ubdist-kernel
+    currentKernelLocationUNIX=/cygdrive/c/core/infrastructure/ubdist-kernel
+    mv "$currentKernelLocationUNIX" "$currentKernelLocationUNIX"-$(_uid 14)
+    mkdir -p "$currentKernelLocationUNIX"
     local currentKernelLocationMSW
     currentKernelLocationMSW=$(cygpath -w "$currentKernelLocationUNIX")
 
     _messagePlain_probe wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _install_vm-wsl2-kernel-wsl2 "'""$currentKernelLocationMSW""'"
     wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _install_vm-wsl2-kernel-wsl2 "'""$currentKernelLocationMSW""'"
     echo
+
+
+    _messageNormal '_install_vm-wsl2-kernel: config: host'
     
     # https://en.linuxportal.info/tutorials/troubleshooting/how-to-clear-the-not-authorized-to-perform-operation-error-message-when-automatically-attaching-USB-flash-drives-and-other-external-USB-storage-devices
     _messagePlain_probe wsl -d "ubdist" sudo -n sed -i 's/auth_admin/yes/g' /usr/share/polkit-1/actions/org.freedesktop.UDisks2.policy
@@ -616,6 +646,7 @@ _install_vm-wsl2-kernel() {
     wsl -d "ubdist" sudo -n sed -i 's/auth_admin/yes_keep/g' /usr/share/polkit-1/actions/org.freedesktop.UDisks2.policy
 
     # https://github.com/dorssel/usbipd-win/discussions/127
+    _messagePlain_probe 'echo udev | wsl tee'
     echo 'KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0664", GROUP="plugdev", ATTRS{idVendor}=="1050"' | wsl -d "ubdist" sudo -n tee /etc/udev/rules.d/90-fido2-own.rules
 
 
