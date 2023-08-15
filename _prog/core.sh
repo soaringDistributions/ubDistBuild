@@ -1974,6 +1974,8 @@ _assessment() {
 
 
 _refresh_anchors() {
+	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_bin.bat
+	
 	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild.bat
 	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild-live.bat
 	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild-rootfs.bat

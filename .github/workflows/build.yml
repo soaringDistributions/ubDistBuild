@@ -74,6 +74,43 @@ concurrency:
 
 
 jobs:
+  build_installer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          submodules: 'recursive'
+      - name: _getMinimal_cloud
+        shell: bash
+        timeout-minutes: 120
+        run: |
+          ./ubiquitous_bash.sh _getMinimal_cloud
+      - name: _getMinimal-build_ubDistBuild
+        shell: bash
+        timeout-minutes: 120
+        run: |
+          ./ubiquitous_bash.sh _getMinimal-build_ubDistBuild
+      - name: build-fetch
+        shell: bash
+        timeout-minutes: 120
+        run: |
+          mkdir -p ../ubDistBuild-accessories/integrations/ubcp
+          curl -L -o ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
+          ./ubiquitous_bash.sh _build_ubDistBuild-fetch
+      - name: build-build
+        shell: bash
+        timeout-minutes: 120
+        run: |
+          rm -f ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z
+          ./ubiquitous_bash.sh _build_ubDistBuild-build
+      - name: release!
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ../ubDistBuild.exe
   build:
     # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
     #  '7 GB of RAM memory'

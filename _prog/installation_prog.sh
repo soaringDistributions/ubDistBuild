@@ -4,7 +4,9 @@ _test_prog() {
 }
 
 
-#_setup_install() {
+_setup_install() {
+	true
+
 	#local currentBackupDir=/cygdrive/c/core/infrastructure/uwsl-h-b-"$1"
 	
 	#if [[ "$1" != "" ]] && [[ ! -e "$currentBackupDir" ]]
@@ -15,12 +17,14 @@ _test_prog() {
 		#return 1
 	#fi
 	
-	#_install_wsl2 "$@"
+	_install_wsl2
     #_install_vm-wsl2 "$@"
-#}
+}
 
-#_setup_uninstall() {
+_setup_uninstall() {
+	true
+	
 	#_uninstall_vm-wsl2
-#}
+}
 
 
