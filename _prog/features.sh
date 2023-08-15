@@ -199,7 +199,7 @@ _backup_vm-wsl2() {
         _messagePlain_bad 'fail: mkdir: '"$currentBackupRootUNIX"
         return 1
     fi
-    if echo > "$currentBackupLocationUNIX" || [[ ! -e "$currentBackupLocationUNIX" ]]
+    if ! echo > "$currentBackupLocationUNIX" || [[ ! -e "$currentBackupLocationUNIX" ]]
     then
         _messagePlain_bad 'fail: tee: '"$currentBackupLocationUNIX"
         return 1
