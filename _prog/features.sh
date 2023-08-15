@@ -133,9 +133,11 @@ _backup_restore_vm-wsl2-rsync-basic() {
 }
 
 _backup_vm-wsl2-tar-basic() {
-    rm -f "$2"
-    _messagePlain_probe 'tar -cf - '"$1"' | lz4 -z --fast=1 - '"$2"
-    tar -cf - "$1" | lz4 -z --fast=1 - "$2"
+    cd "$1"
+    rm -f "$3"
+    _messagePlain_prove_var PWD
+    _messagePlain_probe 'tar -cf - '"$2"' | lz4 -z --fast=1 - '"$3"
+    tar -cf - "$2" | lz4 -z --fast=1 - "$3"
 }
 
 
@@ -206,7 +208,7 @@ _backup_vm-wsl2() {
         return 1
     fi
     currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX")
-    wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _backup_vm-wsl2-tar-basic /home/user/project "'""$currentBackupLocationMSW""'"
+    wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _backup_vm-wsl2-tar-basic /home/user/ project "'""$currentBackupLocationMSW""'"
 }
 
 # ATTENTION: Override with 'ops.sh' if necessary.
