@@ -18,7 +18,7 @@ SilentInstall normal
 LicenseData "..\..\license-installer.txt"
 
 Name "ubDistBuild"
-Icon ".\icon\ubdistbuilt.ico"
+Icon ".\icon\ubdist.ico"
 OutFile "..\..\..\ubDistBuild.exe"
 
 
