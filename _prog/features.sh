@@ -215,6 +215,8 @@ _setup_vm-wsl2_sequence() {
     local functionEntryPWD
     functionEntryPWD="$PWD"
 
+    _write_wslconfig "ub_ignore_kernel_wsl"
+
     local backupID
     backupID=
     wsl --list | tr -dc 'a-zA-Z0-9\n' | grep '^ubdist' > /dev/null 2>&1 && backupID=$(_uid 14)
@@ -289,6 +291,342 @@ _install_vm-wsl2() {
 _install_vm-wsl() {
     _install_vm-wsl2 "$@"
 }
+
+
+
+
+_write_kernelConfig_wsl2() {
+    [[ "$1" != "" ]] && cd "$1"
+
+    if [[ ! -e "./Microsoft/config-wsl" ]]
+    then
+        _messagePlain_bad 'fail: missing: ./Microsoft/config-wsl'
+        echo 'Usually this arises due to having done 'git clone' from Cygwin/MSW and then attempting to build from Linux .'
+        return 1
+    fi
+
+    cp Microsoft/config-wsl .config
+
+    ./scripts/config --enable CONFIG_KVM
+    ./scripts/config --enable CONFIG_KVM_INTEL
+    ./scripts/config --enable CONFIG_KVM_AMD
+
+    ./scripts/config --enable CONFIG_HID_GENERIC
+    
+    # CONFIG_HIDRAW * (devices), USB_STORAGE * (devices but NOT debug)
+    #NILFS , CONFIG_USB_SERIAL * (devices NOT debug) , CONFIG_USB_SERIAL_CONSOLE
+
+    ./scripts/config --enable CONFIG_HIDRAW
+
+    # ATTRIBUTION - ChatGPT 3.5 2023-08-14 .
+    # Here is a list of 'make menuconfig' choices.
+    #
+    # Here is a list of kernel symbols from '   cat drivers/usb/serial/Kconfig | grep '^config' | sed 's/config //g' | sed 's/^/\.\/scripts\/config --enable /g'   ' .
+    #
+    # Which items from the second list seem not to exist in the first list?
+
+    #cat ./drivers/hid/Kconfig | grep '^config' | sed 's/config //g' | sed 's/^/\.\/scripts\/config --enable /g'
+./scripts/config --enable HID_A4TECH
+./scripts/config --enable HID_ACCUTOUCH
+./scripts/config --enable HID_ACRUX
+./scripts/config --enable HID_ACRUX_FF
+./scripts/config --enable HID_APPLE
+./scripts/config --enable HID_APPLEIR
+./scripts/config --enable HID_ASUS
+./scripts/config --enable HID_AUREAL
+./scripts/config --enable HID_BELKIN
+./scripts/config --enable HID_BETOP_FF
+./scripts/config --enable HID_BIGBEN_FF
+./scripts/config --enable HID_CHERRY
+./scripts/config --enable HID_CHICONY
+./scripts/config --enable HID_CORSAIR
+./scripts/config --enable HID_COUGAR
+./scripts/config --enable HID_MACALLY
+#./scripts/config --enable HID_PRODIKEYS
+./scripts/config --enable HID_CMEDIA
+#./scripts/config --enable HID_CP2112
+./scripts/config --enable HID_CREATIVE_SB0540
+./scripts/config --enable HID_CYPRESS
+./scripts/config --enable HID_DRAGONRISE
+./scripts/config --enable DRAGONRISE_FF
+./scripts/config --enable HID_EMS_FF
+./scripts/config --enable HID_ELAN
+./scripts/config --enable HID_ELECOM
+./scripts/config --enable HID_ELO
+./scripts/config --enable HID_EZKEY
+./scripts/config --enable HID_FT260
+./scripts/config --enable HID_GEMBIRD
+./scripts/config --enable HID_GFRM
+./scripts/config --enable HID_GLORIOUS
+./scripts/config --enable HID_HOLTEK
+./scripts/config --enable HOLTEK_FF
+./scripts/config --enable HID_VIVALDI_COMMON
+#./scripts/config --enable HID_GOOGLE_HAMMER
+./scripts/config --enable HID_VIVALDI
+./scripts/config --enable HID_GT683R
+./scripts/config --enable HID_KEYTOUCH
+./scripts/config --enable HID_KYE
+./scripts/config --enable HID_UCLOGIC
+./scripts/config --enable HID_WALTOP
+./scripts/config --enable HID_VIEWSONIC
+./scripts/config --enable HID_VRC2
+./scripts/config --enable HID_XIAOMI
+./scripts/config --enable HID_GYRATION
+./scripts/config --enable HID_ICADE
+./scripts/config --enable HID_ITE
+./scripts/config --enable HID_JABRA
+./scripts/config --enable HID_TWINHAN
+./scripts/config --enable HID_KENSINGTON
+./scripts/config --enable HID_LCPOWER
+./scripts/config --enable HID_LED
+./scripts/config --enable HID_LENOVO
+./scripts/config --enable HID_LETSKETCH
+./scripts/config --enable HID_LOGITECH
+./scripts/config --enable HID_LOGITECH_DJ
+./scripts/config --enable HID_LOGITECH_HIDPP
+./scripts/config --enable LOGITECH_FF
+./scripts/config --enable LOGIRUMBLEPAD2_FF
+./scripts/config --enable LOGIG940_FF
+./scripts/config --enable LOGIWHEELS_FF
+./scripts/config --enable HID_MAGICMOUSE
+./scripts/config --enable HID_MALTRON
+./scripts/config --enable HID_MAYFLASH
+./scripts/config --enable HID_MEGAWORLD_FF
+./scripts/config --enable HID_REDRAGON
+./scripts/config --enable HID_MICROSOFT
+./scripts/config --enable HID_MONTEREY
+./scripts/config --enable HID_MULTITOUCH
+./scripts/config --enable HID_NINTENDO
+./scripts/config --enable NINTENDO_FF
+./scripts/config --enable HID_NTI
+./scripts/config --enable HID_NTRIG
+./scripts/config --enable HID_ORTEK
+./scripts/config --enable HID_PANTHERLORD
+./scripts/config --enable PANTHERLORD_FF
+./scripts/config --enable HID_PENMOUNT
+./scripts/config --enable HID_PETALYNX
+./scripts/config --enable HID_PICOLCD
+#./scripts/config --enable HID_PICOLCD_FB
+#./scripts/config --enable HID_PICOLCD_BACKLIGHT
+#./scripts/config --enable HID_PICOLCD_LCD
+./scripts/config --enable HID_PICOLCD_LEDS
+#./scripts/config --enable HID_PICOLCD_CIR
+./scripts/config --enable HID_PLANTRONICS
+#./scripts/config --enable HID_PLAYSTATION
+#./scripts/config --enable PLAYSTATION_FF
+./scripts/config --enable HID_PXRC
+./scripts/config --enable HID_RAZER
+./scripts/config --enable HID_PRIMAX
+./scripts/config --enable HID_RETRODE
+./scripts/config --enable HID_ROCCAT
+./scripts/config --enable HID_SAITEK
+./scripts/config --enable HID_SAMSUNG
+./scripts/config --enable HID_SEMITEK
+./scripts/config --enable HID_SIGMAMICRO
+./scripts/config --enable HID_SONY
+./scripts/config --enable SONY_FF
+./scripts/config --enable HID_SPEEDLINK
+./scripts/config --enable HID_STEAM
+./scripts/config --enable HID_STEELSERIES
+./scripts/config --enable HID_SUNPLUS
+./scripts/config --enable HID_RMI
+./scripts/config --enable HID_GREENASIA
+./scripts/config --enable GREENASIA_FF
+./scripts/config --enable HID_HYPERV_MOUSE
+./scripts/config --enable HID_SMARTJOYPLUS
+./scripts/config --enable SMARTJOYPLUS_FF
+./scripts/config --enable HID_TIVO
+./scripts/config --enable HID_TOPSEED
+./scripts/config --enable HID_TOPRE
+./scripts/config --enable HID_THINGM
+./scripts/config --enable HID_THRUSTMASTER
+./scripts/config --enable THRUSTMASTER_FF
+./scripts/config --enable HID_UDRAW_PS3
+./scripts/config --enable HID_U2FZERO
+./scripts/config --enable HID_WACOM
+./scripts/config --enable HID_WIIMOTE
+./scripts/config --enable HID_XINMO
+./scripts/config --enable HID_ZEROPLUS
+./scripts/config --enable ZEROPLUS_FF
+./scripts/config --enable HID_ZYDACRON
+./scripts/config --enable HID_SENSOR_HUB
+./scripts/config --enable HID_SENSOR_CUSTOM_SENSOR
+./scripts/config --enable HID_ALPS
+#./scripts/config --enable HID_MCP2221
+    
+
+
+
+    ./scripts/config --enable USB_STORAGE
+    #./scripts/config --disable CONFIG_USB_STORAGE_DEBUG
+
+./scripts/config --enable CONFIG_USB_STORAGE_REALTEK
+./scripts/config --enable CONFIG_USB_STORAGE_DATAFAB
+./scripts/config --enable CONFIG_USB_STORAGE_FREECOM
+./scripts/config --enable CONFIG_USB_STORAGE_ISD200
+./scripts/config --enable CONFIG_USB_STORAGE_USBAT
+./scripts/config --enable CONFIG_USB_STORAGE_SDDR09
+./scripts/config --enable CONFIG_USB_STORAGE_SDDR55
+./scripts/config --enable CONFIG_USB_STORAGE_JUMPSHOT
+./scripts/config --enable CONFIG_USB_STORAGE_ALAUDA
+./scripts/config --enable CONFIG_USB_STORAGE_ONETOUCH
+./scripts/config --enable CONFIG_USB_STORAGE_KARMA
+./scripts/config --enable CONFIG_USB_STORAGE_CYPRESS_ATACB
+./scripts/config --enable CONFIG_USB_STORAGE_ENE_UB6250
+./scripts/config --enable CONFIG_USB_UAS
+
+
+    
+
+    ./scripts/config --enable CONFIG_NILFS2_FS
+    #./scripts/config --enable CONFIG_NTFS_FS
+    #./scripts/config --enable CONFIG_NTFS3_FS
+
+
+
+    ./scripts/config --enable CONFIG_USB_SERIAL
+    ./scripts/config --enable CONFIG_USB_SERIAL_CONSOLE
+    ./scripts/config --disable CONFIG_USB_SERIAL_DEBUG
+
+    #cat drivers/usb/serial/Kconfig | grep '^config' | sed 's/config //g' | sed 's/^/\.\/scripts\/config --enable /g'
+./scripts/config --enable USB_SERIAL_SIMPLE
+./scripts/config --enable USB_SERIAL_AIRCABLE
+./scripts/config --enable USB_SERIAL_ARK3116
+./scripts/config --enable USB_SERIAL_BELKIN
+./scripts/config --enable USB_SERIAL_CH341
+./scripts/config --enable USB_SERIAL_WHITEHEAT
+./scripts/config --enable USB_SERIAL_DIGI_ACCELEPORT
+./scripts/config --enable USB_SERIAL_CP210X
+./scripts/config --enable USB_SERIAL_CYPRESS_M8
+./scripts/config --enable USB_SERIAL_EMPEG
+./scripts/config --enable USB_SERIAL_FTDI_SIO
+./scripts/config --enable USB_SERIAL_VISOR
+./scripts/config --enable USB_SERIAL_IPAQ
+./scripts/config --enable USB_SERIAL_IR
+./scripts/config --enable USB_SERIAL_EDGEPORT
+./scripts/config --enable USB_SERIAL_EDGEPORT_TI
+./scripts/config --enable USB_SERIAL_F81232
+./scripts/config --enable USB_SERIAL_F8153X
+./scripts/config --enable USB_SERIAL_GARMIN
+./scripts/config --enable USB_SERIAL_IPW
+./scripts/config --enable USB_SERIAL_IUU
+./scripts/config --enable USB_SERIAL_KEYSPAN_PDA
+./scripts/config --enable USB_SERIAL_KEYSPAN
+./scripts/config --enable USB_SERIAL_KLSI
+./scripts/config --enable USB_SERIAL_KOBIL_SCT
+./scripts/config --enable USB_SERIAL_MCT_U232
+./scripts/config --enable USB_SERIAL_METRO
+./scripts/config --enable USB_SERIAL_MOS7720
+./scripts/config --enable USB_SERIAL_MOS7715_PARPORT
+./scripts/config --enable USB_SERIAL_MOS7840
+./scripts/config --enable USB_SERIAL_MXUPORT
+./scripts/config --enable USB_SERIAL_NAVMAN
+./scripts/config --enable USB_SERIAL_PL2303
+./scripts/config --enable USB_SERIAL_OTI6858
+./scripts/config --enable USB_SERIAL_QCAUX
+./scripts/config --enable USB_SERIAL_QUALCOMM
+./scripts/config --enable USB_SERIAL_SPCP8X5
+./scripts/config --enable USB_SERIAL_SAFE
+./scripts/config --enable USB_SERIAL_SAFE_PADDED
+./scripts/config --enable USB_SERIAL_SIERRAWIRELESS
+./scripts/config --enable USB_SERIAL_SYMBOL
+./scripts/config --enable USB_SERIAL_TI
+./scripts/config --enable USB_SERIAL_CYBERJACK
+#./scripts/config --enable USB_SERIAL_WWAN
+./scripts/config --enable USB_SERIAL_OPTION
+./scripts/config --enable USB_SERIAL_OMNINET
+./scripts/config --enable USB_SERIAL_OPTICON
+./scripts/config --enable USB_SERIAL_XSENS_MT
+./scripts/config --enable USB_SERIAL_WISHBONE
+./scripts/config --enable USB_SERIAL_SSU100
+./scripts/config --enable USB_SERIAL_QT2
+./scripts/config --enable USB_SERIAL_UPD78F0730
+./scripts/config --enable USB_SERIAL_XR
+
+
+    make olddefconfig
+}
+
+
+_install_vm-wsl2-kernel-wsl2() {
+    git config --global checkout.workers -1
+    
+    cd "$HOME"/core/infrastructure
+
+    local currentTag
+    currentTag=$(git ls-remote --tags https://github.com/microsoft/WSL2-Linux-Kernel.git | cut -f2 | sed "s/refs\/tags\///g" | grep linux-msft-wsl | sort -V -r | head -n1 | tr -dc "a-zA-Z0-9.:\-_")
+    
+    # Alternative generated by ChatGPT 3.5 2023-08-14 . Discouraged unless git tags are not well maintained.
+	# curl -s "https://github.com/microsoft/WSL2-Linux-Kernel/releases" | grep -o '<a href="/microsoft/WSL2-Linux-Kernel/releases/tag/[^"]*' | sed -E 's/.*tag\/([^"]+)/\1/' | sort -V -r
+
+    rmdir WSL2-Linux-Kernel
+	git clone --depth 1 --no-checkout --branch "$currentTag" "https://github.com/microsoft/WSL2-Linux-Kernel.git"
+
+    cd WSL2-Linux-Kernel
+
+    # https://stackoverflow.com/questions/26617862/git-shallow-fetch-of-a-new-tag
+    git fetch --depth 1 origin tag "$currentTag"
+
+    git checkout
+    git reset --hard
+
+    _write_kernelConfig_wsl2
+
+    local currentProcessors
+    currentProcessors=$(nproc)
+    [[ "$currentProcessors" -gt "6" ]] && currentProcessors=6
+    make -j$(nproc)
+    
+    cp arch/x86/boot/bzImage "$1"
+
+    local currentOutDirectory
+    currentOutDirectory=$(_getAbsoluteFolder "$1")
+
+    cp ./.config "$currentOutDirectory"/.config
+    mkdir -p "$currentOutDirectory"/wsl-source/
+    cp -r ./.git "$currentOutDirectory"/wsl-source/.git
+
+    #https://blog-devbug-me.translate.goog/wsl2-kernel-compile/?_x_tr_sl=auto&_x_tr_tl=en&_x_tr_hl=ro&_x_tr_pto=nui
+    sudo -n make modules_install
+
+    # Expected unnecessary. Expect '+' will be present from 'uname -r' for installed custom kernel.
+    #sudo mv /lib/modules/$(uname -r)+ /lib/modules/$(uname -r)
+    # find /lib/modules -mindepth 1 -maxdepth 1 -type d -name '*\+' -exec sh -c 'sudo -n mv "$0" "${0%+}"' {} \;
+
+
+
+}
+_install_vm-wsl2-kernel() {
+    local currentScriptAbsoluteLocationMSW
+    currentScriptAbsoluteLocationMSW
+    currentScriptAbsoluteLocationMSW=$(cygpath -w "$scriptAbsoluteLocation")
+    local currentKernelLocationUNIX
+    currentKernelLocationUNIX=/cygdrive/c/core/infrastructure/ubdist-kernel/ubdist-kernel
+    local currentKernelLocationMSW
+    currentKernelLocationMSW=$(cygpath -w "$currentKernelLocationUNIX")
+
+    _messagePlain_probe wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _install_vm-wsl2-kernel-wsl2 "'""$currentKernelLocationMSW""'"
+    wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _install_vm-wsl2-kernel-wsl2 "'""$currentKernelLocationMSW""'"
+    echo
+    
+    # https://en.linuxportal.info/tutorials/troubleshooting/how-to-clear-the-not-authorized-to-perform-operation-error-message-when-automatically-attaching-USB-flash-drives-and-other-external-USB-storage-devices
+    _messagePlain_probe wsl -d "ubdist" sudo -n sed -i 's/auth_admin/yes/g' /usr/share/polkit-1/actions/org.freedesktop.UDisks2.policy
+    wsl -d "ubdist" sudo -n sed -i 's/auth_admin/yes/g' /usr/share/polkit-1/actions/org.freedesktop.UDisks2.policy
+    _messagePlain_probe wsl -d "ubdist" sudo -n sed -i 's/auth_admin/yes_keep/g' /usr/share/polkit-1/actions/org.freedesktop.UDisks2.policy
+    wsl -d "ubdist" sudo -n sed -i 's/auth_admin/yes_keep/g' /usr/share/polkit-1/actions/org.freedesktop.UDisks2.policy
+
+    # https://github.com/dorssel/usbipd-win/discussions/127
+    echo 'KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0664", GROUP="plugdev", ATTRS{idVendor}=="1050"' | wsl -d "ubdist" sudo -n tee /etc/udev/rules.d/90-fido2-own.rules
+
+
+    _write_wslconfig
+
+    wsl --shutdown -d ubdist
+    wsl --shutdown
+
+}
+
+
 
 
 
