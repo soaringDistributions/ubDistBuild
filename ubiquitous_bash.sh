@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3012345141'
+export ub_setScriptChecksum_contents='761488285'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -43779,7 +43779,8 @@ _install_vm-wsl2-kernel() {
     currentScriptAbsoluteLocationMSW=$(cygpath -w "$scriptAbsoluteLocation")
     local currentKernelLocationUNIX
     currentKernelLocationUNIX=/cygdrive/c/core/infrastructure/ubdist-kernel
-    mv "$currentKernelLocationUNIX" "$currentKernelLocationUNIX"-$(_uid 14)
+    local currentPreviousKernelID=$(_uid 14)
+    [[ -e "$currentKernelLocationUNIX" ]] && mv "$currentKernelLocationUNIX" "$currentKernelLocationUNIX"-"$currentPreviousKernelID"
     mkdir -p "$currentKernelLocationUNIX"
     local currentKernelLocationMSW
     currentKernelLocationMSW=$(cygpath -w "$currentKernelLocationUNIX")
@@ -43807,6 +43808,19 @@ _install_vm-wsl2-kernel() {
     wsl --shutdown -d ubdist
     wsl --shutdown
 
+    if [[ -e /cygdrive/c/core/infrastructure/ubdist-kernel/ubdist-kernel ]] && [[ -e "$currentKernelLocationUNIX"-"$currentPreviousKernelID" ]]
+    then
+        # DANGER: Unusual! May delete data from host!
+        #_safeRMR "$currentKernelLocationUNIX"-"$currentPreviousKernelID"
+        if [[ ! -e "$currentKernelLocationUNIX"-"$currentPreviousKernelID" ]] || [[ "$currentKernelLocationUNIX" == "" ]] || [[ "$currentPreviousKernelID" == "" ]]
+        then
+            _messagePlain_bad 'fail: rm: missing: '"$currentKernelLocationUNIX"-"$currentPreviousKernelID"
+            _messageFAIL
+            _stop 1
+        fi
+        rm -rf "$currentKernelLocationUNIX"-"$currentPreviousKernelID"
+    fi
+    return 0
 }
 
 
