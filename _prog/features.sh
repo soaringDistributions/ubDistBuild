@@ -326,8 +326,26 @@ _setup_vm-wsl2_sequence() {
     if [[ "$backupID" != "" ]]
     then
         _restore_vm-wsl2 "$backupID"
+        # DANGER: Unusual! May delete data from host!
+        #_safeRMR rm -rf /cygdrive/c/core/infrastructure/uwsl-h-b-"$backupID"
+        if [[ ! -e /cygdrive/c/core/infrastructure/uwsl-h-b-"$backupID" ]]
+        then
+            _messagePlain_bad 'fail: rm: missing: /cygdrive/c/core/infrastructure/uwsl-h-b-'"$backupID"
+            _messageFAIL
+            _stop 1
+        fi
+        rm -rf /cygdrive/c/core/infrastructure/uwsl-h-b-"$backupID"
     else
         _restore_vm-wsl2 "uninstalled"
+        # DANGER: Unusual! May delete data from host!
+        #_safeRMR /cygdrive/c/core/infrastructure/uwsl-h-b-uninstalled
+        if [[ ! -e /cygdrive/c/core/infrastructure/uwsl-h-b-uninstalled ]]
+        then
+            _messagePlain_bad 'fail: rm: missing: /cygdrive/c/core/infrastructure/uwsl-h-b-uninstalled'
+            _messageFAIL
+            _stop 1
+        fi
+        rm -rf /cygdrive/c/core/infrastructure/uwsl-h-b-uninstalled
     fi
 
 
@@ -705,7 +723,8 @@ _install_vm-wsl2-kernel() {
     currentScriptAbsoluteLocationMSW=$(cygpath -w "$scriptAbsoluteLocation")
     local currentKernelLocationUNIX
     currentKernelLocationUNIX=/cygdrive/c/core/infrastructure/ubdist-kernel
-    mv "$currentKernelLocationUNIX" "$currentKernelLocationUNIX"-$(_uid 14)
+    local currentPreviousKernelID=$(_uid 14)
+    [[ -e "$currentKernelLocationUNIX" ]] && mv "$currentKernelLocationUNIX" "$currentKernelLocationUNIX"-"$currentPreviousKernelID"
     mkdir -p "$currentKernelLocationUNIX"
     local currentKernelLocationMSW
     currentKernelLocationMSW=$(cygpath -w "$currentKernelLocationUNIX")
@@ -733,6 +752,19 @@ _install_vm-wsl2-kernel() {
     wsl --shutdown -d ubdist
     wsl --shutdown
 
+    if [[ -e /cygdrive/c/core/infrastructure/ubdist-kernel/ubdist-kernel ]] && [[ -e "$currentKernelLocationUNIX"-"$currentPreviousKernelID" ]]
+    then
+        # DANGER: Unusual! May delete data from host!
+        #_safeRMR "$currentKernelLocationUNIX"-"$currentPreviousKernelID"
+        if [[ ! -e "$currentKernelLocationUNIX"-"$currentPreviousKernelID" ]] || [[ "$currentKernelLocationUNIX" == "" ]] || [[ "$currentPreviousKernelID" == "" ]]
+        then
+            _messagePlain_bad 'fail: rm: missing: '"$currentKernelLocationUNIX"-"$currentPreviousKernelID"
+            _messageFAIL
+            _stop 1
+        fi
+        rm -rf "$currentKernelLocationUNIX"-"$currentPreviousKernelID"
+    fi
+    return 0
 }
 
 
