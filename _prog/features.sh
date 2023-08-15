@@ -276,9 +276,9 @@ _restore_vm-wsl2() {
         _messagePlain_bad 'fail: mkdir: '"$currentBackupRootUNIX"
         return 1
     fi
-    if ! echo > "$currentBackupLocationUNIX" || [[ ! -e "$currentBackupLocationUNIX" ]]
+    if [[ ! -e "$currentBackupLocationUNIX" ]]
     then
-        _messagePlain_bad 'fail: tee: '"$currentBackupLocationUNIX"
+        _messagePlain_bad 'fail: missing: '"$currentBackupLocationUNIX"
         return 1
     fi
     currentBackupLocationMSW=$(cygpath -w "$currentBackupLocationUNIX")
