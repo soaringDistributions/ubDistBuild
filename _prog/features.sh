@@ -752,6 +752,8 @@ _install_vm-wsl2-kernel() {
     wsl --shutdown -d ubdist
     wsl --shutdown
 
+    wsl -d ubdist sudo -n /sbin/vboxconfig
+
     if [[ -e /cygdrive/c/core/infrastructure/ubdist-kernel/ubdist-kernel ]] && [[ -e "$currentKernelLocationUNIX"-"$currentPreviousKernelID" ]]
     then
         # DANGER: Unusual! May delete data from host!
