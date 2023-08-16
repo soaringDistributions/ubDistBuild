@@ -665,7 +665,7 @@ _create_ubDistBuild-rotten_install-core() {
 
 
 
-	_chroot find /home/user/core/installations /home/user/core/infrastructure | sudo -n tee "$globalVirtFS"/coreReport > /dev/null
+	_chroot find /home/user/core/installations /home/user/core/infrastructure -not \( -path \*.git\* -prune \) | sudo -n tee "$globalVirtFS"/coreReport > /dev/null
 	sudo -n cp -f "$globalVirtFS"/coreReport "$scriptLocal"/coreReport
 	sudo -n chown "$USER":"$USER" "$scriptLocal"/coreReport
 
