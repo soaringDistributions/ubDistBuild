@@ -75,7 +75,7 @@ concurrency:
 
 jobs:
   build_installer:
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
     steps:
       - uses: actions/checkout@v3
         with:
