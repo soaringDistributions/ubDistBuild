@@ -288,6 +288,7 @@ jobs:
           name: build
           files: |
             ./_local/dpkg
+            ./_local/lsmodReport
             ./_local/binReport
             ./_local/coreReport
             /proc/cpuinfo
@@ -296,6 +297,7 @@ jobs:
         run: |
           mkdir -p ./_local/analysis
 
+          cp ./_local/binReport ./_local/analysis/lsmodReport
           cp ./_local/binReport ./_local/analysis/binReport
           cp ./_local/coreReport ./_local/analysis/coreReport
           cp ./_local/dpkg ./_local/analysis/dpkg
@@ -308,12 +310,16 @@ jobs:
           # Loop through each release
           for RELEASE in $(echo "$RELEASES" | jq -r '.[].tag_name' | sort --reverse); do
             # Download the binReport file for this release
+            curl -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/binReport"
             curl -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/binReport"
             curl -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/coreReport"
             curl -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/dpkg"
 
             # Compare the list of binaries in this release to the current release
             if [ "$RELEASE" != "$currentReleaseTag" ]; then
+              echo | tee -a ./missing-lsmodReport
+              echo "Binaries (filesystem) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-lsmodReport
+              comm -23 <(sort "lsmodReport-$RELEASE") <(sort "lsmodReport-$currentReleaseTag") | tee -a ./missing-lsmodReport
               echo | tee -a ./missing-binReport
               echo "Binaries (filesystem) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-binReport
               comm -23 <(sort "binReport-$RELEASE") <(sort "binReport-$currentReleaseTag") | tee -a ./missing-binReport
@@ -334,6 +340,7 @@ jobs:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
+            ./_local/analysis/missing-lsmodReport
             ./_local/analysis/missing-binReport
             ./_local/analysis/missing-coreReport
             ./_local/analysis/missing-dpkg
