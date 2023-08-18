@@ -687,8 +687,8 @@ _create_ubDistBuild-rotten_install-core() {
 	# https://github.com/Klipper3d/klipper/issues/5523
 	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/klipper ; chmod 755 ./scripts/install-ubuntu-22.04.sh ; ./scripts/install-ubuntu-22.04.sh'
 
-
-
+	# systemctl status klipper
+	# cat /tmp/klippy.log
 
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0
