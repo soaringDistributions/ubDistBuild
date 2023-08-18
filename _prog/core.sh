@@ -682,6 +682,14 @@ _create_ubDistBuild-rotten_install-core() {
 	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure ; rmdir WSL2-Linux-Kernel ; git config --global checkout.workers -1 ; git clone --depth 1 --no-checkout --branch $(git ls-remote --tags https://github.com/microsoft/WSL2-Linux-Kernel.git | cut -f2 | sed "s/refs\/tags\///g" | grep linux-msft-wsl | sort -V -r | head -n1 | tr -dc "a-zA-Z0-9.:\-_") "https://github.com/microsoft/WSL2-Linux-Kernel.git"'
 
 	
+
+	# Eventually, a custom function may be necessary. Despite the name, the 'ubuntu-22.04' install script may have a better chance with recent versions of debian.
+	# https://github.com/Klipper3d/klipper/issues/5523
+	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/klipper ; chmod 755 ./scripts/install-ubuntu-22.04.sh ; ./scripts/install-ubuntu-22.04.sh'
+
+
+
+
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0
 }
