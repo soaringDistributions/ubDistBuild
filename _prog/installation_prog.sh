@@ -43,6 +43,12 @@ _setup_install() {
 	reg add "HKEY_CLASSES_ROOT\Directory\Background\shell\OpenWith_ubdistWSL" /v "" /d "Open with ubdistWSL" /f
 	reg add "HKEY_CLASSES_ROOT\Directory\Background\shell\OpenWith_ubdistWSL\command" /v "" /d "wsl.exe -d ubdist" /f
 
+	
+	# May be unusual. Unlike other apps, usability of native MSW equivalent for gEDA apps may not be expected.
+	local currentMSWPath_associate
+	currentMSWPath_associate=$(cygpath -w "$scriptLib"/support/MSW/associate.bat)
+	cmd /c "$currentMSWPath_associate" geda.schematic .sch gschem
+
 
 
 	sleep 5
