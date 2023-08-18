@@ -740,6 +740,20 @@ _detect_chroot() {
 	
 	return 0
 }
+_detect_wsl() {
+	# https://unix.stackexchange.com/questions/14345/how-do-i-tell-im-running-in-a-chroot
+	if ( uname -a | grep -i 'microsoft' > /dev/null 2>&1 || uname -a | grep -i 'WSL2' > /dev/null 2>&1 )
+	then
+		_messageFAIL
+		_stop 1
+		exit 1
+		exit
+		return 1
+		return
+	fi
+	
+	return 0
+}
 _autoinstall_procedure() {
 	_mustBeRoot
 	
@@ -768,7 +782,15 @@ _autoinstall_procedure() {
 		return
 	fi
 	
-	
+	if ! _detect_wsl
+	then
+		_messageFAIL
+		_stop 1
+		exit 1
+		exit
+		return 1
+		return
+	fi
 	
 	
 	
