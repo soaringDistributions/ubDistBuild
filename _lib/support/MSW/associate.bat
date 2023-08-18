@@ -8,7 +8,7 @@ REM ftype geda.schematic=wslg.exe ~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh _
 
 echo BATCH: Setting file type association...
 
-assoc %2=geda.schematic
+assoc %2=%1
 
 :: Use double percentage to escape %1
 ftype %1=wslg.exe ~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh _wrap %3 $(wslpath "%%1")

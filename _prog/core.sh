@@ -782,6 +782,44 @@ _create_ubDistBuild-bootOnce-fsck_sequence() {
 	! "$scriptAbsoluteLocation" _closeLoop && _messagePlain_bad 'fail: _closeLoop' && _messageFAIL
 	return 0
 }
+# Causes gschem to compile a bunch of scheme files so there may not be as much delay when otherwise running gschem for the first time.
+_create_ubDistBuild-bootOnce-geda_chroot() {
+	#. "$HOME"/.ubcore/.ubcorerc
+	[[ -e "$HOME"/.nix-profile/etc/profile.d/nix.sh ]] && . "$HOME"/.nix-profile/etc/profile.d/nix.sh
+	
+	local currentPID
+	Xvfb :30 > /dev/null 2>&1 &
+	currentPID="$!"
+	sleep 1
+
+	export DISPLAY=:30
+	_timeout 180 gschem
+
+
+	kill "$currentPID"
+	sleep 3
+	kill -KILL "$currentPID"
+	pkill Xvfb
+
+
+	local currentStopJobs
+	currentStopJobs=$(jobs -p -r 2> /dev/null)
+	_messagePlain_probe_var currentStopJobs
+	[[ "$currentStopJobs" != "" ]] && kill "$currentStopJobs"
+	
+	#disown -h $currentPID
+	disown -a -h -r
+	disown -a -r
+
+	return 0
+}
+_create_ubDistBuild-bootOnce-geda_procedure() {
+	sudo -n cp "$scriptAbsoluteLocation" "$globalVirtFS"/home/user/tmp_bootOnce-geda.sh
+	_chroot chown user:user /home/user/tmp_bootOnce-geda.sh
+	_chroot chmod 755 /home/user/tmp_bootOnce-geda.sh
+
+	_chroot sudo -n -u user bash -c 'cd /home/user/ ; ./tmp_bootOnce-geda.sh _create_ubDistBuild-bootOnce-geda_chroot'
+}
 _create_ubDistBuild-bootOnce() {
 	_messageNormal '##### init: _create_ubDistBuild-bootOnce'
 	
@@ -885,6 +923,21 @@ CZXWXcRMTo8EmM8i4d
 
 	sudo -n mv -f "$globalVirtFS"/usr/bin/uname-orig "$globalVirtFS"/usr/bin/uname
 	sudo -n mv -f "$globalVirtFS"/bin/uname-orig "$globalVirtFS"/bin/uname
+
+
+
+
+
+	_create_ubDistBuild-bootOnce-geda_procedure
+
+
+
+
+
+
+
+
+
 
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	

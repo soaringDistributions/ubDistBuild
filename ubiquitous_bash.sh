@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3375802482'
+export ub_setScriptChecksum_contents='432601405'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -40665,10 +40665,14 @@ _setup_install() {
 	reg add "HKEY_CLASSES_ROOT\Directory\Background\shell\OpenWith_ubdistWSL\command" /v "" /d "wsl.exe -d ubdist" /f
 
 	
-	# May be unusual. Unlike other apps, usability of native MSW equivalent for gEDA apps may not be expected.
 	local currentMSWPath_associate
 	currentMSWPath_associate=$(cygpath -w "$scriptLib"/support/MSW/associate.bat)
+
+
+	# May be unusual. Unlike other apps, usability of native MSW equivalent for gEDA apps may not be expected.
 	cmd /c "$currentMSWPath_associate" geda.schematic .sch gschem
+	cmd /c "$currentMSWPath_associate" geda.pcb .pcb pcb
+
 
 
 
@@ -41467,6 +41471,44 @@ _create_ubDistBuild-bootOnce-fsck_sequence() {
 	! "$scriptAbsoluteLocation" _closeLoop && _messagePlain_bad 'fail: _closeLoop' && _messageFAIL
 	return 0
 }
+# Causes gschem to compile a bunch of scheme files so there may not be as much delay when otherwise running gschem for the first time.
+_create_ubDistBuild-bootOnce-geda_chroot() {
+	#. "$HOME"/.ubcore/.ubcorerc
+	[[ -e "$HOME"/.nix-profile/etc/profile.d/nix.sh ]] && . "$HOME"/.nix-profile/etc/profile.d/nix.sh
+	
+	local currentPID
+	Xvfb :30 > /dev/null 2>&1 &
+	currentPID="$!"
+	sleep 1
+
+	export DISPLAY=:30
+	_timeout 180 gschem
+
+
+	kill "$currentPID"
+	sleep 3
+	kill -KILL "$currentPID"
+	pkill Xvfb
+
+
+	local currentStopJobs
+	currentStopJobs=$(jobs -p -r 2> /dev/null)
+	_messagePlain_probe_var currentStopJobs
+	[[ "$currentStopJobs" != "" ]] && kill "$currentStopJobs"
+	
+	#disown -h $currentPID
+	disown -a -h -r
+	disown -a -r
+
+	return 0
+}
+_create_ubDistBuild-bootOnce-geda_procedure() {
+	sudo -n cp "$scriptAbsoluteLocation" "$globalVirtFS"/home/user/tmp_bootOnce-geda.sh
+	_chroot chown user:user /home/user/tmp_bootOnce-geda.sh
+	_chroot chmod 755 /home/user/tmp_bootOnce-geda.sh
+
+	_chroot sudo -n -u user bash -c 'cd /home/user/ ; ./tmp_bootOnce-geda.sh _create_ubDistBuild-bootOnce-geda_chroot'
+}
 _create_ubDistBuild-bootOnce() {
 	_messageNormal '##### init: _create_ubDistBuild-bootOnce'
 	
@@ -41570,6 +41612,21 @@ CZXWXcRMTo8EmM8i4d
 
 	sudo -n mv -f "$globalVirtFS"/usr/bin/uname-orig "$globalVirtFS"/usr/bin/uname
 	sudo -n mv -f "$globalVirtFS"/bin/uname-orig "$globalVirtFS"/bin/uname
+
+
+
+
+
+	_create_ubDistBuild-bootOnce-geda_procedure
+
+
+
+
+
+
+
+
+
 
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
