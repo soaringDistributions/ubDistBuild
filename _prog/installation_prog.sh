@@ -20,6 +20,31 @@ _setup_install() {
 	_install_wsl2
     #_install_vm-wsl2 "$@"
 
+	local currentLOCALAPPDATA
+	currentLOCALAPPDATA=$(cygpath "$LOCALAPPDATA")
+	currentLOCALAPPDATA="$currentLOCALAPPDATA"/ubDistBuild
+	mkdir -p "$currentLOCALAPPDATA"
+
+	mkdir -p "$currentLOCALAPPDATA"/root
+	_messagePlain_probe_cmd unzip -o "$scriptLib"/support/MSW/root_extra.zip -d /cygdrive/c
+	_messagePlain_probe_cmd unzip -o "$scriptLib"/support/MSW/root_extra.zip -d "$currentLOCALAPPDATA"/root
+	
+	
+	reg add "HKEY_CLASSES_ROOT\Directory\shell\OpenWith_ubdistWSL-FileManager" /v "" /d "Open with ubdistWSL-FileManager" /f
+	reg add "HKEY_CLASSES_ROOT\Directory\shell\OpenWith_ubdistWSL-FileManager\command" /v "" /d "wslg.exe -d ubdist ~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh _wrap dolphin \"%V\"" /f
+
+	reg add "HKEY_CLASSES_ROOT\Directory\Background\shell\OpenWith_ubdistWSL-FileManager" /v "" /d "Open with ubdistWSL-FileManager" /f
+	reg add "HKEY_CLASSES_ROOT\Directory\Background\shell\OpenWith_ubdistWSL-FileManager\command" /v "" /d "wslg.exe -d ubdist ~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh _wrap dolphin \"%V\"" /f
+
+
+	reg add "HKEY_CLASSES_ROOT\Directory\shell\OpenWith_ubdistWSL" /v "" /d "Open with ubdistWSL" /f
+	reg add "HKEY_CLASSES_ROOT\Directory\shell\OpenWith_ubdistWSL\command" /v "" /d "wsl.exe -d ubdist" /f
+
+	reg add "HKEY_CLASSES_ROOT\Directory\Background\shell\OpenWith_ubdistWSL" /v "" /d "Open with ubdistWSL" /f
+	reg add "HKEY_CLASSES_ROOT\Directory\Background\shell\OpenWith_ubdistWSL\command" /v "" /d "wsl.exe -d ubdist" /f
+
+
+
 	sleep 5
 }
 
