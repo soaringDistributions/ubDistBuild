@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1686930995'
+export ub_setScriptChecksum_contents='30676290'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -43969,6 +43969,41 @@ _export_wsl2-sshid-wsl2() {
 
     chmod 600 "$1"/id_*
     chmod 755 "$1"/id_*.pub
+    chmod 600 "$HOME"/.ssh/id_*
+    chmod 755 "$HOME"/.ssh/id_*.pub
+
+    return "$currentExitStatus"
+}
+_import_wsl2-gitconfig-wsl2() {
+    local currentExitStatus
+
+    cd "$1"
+    _messagePlain_probe_var PWD
+    _messagePlain_probe cp "$1"/.gitconfig "$HOME"/
+    cp "$1"/.gitconfig "$HOME"/
+    currentExitStatus="$?"
+
+    chmod 600 "$HOME"/.gitconfig
+    chmod 755 "$HOME"/.gitconfig
+
+    return "$currentExitStatus"
+}
+_export_wsl2-gitconfig-wsl2() {
+    chmod 600 "$HOME"/.gitconfig
+    chmod 755 "$HOME"/.gitconfig
+
+    local currentExitStatus
+
+    cd "$1"
+    _messagePlain_probe_var PWD
+    _messagePlain_probe cp --preserve=all "$HOME"/.gitconfig ./
+    cp --preserve=all "$HOME"/.gitconfig ./
+    currentExitStatus="$?"
+
+    chmod 600 "$1"/.gitconfig
+    chmod 755 "$1"/.gitconfig
+    chmod 600 "$HOME"/.gitconfig
+    chmod 755 "$HOME"/.gitconfig
 
     return "$currentExitStatus"
 }
@@ -43985,6 +44020,15 @@ _sshid-import-wsl2() {
     local current_ssh_MSW
     current_ssh_MSW=$(cygpath -w "$current_ssh_UNIX")
     wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _import_wsl2-sshid-wsl2 "'""$current_ssh_MSW""'"
+
+    local current_gitconfig_UNIX
+    current_gitconfig_UNIX="/cygdrive/c/core/infrastructure/ubcp/cygwin/home/root"
+    mkdir -p "$current_gitconfig_UNIX"
+    chmod 600 "$current_gitconfig_UNIX"
+    [[ ! -e "$current_gitconfig_UNIX" ]] && return 1
+    local current_gitconfig_MSW
+    current_gitconfig_MSW=$(cygpath -w "$current_gitconfig_UNIX")
+    wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _import_wsl2-gitconfig-wsl2 "'""$current_gitconfig_MSW""'"
 }
 _sshid-export-wsl2() {
     ! _if_cygwin && return 1
@@ -44002,6 +44046,16 @@ _sshid-export-wsl2() {
     current_ssh_MSW=$(cygpath -w "$current_ssh_UNIX")
     wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _export_wsl2-sshid-wsl2 "'""$current_ssh_MSW""'"
     currentExitStatus="$?"
+
+    local current_gitconfig_UNIX
+    current_gitconfig_UNIX="/cygdrive/c/core/infrastructure/ubcp/cygwin/home/root"
+    mkdir -p "$current_gitconfig_UNIX"
+    chmod 600 "$current_gitconfig_UNIX"
+    [[ ! -e "$current_gitconfig_UNIX" ]] && return 1
+    local current_gitconfig_MSW
+    current_gitconfig_MSW=$(cygpath -w "$current_gitconfig_UNIX")
+    wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _export_wsl2-gitconfig-wsl2 "'""$current_gitconfig_MSW""'"
+    ( [[ "$?" != "0" ]] || [[ "$currentExitStatus" != "0" ]] ) && currentExitStatus=1
 
     _messagePlain_probe chmod 600 "$current_ssh_UNIX"/id_'*'
     chmod 600 "$current_ssh_UNIX"/id_*
