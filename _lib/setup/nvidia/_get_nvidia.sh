@@ -484,13 +484,14 @@ true
 #####Entry
 # ###
 
-
+# https://www.reddit.com/r/linux4noobs/comments/115d0o4/how_do_you_install_the_open_source_nvidia_drivers/
+#  'This can be achieved by installing the NVIDIA GPU driver from the .run file using the --no-kernel-modules option. E.g.,'
 
 # https://www.nvidia.com/en-us/drivers/unix/
 #  'Latest Legacy GPU version'
 # https://www.nvidia.com/download/driverResults.aspx/187162/en-us
 # https://www.nvidia.com/Download/driverResults.aspx/44241/en-us
-export currentVersion=515.43.04
+export currentVersion='535.98'
 
 
 
