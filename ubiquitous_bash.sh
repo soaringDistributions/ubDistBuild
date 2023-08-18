@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3582576131'
+export ub_setScriptChecksum_contents='3134747731'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -41445,13 +41445,19 @@ _create_ubDistBuild-rotten_install-core() {
 	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure ; rmdir WSL2-Linux-Kernel ; git config --global checkout.workers -1 ; git clone --depth 1 --no-checkout --branch $(git ls-remote --tags https://github.com/microsoft/WSL2-Linux-Kernel.git | cut -f2 | sed "s/refs\/tags\///g" | grep linux-msft-wsl | sort -V -r | head -n1 | tr -dc "a-zA-Z0-9.:\-_") "https://github.com/microsoft/WSL2-Linux-Kernel.git"'
 
 	
-
+	# WARNING: May be untested.
 	# Eventually, a custom function may be necessary. Despite the name, the 'ubuntu-22.04' install script may have a better chance with recent versions of debian.
 	# https://github.com/Klipper3d/klipper/issues/5523
-	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/klipper ; chmod 755 ./scripts/install-ubuntu-22.04.sh ; ./scripts/install-ubuntu-22.04.sh'
+	#_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/klipper ; chmod 755 ./scripts/install-ubuntu-22.04.sh ; ./scripts/install-ubuntu-22.04.sh'
 
 	# systemctl status klipper
 	# cat /tmp/klippy.log
+
+
+
+
+	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/kiauh-automatic ; chmod 755 ./scripts/magic.sh ; ./scripts/magic.sh'
+	
 
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0
@@ -43306,7 +43312,7 @@ _backup_restore_vm-wsl2-rsync-exclude() {
 		return 1
 	fi
 
-	_messagePlain_probe_cmd rsync -ax --delete --exclude ".Xauthority" --exclude ".bash_history" --exclude ".bash_logout" --exclude ".cache" --exclude ".face" --exclude ".face.icon" --exclude ".gEDA" --exclude ".gcloud" --exclude ".gnome" --exclude ".kde.bak" --exclude ".nix-channels" --exclude ".nix-defexpr" --exclude ".nix-profile" --exclude ".python_history" --exclude ".pythonrc" --exclude ".sudo_as_admin_successful" --exclude ".terraform.d" --exclude ".xsession-errors" --exclude "Downloads" --exclude "___quick" --exclude "_unix_renice_execDaemon.log" --exclude "core" --exclude "package_kde.tar.xz" --exclude "project" --exclude "rottenScript.sh" --exclude "ubDistBuild" --exclude "ubDistFetch" --exclude "ubiquitous_bash.sh" --exclude ".config" --exclude ".kde" --exclude ".local" --exclude ".xournal" --exclude ".license_package_kde" --exclude ".bash_profile" --exclude ".bashrc" --exclude ".config" --exclude ".gitconfig" --exclude ".inputrc" --exclude ".lesshst" --exclude ".octave_hist" --exclude ".octaverc" --exclude ".profile" --exclude ".ubcore" --exclude ".ubcorerc_pythonrc.py" --exclude ".ubcorerc-gnuoctave.m" --exclude ".viminfo" --exclude ".wget-hsts" --exclude "bin" "$currentSource" "$currentDestination"
+	_messagePlain_probe_cmd rsync -ax --delete --exclude "VirtualBox VMs" --exclude "KlipperScreen" --exclude "crowsnest" --exclude "kiauh" --exclude "kiauh-backups" --exclude "klipper" --exclude "klippy-env" --exclude "mainsail" --exclude "mainsail-config" --exclude "moonraker" --exclude "moonraker-env" --exclude "printer_data" --exclude ".Xauthority" --exclude ".bash_history" --exclude ".bash_logout" --exclude ".cache" --exclude ".face" --exclude ".face.icon" --exclude ".gEDA" --exclude ".gcloud" --exclude ".gnome" --exclude ".kde.bak" --exclude ".nix-channels" --exclude ".nix-defexpr" --exclude ".nix-profile" --exclude ".python_history" --exclude ".pythonrc" --exclude ".sudo_as_admin_successful" --exclude ".terraform.d" --exclude ".xsession-errors" --exclude "Downloads" --exclude "___quick" --exclude "_unix_renice_execDaemon.log" --exclude "core" --exclude "package_kde.tar.xz" --exclude "project" --exclude "rottenScript.sh" --exclude "ubDistBuild" --exclude "ubDistFetch" --exclude "ubiquitous_bash.sh" --exclude ".config" --exclude ".kde" --exclude ".local" --exclude ".xournal" --exclude ".license_package_kde" --exclude ".bash_profile" --exclude ".bashrc" --exclude ".config" --exclude ".gitconfig" --exclude ".inputrc" --exclude ".lesshst" --exclude ".octave_hist" --exclude ".octaverc" --exclude ".profile" --exclude ".ubcore" --exclude ".ubcorerc_pythonrc.py" --exclude ".ubcorerc-gnuoctave.m" --exclude ".viminfo" --exclude ".wget-hsts" --exclude "bin" "$currentSource" "$currentDestination"
 }
 _backup_restore_vm-wsl2-rsync-basic() {
     local currentSource
