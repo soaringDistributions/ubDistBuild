@@ -685,7 +685,7 @@ _create_ubDistBuild-rotten_install-core() {
 	# WARNING: May be untested.
 	# Eventually, a custom function may be necessary. Despite the name, the 'ubuntu-22.04' install script may have a better chance with recent versions of debian.
 	# https://github.com/Klipper3d/klipper/issues/5523
-	#_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/klipper ; chmod 755 ./scripts/install-ubuntu-22.04.sh ; ./scripts/install-ubuntu-22.04.sh'
+	#_chroot sudo -n -u user bash -c 'cd /home/user/core/installations/klipper ; chmod 755 ./scripts/install-ubuntu-22.04.sh ; ./scripts/install-ubuntu-22.04.sh'
 
 	# systemctl status klipper
 	# cat /tmp/klippy.log
@@ -693,8 +693,8 @@ _create_ubDistBuild-rotten_install-core() {
 
 
 
-	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/kiauh-automatic ; chmod 755 ./magic.sh ; ./magic.sh'
-	#_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/kiauh-automatic ; chmod 755 ./auto.sh ; ./auto.sh'
+	_chroot sudo -n -u user bash -c 'cd /home/user/core/installations/kiauh-automatic ; chmod 755 ./magic.sh ; ./magic.sh'
+	#_chroot sudo -n -u user bash -c 'cd /home/user/core/installations/kiauh-automatic ; chmod 755 ./auto.sh ; ./auto.sh'
 	_chroot sudo -n systemctl disable KlipperScreen
 	_chroot systemctl disable KlipperScreen.service
 	_chroot sudo -n systemctl stop KlipperScreen
