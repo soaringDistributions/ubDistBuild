@@ -1369,7 +1369,11 @@ _zSpecial_qemu_chroot() {
 		sudo -n chown "$USER":"$USER" "$scriptLocal"/binReport
 	fi
 
-
+	if [[ -e "$globalVirtFS"/lsmodReport ]]
+	then
+		sudo -n cp -f "$globalVirtFS"/lsmodReport "$scriptLocal"/lsmodReport
+		sudo -n chown "$USER":"$USER" "$scriptLocal"/lsmodReport
+	fi
 
 
 	_chroot rmdir /var/lib/docker/runtimes
