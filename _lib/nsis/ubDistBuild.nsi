@@ -106,6 +106,35 @@ Section "Install"
   ExecWait '"msiexec" /i "$TEMP\ubDistBuild_bundle\wsl-usb-gui\WSL-USB-4.0.0.msi" /passive /norestart'
 
 
+  ;start /wait
+  SetOutPath "$TEMP\ubDistBuild_bundle\vc_redist"
+  File /r "..\..\..\ubDistBuild-accessories\parts\ubDistBuild_bundle\vc_redist\*"
+  IfSilent +2
+  ExecWait "$TEMP\ubDistBuild_bundle\vc_redist\vc_redist.x64.exe"
+  IfSilent 0 +2
+  ExecWait "$TEMP\ubDistBuild_bundle\vc_redist\vc_redist.x64.exe /install /passive /norestart"
+  ;ExecWait "$TEMP\ubDistBuild_bundle\vc_redist\vc_redist.x64.exe /Q"
+
+
+  ;https://silentinstallhq.com/oracle-vm-virtualbox-6-1-silent-install-how-to-guide/
+  ;start /wait
+  SetOutPath "$TEMP\ubDistBuild_bundle-adhoc\virtualbox"
+  File /r "..\..\..\ubDistBuild-accessories\parts\ubDistBuild_bundle-adhoc\virtualbox\*"
+  IfSilent +2
+  ExecWait "$TEMP\ubDistBuild_bundle-adhoc\virtualbox\VirtualBox-7.0.10-158379-Win.exe"
+  IfSilent 0 +2
+  ExecWait "$TEMP\ubDistBuild_bundle-adhoc\virtualbox\VirtualBox-7.0.10-158379-Win.exe --silent --ignore-reboot"
+
+
+  ;start /wait
+  SetOutPath "$TEMP\ubDistBuild_bundle-adhoc\qemu"
+  File /r "..\..\..\ubDistBuild-accessories\parts\ubDistBuild_bundle-adhoc\qemu\*"
+  IfSilent +2
+  ExecWait "$TEMP\ubDistBuild_bundle-adhoc\qemu\qemu-w64-setup-20230817.exe"
+  IfSilent 0 +2
+  ExecWait "$TEMP\ubDistBuild_bundle-adhoc\qemu\qemu-w64-setup-20230817.exe /S"
+
+
   ExpandEnvStrings $5 %COMSPEC%
   ExecWait '"$5" /C "C:\core\infrastructure\ubDistBuild\_bin.bat" _setup_install $0'
   DetailPrint '"$0"'

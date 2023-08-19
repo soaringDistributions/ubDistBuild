@@ -138,6 +138,12 @@ _build_ubDistBuild-fetch() {
     cd "$functionEntryPWD"
 
 
+    mkdir -p "$currentAccessoriesDir"/parts/ubDistBuild_bundle-adhoc/
+    cd "$currentAccessoriesDir"/parts/ubDistBuild_bundle-adhoc/
+    wget 'https://download.virtualbox.org/virtualbox/7.0.10/VirtualBox-7.0.10-158379-Win.exe'
+    wget 'https://qemu.weilnetz.de/w64/2023/qemu-w64-setup-20230817.exe'
+    cd "$functionEntryPWD"
+
 
     cd "$functionEntryPWD"
     _stop
