@@ -694,7 +694,10 @@ _create_ubDistBuild-rotten_install-core() {
 
 
 	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/kiauh-automatic ; chmod 755 ./scripts/magic.sh ; ./scripts/magic.sh'
-	
+	_chroot sudo -n systemctl disable KlipperScreen
+	_chroot systemctl disable KlipperScreen.service
+	_chroot sudo -n systemctl stop KlipperScreen
+	_chroot systemctl stop KlipperScreen.service
 
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0
