@@ -2,6 +2,7 @@ _compile_bash_deps_prog() {
 	if [[ "$1" == "ubDistBuild" ]]
 	then
 		_compile_bash_deps "core"
+		_deps_github
 		_deps_virt_translation_gui
 		return 0
 	fi
