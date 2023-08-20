@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2581292459'
+export ub_setScriptChecksum_contents='371811405'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -43062,37 +43062,38 @@ _build_ubDistBuild-fetch() {
     mkdir -p "$currentAccessoriesDir"/parts/ubDistBuild
     cd "$currentAccessoriesDir"/parts/ubDistBuild
     cp -a "$scriptAbsoluteFolder"/.git ./
-    git config gc.pruneExpire now
-    git config gc.reflogExpire now
-    git config gc.reflogExpireUnreachable now
+    #git config gc.pruneExpire now
+    #git config gc.reflogExpire now
+    #git config gc.reflogExpireUnreachable now
     git reset --hard
     git submodule update
-    git gc --aggressive
+    git gc
+    #git gc --aggressive
 
-    git show-ref -s HEAD > $(git rev-parse --git-dir)/shallow
-    git reflog expire --expire-unreachable=now --all
-    git reflog expire --expire=0
-    git reflog expire --expire=now --all
-    git prune
-    git prune-packed
+    #git show-ref -s HEAD > $(git rev-parse --git-dir)/shallow
+    #git reflog expire --expire-unreachable=now --all
+    #git reflog expire --expire=0
+    #git reflog expire --expire=now --all
+    #git prune
+    #git prune-packed
 
     cd "$currentAccessoriesDir"/parts/ubDistBuild/_lib/ubiquitous_bash/
-    git show-ref -s HEAD > $(git rev-parse --git-dir)/shallow
-    git reflog expire --expire-unreachable=now --all
-    git reflog expire --expire=0
-    git reflog expire --expire=now --all
-    git prune
-    git prune-packed
+    #git show-ref -s HEAD > $(git rev-parse --git-dir)/shallow
+    #git reflog expire --expire-unreachable=now --all
+    #git reflog expire --expire=0
+    #git reflog expire --expire=now --all
+    #git prune
+    #git prune-packed
 
     cd "$currentAccessoriesDir"/parts/ubDistBuild/
-    git reflog expire --expire-unreachable=now --all
-    git reflog expire --expire=now --all
-    git reflog expire --expire=0
-    git prune
-    git prune-packed
-    git gc --prune=all
-    git gc --aggressive
-    git gc
+    #git reflog expire --expire-unreachable=now --all
+    #git reflog expire --expire=now --all
+    #git reflog expire --expire=0
+    #git prune
+    #git prune-packed
+    #git gc --prune=all
+    #git gc --aggressive
+    #git gc
 
 
     cd "$functionEntryPWD"
