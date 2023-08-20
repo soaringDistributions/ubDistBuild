@@ -123,6 +123,8 @@ _build_ubDistBuild-fetch() {
     #git gc --aggressive
     #git gc
 
+    _github_removeActionsHTTPS ./.git
+
 
     cd "$functionEntryPWD"
 
