@@ -397,10 +397,23 @@ CZXWXcRMTo8EmM8i4d
 	then
 		_chroot dpkg -i /firmware-realtek_20210818-1_all.deb
 	else
+		# WARNING: HTTP (as opposed to HTTPS) strongly discouraged.
 		#_chroot wget http://ftp.us.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-realtek_20210818-1_all.deb
-		_chroot wget https://mirrorservice.org/sites/ftp.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-realtek_20210818-1_all.deb
+		#_chroot wget https://mirrorservice.org/sites/ftp.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-realtek_20210818-1_all.deb
 		
 		_chroot dpkg -i ./firmware-realtek_20210818-1_all.deb
+	fi
+
+	sudo -n cp "$scriptLib"/setup/debian/firmware-iwlwifi_20230515-3_all.deb "$globalVirtFS"/
+	if _chroot ls -A -1 /firmware-iwlwifi_20230515-3_all.deb > /dev/null
+	then
+		_chroot dpkg -i /firmware-iwlwifi_20230515-3_all.deb
+	else
+		# WARNING: HTTP (as opposed to HTTPS) strongly discouraged.
+		#_chroot wget http://ftp.us.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-iwlwifi_20230515-3_all.deb
+		#_chroot wget https://mirrorservice.org/sites/ftp.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-iwlwifi_20230515-3_all.deb
+		
+		_chroot dpkg -i ./firmware-iwlwifi_20230515-3_all.deb
 	fi
 	
 	#sudo -n cp "$scriptLib"/setup/debian/firmware-amd-graphics_20210818-1_all.deb "$globalVirtFS"/
