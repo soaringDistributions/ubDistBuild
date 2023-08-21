@@ -539,7 +539,8 @@ _detect_installed_nvidia() {
 	
 	modprobe -l 2>/dev/null | grep -v -i 'nvidiafb' | grep -v -i 'typec' | grep -v -i 'eth' | grep 'nvidia' && _stop 0
 	
-	find /lib/modules/`uname -r` -name '*.ko' -type f -printf '%P\n' | grep -v -i 'nvidiafb' | grep -v -i 'typec' | grep -v -i 'eth' | grep 'nvidia' && _stop 0
+	# nvidia-wmi-ec-backlight
+	find /lib/modules/`uname -r` -name '*.ko' -type f -printf '%P\n' | grep -v -i 'nvidiafb' | grep -v -i 'typec' | grep -v -i 'eth' | grep -v -i 'backlight' | grep 'nvidia' && _stop 0
 	
 	lsmod | cut -f1 -d\  | grep -v -i 'nvidiafb' | grep 'nvidia' && _stop 0
 	
