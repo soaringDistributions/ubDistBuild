@@ -86,10 +86,22 @@ _build_ubDistBuild-fetch() {
     cd "$functionEntryPWD"
 
 
+    cd "$currentAccessoriesDir"/parts
+    if [[ "$objectName" == "ubDistBuild" ]]
+    then
+        _gitBest clone --recursive git@github.com:soaringDistributions/"$objectName".git
+    else
+        _gitBest clone --recursive git@github.com:mirage335/"$objectName".git
+    fi
 
-    mkdir -p "$currentAccessoriesDir"/parts/ubDistBuild
-    cd "$currentAccessoriesDir"/parts/ubDistBuild
-    cp -a "$scriptAbsoluteFolder"/.git ./
+    mkdir -p "$currentAccessoriesDir"/parts/"$objectName"
+    cd "$currentAccessoriesDir"/parts/"$objectName"
+    if [[ ! -e ./.git ]]
+    then
+        cp -a "$scriptAbsoluteFolder"/.git ./
+    fi
+
+
     #git config gc.pruneExpire now
     #git config gc.reflogExpire now
     #git config gc.reflogExpireUnreachable now

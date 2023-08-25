@@ -319,6 +319,49 @@ _setup_vm-wsl2_sequence() {
     _userMSW _messagePlain_probe wsl --import ubdist '/cygdrive/c/core/infrastructure/ubdist_wsl' "$scriptLocal"/package_rootfs.tar --version 2
     _userMSW wsl --import ubdist '/cygdrive/c/core/infrastructure/ubdist_wsl' "$scriptLocal"/package_rootfs.tar --version 2
 
+
+    # Preserve fallback and rootfs if automatic test is successful. Expected to suffice for rebuilding 'ubdist' or other dist/OS from an MSW host if necessary.
+    if wsl -d "ubdist" /bin/true > /dev/null 2>&1 && ! wsl -d "ubdist" /bin/false > /dev/null 2>&1 && wsl -d ubdist /home/user/ubiquitous_bash.sh _true && ! wsl -d ubdist /home/user/ubiquitous_bash.sh _false
+    then
+        _messagePlain_good 'good: wsl: ubdist: true/false'
+
+        mkdir -p '/cygdrive/c/core/infrastructure/ubdist_wsl_recovery/autotest_success'
+        cp "$scriptLocal"/package_rootfs.tar '/cygdrive/c/core/infrastructure/ubdist_wsl_recovery/autotest_success/package_rootfs.tar'
+
+        mkdir -p '/cygdrive/c/core/infrastructure/ubdist_wsl_fallback'
+        _userMSW _messagePlain_probe wsl --import ubdist_fallback '/cygdrive/c/core/infrastructure/ubdist_wsl_fallback' "$scriptLocal"/package_rootfs.tar --version 2
+        _userMSW wsl --import ubdist_fallback '/cygdrive/c/core/infrastructure/ubdist_wsl_fallback' "$scriptLocal"/package_rootfs.tar --version 2
+
+        if wsl -d "ubdist" /bin/true > /dev/null 2>&1 && ! wsl -d "ubdist" /bin/false > /dev/null 2>&1 && wsl -d ubdist /home/user/ubiquitous_bash.sh _true && ! wsl -d ubdist /home/user/ubiquitous_bash.sh _false
+        then
+            _messagePlain_good 'good: wsl: ubdist_fallback: true/false'
+        else
+            _messagePlain_bad 'fail: wsl: ubdist_fallback: true/false'
+            sleep 15
+            _messageFAIL
+            _stop 1
+            return 1
+        fi
+
+        if [[ -e '/cygdrive/c/core/infrastructure/ubdist_wsl_recovery/autotest_success/package_rootfs.tar' ]]
+        then
+            _messagePlain_good 'good: autotest_success: package_rootfs.tar'
+        else
+            _messagePlain_bad 'fail: autotest_success: package_rootfs.tar'
+            sleep 15
+            _messageFAIL
+            _stop 1
+            return 1
+        fi
+    else
+        _messagePlain_bad 'fail: wsl: ubdist: true/false'
+        sleep 15
+        _messageFAIL
+        _stop 1
+        return 1
+    fi
+
+
     _messagePlain_probe wsl --set-default ubdist
     wsl --set-default ubdist
 

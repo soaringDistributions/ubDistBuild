@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1900127426'
+export ub_setScriptChecksum_contents='2814606825'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -277,8 +277,8 @@ fi
 
 
 # ATTENTION: Highly irregular. Workaround due to gsch2pcb installed by nix package manager not searching for installed footprints.
-if [[ "$NIX_PROFILES" != "" ]]
-then
+#if [[ "$NIX_PROFILES" != "" ]]
+#then
 	if [[ -e "$HOME"/.nix-profile/bin/gsch2pcb ]] && [[ -e /usr/local/share/pcb/newlib ]] && [[ -e /usr/local/lib/pcb_lib ]]
 	then
 		gsch2pcb() {
@@ -290,7 +290,7 @@ then
 			"$HOME"/.nix-profile/bin/gsch2pcb --elements-dir /usr/share/pcb/pcblib-newlib "$@"
 		}
 	fi
-fi
+#fi
 
 
 # Only production use is Inter-Process Communication (IPC) loops which may be theoretically impossible to make fully deterministic under Operating Systems which do not have hard-real-time kernels and/or may serve an unlimited number of processes.
@@ -43099,10 +43099,22 @@ _build_ubDistBuild-fetch() {
     cd "$functionEntryPWD"
 
 
+    cd "$currentAccessoriesDir"/parts
+    if [[ "$objectName" == "ubDistBuild" ]]
+    then
+        _gitBest clone --recursive git@github.com:soaringDistributions/"$objectName".git
+    else
+        _gitBest clone --recursive git@github.com:mirage335/"$objectName".git
+    fi
 
-    mkdir -p "$currentAccessoriesDir"/parts/ubDistBuild
-    cd "$currentAccessoriesDir"/parts/ubDistBuild
-    cp -a "$scriptAbsoluteFolder"/.git ./
+    mkdir -p "$currentAccessoriesDir"/parts/"$objectName"
+    cd "$currentAccessoriesDir"/parts/"$objectName"
+    if [[ ! -e ./.git ]]
+    then
+        cp -a "$scriptAbsoluteFolder"/.git ./
+    fi
+
+
     #git config gc.pruneExpire now
     #git config gc.reflogExpire now
     #git config gc.reflogExpireUnreachable now
@@ -43672,6 +43684,49 @@ _setup_vm-wsl2_sequence() {
     mkdir -p '/cygdrive/c/core/infrastructure/ubdist_wsl'
     _userMSW _messagePlain_probe wsl --import ubdist '/cygdrive/c/core/infrastructure/ubdist_wsl' "$scriptLocal"/package_rootfs.tar --version 2
     _userMSW wsl --import ubdist '/cygdrive/c/core/infrastructure/ubdist_wsl' "$scriptLocal"/package_rootfs.tar --version 2
+
+
+    # Preserve fallback and rootfs if automatic test is successful. Expected to suffice for rebuilding 'ubdist' or other dist/OS from an MSW host if necessary.
+    if wsl -d "ubdist" /bin/true > /dev/null 2>&1 && ! wsl -d "ubdist" /bin/false > /dev/null 2>&1 && wsl -d ubdist /home/user/ubiquitous_bash.sh _true && ! wsl -d ubdist /home/user/ubiquitous_bash.sh _false
+    then
+        _messagePlain_good 'good: wsl: ubdist: true/false'
+
+        mkdir -p '/cygdrive/c/core/infrastructure/ubdist_wsl_recovery/autotest_success'
+        cp "$scriptLocal"/package_rootfs.tar '/cygdrive/c/core/infrastructure/ubdist_wsl_recovery/autotest_success/package_rootfs.tar'
+
+        mkdir -p '/cygdrive/c/core/infrastructure/ubdist_wsl_fallback'
+        _userMSW _messagePlain_probe wsl --import ubdist_fallback '/cygdrive/c/core/infrastructure/ubdist_wsl_fallback' "$scriptLocal"/package_rootfs.tar --version 2
+        _userMSW wsl --import ubdist_fallback '/cygdrive/c/core/infrastructure/ubdist_wsl_fallback' "$scriptLocal"/package_rootfs.tar --version 2
+
+        if wsl -d "ubdist" /bin/true > /dev/null 2>&1 && ! wsl -d "ubdist" /bin/false > /dev/null 2>&1 && wsl -d ubdist /home/user/ubiquitous_bash.sh _true && ! wsl -d ubdist /home/user/ubiquitous_bash.sh _false
+        then
+            _messagePlain_good 'good: wsl: ubdist_fallback: true/false'
+        else
+            _messagePlain_bad 'fail: wsl: ubdist_fallback: true/false'
+            sleep 15
+            _messageFAIL
+            _stop 1
+            return 1
+        fi
+
+        if [[ -e '/cygdrive/c/core/infrastructure/ubdist_wsl_recovery/autotest_success/package_rootfs.tar' ]]
+        then
+            _messagePlain_good 'good: autotest_success: package_rootfs.tar'
+        else
+            _messagePlain_bad 'fail: autotest_success: package_rootfs.tar'
+            sleep 15
+            _messageFAIL
+            _stop 1
+            return 1
+        fi
+    else
+        _messagePlain_bad 'fail: wsl: ubdist: true/false'
+        sleep 15
+        _messageFAIL
+        _stop 1
+        return 1
+    fi
+
 
     _messagePlain_probe wsl --set-default ubdist
     wsl --set-default ubdist
