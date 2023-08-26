@@ -712,6 +712,10 @@ _create_ubDistBuild-rotten_install-core() {
 	_chroot systemctl disable KlipperScreen.service
 	_chroot sudo -n systemctl stop KlipperScreen
 	_chroot systemctl stop KlipperScreen.service
+	_chroot sudo -n systemctl disable crowsnest
+	_chroot systemctl disable crowsnest.service
+	_chroot sudo -n systemctl stop crowsnest
+	_chroot systemctl stop crowsnest.service
 
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0
