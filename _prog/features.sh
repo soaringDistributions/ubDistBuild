@@ -929,7 +929,7 @@ _sshid-export-wsl2() {
     wsl -d "ubdist" '~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh' '_wrap' "'""$currentScriptAbsoluteLocationMSW""'" _export_wsl2-gitconfig-wsl2 "'""$current_gitconfig_MSW""'"
     ( [[ "$?" != "0" ]] || [[ "$currentExitStatus" != "0" ]] ) && currentExitStatus=1
 
-    _messagePlain_probe chmod 600 "$current_ssh_UNIX"/id_'*'
+    #_messagePlain_probe chmod 600 "$current_ssh_UNIX"/id_'*'
     chmod 600 "$current_ssh_UNIX"/id_*
     chmod 755 "$current_ssh_UNIX"/id_*.pub
 
@@ -937,6 +937,11 @@ _sshid-export-wsl2() {
     _messagePlain_probe chmod 600 "$HOME"/.ssh/id_'*'
     chmod 600 "$HOME"/.ssh/id_*
     chmod 755 "$HOME"/.ssh/id_*.pub
+
+    # WARNING: Setting permissions through MSW, isntead of from within Cygwin itself, may result incorrectly set permissions too open.
+    # Other commands to set 'chmod 600' may in fact have had the opposite effect.
+    '/cygdrive/c/core/infrastructure/ubiquitous_bash/_bin.bat' chmod 600 /home/root/.ssh/id_*
+    '/cygdrive/c/core/infrastructure/ubiquitous_bash/_bin.bat' chmod 755 /home/root/.ssh/id_*.pub
 
     return "$currentExitStatus"
 }
