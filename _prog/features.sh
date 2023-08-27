@@ -476,6 +476,17 @@ _write_kernelConfig_wsl2() {
 
     cp Microsoft/config-wsl .config
 
+    ./scripts/config --enable CONFIG_PREEMPT
+
+    # Maybe not ideal. VR framerates are closer to fractions of 360Hz (30, 45, 60, 75, 90, !114, 120, 144, 180, 240) .
+    # Expect 300Hz is ok for WSL2 . Worst case jitter or latency of ~3ms is less than one frame at usual 2D framerates, and both CPU/GPU frametime margins for 2D content are normally much greater.
+    # Setting this too high might cause VR performance issues. Historically, VirtualBox has had significant performance cost (a few milliseconds per frame) against VR frametimes
+    # https://www.pugetsystems.com/labs/hpc/does-enabling-wsl2-affect-performance-of-windows-10-applications-1832/
+    #  Suggests approximately 2percent worst case possible performance loss (with reasonable interpretation of margin of error).
+    #  Much above 2percent would be approaching significantly lower practical VR resolution, significant loss of hard earned CPU/RAM clocking gains, etc.
+    #   However, these results may include the performance cost of enabling HyperV virtualization at all, which may already be a dire security necessity.
+    ./scripts/config --enable CONFIG_HZ_300
+
     ./scripts/config --enable CONFIG_KVM
     ./scripts/config --enable CONFIG_KVM_INTEL
     ./scripts/config --enable CONFIG_KVM_AMD
