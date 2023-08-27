@@ -66,6 +66,7 @@ _build_ubDistBuild-fetch() {
     _start
     #mkdir -p "$shortTmp"
     local functionEntryPWD="$PWD"
+    cd "$scriptAbsoluteFolder"
 
 
     export currentAccessoriesDir="$scriptAbsoluteFolder"/../"$objectName"-accessories

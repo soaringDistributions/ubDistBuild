@@ -484,15 +484,188 @@ true
 #####Entry
 # ###
 
-# https://www.reddit.com/r/linux4noobs/comments/115d0o4/how_do_you_install_the_open_source_nvidia_drivers/
-#  'This can be achieved by installing the NVIDIA GPU driver from the .run file using the --no-kernel-modules option. E.g.,'
 
-# https://www.nvidia.com/en-us/drivers/unix/
-#  'Latest Legacy GPU version'
-# https://www.nvidia.com/download/driverResults.aspx/187162/en-us
-# https://www.nvidia.com/Download/driverResults.aspx/44241/en-us
-export currentVersion='535.98'
 
+
+_set_nvidia() {
+	# https://www.reddit.com/r/linux4noobs/comments/115d0o4/how_do_you_install_the_open_source_nvidia_drivers/
+	#  'This can be achieved by installing the NVIDIA GPU driver from the .run file using the --no-kernel-modules option. E.g.,'
+
+	# https://www.nvidia.com/en-us/drivers/unix/
+	#  'Latest Legacy GPU version'
+	# https://www.nvidia.com/download/driverResults.aspx/187162/en-us
+	# https://www.nvidia.com/Download/driverResults.aspx/44241/en-us
+
+	# Tested apparently successfully.
+	#export currentVersion='535.98'
+
+	export currentVersion='535.104.05'
+	export currentVersion_legacy470='470.199.02'
+
+
+	# https://www.nvidia.com/en-us/drivers/unix/legacy-gpu/
+	# LibreOffice Calc RegEx Search/Replace   (.*)   $1
+	# LibreOffice Calc Formula   =CONCATENATE(D8,B8,C8,E8)
+	# LibreOffice Calc RegEx Search/Replace    '$   '
+	#  IMPORTANT: Whitespace before quote in Search .
+	
+[[ $(lspci -nn -d ':0FC6' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FC8' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FC9' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FCD' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FCE' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FD1' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FD2' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FD2' -s '1028:0595' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FD2' -s '1028:05B2' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FD3' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FD4' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FD5' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FD8' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FD9' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FDF' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FE0' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FE1' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FE2' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FE3' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FE3' -s '103C:2B16' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FE3' -s '17AA:3675' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FE4' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FE9' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FEA' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FEC' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FED' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FEE' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FF6' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FF8' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FF9' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FFA' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FFB' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FFC' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FFD' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FFE' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':0FFF' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1001' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1004' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1005' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1007' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1008' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':100A' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':100C' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1021' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1022' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1023' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1024' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1026' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1027' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1028' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1029' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':102A' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':102D' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':103A' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':103C' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1180' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1183' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1184' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1185' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1185' -s '10DE:106F' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1187' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1188' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1189' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1189' -s '10DE:1074' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':118A' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':118E' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':118F' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1193' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1194' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1195' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1198' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1199' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1199' -s '1458:D001' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':119A' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':119D' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':119E' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':119F' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11A0' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11A1' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11A2' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11A3' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11A7' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11B4' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11B6' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11B7' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11B8' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11BA' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11BC' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11BD' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11BE' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11C0' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11C2' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11C3' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11C4' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11C5' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11C6' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11C8' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11CB' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':110' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1100' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11000' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11000' -s '17AA:3683' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11FA' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':11FC' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1280' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1281' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1282' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1284' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1286' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1287' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1288' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1289' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':128B' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1290' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1290' -s '103C:2AFA' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1291' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1292' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1292' -s '17AA:3675' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1292' -s '17AA:367C' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1292' -s '17AA:3684' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1293' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1295' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1295' -s '103C:2B0D' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1295' -s '103C:2B0F' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1295' -s '103C:2B20' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1295' -s '103C:2B21' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1295' -s '17AA:367A' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1295' -s '17AA:367C' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1296' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1298' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1299' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1299' -s '17AA:30BB' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1299' -s '17AA:30DA' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1299' -s '17AA:30DC' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1299' -s '17AA:30DD' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1299' -s '17AA:30DF' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1299' -s '17AA:3117' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1299' -s '17AA:361B' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1299' -s '17AA:362D' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1299' -s '17AA:362E' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1299' -s '17AA:3630' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1299' -s '17AA:3637' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1299' -s '17AA:369B' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1299' -s '17AA:36A7' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1299' -s '17AA:36AF' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1299' -s '17AA:36F0' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':1299' -s '1B0A:01C6' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':129A' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':12B9' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+[[ $(lspci -nn -d ':12BA' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470" 
+
+
+
+	#[[ $(lspci -nn -d ':11fc' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470"
+	#lspci | grep -i 'Quadro K2100M' > /dev/null 2>&1 && export currentVersion="$currentVersion_legacy470"
+}
 
 
 
@@ -567,6 +740,8 @@ _detect_nvidia() {
 
 _fetch_nvidia() {
 	_messageNormal 'init: _fetch_nvidia'
+	_set_nvidia
+
 	cd "$scriptAbsoluteFolder"
 	
 	# https://gitweb.gentoo.org/repo/gentoo.git/tree/x11-drivers/nvidia-drivers/nvidia-drivers-510.60.02.ebuild
@@ -598,6 +773,8 @@ _fetch_nvidia() {
 
 _install_nvidia() {
 	_messageNormal 'init: _install_nvidia'
+	_set_nvidia
+
 	# https://ubuntu.com/blog/how-to-sign-things-for-secure-boot
 	# https://download.nvidia.com/XFree86/Linux-x86_64/384.111/README/installdriver.html
 	

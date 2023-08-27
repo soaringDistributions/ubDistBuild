@@ -1868,6 +1868,25 @@ _convert-vhdx() {
 
 _convert-live() {
 	_messageNormal '_convert: vm-live.iso'
+
+
+	_messageNormal 'convert-live: chroot'
+
+	_messagePlain_nominal 'Attempt: _openChRoot'
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	
+
+	# Provide more information to convert 'vm-live.iso' back to 'vm.img' (and other things), while offline from only a Live BD-ROM disc (or other source of the squashfs root filesystem) .
+	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/extendedInterface && [[ ! -e /home/user/core/infrastructure/extendedInterface-accessories/parts ]] && ./ubiquitous_bash.sh _build_extendedInterface-fetch'
+
+	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistBuild && [[ ! -e /home/user/core/infrastructure/ubDistBuild-accessories/parts ]] && ./ubiquitous_bash.sh _build_ubDistBuild-fetch'
+
+
+	_messagePlain_nominal 'Attempt: _closeChRoot'
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+	
+
 	
 	if ! "$scriptAbsoluteLocation" _live_sequence_in "$@"
 	then
