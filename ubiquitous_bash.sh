@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='501686902'
+export ub_setScriptChecksum_contents='1779709739'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -10092,6 +10092,8 @@ _getMost_debian11_install() {
 	then
 		_getMost_backend_aptGetInstall linux-headers-$(uname -r)
 	fi
+
+	_getMost_backend_aptGetInstall initramfs-tools
 	
 	_getMost_backend_aptGetInstall net-tools wireless-tools rfkill
 	
@@ -10384,6 +10386,7 @@ _getMost_debian11_install() {
 	_getMost_backend_aptGetInstall debhelper
 	
 	_getMost_backend_aptGetInstall p7zip
+	_getMost_backend_aptGetInstall p7zip-full
 	_getMost_backend_aptGetInstall nsis
 
 	_getMost_backend_aptGetInstall dos2unix
@@ -17697,16 +17700,16 @@ _live_sequence_in() {
 	_messagePlain_nominal 'Attempt: _openChRoot'
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 
-	#_chroot systemctl disable nfs-blkmap
-	#_chroot systemctl disable nfs-idmapd
-	#_chroot systemctl disable nfs-mountd
-	#_chroot systemctl disable nfs-server
-	#_chroot systemctl disable nfsdcld
+	##_chroot systemctl disable nfs-blkmap
+	##_chroot systemctl disable nfs-idmapd
+	##_chroot systemctl disable nfs-mountd
+	##_chroot systemctl disable nfs-server
+	##_chroot systemctl disable nfsdcld
 
-	#_chroot systemctl disable ssh
-	#_chroot systemctl disable sshd
+	##_chroot systemctl disable ssh
+	##_chroot systemctl disable sshd
 
-	_chroot systemctl disable exim4
+	#_chroot systemctl disable exim4
 
 
 	_live_preload_here | sudo -n tee "$globalVirtFS"/usr/share/initramfs-tools/scripts/init-bottom/preload_run > /dev/null
@@ -17722,10 +17725,21 @@ DefaultTasksMax=12' | sudo -n tee "$globalVirtFS"/etc/systemd/system.conf > /dev
 	_chroot update-initramfs -u -k all
 
 
+
+	# Solely to provide more information to convert 'vm-live.iso' back to 'vm.img' offline from only a Live BD-ROM disc .
+	mkdir -p "$safeTmp"/root002
+	sudo -n cp -a "$globalVirtFS"/boot  "$safeTmp"/root002/boot-copy
+	sudo -n cp -a "$globalVirtFS"/etc/fstab  "$safeTmp"/root002/fstab-copy
+
+
+
 	_messagePlain_nominal 'Attempt: _closeChRoot'
 	#sudo -n umount "$globalVirtFS"/boot/efi > /dev/null 2>&1
 	#sudo -n umount "$globalVirtFS"/boot > /dev/null 2>&1
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+
+
 
 
 	
@@ -17806,6 +17820,12 @@ DefaultTasksMax=12' | sudo -n tee "$globalVirtFS"/etc/systemd/system.conf > /dev
 	#sudo -n mksquashfs "$globalVirtFS" "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1 -e home/user/core -e boot -e etc/fstab
 
 
+
+	# Solely to provide more information to convert 'vm-live.iso' back to 'vm.img' offline from only a Live BD-ROM disc .
+	sudo -n mksquashfs "$safeTmp"/root002 "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1 -e boot -e etc/fstab
+	du -sh "$scriptLocal"/livefs/image/live/filesystem.squashfs
+	sudo -n chown "$USER":"$USER" "$safeTmp"/root002
+	_safeRMR "$safeTmp"/root002
 
 	mkdir -p "$safeTmp"/root001
 	sudo -n cp -a "$globalVirtFS"/home  "$safeTmp"/root001/
@@ -42889,6 +42909,25 @@ _convert-vhdx() {
 
 _convert-live() {
 	_messageNormal '_convert: vm-live.iso'
+
+
+	_messageNormal 'convert-live: chroot'
+
+	_messagePlain_nominal 'Attempt: _openChRoot'
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	
+
+	# Provide more information to convert 'vm-live.iso' back to 'vm.img' (and other things), while offline from only a Live BD-ROM disc (or other source of the squashfs root filesystem) .
+	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/extendedInterface && [[ ! -e /home/user/core/infrastructure/extendedInterface-accessories/parts ]] && ./ubiquitous_bash.sh _build_extendedInterface-fetch'
+
+	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistBuild && [[ ! -e /home/user/core/infrastructure/ubDistBuild-accessories/parts ]] && ./ubiquitous_bash.sh _build_ubDistBuild-fetch'
+
+
+	_messagePlain_nominal 'Attempt: _closeChRoot'
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+	
+
 	
 	if ! "$scriptAbsoluteLocation" _live_sequence_in "$@"
 	then
@@ -43271,6 +43310,7 @@ _build_ubDistBuild-fetch() {
     _start
     #mkdir -p "$shortTmp"
     local functionEntryPWD="$PWD"
+    cd "$scriptAbsoluteFolder"
 
 
     export currentAccessoriesDir="$scriptAbsoluteFolder"/../"$objectName"-accessories
@@ -43948,6 +43988,37 @@ _setup_vm-wsl2_sequence() {
         fi
         rm -rf /cygdrive/c/core/infrastructure/uwsl-h-b-uninstalled
     fi
+
+
+    #_messagePlain_probe 'wsl: disable unnecessary systemd services'
+
+    #wsl -d ubdist sudo -n systemctl disable exim4
+    #wsl -d ubdist sudo -n systemctl disable wpa_supplicant
+    #wsl -d ubdist sudo -n systemctl disable NetworkManager
+
+    ##wsl -d ubdist sudo -n systemctl disable ssh
+    ##wsl -d ubdist sudo -n systemctl disable sshd
+
+    #wsl -d ubdist sudo -n systemctl disable nfs-blkmap
+	#wsl -d ubdist sudo -n systemctl disable nfs-idmapd
+	#wsl -d ubdist sudo -n systemctl disable nfs-mountd
+	#wsl -d ubdist sudo -n systemctl disable nfs-server
+	#wsl -d ubdist sudo -n systemctl disable nfsdcld
+
+	#wsl -d ubdist sudo -n systemctl disable lm-sensors
+	#wsl -d ubdist sudo -n systemctl disable cron
+
+	#wsl -d ubdist sudo -n systemctl disable console-getty
+	#wsl -d ubdist sudo -n systemctl disable getty@tty1.service
+	#wsl -d ubdist sudo -n systemctl disable getty@tty2.service
+	#wsl -d ubdist sudo -n systemctl disable getty@tty3.service
+	#wsl -d ubdist sudo -n systemctl disable sddm
+    
+	#wsl -d ubdist sudo -n systemctl disable vboxadd
+	#wsl -d ubdist sudo -n systemctl disable vboxadd-service
+    
+
+
 
 
     #wsl --unregister ubdist

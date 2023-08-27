@@ -392,6 +392,37 @@ _setup_vm-wsl2_sequence() {
     fi
 
 
+    #_messagePlain_probe 'wsl: disable unnecessary systemd services'
+
+    #wsl -d ubdist sudo -n systemctl disable exim4
+    #wsl -d ubdist sudo -n systemctl disable wpa_supplicant
+    #wsl -d ubdist sudo -n systemctl disable NetworkManager
+
+    ##wsl -d ubdist sudo -n systemctl disable ssh
+    ##wsl -d ubdist sudo -n systemctl disable sshd
+
+    #wsl -d ubdist sudo -n systemctl disable nfs-blkmap
+	#wsl -d ubdist sudo -n systemctl disable nfs-idmapd
+	#wsl -d ubdist sudo -n systemctl disable nfs-mountd
+	#wsl -d ubdist sudo -n systemctl disable nfs-server
+	#wsl -d ubdist sudo -n systemctl disable nfsdcld
+
+	#wsl -d ubdist sudo -n systemctl disable lm-sensors
+	#wsl -d ubdist sudo -n systemctl disable cron
+
+	#wsl -d ubdist sudo -n systemctl disable console-getty
+	#wsl -d ubdist sudo -n systemctl disable getty@tty1.service
+	#wsl -d ubdist sudo -n systemctl disable getty@tty2.service
+	#wsl -d ubdist sudo -n systemctl disable getty@tty3.service
+	#wsl -d ubdist sudo -n systemctl disable sddm
+    
+	#wsl -d ubdist sudo -n systemctl disable vboxadd
+	#wsl -d ubdist sudo -n systemctl disable vboxadd-service
+    
+
+
+
+
     #wsl --unregister ubdist
 
     cd "$functionEntryPWD"

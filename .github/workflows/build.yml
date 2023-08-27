@@ -46,12 +46,13 @@ on:
         - ubuntu-latest-m
   # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
   schedule:
-    - cron: '5 7 * * 6'
+    #- cron: '5 7 * * 6'
     #- cron: '5 1 * * 6'
     #- cron: '5 1 * * 2,4'
     #- cron: '5 1 * * 2'
     #- cron: '5 1 * * 4'
     #- cron: '5 1 * * 5'
+    - cron: '5 7 15 * *'
 
 # https://docs.github.com/en/actions/using-jobs/using-concurrency
 concurrency:
@@ -295,6 +296,14 @@ jobs:
         #shell: bash
         #run: |
           #./_create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log- name: release! package_image
+      - name: mark! info! github
+        shell: bash
+        run: |
+          ! ./ubiquitous_bash.sh _openChRoot && exit 1
+          ! echo build-${{ github.run_id }}-${{ github.run_attempt }} | ./ubiquitous_bash.sh _chroot tee /info-github && exit 1
+          ! date +"%Y-%m-%d" | ./ubiquitous_bash.sh _chroot tee -a /info-github && exit 1
+          ! ./ubiquitous_bash.sh _closeChRoot && exit 1
+          true
       - name: release! report! internal
         uses: softprops/action-gh-release@v1
         with:
