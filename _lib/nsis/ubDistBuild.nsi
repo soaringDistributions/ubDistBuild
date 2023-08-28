@@ -41,7 +41,8 @@ Page instfiles
 !define HELPURL "https://github.com/soaringDistributions/ubDistBuild"
 !define UPDATEURL "https://github.com/soaringDistributions/ubDistBuild"
 !define ABOUTURL "https://github.com/soaringDistributions/ubDistBuild"
-!define INSTALLSIZE 4500000
+!define INSTALLSIZE 2800000
+;!define INSTALLSIZE 4500000
 
 
 Section "Install"
