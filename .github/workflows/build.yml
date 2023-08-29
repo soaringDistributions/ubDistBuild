@@ -142,15 +142,18 @@ jobs:
         with:
           ##root-reserve-mb: 512
           ##root-reserve-mb: 1450
-          #root-reserve-mb: 950
-          root-reserve-mb: 1750
+          ##root-reserve-mb: 950
+          #root-reserve-mb: 1750
+          root-reserve-mb: 1625
           ##temp-reserve-mb: 100
           ##temp-reserve-mb: 300
-          #temp-reserve-mb: 300
-          temp-reserve-mb: 700
+          ##temp-reserve-mb: 300
+          #temp-reserve-mb: 700
+          temp-reserve-mb: 50
           ##swap-size-mb: 128
           ##swap-size-mb: 192
-          swap-size-mb: 8
+          #swap-size-mb: 8
+          swap-size-mb: 2
           #swap-size-mb: 384
           #remove-dotnet: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
           remove-dotnet: 'true'
@@ -296,7 +299,7 @@ jobs:
         #shell: bash
         #run: |
           #./_create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log- name: release! package_image
-      - name: mark! info! github
+      - name: scribe! info! github
         shell: bash
         run: |
           ! ./ubiquitous_bash.sh _openChRoot && exit 1
@@ -378,6 +381,11 @@ jobs:
         run: |
           ./ubiquitous_bash.sh _ubDistBuild_split | sudo -n tee ./_lib/_ubDistBuild_split.log && exit ${PIPESTATUS[0]}
         timeout-minutes: 355
+      - name: df
+        shell: bash
+        run: |
+          df -h
+          df -h /
       - name: release! package_image
         uses: softprops/action-gh-release@v1
         with:
@@ -490,6 +498,11 @@ jobs:
         run: |
           ./ubiquitous_bash.sh _ubDistBuild_split-rootfs | sudo -n tee ./_lib/_ubDistBuild_split-rootfs.log && exit ${PIPESTATUS[0]}
         timeout-minutes: 355
+      - name: df
+        shell: bash
+        run: |
+          df -h
+          df -h /
       - name: release! package_rootfs
         uses: softprops/action-gh-release@v1
         with:
@@ -596,6 +609,11 @@ jobs:
         shell: bash
         run: |
           ./ubiquitous_bash.sh _ubDistBuild_split-live
+      - name: df
+        shell: bash
+        run: |
+          df -h
+          df -h /
       - name: release! live
         uses: softprops/action-gh-release@v1
         with:

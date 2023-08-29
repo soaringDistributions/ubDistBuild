@@ -638,6 +638,11 @@ _create_ubDistBuild-install-ubDistBuild() {
 	_chroot chmod 700 /home/user/ubDistBuild
 	#--quiet
 	_chroot sudo -n -u user bash -c 'cd /home/user/ubDistBuild ; git reset --hard ; git submodule update --force --no-fetch --recursive'
+
+
+	_messageNormal 'chroot: install: ubDistBuild: report: df'
+	_chroot df -h / /boot /boot/efi | _chroot tee /df
+	_chroot mount | grep '^.* on / ' | _chroot tee -a /df
 	
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
@@ -1876,11 +1881,17 @@ _convert-live() {
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
 
+
 	# Provide more information to convert 'vm-live.iso' back to 'vm.img' (and other things), while offline from only a Live BD-ROM disc (or other source of the squashfs root filesystem) .
 	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/extendedInterface && [[ ! -e /home/user/core/infrastructure/extendedInterface-accessories/parts ]] && ./ubiquitous_bash.sh _build_extendedInterface-fetch'
 
 	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistBuild && [[ ! -e /home/user/core/infrastructure/ubDistBuild-accessories/parts ]] && ./ubiquitous_bash.sh _build_ubDistBuild-fetch'
 
+
+
+	_messagePlain_nominal 'chroot: report: df-live'
+	_chroot df -h / /boot /boot/efi | _chroot tee /df-live
+	_chroot mount | grep '^.* on / ' | _chroot tee -a /df-live
 
 	_messagePlain_nominal 'Attempt: _closeChRoot'
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL

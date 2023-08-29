@@ -1,4 +1,6 @@
 
+_local/ubcp
+
 core.tar.xz
 
 
@@ -45,7 +47,7 @@ _local/ssh/log/
 
 
 
-!_local/ubcp
+#!_local/ubcp
 .search
 search/
 
