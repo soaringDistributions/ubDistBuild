@@ -97,7 +97,7 @@ jobs:
         timeout-minutes: 120
         run: |
           mkdir -p ../ubDistBuild-accessories/integrations/ubcp
-          curl -L -o ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
+          curl -L -o ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
           ./ubiquitous_bash.sh _build_ubDistBuild-fetch
       - name: build-build
         shell: bash
@@ -173,7 +173,7 @@ jobs:
         run: |
           mkdir -p ~/core/infrastructure
           cd ~/core/infrastructure
-          git clone --depth 1 --recursive https://github.com/mirage335/ubiquitous_bash.git
+          git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
           cd ubiquitous_bash
           ./_setupUbiquitous.bat
       - name: _getMinimal_cloud
