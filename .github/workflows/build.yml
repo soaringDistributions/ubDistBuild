@@ -292,7 +292,7 @@ jobs:
           cd _local
           git clone https://github.com/soaringDistributions/ubDistFetch.git
           cd ubDistFetch
-          ./_ubDistFetch.bat | sudo -n tee ../_lib/_ubDistFetch.log && exit ${PIPESTATUS[0]}
+          ./_ubDistFetch.bat | sudo -n tee ../../_lib/_ubDistFetch.log && exit ${PIPESTATUS[0]}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
@@ -633,7 +633,7 @@ jobs:
           cd extendedInterface
           mkdir -p ../extendedInterface-accessories/integrations/ubcp
           curl -L -o ../extendedInterface-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
-          ./ubiquitous_bash.sh _build_extendedInterface-fetch | sudo -n tee ../_lib/_extendedInterface.log && exit ${PIPESTATUS[0]}
+          ./ubiquitous_bash.sh _build_extendedInterface-fetch | sudo -n tee ../../_lib/_extendedInterface.log && exit ${PIPESTATUS[0]}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: _fetchAccessories ubDistBuild
@@ -644,7 +644,7 @@ jobs:
           cd ubDistBuild
           mkdir -p ../ubDistBuild-accessories/integrations/ubcp
           curl -L -o ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
-          ./ubiquitous_bash.sh _build_ubDistBuild-fetch | sudo -n tee ../_lib/_ubDistBuild.log && exit ${PIPESTATUS[0]}
+          ./ubiquitous_bash.sh _build_ubDistBuild-fetch | sudo -n tee ../../_lib/_ubDistBuild.log && exit ${PIPESTATUS[0]}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
