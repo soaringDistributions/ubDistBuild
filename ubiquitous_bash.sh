@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2895384878'
+export ub_setScriptChecksum_contents='1008848219'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -1689,7 +1689,7 @@ _mitigate-ubcp_rewrite_sequence() {
 	# https://serverfault.com/questions/193319/a-better-unix-find-with-parallel-processing
 	# https://stackoverflow.com/questions/11003418/calling-shell-functions-with-xargs
 	export -f "_mitigate-ubcp_rewrite_parallel"
-	find "$2" -type l -print0 | xargs -0 -x -s 4096 -L 12 -P 6 bash -c '_mitigate-ubcp_rewrite_parallel "$@"' _
+	find "$2" -type l -print0 | xargs -0 -x -s 4096 -L 12 -P $(nproc) bash -c '_mitigate-ubcp_rewrite_parallel "$@"' _
 	#find "$2" -type l -print0 | xargs -0 -n 1 -P 4 -I {} bash -c '_mitigate-ubcp_rewrite_parallel "$@"' _ {}
 	#find "$2" -type l -print0 | xargs -0 -n 1 -P 4 -I {} bash -c '_mitigate-ubcp_rewrite_procedure "$@"' _ {}
 	
@@ -23433,14 +23433,32 @@ _gitBest_detect() {
 _gitBest_override_config_insteadOf-core() {
 	git config --global url."file://""$realHome""/core/infrastructure/""$1".insteadOf git@github.com:mirage335/"$1".git git@github.com:mirage335/"$1"
 }
+_gitBest_override_config_insteadOf-core--colossus() {
+	git config --global url."file://""$realHome""/core/infrastructure/""$1".insteadOf git@github.com:mirage335-colossus/"$1".git git@github.com:mirage335-colossus/"$1"
+}
+_gitBest_override_config_insteadOf-core--gizmos() {
+	git config --global url."file://""$realHome""/core/infrastructure/""$1".insteadOf git@github.com:mirage335-gizmos/"$1".git git@github.com:mirage335-gizmos/"$1"
+}
+_gitBest_override_config_insteadOf-core--distllc() {
+	git config --global url."file://""$realHome""/core/infrastructure/""$1".insteadOf git@github.com:soaringDistributions/"$1".git git@github.com:soaringDistributions/"$1"
+}
 
 
 _gitBest_override_github-github_core() {
-	_gitBest_override_config_insteadOf-core ubiquitous_bash
-	_gitBest_override_config_insteadOf-core extendedInterface
+	_gitBest_override_config_insteadOf-core--colossus ubiquitous_bash
+	_gitBest_override_config_insteadOf-core--colossus extendedInterface
+
+	_gitBest_override_config_insteadOf-core--gizmos flightDeck
+	_gitBest_override_config_insteadOf-core--gizmos kinematicBase-large
+
+	_gitBest_override_config_insteadOf-core--distllc ubDistBuild
+	_gitBest_override_config_insteadOf-core--distllc ubDistFetch
+	
+	_gitBest_override_config_insteadOf-core mirage335_documents
+	_gitBest_override_config_insteadOf-core mirage335GizmoScience
+
 	_gitBest_override_config_insteadOf-core scriptedIllustrator
 	_gitBest_override_config_insteadOf-core arduinoUbiquitous
-	_gitBest_override_config_insteadOf-core mirage335_documents
 	
 	_gitBest_override_config_insteadOf-core BOM_designer
 	_gitBest_override_config_insteadOf-core CoreAutoSSH
@@ -41885,6 +41903,28 @@ _create_ubDistBuild-rotten_install-core() {
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	imagedev=$(cat "$scriptLocal"/imagedev)
+
+	if [[ -e "$scriptLocal"/ubDistFetch ]] && ! [[ -e "$scriptLocal"/ubDistFetch/_lib/core/FAIL ]]
+	then
+		## DANGER: Rare case of 'rm -rf' , called through '_chroot' instead of '_safeRMR' . If not called through '_chroot', very dangerous!
+		_chroot rm -rf /home/user/core
+		sudo -n cp -a "$scriptLocal"/ubDistFetch/_lib/core "$globalVirtFS"/home/user/
+		_chroot chown -R user:user /home/user/core
+
+		## DANGER: Rare case of 'rm -rf' , called through '_chroot' instead of '_safeRMR' . If not called through '_chroot', very dangerous!
+		_chroot rm -rf /home/user/ubDistFetch
+		if [[ -e "$scriptLocal"/core ]]
+		then
+			_messageFAIL
+			_stop 1
+			return 1
+		fi
+		sudo -n mv -f "$scriptLocal"/ubDistFetch/_lib/core "$scriptLocal"/
+		sudo -n cp -a "$scriptLocal"/ubDistFetch "$globalVirtFS"/home/user/
+		sudo -n mv -f "$scriptLocal"/core "$scriptLocal"/ubDistFetch/_lib/
+		_chroot chown -R user:user /home/user/ubDistFetch
+	fi
+
 	
 	if [[ -e "$scriptLocal"/core.tar.xz ]]
 	then
@@ -41894,7 +41934,13 @@ _create_ubDistBuild-rotten_install-core() {
 		#sudo -n chmod 644 "$globalVirtFS"/core.tar.xz
 		
 		
-		tar -xvf "$scriptLocal"/core.tar.xz -C "$globalVirtFS"/home/user/
+		if [[ "$skimfast" != "true" ]]
+		then
+			tar -xvf "$scriptLocal"/core.tar.xz -C "$globalVirtFS"/home/user/
+		else
+			tar -xf "$scriptLocal"/core.tar.xz -C "$globalVirtFS"/home/user/
+		fi
+		
 		_chroot chown -R user:user /home/user/core
 	fi
 	
@@ -41905,9 +41951,15 @@ _create_ubDistBuild-rotten_install-core() {
 	sudo -n chmod 700 "$globalVirtFS"/rotten_install.sh
 	
 	
-	#echo | sudo -n tee "$globalVirtFS"/in_chroot
-	! _chroot /rotten_install.sh _custom_core_drop && _messageFAIL
-	#sudo rm -f "$globalVirtFS"/in_chroot
+	if ! [[ -e "$scriptLocal"/core.tar.xz ]] && ! [[ -e "$scriptLocal"/ubDistFetch/_lib/core ]]
+	then
+		#echo | sudo -n tee "$globalVirtFS"/in_chroot
+		! _chroot /rotten_install.sh _custom_core_drop && _messageFAIL
+		#sudo rm -f "$globalVirtFS"/in_chroot
+	else
+		_messagePlain_good 'good: core.tar.xz'
+		rm -f "$scriptLocal"/core.tar.xz
+	fi
 	
 
 
@@ -43110,10 +43162,36 @@ _convert-live() {
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
 
+	#[[ -e "$scriptLocal"/extendedInterface ]] && [[ -e "$scriptLocal"/ubDistBuild ]] && 
+	if [[ -e "$scriptLocal"/extendedInterface-accessories ]] && [[ -e "$scriptLocal"/ubDistBuild-accessories ]]
+	then
+		_chroot sudo -n -u user bash -c 'mkdir -p /home/user/core/infrastructure/'
+
+		sudo -n cp -a "$scriptLocal"/extendedInterface-accessories "$globalVirtFS"/home/user/core/infrastructure/
+		sudo -n cp -a "$scriptLocal"/ubDistBuild-accessories "$globalVirtFS"/home/user/core/infrastructure/
+
+		_chroot chown -R user:user /home/user/core/infrastructure/extendedInterface-accessories
+		_chroot chown -R user:user /home/user/core/infrastructure/ubDistBuild-accessories
+	fi
+
+
+	# WARNING: May be untested.
+	#if [[ -e "$scriptLocal"/package_ubcp-core.7z ]]
+	#then
+		#[[ ! -e "$scriptLocal"/package_ubcp-core.7z ]] && _messageFAIL
+		#sudo -n cp -f "$scriptLocal"/package_ubcp-core.7z "$globalVirtFS"/package_ubcp-core.7z
+		#[[ ! -e "$globalVirtFS"/package_ubcp-core.7z ]] && _messageFAIL
+		#sudo -n chmod 644 "$globalVirtFS"/package_ubcp-core.7z
+		#_chroot chown -R user:user /package_ubcp-core.7z
+
+		#_chroot sudo -n -u user bash -c 'mkdir -p /home/user/core/infrastructure/extendedInterface-accessories/parts ; cd /home/user/core/infrastructure/extendedInterface-accessories/parts && mv -f /package_ubcp-core.7z ./'
+		#_chroot sudo -n -u user bash -c 'mkdir -p /home/user/core/infrastructure/ubDistBuild-accessories/parts ; cd /home/user/core/infrastructure/extendedInterface-accessories/parts && mv -f /package_ubcp-core.7z ./'
+	#fi
+
+
 
 	# Provide more information to convert 'vm-live.iso' back to 'vm.img' (and other things), while offline from only a Live BD-ROM disc (or other source of the squashfs root filesystem) .
 	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/extendedInterface && [[ ! -e /home/user/core/infrastructure/extendedInterface-accessories/parts ]] && ./ubiquitous_bash.sh _build_extendedInterface-fetch'
-
 	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistBuild && [[ ! -e /home/user/core/infrastructure/ubDistBuild-accessories/parts ]] && ./ubiquitous_bash.sh _build_ubDistBuild-fetch'
 
 
@@ -43500,7 +43578,8 @@ _getRelease-ubcp() {
     if [[ ! -e "$currentAccessoriesDir"/integrations/ubcp/"$1" ]]
     then
         #-H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"
-        curl -L -o "$currentAccessoriesDir"/integrations/ubcp/"$1"  $(curl -s "https://api.github.com/repos/mirage335/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"""$1""\") | .browser_download_url" | sort -n -r | head -n1)
+        #curl -L -o "$currentAccessoriesDir"/integrations/ubcp/"$1"  $(curl -s "https://api.github.com/repos/mirage335/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"""$1""\") | .browser_download_url" | sort -n -r | head -n1)
+        curl -L -o "$currentAccessoriesDir"/integrations/ubcp/"$1"  $(curl -s "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"""$1""\") | .browser_download_url" | sort -n -r | head -n1)
     fi
 }
 

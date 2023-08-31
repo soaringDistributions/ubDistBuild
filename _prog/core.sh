@@ -656,6 +656,28 @@ _create_ubDistBuild-rotten_install-core() {
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	imagedev=$(cat "$scriptLocal"/imagedev)
+
+	if [[ -e "$scriptLocal"/ubDistFetch ]] && ! [[ -e "$scriptLocal"/ubDistFetch/_lib/core/FAIL ]]
+	then
+		## DANGER: Rare case of 'rm -rf' , called through '_chroot' instead of '_safeRMR' . If not called through '_chroot', very dangerous!
+		_chroot rm -rf /home/user/core
+		sudo -n cp -a "$scriptLocal"/ubDistFetch/_lib/core "$globalVirtFS"/home/user/
+		_chroot chown -R user:user /home/user/core
+
+		## DANGER: Rare case of 'rm -rf' , called through '_chroot' instead of '_safeRMR' . If not called through '_chroot', very dangerous!
+		_chroot rm -rf /home/user/ubDistFetch
+		if [[ -e "$scriptLocal"/core ]]
+		then
+			_messageFAIL
+			_stop 1
+			return 1
+		fi
+		sudo -n mv -f "$scriptLocal"/ubDistFetch/_lib/core "$scriptLocal"/
+		sudo -n cp -a "$scriptLocal"/ubDistFetch "$globalVirtFS"/home/user/
+		sudo -n mv -f "$scriptLocal"/core "$scriptLocal"/ubDistFetch/_lib/
+		_chroot chown -R user:user /home/user/ubDistFetch
+	fi
+
 	
 	if [[ -e "$scriptLocal"/core.tar.xz ]]
 	then
@@ -665,7 +687,13 @@ _create_ubDistBuild-rotten_install-core() {
 		#sudo -n chmod 644 "$globalVirtFS"/core.tar.xz
 		
 		
-		tar -xvf "$scriptLocal"/core.tar.xz -C "$globalVirtFS"/home/user/
+		if [[ "$skimfast" != "true" ]]
+		then
+			tar -xvf "$scriptLocal"/core.tar.xz -C "$globalVirtFS"/home/user/
+		else
+			tar -xf "$scriptLocal"/core.tar.xz -C "$globalVirtFS"/home/user/
+		fi
+		
 		_chroot chown -R user:user /home/user/core
 	fi
 	
@@ -676,9 +704,15 @@ _create_ubDistBuild-rotten_install-core() {
 	sudo -n chmod 700 "$globalVirtFS"/rotten_install.sh
 	
 	
-	#echo | sudo -n tee "$globalVirtFS"/in_chroot
-	! _chroot /rotten_install.sh _custom_core_drop && _messageFAIL
-	#sudo rm -f "$globalVirtFS"/in_chroot
+	if ! [[ -e "$scriptLocal"/core.tar.xz ]] && ! [[ -e "$scriptLocal"/ubDistFetch/_lib/core ]]
+	then
+		#echo | sudo -n tee "$globalVirtFS"/in_chroot
+		! _chroot /rotten_install.sh _custom_core_drop && _messageFAIL
+		#sudo rm -f "$globalVirtFS"/in_chroot
+	else
+		_messagePlain_good 'good: core.tar.xz'
+		rm -f "$scriptLocal"/core.tar.xz
+	fi
 	
 
 
@@ -1881,10 +1915,36 @@ _convert-live() {
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
 
+	#[[ -e "$scriptLocal"/extendedInterface ]] && [[ -e "$scriptLocal"/ubDistBuild ]] && 
+	if [[ -e "$scriptLocal"/extendedInterface-accessories ]] && [[ -e "$scriptLocal"/ubDistBuild-accessories ]]
+	then
+		_chroot sudo -n -u user bash -c 'mkdir -p /home/user/core/infrastructure/'
+
+		sudo -n cp -a "$scriptLocal"/extendedInterface-accessories "$globalVirtFS"/home/user/core/infrastructure/
+		sudo -n cp -a "$scriptLocal"/ubDistBuild-accessories "$globalVirtFS"/home/user/core/infrastructure/
+
+		_chroot chown -R user:user /home/user/core/infrastructure/extendedInterface-accessories
+		_chroot chown -R user:user /home/user/core/infrastructure/ubDistBuild-accessories
+	fi
+
+
+	# WARNING: May be untested.
+	#if [[ -e "$scriptLocal"/package_ubcp-core.7z ]]
+	#then
+		#[[ ! -e "$scriptLocal"/package_ubcp-core.7z ]] && _messageFAIL
+		#sudo -n cp -f "$scriptLocal"/package_ubcp-core.7z "$globalVirtFS"/package_ubcp-core.7z
+		#[[ ! -e "$globalVirtFS"/package_ubcp-core.7z ]] && _messageFAIL
+		#sudo -n chmod 644 "$globalVirtFS"/package_ubcp-core.7z
+		#_chroot chown -R user:user /package_ubcp-core.7z
+
+		#_chroot sudo -n -u user bash -c 'mkdir -p /home/user/core/infrastructure/extendedInterface-accessories/parts ; cd /home/user/core/infrastructure/extendedInterface-accessories/parts && mv -f /package_ubcp-core.7z ./'
+		#_chroot sudo -n -u user bash -c 'mkdir -p /home/user/core/infrastructure/ubDistBuild-accessories/parts ; cd /home/user/core/infrastructure/extendedInterface-accessories/parts && mv -f /package_ubcp-core.7z ./'
+	#fi
+
+
 
 	# Provide more information to convert 'vm-live.iso' back to 'vm.img' (and other things), while offline from only a Live BD-ROM disc (or other source of the squashfs root filesystem) .
 	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/extendedInterface && [[ ! -e /home/user/core/infrastructure/extendedInterface-accessories/parts ]] && ./ubiquitous_bash.sh _build_extendedInterface-fetch'
-
 	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistBuild && [[ ! -e /home/user/core/infrastructure/ubDistBuild-accessories/parts ]] && ./ubiquitous_bash.sh _build_ubDistBuild-fetch'
 
 
