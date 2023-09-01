@@ -744,17 +744,46 @@ _create_ubDistBuild-rotten_install-core() {
 
 
 
-
 	_chroot sudo -n -u user bash -c 'cd /home/user/core/installations/kiauh-automatic ; chmod 755 ./magic.sh ; ./magic.sh'
 	#_chroot sudo -n -u user bash -c 'cd /home/user/core/installations/kiauh-automatic ; chmod 755 ./auto.sh ; ./auto.sh'
+	
+
+	# DANGER: Klipper services should be started by a script, possibly called by cron, automatically detecting relevant CAN bus attached hardware, if any, and installing appropriate configuration files. Thus, Klipper services are disabled by default.
+	_chroot mkdir -p /root/systemd/etc--systemd--system
+	_chroot mkdir -p /root/systemd/lib--systemd--system
+	
 	_chroot sudo -n systemctl disable KlipperScreen
 	_chroot systemctl disable KlipperScreen.service
 	_chroot sudo -n systemctl stop KlipperScreen
 	_chroot systemctl stop KlipperScreen.service
+
 	_chroot sudo -n systemctl disable crowsnest
 	_chroot systemctl disable crowsnest.service
 	_chroot sudo -n systemctl stop crowsnest
 	_chroot systemctl stop crowsnest.service
+
+	_chroot sudo -n systemctl disable mainsail
+	_chroot systemctl disable mainsail.service
+	_chroot sudo -n systemctl stop mainsail
+	_chroot systemctl stop mainsail.service
+
+	_chroot sudo -n systemctl disable nginx
+	_chroot systemctl disable nginx.service
+	_chroot sudo -n systemctl mask nginx
+	_chroot systemctl mask nginx.service
+	_chroot sudo -n systemctl stop nginx
+	_chroot systemctl stop nginx.service
+
+	_chroot sudo -n systemctl disable moonraker
+	_chroot systemctl disable moonraker.service
+	_chroot sudo -n systemctl stop moonraker
+	_chroot systemctl stop moonraker.service
+
+	_chroot sudo -n systemctl disable klipper
+	_chroot systemctl disable klipper.service
+	_chroot sudo -n systemctl stop klipper
+	_chroot systemctl stop klipper.service
+
 
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0
