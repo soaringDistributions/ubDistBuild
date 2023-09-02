@@ -59,8 +59,8 @@ Section "Install"
   ;ATTENTION
   CreateDirectory "C:\core\infrastructure\ubDistBuild-backup-$0\_local"
   Rename "C:\core\infrastructure\ubDistBuild\_local\vm.img" "C:\core\infrastructure\ubDistBuild-backup-$0\_local\vm.img"
-  Rename "C:\core\infrastructure\ubDistBuild\_local\vm.img" "C:\core\infrastructure\ubDistBuild-backup-$0\_local\vm-live.iso"
-  Rename "C:\core\infrastructure\ubDistBuild\_local\vm.img" "C:\core\infrastructure\ubDistBuild-backup-$0\_local\package_rootfs.iso"
+  Rename "C:\core\infrastructure\ubDistBuild\_local\vm-live.iso" "C:\core\infrastructure\ubDistBuild-backup-$0\_local\vm-live.iso"
+  Rename "C:\core\infrastructure\ubDistBuild\_local\package_rootfs.tar" "C:\core\infrastructure\ubDistBuild-backup-$0\_local\package_rootfs.tar"
 
   RMDir /r "C:\core\infrastructure\ubDistBuild"
   ;RMDir /r /REBOOTOK "C:\core\infrastructure\ubDistBuild"
@@ -73,15 +73,15 @@ Section "Install"
 
   ;ATTENTION
   Rename "C:\core\infrastructure\ubDistBuild-backup-uninstalled\_local\vm.img" "C:\core\infrastructure\ubDistBuild\_local\vm.img"
-  Rename "C:\core\infrastructure\ubDistBuild-backup-uninstalled\_local\vm-live.iso" "C:\core\infrastructure\ubDistBuild\_local\vm.img"
-  Rename "C:\core\infrastructure\ubDistBuild-backup-uninstalled\_local\package_rootfs.iso" "C:\core\infrastructure\ubDistBuild\_local\vm.img"
+  Rename "C:\core\infrastructure\ubDistBuild-backup-uninstalled\_local\vm-live.iso" "C:\core\infrastructure\ubDistBuild\_local\vm-live.iso"
+  Rename "C:\core\infrastructure\ubDistBuild-backup-uninstalled\_local\package_rootfs.tar" "C:\core\infrastructure\ubDistBuild\_local\package_rootfs.tar"
   RMDir "C:\core\infrastructure\ubDistBuild-backup-uninstalled\_local"
   RMDir "C:\core\infrastructure\ubDistBuild-backup-uninstalled"
 
   ;ATTENTION
   Rename "C:\core\infrastructure\ubDistBuild-backup-$0\_local\vm.img" "C:\core\infrastructure\ubDistBuild\_local\vm.img"
-  Rename "C:\core\infrastructure\ubDistBuild-backup-$0\_local\vm-live.iso" "C:\core\infrastructure\ubDistBuild\_local\vm.img"
-  Rename "C:\core\infrastructure\ubDistBuild-backup-$0\_local\package_rootfs.iso" "C:\core\infrastructure\ubDistBuild\_local\vm.img"
+  Rename "C:\core\infrastructure\ubDistBuild-backup-$0\_local\vm-live.iso" "C:\core\infrastructure\ubDistBuild\_local\vm-live.iso"
+  Rename "C:\core\infrastructure\ubDistBuild-backup-$0\_local\package_rootfs.tar" "C:\core\infrastructure\ubDistBuild\_local\package_rootfs.tar"
   RMDir "C:\core\infrastructure\ubDistBuild-backup-$0\_local"
   RMDir "C:\core\infrastructure\ubDistBuild-backup-$0"
 
@@ -195,8 +195,8 @@ section "uninstall"
   RMDir /r "C:\core\infrastructure\ubDistBuild-backup-uninstalled"
   CreateDirectory "C:\core\infrastructure\ubDistBuild-backup-uninstalled\_local"
   Rename "C:\core\infrastructure\ubDistBuild\_local\vm.img" "C:\core\infrastructure\ubDistBuild-backup-uninstalled\_local\vm.img"
-  Rename "C:\core\infrastructure\ubDistBuild\_local\vm.img" "C:\core\infrastructure\ubDistBuild-backup-uninstalled\_local\vm-live.iso"
-  Rename "C:\core\infrastructure\ubDistBuild\_local\vm.img" "C:\core\infrastructure\ubDistBuild-backup-uninstalled\_local\package_rootfs.iso"
+  Rename "C:\core\infrastructure\ubDistBuild\_local\vm-live.iso" "C:\core\infrastructure\ubDistBuild-backup-uninstalled\_local\vm-live.iso"
+  Rename "C:\core\infrastructure\ubDistBuild\_local\package_rootfs.tar" "C:\core\infrastructure\ubDistBuild-backup-uninstalled\_local\package_rootfs.tar"
   
   ;RMDir /r "C:\core\infrastructure\ubDistBuild"
   RMDir /r /REBOOTOK "C:\core\infrastructure\ubDistBuild"
