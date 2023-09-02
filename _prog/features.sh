@@ -366,32 +366,7 @@ _setup_vm-wsl2_sequence() {
     wsl --set-default ubdist
 
 
-    if [[ "$backupID" != "" ]]
-    then
-        _restore_vm-wsl2 "$backupID"
-        # DANGER: Unusual! May delete data from host!
-        #_safeRMR rm -rf /cygdrive/c/core/infrastructure/uwsl-h-b-"$backupID"
-        if [[ ! -e /cygdrive/c/core/infrastructure/uwsl-h-b-"$backupID" ]]
-        then
-            _messagePlain_bad 'fail: rm: missing: /cygdrive/c/core/infrastructure/uwsl-h-b-'"$backupID"
-            _messageFAIL
-            _stop 1
-        fi
-        rm -rf /cygdrive/c/core/infrastructure/uwsl-h-b-"$backupID"
-    else
-        _restore_vm-wsl2 "uninstalled"
-        # DANGER: Unusual! May delete data from host!
-        #_safeRMR /cygdrive/c/core/infrastructure/uwsl-h-b-uninstalled
-        if [[ ! -e /cygdrive/c/core/infrastructure/uwsl-h-b-uninstalled ]]
-        then
-            _messagePlain_bad 'fail: rm: missing: /cygdrive/c/core/infrastructure/uwsl-h-b-uninstalled'
-            _messageFAIL
-            _stop 1
-        fi
-        rm -rf /cygdrive/c/core/infrastructure/uwsl-h-b-uninstalled
-    fi
-
-
+    
     #_messagePlain_probe 'wsl: disable unnecessary systemd services'
 
     #wsl -d ubdist sudo -n systemctl disable exim4
@@ -418,9 +393,36 @@ _setup_vm-wsl2_sequence() {
     
 	#wsl -d ubdist sudo -n systemctl disable vboxadd
 	#wsl -d ubdist sudo -n systemctl disable vboxadd-service
+
+
+
+    if [[ "$backupID" != "" ]]
+    then
+        _restore_vm-wsl2 "$backupID"
+        # DANGER: Unusual! May delete data from host!
+        #_safeRMR rm -rf /cygdrive/c/core/infrastructure/uwsl-h-b-"$backupID"
+        if [[ ! -e /cygdrive/c/core/infrastructure/uwsl-h-b-"$backupID" ]]
+        then
+            _messagePlain_bad 'fail: rm: missing: /cygdrive/c/core/infrastructure/uwsl-h-b-'"$backupID"
+            _messageFAIL
+            _stop 1
+        fi
+        rm -rf /cygdrive/c/core/infrastructure/uwsl-h-b-"$backupID"
+    else
+        _restore_vm-wsl2 "uninstalled"
+        # DANGER: Unusual! May delete data from host!
+        #_safeRMR /cygdrive/c/core/infrastructure/uwsl-h-b-uninstalled
+        if [[ ! -e /cygdrive/c/core/infrastructure/uwsl-h-b-uninstalled ]]
+        then
+            _messagePlain_bad 'fail: rm: missing: /cygdrive/c/core/infrastructure/uwsl-h-b-uninstalled'
+            echo "Missing 'restore' is only ok either on first installation or if the backup was deliberately deleted, moved, etc."
+            #_messageFAIL
+            _stop 1
+            return 1
+        fi
+        rm -rf /cygdrive/c/core/infrastructure/uwsl-h-b-uninstalled
+    fi
     
-
-
 
 
     #wsl --unregister ubdist
