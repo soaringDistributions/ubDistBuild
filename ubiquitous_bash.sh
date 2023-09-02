@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1008848219'
+export ub_setScriptChecksum_contents='839159460'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -23275,32 +23275,6 @@ _git_shallow() {
 }
 
 
-_self_gitMad_procedure() {
-	local functionEntryPWD
-	functionEntryPWD="$PWD"
-
-	cd "$scriptAbsoluteFolder"
-	_gitMad
-	
-	cd "$functionEntryPWD"
-}
-_self_gitMad() {
-	"$scriptAbsoluteLocation" _self_gitMad_procedure "$@"
-}
-# https://stackoverflow.com/questions/1580596/how-do-i-make-git-ignore-file-mode-chmod-changes
-_gitMad() {
-	git config core.fileMode false
-	git submodule foreach git config core.fileMode false
-	git submodule foreach git submodule foreach git config core.fileMode false
-	git submodule foreach git submodule foreach git submodule foreach git config core.fileMode false
-	git submodule foreach git submodule foreach git submodule foreach git submodule foreach git config core.fileMode false
-	git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git config core.fileMode false
-	git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git config core.fileMode false
-	git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git config core.fileMode false
-	git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git config core.fileMode false
-	git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git config core.fileMode false
-	git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git config core.fileMode false
-}
 
 
 
@@ -23372,6 +23346,34 @@ _gitBare() {
 }
 
 
+
+
+_self_gitMad_procedure() {
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+
+	cd "$scriptAbsoluteFolder"
+	_gitMad
+	
+	cd "$functionEntryPWD"
+}
+_self_gitMad() {
+	"$scriptAbsoluteLocation" _self_gitMad_procedure "$@"
+}
+# https://stackoverflow.com/questions/1580596/how-do-i-make-git-ignore-file-mode-chmod-changes
+_gitMad() {
+	git config core.fileMode false
+	git submodule foreach git config core.fileMode false
+	git submodule foreach git submodule foreach git config core.fileMode false
+	git submodule foreach git submodule foreach git submodule foreach git config core.fileMode false
+	git submodule foreach git submodule foreach git submodule foreach git submodule foreach git config core.fileMode false
+	git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git config core.fileMode false
+	git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git config core.fileMode false
+	git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git config core.fileMode false
+	git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git config core.fileMode false
+	git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git config core.fileMode false
+	git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git submodule foreach git config core.fileMode false
+}
 
 
 _gitBest_detect_github_procedure() {
@@ -41991,17 +41993,46 @@ _create_ubDistBuild-rotten_install-core() {
 
 
 
-
 	_chroot sudo -n -u user bash -c 'cd /home/user/core/installations/kiauh-automatic ; chmod 755 ./magic.sh ; ./magic.sh'
 	#_chroot sudo -n -u user bash -c 'cd /home/user/core/installations/kiauh-automatic ; chmod 755 ./auto.sh ; ./auto.sh'
+	
+
+	# DANGER: Klipper services should be started by a script, possibly called by cron, automatically detecting relevant CAN bus attached hardware, if any, and installing appropriate configuration files. Thus, Klipper services are disabled by default.
+	_chroot mkdir -p /root/systemd/etc--systemd--system
+	_chroot mkdir -p /root/systemd/lib--systemd--system
+	
 	_chroot sudo -n systemctl disable KlipperScreen
 	_chroot systemctl disable KlipperScreen.service
 	_chroot sudo -n systemctl stop KlipperScreen
 	_chroot systemctl stop KlipperScreen.service
+
 	_chroot sudo -n systemctl disable crowsnest
 	_chroot systemctl disable crowsnest.service
 	_chroot sudo -n systemctl stop crowsnest
 	_chroot systemctl stop crowsnest.service
+
+	_chroot sudo -n systemctl disable mainsail
+	_chroot systemctl disable mainsail.service
+	_chroot sudo -n systemctl stop mainsail
+	_chroot systemctl stop mainsail.service
+
+	_chroot sudo -n systemctl disable nginx
+	_chroot systemctl disable nginx.service
+	_chroot sudo -n systemctl mask nginx
+	_chroot systemctl mask nginx.service
+	_chroot sudo -n systemctl stop nginx
+	_chroot systemctl stop nginx.service
+
+	_chroot sudo -n systemctl disable moonraker
+	_chroot systemctl disable moonraker.service
+	_chroot sudo -n systemctl stop moonraker
+	_chroot systemctl stop moonraker.service
+
+	_chroot sudo -n systemctl disable klipper
+	_chroot systemctl disable klipper.service
+	_chroot sudo -n systemctl stop klipper
+	_chroot systemctl stop klipper.service
+
 
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0
@@ -47289,6 +47320,9 @@ _compile_bash_shortcuts() {
 	
 	( [[ "$enUb_repo" == "true" ]] && [[ "$enUb_git" == "true" ]] ) && includeScriptList+=( "shortcuts/git"/git.sh )
 	( [[ "$enUb_repo" == "true" ]] && [[ "$enUb_git" == "true" ]] ) && includeScriptList+=( "shortcuts/git"/gitBare.sh )
+
+	includeScriptList+=( "shortcuts/git"/gitMad.sh )
+
 	includeScriptList+=( "shortcuts/git"/gitBest.sh )
 	includeScriptList+=( "shortcuts/git"/wget_githubRelease_internal.sh )
 	
