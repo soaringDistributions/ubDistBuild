@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1744691248'
+export ub_setScriptChecksum_contents='2042364164'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -42054,6 +42054,16 @@ _create_ubDistBuild-rotten_install-core() {
 	_chroot systemctl stop klipper.service
 
 
+	#if [[ ! -e "$globalVirtFS"/binReport ]]
+	#then
+		_chroot find /bin/ /usr/bin/ /sbin/ /usr/sbin/ | sudo -n tee "$globalVirtFS"/binReport > /dev/null
+		_chroot find /home/user/.nix-profile/bin | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null 2>&1
+		_chroot find /home/user/.gcloud/google-cloud-sdk/bin | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null
+		_chroot find /home/user/.ebcli-virtual-env/executables | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null 2>&1
+		sudo -n cp -f "$globalVirtFS"/binReport "$scriptLocal"/binReport
+		sudo -n chown "$USER":"$USER" "$scriptLocal"/binReport
+	#fi
+
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0
 }
@@ -42713,15 +42723,15 @@ _zSpecial_qemu_chroot() {
 		sudo -n chown "$USER":"$USER" "$scriptLocal"/dpkg
 	fi
 	
-	if [[ ! -e "$globalVirtFS"/binReport ]]
-	then
+	#if [[ ! -e "$globalVirtFS"/binReport ]]
+	#then
 		_chroot find /bin/ /usr/bin/ /sbin/ /usr/sbin/ | sudo -n tee "$globalVirtFS"/binReport > /dev/null
 		_chroot find /home/user/.nix-profile/bin | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null 2>&1
 		_chroot find /home/user/.gcloud/google-cloud-sdk/bin | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null
 		_chroot find /home/user/.ebcli-virtual-env/executables | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null 2>&1
 		sudo -n cp -f "$globalVirtFS"/binReport "$scriptLocal"/binReport
 		sudo -n chown "$USER":"$USER" "$scriptLocal"/binReport
-	fi
+	#fi
 
 	if [[ -e "$globalVirtFS"/lsmodReport ]]
 	then
@@ -43684,6 +43694,7 @@ _build_ubDistBuild-fetch() {
     #git config gc.reflogExpireUnreachable now
     git reset --hard
     git submodule update
+    git submodule update --force --recursive
     git gc
     #git gc --aggressive
 
