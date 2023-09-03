@@ -633,7 +633,16 @@ _create_ubDistBuild-install-ubDistBuild() {
 	
 	sudo -n mkdir -p "$globalVirtFS"/home/user/ubDistBuild/
 	[[ ! -e "$scriptAbsoluteFolder"/.git ]] && _messageFAIL
-	sudo -n cp -r "$scriptAbsoluteFolder"/.git "$globalVirtFS"/home/user/ubDistBuild/
+	#sudo -n cp -r "$scriptAbsoluteFolder"/.git "$globalVirtFS"/home/user/ubDistBuild/
+	#sudo -n cp -a "$scriptAbsoluteFolder"/. "$globalVirtFS"/home/user/ubDistBuild/
+	#--delete
+	sudo -n rsync -ax --exclude "_local" "$scriptAbsoluteFolder"/. "$globalVirtFS"/home/user/ubDistBuild/
+	sudo -n rsync -ax "$scriptAbsoluteFolder"/_lib/. "$globalVirtFS"/home/user/ubDistBuild/_lib/
+	sudo -n rsync -ax "$scriptAbsoluteFolder"/_local/ops.sh "$globalVirtFS"/home/user/ubDistBuild/_local/
+	sudo -n rsync -ax "$scriptAbsoluteFolder"/_local/ops.example.sh "$globalVirtFS"/home/user/ubDistBuild/_local/
+	sudo -n rsync -ax "$scriptAbsoluteFolder"/_local/TODO-example.txt "$globalVirtFS"/home/user/ubDistBuild/_local/
+	sudo -n rsync -ax "$scriptAbsoluteFolder"/_local/.gitignore "$globalVirtFS"/home/user/ubDistBuild/_local/
+	sudo -n rsync -ax "$scriptAbsoluteFolder"/_local/ubcp "$globalVirtFS"/home/user/ubDistBuild/_local/
 	_chroot chown -R user:user /home/user/ubDistBuild
 	_chroot chmod 700 /home/user/ubDistBuild
 	#--quiet
@@ -2187,6 +2196,9 @@ _assessment() {
 
 _refresh_anchors() {
 	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_bin.bat
+
+	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_revert-fromLive.bat
+
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild.bat
 	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild-live.bat

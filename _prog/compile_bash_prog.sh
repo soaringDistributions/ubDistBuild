@@ -120,6 +120,12 @@ _compile_bash_program_prog() {
 	includeScriptList+=( get.sh )
 
 	includeScriptList+=( features.sh )
+
+
+	includeScriptList+=( revert-live.sh )
+
+
+	includeScriptList+=( _prog-ops.sh )
 	
 	true
 }

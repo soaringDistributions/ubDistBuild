@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3122209923'
+export ub_setScriptChecksum_contents='1744691248'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -20544,8 +20544,16 @@ _write_msw_WSLENV() {
 
 
 _wsl_desktop() {
+    local functionEntryPWD
+    functionEntryPWD="$PWD"
+
     (
         _messageNormal "init: _wsl_desktop"
+        if [[ "$PWD" == "/mnt/"?"/WINDOWS/system32" ]] || [[ "$PWD" == "/mnt/"?"/Windows/system32" ]] || [[ "$PWD" == "/mnt/"?"/windows/system32" ]]
+        then
+            _messagePlain_probe 'reject: /mnt/'?'/WINDOWS/system32'
+            _messagePlain_probe_cmd cd
+        fi
 
         export QT_QPA_PLATFORMTHEME=
         unset QT_QPA_PLATFORMTHEME
@@ -20577,12 +20585,15 @@ _wsl_desktop() {
         then
             ( Xephyr -screen "$xephyrResolution" :"$xephyrDisplay" & ( export DISPLAY=:"$xephyrDisplay" ; "$HOME"/core/installations/xclipsync/xclipsync & dbus-run-session startplasma-x11 2>/dev/null ) )
             return 0
+            cd "$functionEntryPWD"
         fi
         _messagePlain_bad 'bad: missing: GUI'
         _messageFAIL
-
-        return 0
+        _stop 1
+        return 1
     )
+
+    cd "$functionEntryPWD"
 }
 ldesk() {
     _wsl_desktop "$@"
@@ -41882,7 +41893,16 @@ _create_ubDistBuild-install-ubDistBuild() {
 	
 	sudo -n mkdir -p "$globalVirtFS"/home/user/ubDistBuild/
 	[[ ! -e "$scriptAbsoluteFolder"/.git ]] && _messageFAIL
-	sudo -n cp -r "$scriptAbsoluteFolder"/.git "$globalVirtFS"/home/user/ubDistBuild/
+	#sudo -n cp -r "$scriptAbsoluteFolder"/.git "$globalVirtFS"/home/user/ubDistBuild/
+	#sudo -n cp -a "$scriptAbsoluteFolder"/. "$globalVirtFS"/home/user/ubDistBuild/
+	#--delete
+	sudo -n rsync -ax --exclude "_local" "$scriptAbsoluteFolder"/. "$globalVirtFS"/home/user/ubDistBuild/
+	sudo -n rsync -ax "$scriptAbsoluteFolder"/_lib/. "$globalVirtFS"/home/user/ubDistBuild/_lib/
+	sudo -n rsync -ax "$scriptAbsoluteFolder"/_local/ops.sh "$globalVirtFS"/home/user/ubDistBuild/_local/
+	sudo -n rsync -ax "$scriptAbsoluteFolder"/_local/ops.example.sh "$globalVirtFS"/home/user/ubDistBuild/_local/
+	sudo -n rsync -ax "$scriptAbsoluteFolder"/_local/TODO-example.txt "$globalVirtFS"/home/user/ubDistBuild/_local/
+	sudo -n rsync -ax "$scriptAbsoluteFolder"/_local/.gitignore "$globalVirtFS"/home/user/ubDistBuild/_local/
+	sudo -n rsync -ax "$scriptAbsoluteFolder"/_local/ubcp "$globalVirtFS"/home/user/ubDistBuild/_local/
 	_chroot chown -R user:user /home/user/ubDistBuild
 	_chroot chmod 700 /home/user/ubDistBuild
 	#--quiet
@@ -43436,6 +43456,9 @@ _assessment() {
 
 _refresh_anchors() {
 	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_bin.bat
+
+	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_revert-fromLive.bat
+
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild.bat
 	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild-live.bat
@@ -44903,6 +44926,155 @@ _sshid-export-wsl2() {
 
 
 
+
+
+
+
+# Recreates 'vm.img' from booted Live ISO .
+# WARNING: May be untested.
+# CAUTION: Do NOT introduce external (ie. 'online') dependencies! External dependencies have historically been susceptible to breakage!
+_revert-fromLive() {
+	# /run/live/rootfs/filesystem.squashfs
+    # "$scriptLocal"/vm.img
+    
+    [[ -e "$scriptLocal"/vm.img ]] && _messagePlain_bad 'unexpected: good: found: vm.img' && return 0
+    [[ -e "$scriptLocal"/vm-live.iso ]] && _messagePlain_bad 'unexpected: good: found: vm-live.iso' && return 0
+    [[ -e "$scriptLocal"/package_rootfs.tar ]] && _messagePlain_bad 'unexpected: good: found: package_rootfs.tar' && return 0
+
+    [[ -e "$scriptLocal"/package_rootfs.tar.flx ]] && _messagePlain_bad 'unexpected: good: found: package_rootfs.tar.flx' && return 0
+    
+    [[ -e "$scriptLocal"/vm.img ]] && _messagePlain_bad 'unexpected: bad: missing: /run/live/rootfs/filesystem.squashfs' && return 0
+    
+    # /run/live/rootfs/filesystem.squashfs
+    
+
+    
+    _messageNormal '##### init: _revert-fromLive: create'
+	
+	
+	mkdir -p "$scriptLocal"
+	
+	_set_ubDistBuild
+	
+	
+	
+	_createVMimage "$@"
+
+
+    _messageNormal 'os: globalVirtFS: write: rootfs'
+
+    ! "$scriptAbsoluteLocation" _openImage && _messagePlain_bad 'fail: _openImage' && _messageFAIL
+	local imagedev
+	imagedev=$(cat "$scriptLocal"/imagedev)
+	#_mountChRoot_image_x64_prog
+
+    sudo -n rsync -ax /run/live/rootfs/filesystem.squashfs/. "$globalVirtFS"/
+    
+    _createVMfstab
+    #sudo -n mv -f "$globalVirtFS"/fstab-copy "$globalVirtFS"/etc/fstab
+    sudo -n rm -f "$globalVirtFS"/fstab-copy
+
+    [[ -d "$globalVirtFS"/boot/efi ]] && mountpoint "$globalVirtFS"/boot/efi >/dev/null 2>&1 && _wait_umount "$globalVirtFS"/boot/efi >/dev/null 2>&1
+	[[ -d "$globalVirtFS"/boot ]] && mountpoint "$globalVirtFS"/boot >/dev/null 2>&1 && _wait_umount "$globalVirtFS"/boot >/dev/null 2>&1
+	! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
+
+
+    
+    ! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+
+    sudo -n mv -f "$globalVirtFS"/boot-copy/boot/efi/. "$globalVirtFS"/boot/efi/
+    sudo -n rmdir "$globalVirtFS"/boot-copy/boot/efi/.
+
+    sudo -n mv -f "$globalVirtFS"/boot-copy/boot/. "$globalVirtFS"/boot/
+    sudo -n rmdir "$globalVirtFS"/boot-copy/boot
+    sudo -n rmdir "$globalVirtFS"/boot-copy
+
+    ! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+
+
+    _messageNormal 'os: globalVirtFS: write: fs'
+
+    echo "default" | sudo -n tee "$globalVirtFS"/etc/hostname
+	cat << CZXWXcRMTo8EmM8i4d | sudo -n tee "$globalVirtFS"/etc/hosts > /dev/null
+127.0.0.1	localhost
+::1		localhost ip6-localhost ip6-loopback
+ff02::1		ip6-allnodes
+ff02::2		ip6-allrouters
+
+127.0.1.1	default
+
+CZXWXcRMTo8EmM8i4d
+
+
+
+
+
+
+
+
+
+    ! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	#local imagedev
+	imagedev=$(cat "$scriptLocal"/imagedev)
+
+    _chroot dd if=/dev/zero of=/swapfile bs=1 count=1
+	_chroot chmod 0600 /swapfile
+
+
+
+
+
+
+    _messageNormal 'chroot: bootloader'
+	
+	#_nouveau_disable_procedure
+	
+	# https://wiki.archlinux.org/title/NVIDIA#DRM_kernel_mode_setting
+	#  'NVIDIA driver does not provide an fbdev driver for the high-resolution console for the kernel compiled-in vesafb'
+	#   lsmod should show a modsetting driver in use ...
+	#echo 'GRUB_CMDLINE_LINUX="nvidia-drm.modeset=1"' | sudo -n tee -a "$globalVirtFS"/etc/default/grub
+	echo 'options nvidia-drm modeset=1' | sudo -n tee "$globalVirtFS"/etc/modprobe.d/nvidia-kms.conf
+	
+	#echo 'GRUB_CMDLINE_LINUX="nouveau.modeset=0 nvidia-drm.modeset=1"' | sudo -n tee -a "$globalVirtFS"/etc/default/grub
+	
+	
+	_messagePlain_nominal 'install grub'
+	#export getMost_backend="chroot"
+	#_set_getMost_backend "$@"
+	#_set_getMost_backend_debian "$@"
+	#_test_getMost_backend "$@"
+	
+	#_getMost_backend_aptGetInstall grub-pc-bin
+	
+	_chroot env DEBIAN_FRONTEND=noninteractive debconf-set-selections <<< "grub-efi-amd64 grub2/update_nvram boolean false"
+	_chroot env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" remove -y grub-efi grub-efi-amd64
+	#_getMost_backend_aptGetInstall linux-image-amd64 linux-headers-amd64 grub-efi
+	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+
+    # Install Hybrid/UEFI bootloader by default. May be rewritten later if appropriate.
+	_createVMbootloader-bios
+	_createVMbootloader-efi
+	
+	
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	echo 'GRUB_TIMEOUT=1' | sudo -n tee -a "$globalVirtFS"/etc/default/grub
+	_chroot update-grub
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+
+
+    _chroot_test
+}
+
+
+
+
+
+
+[[ -e "$scriptAbsoluteFolder"/_prog-ops/revert-live.sh ]] && . "$scriptAbsoluteFolder"/_prog-ops/revert-live.sh
 
 
 
@@ -48041,6 +48213,12 @@ _compile_bash_program_prog() {
 	includeScriptList+=( get.sh )
 
 	includeScriptList+=( features.sh )
+
+
+	includeScriptList+=( revert-live.sh )
+
+
+	includeScriptList+=( _prog-ops.sh )
 	
 	true
 }
