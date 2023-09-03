@@ -794,6 +794,16 @@ _create_ubDistBuild-rotten_install-core() {
 	_chroot systemctl stop klipper.service
 
 
+	#if [[ ! -e "$globalVirtFS"/binReport ]]
+	#then
+		_chroot find /bin/ /usr/bin/ /sbin/ /usr/sbin/ | sudo -n tee "$globalVirtFS"/binReport > /dev/null
+		_chroot find /home/user/.nix-profile/bin | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null 2>&1
+		_chroot find /home/user/.gcloud/google-cloud-sdk/bin | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null
+		_chroot find /home/user/.ebcli-virtual-env/executables | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null 2>&1
+		sudo -n cp -f "$globalVirtFS"/binReport "$scriptLocal"/binReport
+		sudo -n chown "$USER":"$USER" "$scriptLocal"/binReport
+	#fi
+
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0
 }
@@ -1453,15 +1463,15 @@ _zSpecial_qemu_chroot() {
 		sudo -n chown "$USER":"$USER" "$scriptLocal"/dpkg
 	fi
 	
-	if [[ ! -e "$globalVirtFS"/binReport ]]
-	then
+	#if [[ ! -e "$globalVirtFS"/binReport ]]
+	#then
 		_chroot find /bin/ /usr/bin/ /sbin/ /usr/sbin/ | sudo -n tee "$globalVirtFS"/binReport > /dev/null
 		_chroot find /home/user/.nix-profile/bin | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null 2>&1
 		_chroot find /home/user/.gcloud/google-cloud-sdk/bin | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null
 		_chroot find /home/user/.ebcli-virtual-env/executables | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null 2>&1
 		sudo -n cp -f "$globalVirtFS"/binReport "$scriptLocal"/binReport
 		sudo -n chown "$USER":"$USER" "$scriptLocal"/binReport
-	fi
+	#fi
 
 	if [[ -e "$globalVirtFS"/lsmodReport ]]
 	then

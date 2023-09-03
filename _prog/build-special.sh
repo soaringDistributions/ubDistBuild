@@ -109,6 +109,7 @@ _build_ubDistBuild-fetch() {
     #git config gc.reflogExpireUnreachable now
     git reset --hard
     git submodule update
+    git submodule update --force --recursive
     git gc
     #git gc --aggressive
 
