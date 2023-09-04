@@ -51,8 +51,8 @@ _devops() {
 	_do_scribeInfo() {
 		! ./ubiquitous_bash.sh _openChRoot && exit 1
 		! echo devops | ./ubiquitous_bash.sh _chroot tee /info-devops && exit 1
-		! git rev-parse --short HEAD | ./ubiquitous_bash.sh _chroot tee -a /info-devops && exit 1
-		! git log --pretty=format:'%h' -n 1 | ./ubiquitous_bash.sh _chroot tee -a /info-devops && exit 1
+		#! git rev-parse --short HEAD | ./ubiquitous_bash.sh _chroot tee -a /info-devops && exit 1
+		#! git log --pretty=format:'%h' -n 1 | ./ubiquitous_bash.sh _chroot tee -a /info-devops && exit 1
 		! git log --pretty=format:'%H' -n 1 | ./ubiquitous_bash.sh _chroot tee -a /info-devops && exit 1
 		! date +"%Y-%m-%d" | ./ubiquitous_bash.sh _chroot tee -a /info-devops && exit 1
 		! ./ubiquitous_bash.sh _closeChRoot && exit 1
