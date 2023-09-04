@@ -396,6 +396,25 @@ _setup_vm-wsl2_sequence() {
 
 
 
+    wsl -d ubdist sudo -n chmod ugoa-x /usr/lib/x86_64-linux-gnu/libexec/kf5/kscreen_backend_launcher
+
+
+    # https://forum.manjaro.org/t/high-cpu-usage-from-plasmashell-kactivitymanagerd/114305
+	# DANGER: Unusual. Uses 'rm -rf' directly. Presumed ONLY during dist/OS install .
+	wsl -d ubdist sudo -n rm -rf /home/user/.local/share/kactivitymanagerd/resources/*
+
+
+    # https://unix.stackexchange.com/questions/253816/restrict-size-of-buffer-cache-in-linux
+    # https://learn.microsoft.com/en-us/windows/wsl/release-notes#build-19013
+    # https://devblogs.microsoft.com/commandline/memory-reclaim-in-the-windows-subsystem-for-linux-2/
+    # https://github.com/microsoft/WSL/issues/4166
+    #  Although this issue is 'open', it seems to have been mitigated significantly as of 2023-09-04 .
+    # https://www.tecmint.com/clear-ram-memory-cache-buffer-and-swap-space-on-linux/
+    wsl -d ubdist sudo -n mkdir -p /etc/sysctl.d
+	echo 'vm.min_free_kbytes=600000' | wsl -d ubdist sudo -n tee /etc/sysctl.d/wsl_ram.conf > /dev/null
+	echo 'vm.vfs_cache_pressure=195' | wsl -d ubdist sudo -n tee -a /etc/sysctl.d/wsl_ram.conf > /dev/null
+
+
     if [[ "$backupID" != "" ]]
     then
         _restore_vm-wsl2 "$backupID"
