@@ -15,6 +15,9 @@ _devops() {
 	sudo -n rm -f "$scriptLocal"/vm.img
 	sudo -n rm -f "$scriptLocal"/vm-live.iso
 	sudo -n rm -f "$scriptLocal"/package_rootfs.tar
+
+	# Notable, due to usability of '_userVBox' through Cygwin/MSW.
+	#sudo -n rm -f "$scriptLocal"/vm.vdi
     
     #_devops_install
 
