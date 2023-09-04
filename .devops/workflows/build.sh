@@ -3,6 +3,135 @@
 # Local experiment. Should closely resemble corresponding devops workflow (eg. build.yml).
 # Host should either be equivalent to the desired CI (eg. Github Actions standard runner), or ubdist/Linux, or through built-in ubcp/MSW .
 
+
+
+_devops() {
+    clear
+	local functionEntryPWD="$PWD"
+
+    export skimfast="true"
+    export devfast="true"
+	
+	sudo -n rm -f "$scriptLocal"/vm.img
+	sudo -n rm -f "$scriptLocal"/vm-live.iso
+	sudo -n rm -f "$scriptLocal"/package_rootfs.tar
+    
+    #_devops_install
+
+
+
+    _dof _create_ubDistBuild-create
+
+    _dof _create_ubDistBuild-rotten_install
+
+	_dof _chroot_test
+
+	_dof _create_ubDistBuild-bootOnce
+
+	#_fetchCore
+	_do_fetchCore() {
+		#cd "$scriptAbsoluteFolder"
+		#cd _local
+		cd "$scriptLocal"
+		git clone https://github.com/soaringDistributions/ubDistFetch.git
+		cd ubDistFetch
+		_gitBest pull
+		./_ubDistFetch.bat
+	}
+	_dof _do_fetchCore
+
+	_dof _create_ubDistBuild-rotten_install-core
+
+	_dof _create_ubDistBuild-install-ubDistBuild
+
+
+	_do_scribeInfo() {
+		! ./ubiquitous_bash.sh _openChRoot && exit 1
+		! echo devops | ./ubiquitous_bash.sh _chroot tee /info-devops && exit 1
+		! git rev-parse --short HEAD | ./ubiquitous_bash.sh _chroot tee -a /info-devops && exit 1
+		! git log --pretty=format:'%h' -n 1 | ./ubiquitous_bash.sh _chroot tee -a /info-devops && exit 1
+		! git log --pretty=format:'%H' -n 1 | ./ubiquitous_bash.sh _chroot tee -a /info-devops && exit 1
+		! date +"%Y-%m-%d" | ./ubiquitous_bash.sh _chroot tee -a /info-devops && exit 1
+		! ./ubiquitous_bash.sh _closeChRoot && exit 1
+	}
+	_dof _do_scribeInfo
+
+
+
+
+
+	_dof _package_ubDistBuild_image
+	_dof _ubDistBuild_split
+	_dof _package_rm
+
+
+	_dof _convert-rootfs
+	_dof _ubDistBuild_split-rootfs
+	_dof _package_rm
+
+
+	#_fetchAccessories extendedInterface
+	_do_fetchAccessories_extendedInterface() {
+		#cd "$scriptAbsoluteFolder"
+		#cd _local
+		cd "$scriptLocal"
+		git clone https://github.com/mirage335-colossus/extendedInterface.git
+		cd extendedInterface
+		mkdir -p ../extendedInterface-accessories/integrations/ubcp
+		#-H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"
+		curl -L -o ../extendedInterface-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
+		./ubiquitous_bash.sh _build_extendedInterface-fetch
+	}
+	_dof _do_fetchAccessories_extendedInterface
+
+	#_fetchAccessories ubDistBuild
+	_do_fetchAccessories_ubDistBuild() {
+		#cd "$scriptAbsoluteFolder"
+		#cd _local
+		cd "$scriptLocal"
+		git clone https://github.com/soaringDistributions/ubDistBuild.git
+		cd ubDistBuild
+		mkdir -p ../ubDistBuild-accessories/integrations/ubcp
+		#-H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"
+		curl -L -o ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
+		./ubiquitous_bash.sh _build_ubDistBuild-fetch
+	}
+	_dof _do_fetchAccessories_ubDistBuild
+
+	_dof _convert-live
+	_dof _ubDistBuild_split-live
+	_dof _package_rm
+
+
+
+
+	cd "$functionEntryPWD"
+}
+
+
+_devops_install() {
+    clear
+
+    export skimfast="true"
+    export devfast="true"
+    
+    _dof _getMinimal_cloud
+	_dof _getMinimal_cloud
+	
+    _dof _getMost_ubuntu22-VBoxManage
+
+	# _getMost-xvfb
+	_do_getMost-xvfb() {
+		sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y xvfb
+	}
+	_dof _do_getMost-xvfb
+}
+
+
+
+
+
+
 _devops_sep() {
     [[ "$1" == "begin" ]] && echo -e '\033[0;95;103m  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  \033[0m'
     echo -e '\033[0;95;103m                                            \033[0m'
@@ -19,33 +148,25 @@ _devops_sep() {
 _devops_function() {
     #_devops_sep begin ${FUNCNAME[0]}
     _devops_sep begin "$@"
+	local functionEntryPWD="$PWD"
+	cd "$scriptAbsoluteFolder"
+	local functionEntryDISPLAY="$DISPLAY"
 
     "$@"
 
-   # _devops_sep end ${FUNCNAME[0]}
+	export DISPLAY="$functionEntryDISPLAY"
+	[[ "$DISPLAY" == "" ]] && unset DISPLAY
+	cd "$functionEntryPWD"
+    # _devops_sep end ${FUNCNAME[0]}
     _devops_sep end "$@"
 }
 _dof() {
     _devops_function "$@"
 }
 
-_devops_special_getMinimal_getMost() {
-    _getMinimal_cloud
-    _getMinimal_cloud
-    _getMost_ubuntu22-VBoxManage
-}
 
 
 
-
-_devops_install() {
-    clear
-
-    export skimfast="true"
-    export devfast="true"
-    
-    _dof _devops_special_getMinimal_getMost
-}
 
 
 _devops_experiment() {
@@ -55,119 +176,13 @@ _devops_experiment() {
 
     ! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
-	# WARNING: Do NOT use twice. Usually already effectively called by '_create_ubDistBuild-rotten_install' .
-	#_create_ubDistBuild-rotten_install-bootOnce
-	
-	
-	## ATTENTION: NOTICE: Resets any changes to crontab (ie. by rotten_install ).
-	##echo | _chroot crontab '-'
-	##echo | sudo -n -u user bash -c "crontab -"
-	##echo '@reboot cd '/home/user'/ ; '/home/user'/rottenScript.sh _run' | sudo -n -u user bash -c "crontab -"
-	
-	##sudo -n mkdir -p "$globalVirtFS"/home/user/.config/autostart
-	##_here_bootdisc_startup_xdg | sudo -n tee "$globalVirtFS"/home/user/.config/autostart/startup.desktop > /dev/null
-	##_chroot chown -R user:user /home/user/.config
-	##_chroot chmod 555 /home/user/.config/autostart/startup.desktop
-	
-	
-	##sudo -n mkdir -p "$globalVirtFS"/home/user/___quick
-	##echo 'sudo -n mount -t fuse.vmhgfs-fuse -o allow_other,uid=$(id -u "$USER"),gid=$(id -g "$USER") .host: "$HOME"/___quick' | sudo -n tee "$globalVirtFS"/home/user/___quick/mount.sh
-	##_chroot chown -R user:user /home/user/___quick
-	##_chroot chmod 755 /home/user/___quick/mount.sh
-	
-	##( _chroot crontab -l ; echo '@reboot /media/bootdisc/rootnix.sh > /var/log/rootnix.log 2>&1' ) | _chroot crontab '-'
-	
-	##( _chroot sudo -n -u user bash -c "crontab -l" ; echo '@reboot cd /home/'"$custom_user"'/.ubcore/ubiquitous_bash/lean.sh _unix_renice_execDaemon' ) | _chroot sudo -n -u user bash -c "crontab -"
-	
-	# ### NOTICE
-	# /usr/lib/virtualbox/vboxdrv.sh
-	#  KERN_VER=`uname -r`
-	#  ! $MODPROBE vboxdrv > /dev/null 2>&1
-	# /usr/share/virtualbox/src/vboxhost/build_in_tmp
-	#  MAKE_JOBS
-
-
-	sudo -n mv "$globalVirtFS"/usr/bin/uname "$globalVirtFS"/usr/bin/uname-orig
-	sudo -n mv "$globalVirtFS"/bin/uname "$globalVirtFS"/bin/uname-orig
-
-	sudo -n rm -f "$globalVirtFS"/usr/bin/uname
-	sudo -n rm -f "$globalVirtFS"/bin/uname
-
-	cat << 'CZXWXcRMTo8EmM8i4d' | sudo -n tee "$globalVirtFS"/usr/bin/uname > /dev/null
-#!/bin/bash
-
-local currentTopKernel 2>/dev/null
-currentTopKernel=$(sudo -n cat /boot/grub/grub.cfg 2>/dev/null | awk -F\' '/menuentry / {print $2}' | grep -v "Advanced options" | grep 'Linux [0-9]' | sed 's/ (.*//' | awk '{print $NF}' | head -n1)
-
-if [[ "$1" == "-r" ]] && [[ "$currentTopKernel" != "" ]]
-then
-	echo "$currentTopKernel"
-	exit "$?"
-fi
-
-if [[ -e /usr/bin/uname-orig ]]
-then
-	/usr/bin/uname-orig "$@"
-	exit "$?"
-fi
-
-if [[ -e /bin/uname-orig ]]
-then
-	/bin/uname-orig "$@"
-	exit "$?"
-fi
-
-exit 1
-CZXWXcRMTo8EmM8i4d
-
-	sudo -n chown root:root "$globalVirtFS"/usr/bin/uname
-	sudo -n chmod 755 "$globalVirtFS"/usr/bin/uname
-
-
-	_messagePlain_probe _chroot /sbin/rcvboxdrv setup
-	_chroot /sbin/rcvboxdrv setup
 
 	_messagePlain_probe /sbin/rcvboxdrv setup all
 	_chroot /sbin/rcvboxdrv setup all
 
-	_messagePlain_probe /sbin/rcvboxdrv setup $(_chroot cat /boot/grub/grub.cfg 2>/dev/null | awk -F\' '/menuentry / {print $2}' | grep -v "Advanced options" | grep 'Linux [0-9]' | sed 's/ (.*//' | awk '{print $NF}' | head -n1)
-	_chroot /sbin/rcvboxdrv setup $(_chroot cat /boot/grub/grub.cfg 2>/dev/null | awk -F\' '/menuentry / {print $2}' | grep -v "Advanced options" | grep 'Linux [0-9]' | sed 's/ (.*//' | awk '{print $NF}' | head -n1)
-
-
-	_messagePlain_probe _chroot /sbin/vboxconfig
-	_chroot /sbin/vboxconfig
-
-	_messagePlain_probe _chroot /sbin/vboxconfig
-	_chroot /sbin/vboxconfig --nostart
-	
-	_messagePlain_probe '__________________________________________________'
-	_messagePlain_probe 'probe: kernel modules: '"sudo -n find / -xdev -name 'vboxdrv.ko'"
-	sudo -n find "$globalVirtFS" -xdev -name 'vboxdrv.ko'
-	_messagePlain_probe '__________________________________________________'
-
-	sudo -n rm -f "$globalVirtFS"/usr/bin/uname
-	sudo -n rm -f "$globalVirtFS"/bin/uname
-
-	sudo -n mv -f "$globalVirtFS"/usr/bin/uname-orig "$globalVirtFS"/usr/bin/uname
-	sudo -n mv -f "$globalVirtFS"/bin/uname-orig "$globalVirtFS"/bin/uname
 
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
 
     _devops_sep end ${FUNCNAME[0]}
 }
-
-
-_devops() {
-    clear
-
-    export skimfast="true"
-    export devfast="true"
-    
-    #_devops_install
-
-    sudo -n rm -f "$scriptLocal"/vm.img
-    _dof _create_ubDistBuild-create
-    _dof _create_ubDistBuild-rotten_install
-}
-

@@ -934,6 +934,9 @@ _create_ubDistBuild-bootOnce-fsck_sequence() {
 }
 # Causes gschem to compile a bunch of scheme files so there may not be as much delay when otherwise running gschem for the first time.
 _create_ubDistBuild-bootOnce-geda_chroot() {
+	local functionEntryDISPLAY
+	functionEntryDISPLAY="$DISPLAY"
+
 	#. "$HOME"/.ubcore/.ubcorerc
 	[[ -e "$HOME"/.nix-profile/etc/profile.d/nix.sh ]] && . "$HOME"/.nix-profile/etc/profile.d/nix.sh
 	
@@ -961,6 +964,8 @@ _create_ubDistBuild-bootOnce-geda_chroot() {
 	disown -a -h -r
 	disown -a -r
 
+	export DISPLAY="$functionEntryDISPLAY"
+	[[ "$functionEntryDISPLAY" == "" ]] && unset DISPLAY
 	return 0
 }
 _create_ubDistBuild-bootOnce-geda_procedure() {
