@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='4059457028'
+export ub_setScriptChecksum_contents='3105977218'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -42333,6 +42333,9 @@ _create_ubDistBuild-bootOnce-fsck_sequence() {
 }
 # Causes gschem to compile a bunch of scheme files so there may not be as much delay when otherwise running gschem for the first time.
 _create_ubDistBuild-bootOnce-geda_chroot() {
+	local functionEntryDISPLAY
+	functionEntryDISPLAY="$DISPLAY"
+
 	#. "$HOME"/.ubcore/.ubcorerc
 	[[ -e "$HOME"/.nix-profile/etc/profile.d/nix.sh ]] && . "$HOME"/.nix-profile/etc/profile.d/nix.sh
 	
@@ -42360,6 +42363,8 @@ _create_ubDistBuild-bootOnce-geda_chroot() {
 	disown -a -h -r
 	disown -a -r
 
+	export DISPLAY="$functionEntryDISPLAY"
+	[[ "$functionEntryDISPLAY" == "" ]] && unset DISPLAY
 	return 0
 }
 _create_ubDistBuild-bootOnce-geda_procedure() {
