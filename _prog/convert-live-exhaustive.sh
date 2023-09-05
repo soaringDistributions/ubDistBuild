@@ -9,6 +9,11 @@ _live_sequence_exhaustive() {
         _messageFAIL
         _stop 1
     fi
+    if ! cp "$scriptLocal"/package_rootfs.tar "$safeTmp"/NOTmounted/package_rootfs.tar
+    then
+        _messageFAIL
+        _stop 1
+    fi
     
     sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
 	du -sh "$scriptLocal"/livefs/image/live/filesystem.squashfs
@@ -18,6 +23,14 @@ _live_sequence_exhaustive() {
 
 _convert-live-exhaustive() {
 	_messageNormal '_convert: vm-live-exhaustive.iso'
+
+    if [[ ! -e "$scriptLocal"/package_rootfs.tar ]]
+    then
+        _messagePlain_bad 'bad: missing: package_rootfs.tar'
+        _messageFAIL
+        _stop 1
+        return 1
+    fi
 
     if [[ ! -e "$scriptLocal"/vm-live.iso ]]
     then

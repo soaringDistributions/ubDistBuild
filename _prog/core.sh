@@ -1757,6 +1757,7 @@ _chroot_test() {
 	sudo -n cp -a "$scriptLib"/ubiquitous_bash "$globalVirtFS"/home/user/temp/test_"$ubiquitousBashIDnano"/
 	
 	_chroot chown -R user:user /home/user/temp/test_"$ubiquitiousBashIDnano"/
+	_chroot sudo -n -u user bash -c 'cd /home/user/temp/test_"$ubiquitousBashIDnano"/ ; git reset --hard'
 
 	if ! _chroot sudo -n --preserve-env=devfast -u user bash -c 'cd /home/user/temp/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ ; /home/user/temp/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ubiquitous_bash.sh _test'
 	then

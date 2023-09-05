@@ -21,6 +21,9 @@ _devops() {
 	sudo -n rm -f "$scriptLocal"/package_rootfs.tar
 	[[ -e "$scriptLocal"/package_rootfs.tar ]] && _messagePlain_bad 'bad: fail: rm: package_rootfs.tar' && return 0
 
+	sudo -n rm -f "$scriptLocal"/package_rootfs.tar.flx
+	[[ -e "$scriptLocal"/package_rootfs.tar.flx ]] && _messagePlain_bad 'bad: fail: rm: package_rootfs.tar.flx' && return 0
+
 	# Notable, due to usability of '_userVBox' through Cygwin/MSW.
 	#sudo -n rm -f "$scriptLocal"/vm.vdi
     
@@ -68,15 +71,20 @@ _devops() {
 
 
 
-	_dof _package_ubDistBuild_image
-	_dof _ubDistBuild_split
-	_dof _package_rm
+	#_dof _package_ubDistBuild_image
+	#_dof _ubDistBuild_split
+	#_dof _package_rm
 
 
 	#export current_diskConstrained="true"
 	_dof _convert-rootfs
-	_dof _ubDistBuild_split-rootfs
-	_dof _package_rm
+	_do_unpackage_rootfs() {
+		cd "$scriptLocal"
+		cat "$scriptLocal"/"package_rootfs.tar.flx" | lz4 -d -c > "$scriptLocal"/package_rootfs.tar
+	}
+	_dof _do_unpackage_rootfs
+	#_dof _ubDistBuild_split-rootfs
+	#_dof _package_rm
 
 
 	#_fetchAccessories extendedInterface
@@ -109,8 +117,8 @@ _devops() {
 
 	#export current_diskConstrained="true"
 	_dof _convert-live
-	_dof _ubDistBuild_split-live
-	_dof _package_rm
+	#_dof _ubDistBuild_split-live
+	#_dof _package_rm
 
 
 
@@ -176,7 +184,9 @@ _dof() {
 
 
 
-
+_devops_continue() {
+	_dof _chroot_test
+}
 
 
 _devops_experiment() {
@@ -196,3 +206,4 @@ _devops_experiment() {
 
     _devops_sep end ${FUNCNAME[0]}
 }
+
