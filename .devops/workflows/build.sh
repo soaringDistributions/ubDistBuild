@@ -4,7 +4,9 @@
 # Host should either be equivalent to the desired CI (eg. Github Actions standard runner), or ubdist/Linux, or through built-in ubcp/MSW .
 
 
-
+#clear ; wsl -d ubdist_fallback ./ubiquitous_bash.sh _devops | tee ./_local/devops.log
+#less -R ./_local/devops.log
+#tail -f ./_local/devops.log
 _devops() {
     clear
 	local functionEntryPWD="$PWD"
