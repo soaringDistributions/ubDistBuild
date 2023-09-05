@@ -1732,6 +1732,8 @@ _chroot_test() {
 	_messageNormal '##### init: _chroot_test'
 	echo
 	
+	local functionEntryPWD="$PWD"
+	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
 	
@@ -1752,12 +1754,21 @@ _chroot_test() {
 	#_chroot rmdir /root/temp/test_"$ubiquitiousBashIDnano"/
 	#_chroot rmdir /root/temp/
 	
+	# https://superuser.com/questions/1559417/how-to-discard-only-mode-changes-with-git
+	cd "$scriptLib"/ubiquitous_bash
+	git config core.fileMode false
+	#git reset --hard
+	git diff -p \
+    | grep -E '^(diff|old mode|new mode)' \
+    | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/' \
+    | git apply
+	cd "$functionEntryPWD"
 
 	sudo -n mkdir -p "$globalVirtFS"/home/user/temp/test_"$ubiquitiousBashIDnano"
 	sudo -n cp -a "$scriptLib"/ubiquitous_bash "$globalVirtFS"/home/user/temp/test_"$ubiquitousBashIDnano"/
 	
 	_chroot chown -R user:user /home/user/temp/test_"$ubiquitiousBashIDnano"/
-	_chroot sudo -n -u user bash -c 'cd /home/user/temp/test_"'"$ubiquitousBashIDnano"'"/ ; git reset --hard'
+	#_chroot sudo -n -u user bash -c 'cd /home/user/temp/test_"'"$ubiquitousBashIDnano"'"/ ; git reset --hard'
 
 	if ! _chroot sudo -n --preserve-env=devfast -u user bash -c 'cd /home/user/temp/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ ; /home/user/temp/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ubiquitous_bash.sh _test'
 	then
@@ -1771,6 +1782,8 @@ _chroot_test() {
 	_chroot rmdir /home/user/temp/
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+	cd "$functionEntryPWD"
 	return 0
 }
 
