@@ -73,6 +73,7 @@ _devops() {
 	_dof _package_rm
 
 
+	#export current_diskConstrained="true"
 	_dof _convert-rootfs
 	_dof _ubDistBuild_split-rootfs
 	_dof _package_rm
@@ -106,6 +107,7 @@ _devops() {
 	}
 	_dof _do_fetchAccessories_ubDistBuild
 
+	#export current_diskConstrained="true"
 	_dof _convert-live
 	_dof _ubDistBuild_split-live
 	_dof _package_rm
