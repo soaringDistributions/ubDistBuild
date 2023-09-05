@@ -151,6 +151,7 @@ _devops_continue() {
     export skimfast="true"
     export devfast="true"
 	export qemuNoKVM="false"
+	export qemuHeadless="false"
 
 	#_dof _chroot_test
 
