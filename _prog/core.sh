@@ -842,7 +842,9 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 
 	local currentExitStatus
 	
-	export qemuHeadless="true"
+	( [[ "$qemuHeadless" != "false" ]] || [[ "$DISPLAY" == "" ]] ) && export qemuHeadless="true"
+	
+	export qemuBootOnce="true"
 	
 	local currentPID
 	local currentPID_qemu
@@ -1563,7 +1565,7 @@ _zSpecial_qemu_sequence() {
 	_start
 	
 	
-	if [[ "$qemuHeadless" == "true" ]] || [[ "$qemu_custom" == "true" ]]
+	if [[ "$qemuHeadless" == "true" ]] || [[ "$qemuBootOnce" == "true" ]] || [[ "$qemu_custom" == "true" ]]
 	then
 		#_commandBootdisc
 		
@@ -1665,10 +1667,11 @@ _zSpecial_qemu_sequence() {
 	# hardware vt
 	if _testQEMU_hostArch_x64_hardwarevt
 	then
+		# Apparently, qemu kvm, can be unreliable if nested (eg. within VMWare Workstation VM).
+		#[[ "$qemuHeadless" == "true" ]] || 
 		_messagePlain_good 'found: kvm'
-		if [[ "$qemuHeadless" == "true" ]] || [[ "$qemuNoKVM" == "true" ]]
+		if [[ "$qemuNoKVM" == "true" ]] || [[ "$qemuNoKVM" != "false" ]]
 		then
-			# Apparently, qemu kvm, can be unreliable if nested (eg. within VMWare Workstation VM).
 			_messagePlain_good 'ignored: kvm'
 		else
 			qemuArgs+=(-machine accel=kvm)

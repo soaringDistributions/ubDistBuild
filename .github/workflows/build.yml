@@ -37,6 +37,9 @@ on:
       skimfast:
         type: boolean
         default: true
+      qemuNoKVM:
+        type: boolean
+        default: false
       runnerName:
         required: false
         default: ubuntu-latest-m
@@ -284,6 +287,8 @@ jobs:
         run: |
           export skimfast=${{ inputs.skimfast }}
           echo $skimfast
+          export qemuNoKVM=${{ inputs.qemuNoKVM }}
+          echo $qemuNoKVM
           ./_create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log && exit ${PIPESTATUS[0]}
       
       - name: _fetchCore

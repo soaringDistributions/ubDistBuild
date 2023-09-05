@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1704354447'
+export ub_setScriptChecksum_contents='930482942'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -42243,7 +42243,9 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 
 	local currentExitStatus
 	
-	export qemuHeadless="true"
+	( [[ "$qemuHeadless" != "false" ]] || [[ "$DISPLAY" == "" ]] ) && export qemuHeadless="true"
+	
+	export qemuBootOnce="true"
 	
 	local currentPID
 	local currentPID_qemu
@@ -42964,7 +42966,7 @@ _zSpecial_qemu_sequence() {
 	_start
 	
 	
-	if [[ "$qemuHeadless" == "true" ]] || [[ "$qemu_custom" == "true" ]]
+	if [[ "$qemuHeadless" == "true" ]] || [[ "$qemuBootOnce" == "true" ]] || [[ "$qemu_custom" == "true" ]]
 	then
 		#_commandBootdisc
 		
@@ -43066,10 +43068,11 @@ _zSpecial_qemu_sequence() {
 	# hardware vt
 	if _testQEMU_hostArch_x64_hardwarevt
 	then
+		# Apparently, qemu kvm, can be unreliable if nested (eg. within VMWare Workstation VM).
+		#[[ "$qemuHeadless" == "true" ]] || 
 		_messagePlain_good 'found: kvm'
-		if [[ "$qemuHeadless" == "true" ]] || [[ "$qemuNoKVM" == "true" ]]
+		if [[ "$qemuNoKVM" == "true" ]] || [[ "$qemuNoKVM" != "false" ]]
 		then
-			# Apparently, qemu kvm, can be unreliable if nested (eg. within VMWare Workstation VM).
 			_messagePlain_good 'ignored: kvm'
 		else
 			qemuArgs+=(-machine accel=kvm)

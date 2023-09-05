@@ -13,6 +13,7 @@ _devops() {
 
     export skimfast="true"
     export devfast="true"
+	export qemuNoKVM="false"
 	
 	sudo -n rm -f "$scriptLocal"/vm.img
 	[[ -e "$scriptLocal"/vm.img ]] && _messagePlain_bad 'bad: fail: rm: vm.img' && return 0
@@ -146,7 +147,15 @@ _devops_install() {
 }
 
 
+_devops_continue() {
+    export skimfast="true"
+    export devfast="true"
+	export qemuNoKVM="false"
 
+	#_dof _chroot_test
+
+	_dof _create_ubDistBuild-bootOnce
+}
 
 
 
@@ -184,12 +193,7 @@ _dof() {
 
 
 
-_devops_continue() {
-    export skimfast="true"
-    export devfast="true"
 
-	_dof _chroot_test
-}
 
 
 _devops_experiment() {
