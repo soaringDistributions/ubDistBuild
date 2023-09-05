@@ -1759,11 +1759,10 @@ _chroot_test() {
 	local currentConfig
 	currentConfig=$(git config core.fileMode)
 	git config core.fileMode true
+	find . -type f -exec chmod 644 {} \;
+	find . -type d -exec chmod 755 {} \;
 	#git reset --hard
-	git diff -p \
-    | grep -E '^(diff|old mode|new mode)' \
-    | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/' \
-    | git apply --allow-empty
+	git diff -p | grep -E '^(diff|old mode|new mode)' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/' | git apply
 	git config core.fileMode "$currentConfig"
 	cd "$functionEntryPWD"
 
