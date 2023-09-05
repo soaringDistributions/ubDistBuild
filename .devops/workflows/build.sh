@@ -185,6 +185,9 @@ _dof() {
 
 
 _devops_continue() {
+    export skimfast="true"
+    export devfast="true"
+
 	_dof _chroot_test
 }
 
