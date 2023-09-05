@@ -842,7 +842,7 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 
 	local currentExitStatus
 	
-	( [[ "$qemuHeadless" != "false" ]] && [[ "$DISPLAY" != "" ]] ) && export qemuHeadless="true"
+	( [[ "$qemuHeadless" != "false" ]] || [[ "$DISPLAY" == "" ]] ) && export qemuHeadless="true"
 	
 	export qemuBootOnce="true"
 	
