@@ -14,12 +14,12 @@ _hash_file() {
     shift
     shift
     
-    echo "$currentFileName" tee -a "$scriptLocal"/_hash-"$currentListName".txt
-    echo "openssl dgst -whirlpool -binary | xxd -p -c0" tee -a "$scriptLocal"/_hash-"$currentListName".txt
-    cat "$currentFilePath" | "$@" | openssl dgst -whirlpool -binary | xxd -p -c0 tee -a "$scriptLocal"/_hash-"$currentListName".txt
-    echo "openssl dgst -sha3-512 -binary | xxd -p -c0" tee -a "$scriptLocal"/_hash-"$currentListName".txt
-    cat "$currentFilePath" | "$@" | openssl dgst -sha3-512 -binary | xxd -p -c0 tee -a "$scriptLocal"/_hash-"$currentListName".txt
-    echo tee -a "$scriptLocal"/_hash-"$currentListName".txt
+    echo "$currentFileName" | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+    echo "openssl dgst -whirlpool -binary | xxd -p -c 256" | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+    cat "$currentFilePath" | "$@" | openssl dgst -whirlpool -binary | xxd -p -c 256 | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+    echo "openssl dgst -sha3-512 -binary | xxd -p -c 256" | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+    cat "$currentFilePath" | "$@" | openssl dgst -sha3-512 -binary | xxd -p -c 256 | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+    echo | tee -a "$scriptLocal"/_hash-"$currentListName".txt
 }
 
 
