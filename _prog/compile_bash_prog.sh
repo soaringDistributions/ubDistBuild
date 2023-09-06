@@ -122,6 +122,9 @@ _compile_bash_program_prog() {
 	includeScriptList+=( features.sh )
 
 
+	includeScriptList+=( hash.sh )
+
+
 	includeScriptList+=( revert-live.sh )
 
 

@@ -58,6 +58,8 @@ _convert-live-exhaustive() {
 	then
 		_stop 1
 	fi
+
+    _hash_file exhaustive--ubdist exhaustive--vm-live.iso "$scriptLocal"/vm-live.iso cat
 	
 	_safeRMR "$scriptLocal"/livefs
 }

@@ -108,6 +108,12 @@ jobs:
         run: |
           rm -f ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z
           ./ubiquitous_bash.sh _build_ubDistBuild-build
+
+      - name: _hash_ubDistBuildExe
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _hash_ubDistBuildExe
+      
       - name: release!
         uses: softprops/action-gh-release@v1
         with:
@@ -115,6 +121,15 @@ jobs:
           name: build
           files: |
             ../ubDistBuild.exe
+
+      - name: release! hash
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/_hash-ubDistBuildExe.txt
+
   build:
     # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
     #  '7 GB of RAM memory'
@@ -339,6 +354,12 @@ jobs:
           ! date +"%Y-%m-%d" | ./ubiquitous_bash.sh _chroot tee -a /info-github && exit 1
           ! ./ubiquitous_bash.sh _closeChRoot && exit 1
           true
+
+      - name: _hash_img
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _hash_img
+      
       - name: release! report! internal
         uses: softprops/action-gh-release@v1
         with:
@@ -525,6 +546,12 @@ jobs:
           export current_diskConstrained="true"
           ./ubiquitous_bash.sh _convert_rm
           ./ubiquitous_bash.sh _convert-rootfs | sudo -n tee ./_convert-rootfs.log && exit ${PIPESTATUS[0]}
+
+      - name: _hash_rootfs
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _hash_rootfs
+      
       - name: _ubDistBuild_split-rootfs
         shell: bash
         run: |
@@ -661,6 +688,11 @@ jobs:
           ./ubiquitous_bash.sh _convert_rm
           ./ubiquitous_bash.sh _convert-live | sudo -n tee ./_convert-live.log && exit ${PIPESTATUS[0]}
           ./ubiquitous_bash.sh _safeRMR ./_local/livefs
+
+      - name: _hash_live
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _hash_live
       
       # DANGER: GitHub Actions ONLY!
       - name: _fetchAccessories rm
@@ -772,6 +804,13 @@ jobs:
         #run: |
           #./_assessment | sudo -n tee ./_local/_assessment.log && exit ${PIPESTATUS[0]}
       # ATTRIBUTION: Largely attributable to ChatGPT through Copilot Chat 2023-08-04 .
-          
+
+      - name: release! hash
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/hash-ubdist.txt
 
 

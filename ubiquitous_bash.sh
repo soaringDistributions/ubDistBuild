@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3934948791'
+export ub_setScriptChecksum_contents='593958206'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -11097,6 +11097,9 @@ _getMinimal_cloud() {
 	_getMost_backend_aptGetInstall cifs-utils
 	
 	_getMost_backend_aptGetInstall dos2unix
+
+
+	_getMost_backend_aptGetInstall xxd
 
 
 	_getMost_backend_aptGetInstall debhelper
@@ -45226,6 +45229,52 @@ _sshid-export-wsl2() {
 
 
 
+_hash_rm() {
+    rm -f "$scriptLocal"/_hash-ubdistBuildExe.txt > /dev/null 2>&1
+    rm -f "$scriptLocal"/_hash-ubdist.txt > /dev/null 2>&1
+}
+
+_hash_file() {
+    _messageNormal '_hash_file: '"$2"
+    
+    local currentListName="$1"
+    local currentFileName="$2"
+    local currentFilePath="$3"
+    shift
+    shift
+    shift
+    
+    echo "$currentFileName" tee -a "$scriptLocal"/_hash-"$currentListName".txt
+    echo "openssl dgst -whirlpool -binary | xxd -p -c0" tee -a "$scriptLocal"/_hash-"$currentListName".txt
+    cat "$currentFilePath" | "$@" | openssl dgst -whirlpool -binary | xxd -p -c0 tee -a "$scriptLocal"/_hash-"$currentListName".txt
+    echo "openssl dgst -sha3-512 -binary | xxd -p -c0" tee -a "$scriptLocal"/_hash-"$currentListName".txt
+    cat "$currentFilePath" | "$@" | openssl dgst -sha3-512 -binary | xxd -p -c0 tee -a "$scriptLocal"/_hash-"$currentListName".txt
+    echo tee -a "$scriptLocal"/_hash-"$currentListName".txt
+}
+
+
+
+_hash_ubDistBuildExe() {
+    _hash_file ubDistBuildExe ubDistBuild.exe "$scriptAbsoluteFolder"/../ubDistBuild.exe cat
+}
+
+
+_hash_img() {
+    _hash_file ubdist vm.img "$scriptLocal"/vm.img cat
+}
+
+_hash_rootfs() {
+    _hash_rootfs ubdist vm-live.iso "$scriptLocal"/vm-live.iso cat
+}
+
+_hash_live() {
+    _hash_file ubdist package_rootfs.tar "$scriptLocal"/package_rootfs.tar.flx lz4 -d -c
+}
+
+
+
+
+
 # Recreates 'vm.img' from booted Live ISO .
 # WARNING: May be untested.
 # CAUTION: Do NOT introduce external (ie. 'online') dependencies! External dependencies have historically been susceptible to breakage!
@@ -48509,6 +48558,9 @@ _compile_bash_program_prog() {
 	includeScriptList+=( get.sh )
 
 	includeScriptList+=( features.sh )
+
+
+	includeScriptList+=( hash.sh )
 
 
 	includeScriptList+=( revert-live.sh )

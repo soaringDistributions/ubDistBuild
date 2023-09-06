@@ -27,6 +27,8 @@ _devops() {
 
 	# Notable, due to usability of '_userVBox' through Cygwin/MSW.
 	#sudo -n rm -f "$scriptLocal"/vm.vdi
+
+	_hash_rm
     
     #_devops_install
 
@@ -68,10 +70,10 @@ _devops() {
 	}
 	_dof _do_scribeInfo
 
+	
 
 
-
-
+	_hash_img
 	#_dof _package_ubDistBuild_image
 	#_dof _ubDistBuild_split
 	#_dof _package_rm
@@ -79,6 +81,7 @@ _devops() {
 
 	#export current_diskConstrained="true"
 	_dof _convert-rootfs
+	_dof _hash_rootfs
 	_do_unpackage_rootfs() {
 		cd "$scriptLocal"
 		cat "$scriptLocal"/"package_rootfs.tar.flx" | lz4 -d -c > "$scriptLocal"/package_rootfs.tar
@@ -118,6 +121,7 @@ _devops() {
 
 	#export current_diskConstrained="true"
 	_dof _convert-live
+	_hash_live
 	#_dof _ubDistBuild_split-live
 	#_dof _package_rm
 
