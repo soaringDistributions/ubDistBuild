@@ -90,6 +90,12 @@ jobs:
         timeout-minutes: 120
         run: |
           ./ubiquitous_bash.sh _getMinimal_cloud
+      
+      - name: _test_hash_legacy
+        shell: bash
+        run: |
+          echo -n | openssl dgst -whirlpool -binary - | xxd -p -c 256
+      
       - name: _getMinimal-build_ubDistBuild
         shell: bash
         timeout-minutes: 120
@@ -247,6 +253,13 @@ jobs:
           df -h
           df -h /
         timeout-minutes: 355
+      
+      - name: _test_hash_legacy
+        shell: bash
+        run: |
+          echo -n | openssl dgst -whirlpool -binary - | xxd -p -c 256
+      
+      
       #- name: _create_ubDistBuild
         #shell: bash
         #run: |
