@@ -96,9 +96,9 @@ jobs:
         run: |
           if [[ -e "/etc/ssl/openssl_legacy.cnf" ]]
           then
-              echo -n | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+              echo -n | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256
           else
-              echo -n | openssl dgst -whirlpool -binary | xxd -p -c 256 | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+              echo -n | openssl dgst -whirlpool -binary | xxd -p -c 256
           fi
       
       - name: _getMinimal-build_ubDistBuild
@@ -264,9 +264,9 @@ jobs:
         run: |
           if [[ -e "/etc/ssl/openssl_legacy.cnf" ]]
           then
-              echo -n | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+              echo -n | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256
           else
-              echo -n | openssl dgst -whirlpool -binary | xxd -p -c 256 | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+              echo -n | openssl dgst -whirlpool -binary | xxd -p -c 256
           fi
       
       #- name: _create_ubDistBuild
