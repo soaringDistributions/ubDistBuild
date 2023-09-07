@@ -4,6 +4,7 @@ _hash_rm() {
     rm -f "$scriptLocal"/_hash-ubdist.txt > /dev/null 2>&1
 }
 
+# WARNING: CAUTION: Do NOT change correspondence between line number and hash ! Intended for automatic verification of distributed and end point integrity traceable back to Git repository public record !
 _hash_file() {
     _messageNormal '_hash_file: '"$2"
     
