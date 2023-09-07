@@ -44,7 +44,7 @@ _hash_rootfs() {
 }
 
 _hash_live() {
-    _hash_rootfs ubdist vm-live.iso "$scriptLocal"/vm-live.iso cat
+    _hash_file ubdist vm-live.iso "$scriptLocal"/vm-live.iso cat
 }
 
 
