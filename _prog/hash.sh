@@ -39,11 +39,11 @@ _hash_img() {
 }
 
 _hash_rootfs() {
-    _hash_rootfs ubdist vm-live.iso "$scriptLocal"/vm-live.iso cat
+    _hash_file ubdist package_rootfs.tar "$scriptLocal"/package_rootfs.tar.flx lz4 -d -c
 }
 
 _hash_live() {
-    _hash_file ubdist package_rootfs.tar "$scriptLocal"/package_rootfs.tar.flx lz4 -d -c
+    _hash_rootfs ubdist vm-live.iso "$scriptLocal"/vm-live.iso cat
 }
 
 
