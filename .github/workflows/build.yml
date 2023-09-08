@@ -192,6 +192,10 @@ jobs:
           remove-android: 'true'
           #remove-haskell: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
           remove-haskell: 'true'
+          #remove-codeql: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-codeql: 'true'
+          #remove-docker-images: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-docker-images: 'true'
       - name: Enable KVM group perms
         if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
         run: |
@@ -714,6 +718,7 @@ jobs:
           ./ubiquitous_bash.sh _convert_rm
           ./ubiquitous_bash.sh _create_ubDistBuild_feedAccessories | sudo -n tee ./_create_ubDistBuild_feedAccessories.log && exit ${PIPESTATUS[0]}
           ./ubiquitous_bash.sh _safeRMR ./_local/livefs
+          true
       
       # DANGER: GitHub Actions ONLY!
       - name: _create_ubDistBuild_feedAccessories rm
@@ -741,8 +746,9 @@ jobs:
           ./ubiquitous_bash.sh _convert_rm
           ./ubiquitous_bash.sh _convert-live_ISO | sudo -n tee ./_convert-live_ISO.log && exit ${PIPESTATUS[0]}
           ./ubiquitous_bash.sh _safeRMR ./_local/livefs
+          true
 
-      - name: _convert-live
+      - name: _convert-live log
         shell: bash
         run: |
           cat ./_create_ubDistBuild_feedAccessories.log ./_convert-live_ISO.log | sudo -n tee ./_convert-live.log && exit ${PIPESTATUS[0]}
