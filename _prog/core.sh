@@ -1178,6 +1178,7 @@ CZXWXcRMTo8EmM8i4d
 	# https://github.com/kdave/btrfs-progs/issues/184
 	_chroot btrfs filesystem defrag -r -czstd /
 	
+	_messagePlain_nominal 'chroot: report: df'
 	_chroot df -h /
 	
 	
@@ -2005,11 +2006,8 @@ _convert-vhdx() {
 	return 0
 }
 
-_convert-live() {
-	_messageNormal '_convert: vm-live.iso'
-
-
-	_messageNormal 'convert-live: chroot'
+_create_ubDistBuild_feedAccessories() {
+	_messageNormal '_convert-live: _create_ubDistBuild_feedAccessories'
 
 	_messagePlain_nominal 'Attempt: _openChRoot'
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
@@ -2055,8 +2053,9 @@ _convert-live() {
 
 	_messagePlain_nominal 'Attempt: _closeChRoot'
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
-
-	
+}
+_convert-live_ISO() {
+	_messageNormal '_convert: vm-live.iso'
 
 	
 	if ! "$scriptAbsoluteLocation" _live_sequence_in "$@"
@@ -2072,6 +2071,17 @@ _convert-live() {
 	fi
 	
 	_safeRMR "$scriptLocal"/livefs
+}
+_convert-live() {
+	#_messageNormal '_convert: vm-live.iso'
+
+
+	
+	_create_ubDistBuild_feedAccessories "$@"
+	
+
+	_convert-live_ISO "$@"
+	
 }
 
 

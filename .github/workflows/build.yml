@@ -707,18 +707,22 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: _convert-live
+      - name: _convert-live _create_ubDistBuild_feedAccessories
         shell: bash
         run: |
           export current_diskConstrained="true"
           ./ubiquitous_bash.sh _convert_rm
-          ./ubiquitous_bash.sh _convert-live | sudo -n tee ./_convert-live.log && exit ${PIPESTATUS[0]}
+          ./ubiquitous_bash.sh _create_ubDistBuild_feedAccessories | sudo -n tee ./_create_ubDistBuild_feedAccessories.log && exit ${PIPESTATUS[0]}
           ./ubiquitous_bash.sh _safeRMR ./_local/livefs
-
-      - name: _hash_live
+      
+      # DANGER: GitHub Actions ONLY!
+      - name: _create_ubDistBuild_feedAccessories rm
         shell: bash
         run: |
-          ./ubiquitous_bash.sh _hash_live
+          rm -rf ../extendedInterface-accessories
+          [[ -e ../extendedInterface-accessories ]] && exit 1 || true
+          rm -rf ../ubDistBuild-accessories
+          [[ -e ../ubDistBuild-accessories ]] && exit 1 || true
       
       # DANGER: GitHub Actions ONLY!
       - name: _fetchAccessories rm
@@ -726,7 +730,27 @@ jobs:
         run: |
           cd _local
           rm -rf extendedInterface
+          [[ -e extendedInterface ]] && exit 1 || true
           rm -rf ubDistBuild
+          [[ -e ubDistBuild ]] && exit 1 || true
+      
+      - name: _convert-live _convert-live_ISO
+        shell: bash
+        run: |
+          export current_diskConstrained="true"
+          ./ubiquitous_bash.sh _convert_rm
+          ./ubiquitous_bash.sh _convert-live_ISO | sudo -n tee ./_convert-live_ISO.log && exit ${PIPESTATUS[0]}
+          ./ubiquitous_bash.sh _safeRMR ./_local/livefs
+
+      - name: _convert-live
+        shell: bash
+        run: |
+          cat ./_create_ubDistBuild_feedAccessories.log ./_convert-live_ISO.log | sudo -n tee ./_convert-live.log && exit ${PIPESTATUS[0]}
+
+      - name: _hash_live
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _hash_live
       
       - name: _ubDistBuild_split-live
         shell: bash
@@ -837,6 +861,6 @@ jobs:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
-            ./_local/hash-ubdist.txt
+            ./_local/_hash-ubdist.txt
 
 
