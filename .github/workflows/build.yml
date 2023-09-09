@@ -229,7 +229,7 @@ jobs:
           grep --color svm /proc/cpuinfo || true
           grep --color vmx /proc/cpuinfo || true
           sudo -n lsmod | grep kvm
-          ls -l /dev/kvm
+          ls -l /dev/kvm*
           echo $USER
           groups
       - name: _getCore_ub
