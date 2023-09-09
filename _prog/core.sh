@@ -2053,6 +2053,8 @@ _create_ubDistBuild_feedAccessories() {
 
 	_messagePlain_nominal 'Attempt: _closeChRoot'
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+	return 0
 }
 _convert-live_ISO() {
 	_messageNormal '_convert: vm-live.iso'
@@ -2071,6 +2073,15 @@ _convert-live_ISO() {
 	fi
 	
 	_safeRMR "$scriptLocal"/livefs
+
+	if [[ -e "$scriptLocal"/livefs ]]
+	then
+		_messagePlain_bad 'fail: exists: livefs'
+		_stop 1
+		return 1
+	fi
+
+	return 0
 }
 _convert-live() {
 	#_messageNormal '_convert: vm-live.iso'
