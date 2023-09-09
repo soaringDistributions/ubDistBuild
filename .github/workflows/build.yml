@@ -204,15 +204,18 @@ jobs:
         if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
         shell: bash
         run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          #echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          echo 'KERNEL=="kvm", GROUP="docker", MODE="0664", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo -n udevadm control --reload-rules
           sudo -n udevadm trigger --name-match=kvm
           sudo -n apt-get update
           sudo -n apt-get install -y libvirt-clients libvirt-daemon-system libvirt-daemon virtinst bridge-utils qemu qemu-system-x86
           sudo -n usermod -a -G kvm $USER
           sudo -n usermod -a -G libvirt $USER
+          sudo -n usermod -a -G docker $USER
           sudo -n adduser $USER kvm
-          sudo -n chown -R $USER /dev/kvm
+          sudo -n chown -R $USER:kvm /dev/kvm
+          #sudo -n chown -R $USER:docker /dev/kvm
           ls -l /dev/kvm
           ls -l /dev/kvm*
           echo $USER
