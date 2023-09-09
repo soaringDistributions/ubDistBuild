@@ -79,7 +79,8 @@ concurrency:
 
 jobs:
   build_installer:
-    runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
+    #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
+    runs-on: 'ubuntu-latest'
     steps:
       - uses: actions/checkout@v3
         with:
@@ -213,15 +214,18 @@ jobs:
           sudo -n adduser $USER kvm
           sudo -n chown -R $USER /dev/kvm
           ls -l /dev/kvm
+          ls -l /dev/kvm*
           echo $USER
           groups
           sudo -n lsmod | grep kvm
           sudo -n modprobe -r kvm_intel
           sudo -n modprobe -r kvm_amd
           sudo -n modprobe -r kvm
-          (grep --color vmx /proc/cpuinfo && sudo -n modprobe kvm_intel) || (grep --color svm /proc/cpuinfo && sudo modprobe -n kvm_amd)
+          ( grep --color vmx /proc/cpuinfo && sudo -n modprobe kvm_intel ) || ( grep --color svm /proc/cpuinfo && sudo -n modprobe kvm_amd )
           sudo -n modprobe kvm
-          sudo lsmod | grep kvm
+          sudo -n lsmod | grep kvm
+          ls -l /dev/kvm
+          ls -l /dev/kvm*
       - name: Check KVM group perms
         if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
         shell: bash
