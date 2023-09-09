@@ -226,8 +226,8 @@ jobs:
         if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
         shell: bash
         run: |
-          grep --color svm /proc/cpuinfo
-          grep --color vmx /proc/cpuinfo
+          grep --color svm /proc/cpuinfo || true
+          grep --color vmx /proc/cpuinfo || true
           sudo -n lsmod | grep kvm
           ls -l /dev/kvm
           echo $USER
