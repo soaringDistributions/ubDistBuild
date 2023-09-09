@@ -219,7 +219,7 @@ jobs:
           sudo -n modprobe -r kvm_intel
           sudo -n modprobe -r kvm_amd
           sudo -n modprobe -r kvm
-          sudo -n modprobe kvm_intel || sudo modprobe -n kvm_amd
+          (grep --color vmx /proc/cpuinfo && sudo -n modprobe kvm_intel) || (grep --color svm /proc/cpuinfo && sudo modprobe -n kvm_amd)
           sudo -n modprobe kvm
           sudo lsmod | grep kvm
       - name: Check KVM group perms
@@ -229,6 +229,7 @@ jobs:
           grep --color svm /proc/cpuinfo || true
           grep --color vmx /proc/cpuinfo || true
           sudo -n lsmod | grep kvm
+          ls -l /dev/kvm
           ls -l /dev/kvm*
           echo $USER
           groups
