@@ -214,8 +214,8 @@ jobs:
           sudo -n usermod -a -G libvirt $USER
           sudo -n usermod -a -G docker $USER
           sudo -n adduser $USER kvm
-          sudo -n chown -R $USER:kvm /dev/kvm
-          #sudo -n chown -R $USER:docker /dev/kvm
+          #sudo -n chown -R $USER:kvm /dev/kvm
+          sudo -n chown -R $USER:docker /dev/kvm
           ls -l /dev/kvm
           ls -l /dev/kvm*
           echo $USER
@@ -227,6 +227,7 @@ jobs:
           ( grep --color vmx /proc/cpuinfo && sudo -n modprobe kvm_intel ) || ( grep --color svm /proc/cpuinfo && sudo -n modprobe kvm_amd )
           sudo -n modprobe kvm
           sudo -n lsmod | grep kvm
+          sudo -n chown -R $USER:docker /dev/kvm
           ls -l /dev/kvm
           ls -l /dev/kvm*
       - name: Check KVM group perms
