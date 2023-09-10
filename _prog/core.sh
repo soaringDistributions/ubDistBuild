@@ -1920,7 +1920,7 @@ _create_kde() {
 	
 	rm -f "$scriptLocal"/package_kde.tar.xz > /dev/null 2>&1
 	#-T0
-	env XZ_OPT="-e9" tar --exclude= './.ubtmp' --exclude='./.config/chromium' --exclude='./.config/autostart/startup.desktop' --exclude='./.config/plasma-workspace/env/startup.sh' --exclude'./.config/qt5ct' -cJvf "$scriptLocal"/package_kde.tar.xz ./.config ./.kde ./.local ./.xournal/config ./.license_package_kde
+	env XZ_OPT="-e9" tar --exclude= './.ubtmp' --exclude='./.config/chromium' --exclude './.config/systemd/user/bootdiscStartup.service' --exclude='./.config/startup.sh' --exclude='./.config/autostart/startup.desktop' --exclude='./.config/plasma-workspace/env/startup.sh' --exclude'./.config/qt5ct' -cJvf "$scriptLocal"/package_kde.tar.xz ./.config ./.kde ./.local ./.xournal/config ./.license_package_kde
 	
 	rm -f "$HOME"/.license_package_kde/license.txt
 	rm -f "$HOME"/.license_package_kde/CC0_license.txt
