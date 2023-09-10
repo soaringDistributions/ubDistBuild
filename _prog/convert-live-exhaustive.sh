@@ -15,6 +15,9 @@ _live_sequence_exhaustive() {
         _stop 1
     fi
     
+
+    mkdir -p "$scriptLocal"/livefs/image/live
+
     sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
 	du -sh "$scriptLocal"/livefs/image/live/filesystem.squashfs
 
@@ -41,11 +44,7 @@ _convert-live-exhaustive() {
         return 1
 	fi
 
-    if ! "$scriptAbsoluteLocation" _live_sequence_exhaustive "$@"
-    then
-        _messageFAIL
-        _stop 1
-    fi
+    rm -f "$scriptLocal"/vm-live.iso
 	
 	if ! "$scriptAbsoluteLocation" _live_sequence_in "$@"
 	then
@@ -53,12 +52,19 @@ _convert-live-exhaustive() {
 	fi
 	
 	[[ "$current_diskConstrained" == "true" ]] && rm -f "$scriptLocal"/vm.img
+
+    if ! "$scriptAbsoluteLocation" _live_sequence_exhaustive "$@"
+    then
+        _messageFAIL
+        _stop 1
+    fi
 	
 	if ! "$scriptAbsoluteLocation" _live_sequence_out "$@"
 	then
 		_stop 1
 	fi
 
+    rm -f "$scriptLocal"/_hash-exhaustive--ubdist.txt
     _hash_file exhaustive--ubdist exhaustive--vm-live.iso "$scriptLocal"/vm-live.iso cat
 	
 	_safeRMR "$scriptLocal"/livefs

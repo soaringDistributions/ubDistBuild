@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='559299073'
+export ub_setScriptChecksum_contents='916056333'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -45627,6 +45627,9 @@ _live_sequence_exhaustive() {
         _stop 1
     fi
     
+
+    mkdir -p "$scriptLocal"/livefs/image/live
+
     sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
 	du -sh "$scriptLocal"/livefs/image/live/filesystem.squashfs
 
@@ -45653,11 +45656,7 @@ _convert-live-exhaustive() {
         return 1
 	fi
 
-    if ! "$scriptAbsoluteLocation" _live_sequence_exhaustive "$@"
-    then
-        _messageFAIL
-        _stop 1
-    fi
+    rm -f "$scriptLocal"/vm-live.iso
 	
 	if ! "$scriptAbsoluteLocation" _live_sequence_in "$@"
 	then
@@ -45665,12 +45664,19 @@ _convert-live-exhaustive() {
 	fi
 	
 	[[ "$current_diskConstrained" == "true" ]] && rm -f "$scriptLocal"/vm.img
+
+    if ! "$scriptAbsoluteLocation" _live_sequence_exhaustive "$@"
+    then
+        _messageFAIL
+        _stop 1
+    fi
 	
 	if ! "$scriptAbsoluteLocation" _live_sequence_out "$@"
 	then
 		_stop 1
 	fi
 
+    rm -f "$scriptLocal"/_hash-exhaustive--ubdist.txt
     _hash_file exhaustive--ubdist exhaustive--vm-live.iso "$scriptLocal"/vm-live.iso cat
 	
 	_safeRMR "$scriptLocal"/livefs
