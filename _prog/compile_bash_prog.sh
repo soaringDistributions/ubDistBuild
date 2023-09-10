@@ -127,6 +127,8 @@ _compile_bash_program_prog() {
 
 	includeScriptList+=( revert-live.sh )
 
+	includeScriptList+=( convert-live-exhaustive.sh )
+
 
 	includeScriptList+=( _prog-ops.sh )
 	

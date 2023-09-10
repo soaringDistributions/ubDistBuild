@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='355067649'
+export ub_setScriptChecksum_contents='559299073'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -45611,6 +45611,76 @@ CZXWXcRMTo8EmM8i4d
 
 
 
+_live_sequence_exhaustive() {
+    _start
+    
+    _messagePlain_nominal 'copy: vm.img'
+    mkdir -p "$safeTmp"/NOTmounted
+    if ! cp "$scriptLocal"/vm.img "$safeTmp"/NOTmounted/vm.img
+    then
+        _messageFAIL
+        _stop 1
+    fi
+    if ! cp "$scriptLocal"/package_rootfs.tar "$safeTmp"/NOTmounted/package_rootfs.tar
+    then
+        _messageFAIL
+        _stop 1
+    fi
+    
+    sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
+	du -sh "$scriptLocal"/livefs/image/live/filesystem.squashfs
+
+    _stop
+}
+
+_convert-live-exhaustive() {
+	_messageNormal '_convert: vm-live-exhaustive.iso'
+
+    if [[ ! -e "$scriptLocal"/package_rootfs.tar ]]
+    then
+        _messagePlain_bad 'bad: missing: package_rootfs.tar'
+        _messageFAIL
+        _stop 1
+        return 1
+    fi
+
+    if [[ ! -e "$scriptLocal"/vm-live.iso ]]
+    then
+        _messagePlain_bad 'bad: missing: vm-live.iso'
+        _messagePlain_request 'request: _convert-live (adds desirable changes for slow-throughput slow-seek and improves revert capability)'
+        _messageFAIL
+        _stop 1
+        return 1
+	fi
+
+    if ! "$scriptAbsoluteLocation" _live_sequence_exhaustive "$@"
+    then
+        _messageFAIL
+        _stop 1
+    fi
+	
+	if ! "$scriptAbsoluteLocation" _live_sequence_in "$@"
+	then
+		_stop 1
+	fi
+	
+	[[ "$current_diskConstrained" == "true" ]] && rm -f "$scriptLocal"/vm.img
+	
+	if ! "$scriptAbsoluteLocation" _live_sequence_out "$@"
+	then
+		_stop 1
+	fi
+
+    _hash_file exhaustive--ubdist exhaustive--vm-live.iso "$scriptLocal"/vm-live.iso cat
+	
+	_safeRMR "$scriptLocal"/livefs
+}
+
+
+
+
+
+
 [[ -e "$scriptAbsoluteFolder"/_prog-ops/revert-live.sh ]] && . "$scriptAbsoluteFolder"/_prog-ops/revert-live.sh
 
 [[ -e "$scriptAbsoluteFolder"/_prog-ops/convert-live-exhaustive.sh ]] && . "$scriptAbsoluteFolder"/_prog-ops/convert-live-exhaustive.sh
@@ -48757,6 +48827,8 @@ _compile_bash_program_prog() {
 
 
 	includeScriptList+=( revert-live.sh )
+
+	includeScriptList+=( convert-live-exhaustive.sh )
 
 
 	includeScriptList+=( _prog-ops.sh )
