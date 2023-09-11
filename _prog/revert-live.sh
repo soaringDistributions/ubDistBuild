@@ -51,10 +51,12 @@ _revert-fromLive() {
     
     ! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 
-    sudo -n mv -f "$globalVirtFS"/boot-copy/boot/efi/. "$globalVirtFS"/boot/efi/
-    sudo -n rmdir "$globalVirtFS"/boot-copy/boot/efi/.
+    sudo -n mv -f "$globalVirtFS"/boot-copy/boot/efi/* "$globalVirtFS"/boot/efi/
+	sudo -n mv -f "$globalVirtFS"/boot-copy/boot/efi/.* "$globalVirtFS"/boot/efi/
+    sudo -n rmdir "$globalVirtFS"/boot-copy/boot/efi
 
-    sudo -n mv -f "$globalVirtFS"/boot-copy/boot/. "$globalVirtFS"/boot/
+	sudo -n mv -f "$globalVirtFS"/boot-copy/boot/* "$globalVirtFS"/boot/
+    sudo -n mv -f "$globalVirtFS"/boot-copy/boot/.* "$globalVirtFS"/boot/
     sudo -n rmdir "$globalVirtFS"/boot-copy/boot
     sudo -n rmdir "$globalVirtFS"/boot-copy
 
