@@ -21,11 +21,22 @@ _live_sequence_exhaustive() {
     sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
 	du -sh "$scriptLocal"/livefs/image/live/filesystem.squashfs
 
+
+    _pattern_recovery_write "$scriptLocal"/livefs/image/live/pattern.img 36044800000
+
     _stop
 }
 
 _convert-live-exhaustive() {
 	_messageNormal '_convert: vm-live-exhaustive.iso'
+
+    if [[ ! -e "$scriptLocal"/vm.img ]]
+    then
+        _messagePlain_bad 'bad: missing: package_rootfs.tar'
+        _messageFAIL
+        _stop 1
+        return 1
+    fi
 
     if [[ ! -e "$scriptLocal"/package_rootfs.tar ]]
     then
@@ -35,15 +46,17 @@ _convert-live-exhaustive() {
         return 1
     fi
 
-    if [[ ! -e "$scriptLocal"/vm-live.iso ]]
-    then
-        _messagePlain_bad 'bad: missing: vm-live.iso'
-        _messagePlain_request 'request: _convert-live (adds desirable changes for slow-throughput slow-seek and improves revert capability)'
-        _messageFAIL
-        _stop 1
-        return 1
-	fi
+    # Should have already called '_live_sequence_in' before '_convert-live-exhaustive'.
+    #if [[ ! -e "$scriptLocal"/vm-live.iso ]]
+    #then
+        #_messagePlain_bad 'bad: missing: vm-live.iso'
+        #_messagePlain_request 'request: _convert-live (adds desirable changes for slow-throughput slow-seek and improves revert capability)'
+        #_messageFAIL
+        #_stop 1
+        #return 1
+	#fi
 
+    rm -f "$scriptLocal"/_hash-exhaustive--ubdist.txt
     rm -f "$scriptLocal"/vm-live.iso
 	
 	if ! "$scriptAbsoluteLocation" _live_sequence_in "$@"
@@ -66,6 +79,7 @@ _convert-live-exhaustive() {
 
     rm -f "$scriptLocal"/_hash-exhaustive--ubdist.txt
     _hash_file exhaustive--ubdist exhaustive--vm-live.iso "$scriptLocal"/vm-live.iso cat
+    
 	
 	_safeRMR "$scriptLocal"/livefs
 }

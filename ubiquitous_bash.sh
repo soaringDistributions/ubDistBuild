@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='916056333'
+export ub_setScriptChecksum_contents='2355927834'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -45432,14 +45432,16 @@ _hash_file() {
     shift
     
     echo "$currentFileName" | tee -a "$scriptLocal"/_hash-"$currentListName".txt
-    echo "openssl dgst -whirlpool -binary | xxd -p -c 256" | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+    echo 'dd if=./'"$currentFileName"' bs=1 count='$(wc -c "$currentFilePath" | cut -f1 -d\ | tr -dc '0-9')' | openssl dgst -whirlpool -binary | xxd -p -c 256' | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+    #echo "openssl dgst -whirlpool -binary | xxd -p -c 256" | tee -a "$scriptLocal"/_hash-"$currentListName".txt
     if [[ -e "/etc/ssl/openssl_legacy.cnf" ]]
     then
         cat "$currentFilePath" | "$@" | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 | tee -a "$scriptLocal"/_hash-"$currentListName".txt
     else
         cat "$currentFilePath" | "$@" | openssl dgst -whirlpool -binary | xxd -p -c 256 | tee -a "$scriptLocal"/_hash-"$currentListName".txt
     fi
-    echo "openssl dgst -sha3-512 -binary | xxd -p -c 256" | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+    echo 'dd if=./'"$currentFileName"' bs=1 count='$(wc -c "$currentFilePath" | cut -f1 -d\ | tr -dc '0-9')' | openssl dgst -sha3-512 -binary | xxd -p -c 256' | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+    #echo "openssl dgst -sha3-512 -binary | xxd -p -c 256" | tee -a "$scriptLocal"/_hash-"$currentListName".txt
     cat "$currentFilePath" | "$@" | openssl dgst -sha3-512 -binary | xxd -p -c 256 | tee -a "$scriptLocal"/_hash-"$currentListName".txt
     echo | tee -a "$scriptLocal"/_hash-"$currentListName".txt
 }
@@ -45633,11 +45635,22 @@ _live_sequence_exhaustive() {
     sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
 	du -sh "$scriptLocal"/livefs/image/live/filesystem.squashfs
 
+
+    _pattern_recovery_write "$scriptLocal"/livefs/image/live/pattern.img 36044800000
+
     _stop
 }
 
 _convert-live-exhaustive() {
 	_messageNormal '_convert: vm-live-exhaustive.iso'
+
+    if [[ ! -e "$scriptLocal"/vm.img ]]
+    then
+        _messagePlain_bad 'bad: missing: package_rootfs.tar'
+        _messageFAIL
+        _stop 1
+        return 1
+    fi
 
     if [[ ! -e "$scriptLocal"/package_rootfs.tar ]]
     then
@@ -45647,15 +45660,17 @@ _convert-live-exhaustive() {
         return 1
     fi
 
-    if [[ ! -e "$scriptLocal"/vm-live.iso ]]
-    then
-        _messagePlain_bad 'bad: missing: vm-live.iso'
-        _messagePlain_request 'request: _convert-live (adds desirable changes for slow-throughput slow-seek and improves revert capability)'
-        _messageFAIL
-        _stop 1
-        return 1
-	fi
+    # Should have already called '_live_sequence_in' before '_convert-live-exhaustive'.
+    #if [[ ! -e "$scriptLocal"/vm-live.iso ]]
+    #then
+        #_messagePlain_bad 'bad: missing: vm-live.iso'
+        #_messagePlain_request 'request: _convert-live (adds desirable changes for slow-throughput slow-seek and improves revert capability)'
+        #_messageFAIL
+        #_stop 1
+        #return 1
+	#fi
 
+    rm -f "$scriptLocal"/_hash-exhaustive--ubdist.txt
     rm -f "$scriptLocal"/vm-live.iso
 	
 	if ! "$scriptAbsoluteLocation" _live_sequence_in "$@"
@@ -45678,6 +45693,7 @@ _convert-live-exhaustive() {
 
     rm -f "$scriptLocal"/_hash-exhaustive--ubdist.txt
     _hash_file exhaustive--ubdist exhaustive--vm-live.iso "$scriptLocal"/vm-live.iso cat
+    
 	
 	_safeRMR "$scriptLocal"/livefs
 }
