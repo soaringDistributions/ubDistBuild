@@ -66,21 +66,30 @@ _revert-fromLive() {
 
 
 
+
+	! "$scriptAbsoluteLocation" _openImage && _messagePlain_bad 'fail: _openImage' && _messageFAIL
+	local imagedev
+	imagedev=$(cat "$scriptLocal"/imagedev)
+
+
     _messageNormal 'os: globalVirtFS: write: fs'
 
-    echo "default" | sudo -n tee "$globalVirtFS"/etc/hostname
+	local currentHostname
+	currentHostname=$(cat "$globalVirtFS"/etc/hostname)
+
+    echo "$currentHostname" | sudo -n tee "$globalVirtFS"/etc/hostname
 	cat << CZXWXcRMTo8EmM8i4d | sudo -n tee "$globalVirtFS"/etc/hosts > /dev/null
 127.0.0.1	localhost
 ::1		localhost ip6-localhost ip6-loopback
 ff02::1		ip6-allnodes
 ff02::2		ip6-allrouters
 
-127.0.1.1	default
+127.0.1.1	$currentHostname
 
 CZXWXcRMTo8EmM8i4d
 
 
-
+	! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
 
 
 
