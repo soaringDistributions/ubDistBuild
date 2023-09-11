@@ -22,7 +22,8 @@ _live_sequence_exhaustive() {
 	du -sh "$scriptLocal"/livefs/image/live/filesystem.squashfs
 
 
-    _pattern_recovery_write "$scriptLocal"/livefs/image/live/pattern.img 36044800000
+    # ATTENTION: Would prefer to append to ISO, but the implications of doing so have not been thoroughly tested.
+    _pattern_recovery_write "$scriptLocal"/livefs/image/live/pattern.img 32768
 
     _stop
 }
