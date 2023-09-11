@@ -20,6 +20,7 @@ _live_sequence_exhaustive() {
 
     sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
 	du -sh "$scriptLocal"/livefs/image/live/filesystem.squashfs
+    rm -f "$safeTmp"/NOTmounted/vm.img
     rm -f "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local/vm.img
 
 
@@ -39,6 +40,7 @@ _live_sequence_exhaustive() {
 
     sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
 	du -sh "$scriptLocal"/livefs/image/live/filesystem.squashfs
+    rm -f "$safeTmp"/NOTmounted/package_rootfs.tar
     rm -f "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local/package_rootfs.tar
 
 

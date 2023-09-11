@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1842722352'
+export ub_setScriptChecksum_contents='2040231919'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -42294,7 +42294,7 @@ _create_ubDistBuild-install-ubDistBuild() {
 	#--quiet
 	_chroot sudo -n -u user bash -c 'cd /home/user/ubDistBuild ; git reset --hard ; git submodule update --force --no-fetch --recursive'
 
-	_chroot sed -i 's/.*extraheader.*//g' /home/user/ubDistBuild/.git/config
+	_chroot find /home/user/ubDistBuild/.git -name config -exec sed -i 's/.*extraheader.*//g' {} \;
 
 	_messageNormal 'chroot: install: ubDistBuild: report: df'
 	_chroot df -h / /boot /boot/efi | _chroot tee /df
@@ -45648,6 +45648,7 @@ _live_sequence_exhaustive() {
 
     sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
 	du -sh "$scriptLocal"/livefs/image/live/filesystem.squashfs
+    rm -f "$safeTmp"/NOTmounted/vm.img
     rm -f "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local/vm.img
 
 
@@ -45667,6 +45668,7 @@ _live_sequence_exhaustive() {
 
     sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
 	du -sh "$scriptLocal"/livefs/image/live/filesystem.squashfs
+    rm -f "$safeTmp"/NOTmounted/package_rootfs.tar
     rm -f "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local/package_rootfs.tar
 
 
