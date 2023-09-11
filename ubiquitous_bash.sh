@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='295169533'
+export ub_setScriptChecksum_contents='368534062'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -45432,17 +45432,28 @@ _hash_file() {
     shift
     
     echo "$currentFileName" | tee -a "$scriptLocal"/_hash-"$currentListName".txt
-    echo 'dd if=./'"$currentFileName"' bs=1 count='$(wc -c "$currentFilePath" | cut -f1 -d\ | tr -dc '0-9')' | openssl dgst -whirlpool -binary | xxd -p -c 256' | tee -a "$scriptLocal"/_hash-"$currentListName".txt
-    #echo "openssl dgst -whirlpool -binary | xxd -p -c 256" | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+
+    if [[ "$currentFileName" == *."iso" ]] || [[ "$currentFileName" == *."ISO" ]] || [[ "$currentFilePath" == *."iso" ]] || [[ "$currentFilePath" == *."ISO" ]]
+    then
+        echo 'dd if=./'"$currentFileName"' bs=2048 count=$(bc <<< '"'"$(wc -c "$currentFilePath" | cut -f1 -d\ | tr -dc '0-9')' / 2048'"'"' ) status=progress | openssl dgst -whirlpool -binary | xxd -p -c 256' | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+    else
+        echo "openssl dgst -whirlpool -binary | xxd -p -c 256" | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+    fi
     if [[ -e "/etc/ssl/openssl_legacy.cnf" ]]
     then
         cat "$currentFilePath" | "$@" | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 | tee -a "$scriptLocal"/_hash-"$currentListName".txt
     else
         cat "$currentFilePath" | "$@" | openssl dgst -whirlpool -binary | xxd -p -c 256 | tee -a "$scriptLocal"/_hash-"$currentListName".txt
     fi
-    echo 'dd if=./'"$currentFileName"' bs=1 count='$(wc -c "$currentFilePath" | cut -f1 -d\ | tr -dc '0-9')' | openssl dgst -sha3-512 -binary | xxd -p -c 256' | tee -a "$scriptLocal"/_hash-"$currentListName".txt
-    #echo "openssl dgst -sha3-512 -binary | xxd -p -c 256" | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+
+    if [[ "$currentFileName" == *."iso" ]] || [[ "$currentFileName" == *."ISO" ]] || [[ "$currentFilePath" == *."iso" ]] || [[ "$currentFilePath" == *."ISO" ]]
+    then
+        echo 'dd if=./'"$currentFileName"' bs=2048 count=$(bc <<< '"'"$(wc -c "$currentFilePath" | cut -f1 -d\ | tr -dc '0-9')' / 2048'"'"' ) status=progress | openssl dgst -whirlpool -binary | xxd -p -c 256' | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+    else
+        echo "openssl dgst -sha3-512 -binary | xxd -p -c 256" | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+    fi
     cat "$currentFilePath" | "$@" | openssl dgst -sha3-512 -binary | xxd -p -c 256 | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+    
     echo | tee -a "$scriptLocal"/_hash-"$currentListName".txt
 }
 
@@ -45615,26 +45626,56 @@ CZXWXcRMTo8EmM8i4d
 
 _live_sequence_exhaustive() {
     _start
+
+    mkdir -p "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local
     
     _messagePlain_nominal 'copy: vm.img'
-    mkdir -p "$safeTmp"/NOTmounted
-    if ! cp "$scriptLocal"/vm.img "$safeTmp"/NOTmounted/vm.img
+    #mkdir -p "$safeTmp"/NOTmounted
+    mkdir -p "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local
+    #if ! cp "$scriptLocal"/vm.img "$safeTmp"/NOTmounted/vm.img
+    if ! cp "$scriptLocal"/vm.img "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local/vm.img
     then
+        _messagePlain_bad 'bad: missing: vm.img'
         _messageFAIL
         _stop 1
+        return 1
     fi
-    if ! cp "$scriptLocal"/package_rootfs.tar "$safeTmp"/NOTmounted/package_rootfs.tar
-    then
-        _messageFAIL
-        _stop 1
-    fi
-    
 
     mkdir -p "$scriptLocal"/livefs/image/live
 
     sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
 	du -sh "$scriptLocal"/livefs/image/live/filesystem.squashfs
+    rm -f "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local/vm.img
 
+
+    _messagePlain_nominal 'copy: package_rootfs.tar'
+    #mkdir -p "$safeTmp"/NOTmounted
+    mkdir -p "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local
+    #if ! cp "$scriptLocal"/package_rootfs.tar "$safeTmp"/NOTmounted/package_rootfs.tar
+    if ! cp "$scriptLocal"/package_rootfs.tar "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local/package_rootfs.tar
+    then
+        _messagePlain_bad 'bad: missing: package_rootfs.tar'
+        _messageFAIL
+        _stop 1
+        return 1
+    fi
+
+    mkdir -p "$scriptLocal"/livefs/image/live
+
+    sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
+	du -sh "$scriptLocal"/livefs/image/live/filesystem.squashfs
+    rm -f "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local/package_rootfs.tar
+
+
+
+    _safeRMR "$safeTmp"/NOTmounted
+    if [[ -e "$safeTmp"/NOTmounted ]]
+    then
+        _messagePlain_bad 'fail: _safeRMR: "$safeTmp"/NOTmounted'
+        _messageFAIL
+        _stop 1
+        return 1
+    fi
 
     # ATTENTION: Would prefer to append to ISO, but the implications of doing so have not been thoroughly tested.
     _pattern_recovery_write "$scriptLocal"/livefs/image/live/pattern.img 32768
@@ -45647,7 +45688,7 @@ _convert-live-exhaustive() {
 
     if [[ ! -e "$scriptLocal"/vm.img ]]
     then
-        _messagePlain_bad 'bad: missing: package_rootfs.tar'
+        _messagePlain_bad 'bad: missing: vm.img'
         _messageFAIL
         _stop 1
         return 1
@@ -45662,6 +45703,7 @@ _convert-live-exhaustive() {
     fi
 
     # Should have already called '_live_sequence_in' before '_convert-live-exhaustive'.
+    # Copy of 'vm-live.iso' is not included because obviously this 'exhaustive' Live ISO already is such a bootable ISO .
     #if [[ ! -e "$scriptLocal"/vm-live.iso ]]
     #then
         #_messagePlain_bad 'bad: missing: vm-live.iso'
