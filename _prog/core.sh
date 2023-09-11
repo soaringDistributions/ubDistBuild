@@ -654,7 +654,7 @@ _create_ubDistBuild-install-ubDistBuild() {
 	#--quiet
 	_chroot sudo -n -u user bash -c 'cd /home/user/ubDistBuild ; git reset --hard ; git submodule update --force --no-fetch --recursive'
 
-	_chroot sed -i 's/.*extraheader.*//g' /home/user/ubDistBuild/.git/config
+	_chroot find /home/user/ubDistBuild/.git -name config -exec sed -i 's/.*extraheader.*//g' {} \;
 
 	_messageNormal 'chroot: install: ubDistBuild: report: df'
 	_chroot df -h / /boot /boot/efi | _chroot tee /df
