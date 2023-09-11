@@ -37,7 +37,7 @@ _revert-fromLive() {
 	imagedev=$(cat "$scriptLocal"/imagedev)
 	#_mountChRoot_image_x64_prog
 
-    sudo -n rsync -ax --exclude /run/live/rootfs/filesystem.squashfs/vm.img /run/live/rootfs/filesystem.squashfs/package_rootfs.tar /run/live/rootfs/filesystem.squashfs/. "$globalVirtFS"/
+    sudo -n rsync -ax --exclude /vm.img /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/. "$globalVirtFS"/
     
     _createVMfstab
     #sudo -n mv -f "$globalVirtFS"/fstab-copy "$globalVirtFS"/etc/fstab
