@@ -5,10 +5,10 @@ _live_sequence_exhaustive() {
     mkdir -p "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local
     
     _messagePlain_nominal 'copy: vm.img'
-    #mkdir -p "$safeTmp"/NOTmounted
-    mkdir -p "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local
-    #if ! cp "$scriptLocal"/vm.img "$safeTmp"/NOTmounted/vm.img
-    if ! cp "$scriptLocal"/vm.img "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local/vm.img
+    mkdir -p "$safeTmp"/NOTmounted
+    #mkdir -p "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local
+    if ! cp "$scriptLocal"/vm.img "$safeTmp"/NOTmounted/vm.img
+    #if ! cp "$scriptLocal"/vm.img "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local/vm.img
     then
         _messagePlain_bad 'bad: missing: vm.img'
         _messageFAIL
@@ -24,10 +24,10 @@ _live_sequence_exhaustive() {
 
 
     _messagePlain_nominal 'copy: package_rootfs.tar'
-    #mkdir -p "$safeTmp"/NOTmounted
-    mkdir -p "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local
-    #if ! cp "$scriptLocal"/package_rootfs.tar "$safeTmp"/NOTmounted/package_rootfs.tar
-    if ! cp "$scriptLocal"/package_rootfs.tar "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local/package_rootfs.tar
+    mkdir -p "$safeTmp"/NOTmounted
+    #mkdir -p "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local
+    if ! cp "$scriptLocal"/package_rootfs.tar "$safeTmp"/NOTmounted/package_rootfs.tar
+    #if ! cp "$scriptLocal"/package_rootfs.tar "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local/package_rootfs.tar
     then
         _messagePlain_bad 'bad: missing: package_rootfs.tar'
         _messageFAIL
