@@ -2,6 +2,8 @@
 # Recreates 'vm.img' from booted Live ISO .
 # WARNING: May be untested.
 # CAUTION: Do NOT introduce external (ie. 'online') dependencies! External dependencies have historically been susceptible to breakage!
+#export skimfast=true
+#export devfast=true
 _revert-fromLive() {
 	# /run/live/rootfs/filesystem.squashfs
     # "$scriptLocal"/vm.img
@@ -37,7 +39,7 @@ _revert-fromLive() {
 	imagedev=$(cat "$scriptLocal"/imagedev)
 	#_mountChRoot_image_x64_prog
 
-    sudo -n rsync -ax --exclude /vm.img /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/. "$globalVirtFS"/
+    sudo -n rsync -ax --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/. "$globalVirtFS"/
     
     _createVMfstab
     #sudo -n mv -f "$globalVirtFS"/fstab-copy "$globalVirtFS"/etc/fstab
