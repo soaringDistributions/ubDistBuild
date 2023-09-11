@@ -569,7 +569,7 @@ _create_ubDistBuild-rotten_install() {
 	# Apparently prevents excessive CPU usage from plasmashell , etc .
 	## DANGER: Rare case of 'rm -rf' , called through '_chroot' instead of '_safeRMR' . If not called through '_chroot', very dangerous!
 	# DANGER: Unusual. Uses 'rm -rf' directly. Presumed ONLY during dist/OS install .
-	_chroot rm -rf /home/user/.local/share/kactivitymanagerd/resources/*
+	#_chroot rm -rf /home/user/.local/share/kactivitymanagerd/resources/*
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0
