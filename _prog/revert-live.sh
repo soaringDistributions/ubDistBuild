@@ -152,6 +152,12 @@ CZXWXcRMTo8EmM8i4d
 
 	_write_revert_live
 
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+
+	# https://unix.stackexchange.com/questions/703887/update-initramfs-is-disabled-live-system-is-running-without-media-mounted-on-r
+	/usr/sbin/update-initramfs.orig.initramfs-tools -u -k all
+
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 
 
     _chroot_test
