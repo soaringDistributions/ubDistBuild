@@ -148,6 +148,12 @@ CZXWXcRMTo8EmM8i4d
 
 
 
+	_messageNormal 'chroot: write: revert: live'
+
+	_write_revert_live
+
+
+
     _chroot_test
 }
 

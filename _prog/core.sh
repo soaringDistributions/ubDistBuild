@@ -1946,6 +1946,7 @@ _package_rm() {
 _convert_rm() {
 	rm -f "$scriptLocal"/vm.vdi
 	rm -f "$scriptLocal"/vm.vmdk
+	rm -f "$scriptLocal"/vm.vhd > /dev/null 2>&1
 	rm -f "$scriptLocal"/vm.vhdx
 
 	rm -f "$scriptLocal"/package_rootfs.tar
@@ -1999,10 +2000,13 @@ _convert-vhdx() {
 	_at_userMSW_probeCmd_discoverResource-cygwinNative-ProgramFiles qemu-img qemu false
 
 	# https://bugs.launchpad.net/cinder/+bug/1692816
-	qemu-img convert -f vpc -O vhdx "$scriptLocal"/vm.vhd "$scriptLocal"/vm.vhdx -p
+	# https://forum.level1techs.com/t/qemu-img-convert-vmdk-to-vhdx/169632
+	# https://manpages.ubuntu.com/manpages/focal/en/man7/qemu-block-drivers.7.html
+	qemu-img convert -f vpc -O vhdx -o subformat=fixed "$scriptLocal"/vm.vhd "$scriptLocal"/vm.vhdx -p
 
-	rm -f "$scriptLocal"/vm.vhd
+	#rm -f "$scriptLocal"/vm.vhd
 
+	[[ ! -e "$scriptLocal"/vm.vhd ]] && _messageFAIL
 	[[ ! -e "$scriptLocal"/vm.vhdx ]] && _messageFAIL
 	return 0
 }
