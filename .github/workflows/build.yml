@@ -606,6 +606,20 @@ jobs:
           name: build
           files: |
             ./_local/package_image.tar.flx.part11
+      - name: release! package_image
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/package_image.tar.flx.part12
+      - name: release! package_image
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/package_image.tar.flx.part13
       #- name: _croc_ubDistBuild_image_out
         #shell: bash
         #run: |
@@ -728,6 +742,27 @@ jobs:
           name: build
           files: |
             ./_local/package_rootfs.tar.flx.part11
+      - name: release! package_rootfs
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/package_rootfs.tar.flx.part12
+      - name: release! package_rootfs
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/package_rootfs.tar.flx.part13
+      - name: release! package_rootfs
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/package_rootfs.tar.flx.part14
       - name: _package_rm
         shell: bash
         run: |
@@ -896,6 +931,20 @@ jobs:
           name: build
           files: |
             ./_local/vm-live.iso.part11
+      - name: release! live
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part12
+      - name: release! live
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: build
+          files: |
+            ./_local/vm-live.iso.part13
       - name: _package_rm
         shell: bash
         run: |
