@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3755845675'
+export ub_setScriptChecksum_contents='1645810846'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -30251,6 +30251,14 @@ _setupUbiquitous_accessories_here-nixenv-bashrc() {
 
 [[ -e "$HOME"/.nix-profile/etc/profile.d/nix.sh ]] && . "$HOME"/.nix-profile/etc/profile.d/nix.sh
 
+# WARNING: Binaries from Nix should not be prepended to Debian PATH, as they may be incompatible with other Debian software (eg. incorrect Python version).
+# Scripts that need to rely preferentially on Nix binaries should detect this situation, defining and calling an appropriate wrapper function.
+if [[ "\$PATH" == *"nix-profile/bin"* ]]
+then
+	export PATH=\$(echo "\$PATH" | sed 's|:'"$HOME"'/.nix-profile/bin||g;s|'"$HOME"'/.nix-profile/bin:||g')
+	export PATH="\$PATH":"$HOME"/.nix-profile/bin
+fi
+
 CZXWXcRMTo8EmM8i4d
 }
 
@@ -41629,8 +41637,8 @@ _setup_install() {
 
 	# May be unusual. Unlike other apps, usability of native MSW equivalent for gEDA apps may not be expected.
 	cmd /c "$currentMSWPath_associate" geda.schematic .sch gschem
-	cmd /c "$currentMSWPath_associate" geda.pcb .pcb pcb
-	cmd /c "$currentMSWPath_associate" geda.fp .fp pcb
+	cmd /c "$currentMSWPath_associate" geda.pcb .pcb /usr/bin/pcb
+	cmd /c "$currentMSWPath_associate" geda.fp .fp /usr/bin/pcb
 
 
 
@@ -44814,7 +44822,7 @@ _setup_vm-wsl2_sequence() {
     # https://forum.manjaro.org/t/high-cpu-usage-from-plasmashell-kactivitymanagerd/114305
 	# DANGER: Unusual. Uses 'rm -rf' directly. Presumed ONLY during dist/OS install .
 	#wsl -d ubdist sudo -n rm -rf /home/user/.local/share/kactivitymanagerd/resources/*
-    #wsl -d ubdist /home/user/ubDistBuild/_lib/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh _custom_kde-limited
+    wsl -d ubdist /home/user/ubDistBuild/_lib/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh _custom_kde-limited
 
 
     # https://unix.stackexchange.com/questions/253816/restrict-size-of-buffer-cache-in-linux

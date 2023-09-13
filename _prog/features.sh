@@ -403,7 +403,7 @@ _setup_vm-wsl2_sequence() {
     # https://forum.manjaro.org/t/high-cpu-usage-from-plasmashell-kactivitymanagerd/114305
 	# DANGER: Unusual. Uses 'rm -rf' directly. Presumed ONLY during dist/OS install .
 	#wsl -d ubdist sudo -n rm -rf /home/user/.local/share/kactivitymanagerd/resources/*
-    #wsl -d ubdist /home/user/ubDistBuild/_lib/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh _custom_kde-limited
+    wsl -d ubdist /home/user/ubDistBuild/_lib/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh _custom_kde-limited
 
 
     # https://unix.stackexchange.com/questions/253816/restrict-size-of-buffer-cache-in-linux

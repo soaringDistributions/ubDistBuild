@@ -50,8 +50,8 @@ _setup_install() {
 
 	# May be unusual. Unlike other apps, usability of native MSW equivalent for gEDA apps may not be expected.
 	cmd /c "$currentMSWPath_associate" geda.schematic .sch gschem
-	cmd /c "$currentMSWPath_associate" geda.pcb .pcb pcb
-	cmd /c "$currentMSWPath_associate" geda.fp .fp pcb
+	cmd /c "$currentMSWPath_associate" geda.pcb .pcb /usr/bin/pcb
+	cmd /c "$currentMSWPath_associate" geda.fp .fp /usr/bin/pcb
 
 
 
