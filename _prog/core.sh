@@ -801,6 +801,29 @@ _create_ubDistBuild-rotten_install-core() {
 	_chroot systemctl stop klipper.service
 
 
+
+
+
+
+
+
+
+
+	_chroot sudo -n systemctl disable tor
+	_chroot systemctl disable tor.service
+	_chroot sudo -n systemctl mask tor
+	_chroot systemctl mask tor.service
+	_chroot sudo -n systemctl stop tor
+	_chroot systemctl stop tor.service
+
+
+
+
+
+
+
+
+
 	#if [[ ! -e "$globalVirtFS"/binReport ]]
 	#then
 		_chroot find /bin/ /usr/bin/ /sbin/ /usr/sbin/ | sudo -n tee "$globalVirtFS"/binReport > /dev/null
