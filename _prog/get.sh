@@ -94,7 +94,7 @@ _get_vmImg_ubDistBuild-rootfs_sequence() {
 	_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_rootfs.tar.flx" | lz4 -d -c > ./package_rootfs.tar
 	[[ "$?" != "0" ]] && _messageFAIL
 
-	_messagePlain_good 'good: download'
+	_messagePlain_good 'done: download'
 
 
 
@@ -117,7 +117,7 @@ _get_vmImg_ubDistBuild-rootfs_sequence() {
 	_messagePlain_probe_var currentHashLocal
 	[[ "$currentHash" != "$currentHashLocal" ]] && _messageFAIL
 
-	_messagePlain_good 'good: hash'
+	_messagePlain_good 'done: hash'
 
 	cd "$functionEntryPWD"
 }
