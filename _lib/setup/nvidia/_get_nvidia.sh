@@ -492,6 +492,7 @@ _set_nvidia() {
 	#  'This can be achieved by installing the NVIDIA GPU driver from the .run file using the --no-kernel-modules option. E.g.,'
 
 	# https://www.nvidia.com/en-us/drivers/unix/
+	#  'Latest Production Branch Version'
 	#  'Latest Legacy GPU version'
 	# https://www.nvidia.com/download/driverResults.aspx/187162/en-us
 	# https://www.nvidia.com/Download/driverResults.aspx/44241/en-us
@@ -608,10 +609,14 @@ _set_nvidia() {
 [[ $(lspci -nn -d ':11C6' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470"
 [[ $(lspci -nn -d ':11C8' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470"
 [[ $(lspci -nn -d ':11CB' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470"
-[[ $(lspci -nn -d ':11' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470"
-[[ $(lspci -nn -d ':110' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470"
-[[ $(lspci -nn -d ':1100' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470"
-[[ $(lspci -nn -d ':11000' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470"
+[[ $(lspci -nn -d ':11E0' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470"
+[[ $(lspci -nn -d ':11E1' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470"
+[[ $(lspci -nn -d ':11E2' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470"
+[[ $(lspci -nn -d ':11E3' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470"
+#[[ $(lspci -nn -d ':11' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470"
+#[[ $(lspci -nn -d ':110' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470"
+#[[ $(lspci -nn -d ':1100' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470"
+#[[ $(lspci -nn -d ':11000' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470"
 #[[ $(lspci -nn -d ':11000' -s '17AA:3683' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470"
 [[ $(lspci -nn -d ':11FA' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470"
 [[ $(lspci -nn -d ':11FC' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470"
