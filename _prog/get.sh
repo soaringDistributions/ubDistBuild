@@ -87,11 +87,37 @@ _get_vmImg_ubDistBuild-rootfs_sequence() {
 	local functionEntryPWD
 	functionEntryPWD="$PWD"
 	
-	
+	_messagePlain_nominal '_get_vmImg: download'
+
 	mkdir -p "$scriptLocal"
 	cd "$scriptLocal"
 	_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_rootfs.tar.flx" | lz4 -d -c > ./package_rootfs.tar
 	[[ "$?" != "0" ]] && _messageFAIL
+
+	_messagePlain_good 'good: download'
+
+
+
+	_messagePlain_nominal '_get_vmImg: hash'
+
+	local currentHash
+	currentHash=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 9 | tail -n 1)
+
+	local currentFilePath
+	currentFilePath="$scriptLocal"/package_rootfs.tar
+	local currentHashLocal
+	if [[ -e "/etc/ssl/openssl_legacy.cnf" ]]
+    then
+        currentHashLocal=$(cat "$currentFilePath" | cat | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256)
+    else
+        currentHashLocal=$(cat "$currentFilePath" | cat | openssl dgst -whirlpool -binary | xxd -p -c 256)
+    fi
+
+	_messagePlain_probe_var currentHash
+	_messagePlain_probe_var currentHashLocal
+	[[ "$currentHash" != "$currentHashLocal" ]] && _messageFAIL
+
+	_messagePlain_good 'good: hash'
 
 	cd "$functionEntryPWD"
 }
