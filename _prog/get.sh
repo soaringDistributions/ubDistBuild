@@ -91,7 +91,10 @@ _get_vmImg_ubDistBuild-rootfs_sequence() {
 
 	mkdir -p "$scriptLocal"
 	cd "$scriptLocal"
+	export MANDATORY_HASH="true"
 	_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_rootfs.tar.flx" | lz4 -d -c > ./package_rootfs.tar
+	export MANDATORY_HASH=
+	unset MANDATORY_HASH
 	[[ "$?" != "0" ]] && _messageFAIL
 
 	_messagePlain_good 'done: download'
@@ -100,8 +103,10 @@ _get_vmImg_ubDistBuild-rootfs_sequence() {
 
 	_messagePlain_nominal '_get_vmImg: hash'
 
-	export MANDATORY_HASH="true"
+	
 	local currentHash
+	export MANDATORY_HASH=
+	unset MANDATORY_HASH
 	currentHash=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 9 | tail -n 1)
 	export MANDATORY_HASH=
 	unset MANDATORY_HASH

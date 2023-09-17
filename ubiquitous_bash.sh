@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1878932113'
+export ub_setScriptChecksum_contents='2036071911'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -44729,7 +44729,10 @@ _get_vmImg_ubDistBuild-rootfs_sequence() {
 
 	mkdir -p "$scriptLocal"
 	cd "$scriptLocal"
+	export MANDATORY_HASH="true"
 	_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_rootfs.tar.flx" | lz4 -d -c > ./package_rootfs.tar
+	export MANDATORY_HASH=
+	unset MANDATORY_HASH
 	[[ "$?" != "0" ]] && _messageFAIL
 
 	_messagePlain_good 'done: download'
@@ -44738,8 +44741,10 @@ _get_vmImg_ubDistBuild-rootfs_sequence() {
 
 	_messagePlain_nominal '_get_vmImg: hash'
 
-	export MANDATORY_HASH="true"
+	
 	local currentHash
+	export MANDATORY_HASH=
+	unset MANDATORY_HASH
 	currentHash=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 9 | tail -n 1)
 	export MANDATORY_HASH=
 	unset MANDATORY_HASH
