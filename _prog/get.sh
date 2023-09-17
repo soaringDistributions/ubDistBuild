@@ -76,6 +76,7 @@ _get_vmImg_ubDistBuild-live() {
 	"$scriptAbsoluteLocation" _get_vmImg_ubDistBuild-live_sequence "$@"
 }
 
+# DANGER: MANDATORY_HASH==true
 _get_vmImg_ubDistBuild-rootfs_sequence() {
 	_messageNormal 'init: _get_vmImg'
 	
@@ -129,6 +130,7 @@ _get_vmImg_ubDistBuild-rootfs_sequence() {
 
 	cd "$functionEntryPWD"
 }
+# DANGER: MANDATORY_HASH==true
 _get_vmImg_ubDistBuild-rootfs() {
 	"$scriptAbsoluteLocation" _get_vmImg_ubDistBuild-rootfs_sequence "$@"
 }
