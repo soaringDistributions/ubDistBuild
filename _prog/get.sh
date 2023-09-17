@@ -44,8 +44,46 @@ _get_vmImg_ubDistBuild_sequence() {
 	fi
 	
 	cd "$scriptLocal"
+	mkdir -p "$scriptLocal"
+	cd "$scriptLocal"
+	export MANDATORY_HASH="true"
 	_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild
 	[[ "$?" != "0" ]] && _messageFAIL
+	export MANDATORY_HASH=
+	unset MANDATORY_HASH
+
+
+
+	_messagePlain_nominal '_get_vmImg: hash'
+
+	if [[ -e "$scriptLocal"/ops.sh ]]
+	then
+		mv -f "$scriptLocal"/ops.sh "$scriptLocal"/ops.sh.ref
+		rm -f "$scriptLocal"/ops.sh
+	fi
+	
+	local currentHash
+	export MANDATORY_HASH=
+	unset MANDATORY_HASH
+	currentHash=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 3 | tail -n 1)
+	export MANDATORY_HASH=
+	unset MANDATORY_HASH
+
+	local currentFilePath
+	currentFilePath="$scriptLocal"/vm.img
+	local currentHashLocal
+	if [[ -e "/etc/ssl/openssl_legacy.cnf" ]]
+    then
+        currentHashLocal=$(cat "$currentFilePath" | cat | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256)
+    else
+        currentHashLocal=$(cat "$currentFilePath" | cat | openssl dgst -whirlpool -binary | xxd -p -c 256)
+    fi
+
+	_messagePlain_probe_var currentHash
+	_messagePlain_probe_var currentHashLocal
+	[[ "$currentHash" != "$currentHashLocal" ]] && _messageFAIL
+
+	_messagePlain_good 'done: hash'
 
 	cd "$functionEntryPWD"
 }
@@ -54,7 +92,7 @@ _get_vmImg_ubDistBuild() {
 }
 
 _get_vmImg_ubDistBuild-live_sequence() {
-	_messageNormal 'init: _get_vmImg'
+	_messageNormal 'init: _get_vmImg-live'
 	
 	local releaseLabel
 	releaseLabel="internal"
@@ -65,10 +103,43 @@ _get_vmImg_ubDistBuild-live_sequence() {
 	functionEntryPWD="$PWD"
 	
 	
+	_messagePlain_nominal '_get_vmImg-live: download'
+
 	mkdir -p "$scriptLocal"
 	cd "$scriptLocal"
+	export MANDATORY_HASH="true"
 	_wget_githubRelease_join "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso"
 	[[ "$?" != "0" ]] && _messageFAIL
+	export MANDATORY_HASH=
+	unset MANDATORY_HASH
+
+
+
+	_messagePlain_nominal '_get_vmImg: hash'
+
+	
+	local currentHash
+	export MANDATORY_HASH=
+	unset MANDATORY_HASH
+	currentHash=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 15 | tail -n 1)
+	export MANDATORY_HASH=
+	unset MANDATORY_HASH
+
+	local currentFilePath
+	currentFilePath="$scriptLocal"/vm-live.iso
+	local currentHashLocal
+	if [[ -e "/etc/ssl/openssl_legacy.cnf" ]]
+    then
+        currentHashLocal=$(cat "$currentFilePath" | cat | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256)
+    else
+        currentHashLocal=$(cat "$currentFilePath" | cat | openssl dgst -whirlpool -binary | xxd -p -c 256)
+    fi
+
+	_messagePlain_probe_var currentHash
+	_messagePlain_probe_var currentHashLocal
+	[[ "$currentHash" != "$currentHashLocal" ]] && _messageFAIL
+
+	_messagePlain_good 'done: hash'
 
 	cd "$functionEntryPWD"
 }
@@ -78,7 +149,7 @@ _get_vmImg_ubDistBuild-live() {
 
 # DANGER: MANDATORY_HASH==true
 _get_vmImg_ubDistBuild-rootfs_sequence() {
-	_messageNormal 'init: _get_vmImg'
+	_messageNormal 'init: _get_vmImg-rootfs'
 	
 	local releaseLabel
 	releaseLabel="internal"
@@ -88,15 +159,15 @@ _get_vmImg_ubDistBuild-rootfs_sequence() {
 	local functionEntryPWD
 	functionEntryPWD="$PWD"
 	
-	_messagePlain_nominal '_get_vmImg: download'
+	_messagePlain_nominal '_get_vmImg-rootfs: download'
 
 	mkdir -p "$scriptLocal"
 	cd "$scriptLocal"
 	export MANDATORY_HASH="true"
 	_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_rootfs.tar.flx" | lz4 -d -c > ./package_rootfs.tar
+	[[ "$?" != "0" ]] && _messageFAIL
 	export MANDATORY_HASH=
 	unset MANDATORY_HASH
-	[[ "$?" != "0" ]] && _messageFAIL
 
 	_messagePlain_good 'done: download'
 
