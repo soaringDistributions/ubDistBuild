@@ -100,8 +100,11 @@ _get_vmImg_ubDistBuild-rootfs_sequence() {
 
 	_messagePlain_nominal '_get_vmImg: hash'
 
+	export MANDATORY_HASH="true"
 	local currentHash
 	currentHash=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 9 | tail -n 1)
+	export MANDATORY_HASH=
+	unset MANDATORY_HASH
 
 	local currentFilePath
 	currentFilePath="$scriptLocal"/package_rootfs.tar
