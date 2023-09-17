@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1270618072'
+export ub_setScriptChecksum_contents='1980002618'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -24172,8 +24172,16 @@ _wget_githubRelease_join-stdout() {
 		export currentAxelTmpFile="$scriptAbsoluteFolder"/.m_axelTmp_$(_uid 14)
 
 		#local currentAxelPID
-		
-		( [[ "$FORCE_AXEL" == "true" ]] || [[ "$FORCE_AXEL" == "" ]] ) && FORCE_AXEL="48"
+
+		local currentForceAxel
+		currentForceAxel="$FORCE_AXEL"
+
+		( [[ "$currentForceAxel" == "true" ]] || [[ "$currentForceAxel" == "" ]] ) && currentForceAxel="48"
+		[[ "$currentForceAxel" -lt 2 ]] && currentForceAxel="2"
+
+		currentForceAxel=$(bc <<< "$currentForceAxel""*0.5" | cut -f1 -d\. )
+		[[ "$currentForceAxel" -lt 2 ]] && currentForceAxel="2"
+
 		#_messagePlain_probe axel -a -n "$FORCE_AXEL" -o "$currentAxelTmpFile" "${currentURL_array_reversed[@]}" >&2
 		#axel -a -n "$FORCE_AXEL" -o "$currentAxelTmpFile" "${currentURL_array_reversed[@]}" >&2 &
 		#currentAxelPID="$!"
@@ -44698,8 +44706,46 @@ _get_vmImg_ubDistBuild_sequence() {
 	fi
 	
 	cd "$scriptLocal"
+	mkdir -p "$scriptLocal"
+	cd "$scriptLocal"
+	export MANDATORY_HASH="true"
 	_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild
 	[[ "$?" != "0" ]] && _messageFAIL
+	export MANDATORY_HASH=
+	unset MANDATORY_HASH
+
+
+
+	_messagePlain_nominal '_get_vmImg: hash'
+
+	if [[ -e "$scriptLocal"/ops.sh ]]
+	then
+		mv -f "$scriptLocal"/ops.sh "$scriptLocal"/ops.sh.ref
+		rm -f "$scriptLocal"/ops.sh
+	fi
+	
+	local currentHash
+	export MANDATORY_HASH=
+	unset MANDATORY_HASH
+	currentHash=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 3 | tail -n 1)
+	export MANDATORY_HASH=
+	unset MANDATORY_HASH
+
+	local currentFilePath
+	currentFilePath="$scriptLocal"/vm.img
+	local currentHashLocal
+	if [[ -e "/etc/ssl/openssl_legacy.cnf" ]]
+    then
+        currentHashLocal=$(cat "$currentFilePath" | cat | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256)
+    else
+        currentHashLocal=$(cat "$currentFilePath" | cat | openssl dgst -whirlpool -binary | xxd -p -c 256)
+    fi
+
+	_messagePlain_probe_var currentHash
+	_messagePlain_probe_var currentHashLocal
+	[[ "$currentHash" != "$currentHashLocal" ]] && _messageFAIL
+
+	_messagePlain_good 'done: hash'
 
 	cd "$functionEntryPWD"
 }
@@ -44708,7 +44754,7 @@ _get_vmImg_ubDistBuild() {
 }
 
 _get_vmImg_ubDistBuild-live_sequence() {
-	_messageNormal 'init: _get_vmImg'
+	_messageNormal 'init: _get_vmImg-live'
 	
 	local releaseLabel
 	releaseLabel="internal"
@@ -44719,10 +44765,43 @@ _get_vmImg_ubDistBuild-live_sequence() {
 	functionEntryPWD="$PWD"
 	
 	
+	_messagePlain_nominal '_get_vmImg-live: download'
+
 	mkdir -p "$scriptLocal"
 	cd "$scriptLocal"
+	export MANDATORY_HASH="true"
 	_wget_githubRelease_join "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso"
 	[[ "$?" != "0" ]] && _messageFAIL
+	export MANDATORY_HASH=
+	unset MANDATORY_HASH
+
+
+
+	_messagePlain_nominal '_get_vmImg: hash'
+
+	
+	local currentHash
+	export MANDATORY_HASH=
+	unset MANDATORY_HASH
+	currentHash=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 15 | tail -n 1)
+	export MANDATORY_HASH=
+	unset MANDATORY_HASH
+
+	local currentFilePath
+	currentFilePath="$scriptLocal"/vm-live.iso
+	local currentHashLocal
+	if [[ -e "/etc/ssl/openssl_legacy.cnf" ]]
+    then
+        currentHashLocal=$(cat "$currentFilePath" | cat | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256)
+    else
+        currentHashLocal=$(cat "$currentFilePath" | cat | openssl dgst -whirlpool -binary | xxd -p -c 256)
+    fi
+
+	_messagePlain_probe_var currentHash
+	_messagePlain_probe_var currentHashLocal
+	[[ "$currentHash" != "$currentHashLocal" ]] && _messageFAIL
+
+	_messagePlain_good 'done: hash'
 
 	cd "$functionEntryPWD"
 }
@@ -44732,7 +44811,7 @@ _get_vmImg_ubDistBuild-live() {
 
 # DANGER: MANDATORY_HASH==true
 _get_vmImg_ubDistBuild-rootfs_sequence() {
-	_messageNormal 'init: _get_vmImg'
+	_messageNormal 'init: _get_vmImg-rootfs'
 	
 	local releaseLabel
 	releaseLabel="internal"
@@ -44742,15 +44821,15 @@ _get_vmImg_ubDistBuild-rootfs_sequence() {
 	local functionEntryPWD
 	functionEntryPWD="$PWD"
 	
-	_messagePlain_nominal '_get_vmImg: download'
+	_messagePlain_nominal '_get_vmImg-rootfs: download'
 
 	mkdir -p "$scriptLocal"
 	cd "$scriptLocal"
 	export MANDATORY_HASH="true"
 	_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_rootfs.tar.flx" | lz4 -d -c > ./package_rootfs.tar
+	[[ "$?" != "0" ]] && _messageFAIL
 	export MANDATORY_HASH=
 	unset MANDATORY_HASH
-	[[ "$?" != "0" ]] && _messageFAIL
 
 	_messagePlain_good 'done: download'
 
@@ -46095,6 +46174,16 @@ CZXWXcRMTo8EmM8i4d
 
 
 
+
+_live_procedure_exhaustive-vmImg() {
+    sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
+}
+_live_procedure_exhaustive-rootfs() {
+    sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
+}
+_live_procedure_exhaustive-pattern() {
+    _pattern_recovery_write "$scriptLocal"/livefs/image/live/pattern.img 32768
+}
 _live_sequence_exhaustive() {
     _start
 
@@ -46114,7 +46203,7 @@ _live_sequence_exhaustive() {
 
     mkdir -p "$scriptLocal"/livefs/image/live
 
-    sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
+    _live_procedure_exhaustive-vmImg "$@"
 	du -sh "$scriptLocal"/livefs/image/live/filesystem.squashfs
     rm -f "$safeTmp"/NOTmounted/vm.img
     rm -f "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local/vm.img
@@ -46134,7 +46223,7 @@ _live_sequence_exhaustive() {
 
     mkdir -p "$scriptLocal"/livefs/image/live
 
-    sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
+    _live_procedure_exhaustive-rootfs "$@"
 	du -sh "$scriptLocal"/livefs/image/live/filesystem.squashfs
     rm -f "$safeTmp"/NOTmounted/package_rootfs.tar
     rm -f "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local/package_rootfs.tar
@@ -46151,7 +46240,7 @@ _live_sequence_exhaustive() {
     fi
 
     # ATTENTION: Would prefer to append to ISO, but the implications of doing so have not been thoroughly tested.
-    _pattern_recovery_write "$scriptLocal"/livefs/image/live/pattern.img 32768
+    _live_procedure_exhaustive-pattern
 
     _stop
 }
@@ -46214,9 +46303,37 @@ _convert-live-exhaustive() {
 	_safeRMR "$scriptLocal"/livefs
 }
 
+_convert-live-exhaustive-BDXL() {
+    _live_procedure_exhaustive-vmImg() {
+        sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
+    }
+    _live_procedure_exhaustive-rootfs() {
+        sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
+    }
+    _live_procedure_exhaustive-pattern() {
+        _pattern_recovery_write "$scriptLocal"/livefs/image/live/pattern.img 32768
+    }
 
 
+    _convert-live-exhaustive "$@"
+}
 
+_convert-live-exhaustive-BDDL() {
+    _live_procedure_exhaustive-vmImg() {
+        sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
+    }
+    _live_procedure_exhaustive-rootfs() {
+        true
+        #sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
+    }
+    _live_procedure_exhaustive-pattern() {
+        true
+        #_pattern_recovery_write "$scriptLocal"/livefs/image/live/pattern.img 32768
+    }
+
+
+    _convert-live-exhaustive "$@"
+}
 
 
 [[ -e "$scriptAbsoluteFolder"/_prog-ops/revert-live.sh ]] && . "$scriptAbsoluteFolder"/_prog-ops/revert-live.sh
