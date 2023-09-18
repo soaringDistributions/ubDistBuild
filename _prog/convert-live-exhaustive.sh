@@ -4,10 +4,22 @@ _live_procedure_exhaustive-vmImg() {
     sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
 }
 _live_procedure_exhaustive-rootfs() {
-    sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
+    if [[ "$currentLiveExhaustive_rootfs" != "false" ]]
+    then
+        sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
+        return
+    else
+        return 0
+    fi
 }
 _live_procedure_exhaustive-pattern() {
-    _pattern_recovery_write "$scriptLocal"/livefs/image/live/pattern.img 32768
+    if [[ "$currentLiveExhaustive_pattern" != "false" ]]
+    then
+        _pattern_recovery_write "$scriptLocal"/livefs/image/live/pattern.img 32768
+        return
+    else
+        return 0
+    fi
 }
 _live_sequence_exhaustive() {
     _start
@@ -129,40 +141,16 @@ _convert-live-exhaustive() {
 }
 
 _convert-live-exhaustive-BDXL() {
-    _live_procedure_exhaustive-vmImg() {
-        sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
-    }
-    export -f _live_procedure_exhaustive-vmImg
-    _live_procedure_exhaustive-rootfs() {
-        sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
-    }
-    export -f _live_procedure_exhaustive-rootfs
-    _live_procedure_exhaustive-pattern() {
-        _pattern_recovery_write "$scriptLocal"/livefs/image/live/pattern.img 32768
-    }
-    export -f _live_procedure_exhaustive-pattern
-
-
+    export currentLiveExhaustive_rootfs="true"
+    export currentLiveExhaustive_pattern="true"
+    
     _convert-live-exhaustive "$@"
 }
 
 _convert-live-exhaustive-BDDL() {
-    _live_procedure_exhaustive-vmImg() {
-        sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
-    }
-    export -f _live_procedure_exhaustive-vmImg
-    _live_procedure_exhaustive-rootfs() {
-        true
-        #sudo -n mksquashfs "$safeTmp"/NOTmounted "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1
-    }
-    export -f _live_procedure_exhaustive-rootfs
-    _live_procedure_exhaustive-pattern() {
-        true
-        #_pattern_recovery_write "$scriptLocal"/livefs/image/live/pattern.img 32768
-    }
-    export -f _live_procedure_exhaustive-pattern
-
-
+    export currentLiveExhaustive_rootfs="false"
+    export currentLiveExhaustive_pattern="false"
+   
     _convert-live-exhaustive "$@"
 }
 
