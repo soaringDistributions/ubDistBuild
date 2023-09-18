@@ -56,7 +56,7 @@ _get_vmImg_ubDistBuild_sequence() {
 
 	_messagePlain_nominal '_get_vmImg: hash'
 
-	if [[ -e "$scriptLocal"/ops.sh ]]
+	if [[ "$FORCE_AXEL" != "" ]] && [[ -e "$scriptLocal"/ops.sh ]]
 	then
 		mv -f "$scriptLocal"/ops.sh "$scriptLocal"/ops.sh.ref
 		rm -f "$scriptLocal"/ops.sh
