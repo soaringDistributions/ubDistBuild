@@ -31,6 +31,8 @@ _get_vmImg_ubDistBuild_sequence() {
 	# Only extracted vm img.
 	rm -f "$scriptLocal"/package_image.tar.flx
 	rm -f "$scriptLocal"/package_image.tar.flx.part*
+	rm -f "$scriptLocal"/_get/package_image.tar.flx
+	rm -f "$scriptLocal"/_get/package_image.tar.flx.part*
 	
 	if [[ -e "$scriptLocal"/vm.img ]]
 	then
@@ -44,11 +46,15 @@ _get_vmImg_ubDistBuild_sequence() {
 	fi
 	
 	cd "$scriptLocal"
-	mkdir -p "$scriptLocal"
-	cd "$scriptLocal"
+	mkdir -p "$scriptLocal"/_get
+	cd "$scriptLocal"/_get
 	export MANDATORY_HASH="true"
 	_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild
-	[[ "$?" != "0" ]] && _messageFAIL
+	if [[ "$?" != "0" ]]
+	then
+		rm -f "$scriptLocal"/_get/ops.sh
+		_messageFAIL
+	fi
 	export MANDATORY_HASH=
 	unset MANDATORY_HASH
 
@@ -58,8 +64,8 @@ _get_vmImg_ubDistBuild_sequence() {
 
 	if [[ "$FORCE_AXEL" != "" ]] && [[ -e "$scriptLocal"/ops.sh ]]
 	then
-		mv -f "$scriptLocal"/ops.sh "$scriptLocal"/ops.sh.ref
-		rm -f "$scriptLocal"/ops.sh
+		mv -f "$scriptLocal"/_get/ops.sh "$scriptLocal"/_get/ops.sh.ref
+		rm -f "$scriptLocal"/_get/ops.sh
 	fi
 	
 	local currentHash
@@ -70,7 +76,7 @@ _get_vmImg_ubDistBuild_sequence() {
 	unset MANDATORY_HASH
 
 	local currentFilePath
-	currentFilePath="$scriptLocal"/vm.img
+	currentFilePath="$scriptLocal"/_get/vm.img
 	local currentHashLocal
 	if [[ -e "/etc/ssl/openssl_legacy.cnf" ]]
     then
@@ -84,6 +90,11 @@ _get_vmImg_ubDistBuild_sequence() {
 	[[ "$currentHash" != "$currentHashLocal" ]] && _messageFAIL
 
 	_messagePlain_good 'done: hash'
+
+	mv -f "$scriptLocal"/_get/vm.img "$scriptLocal"/vm.img
+	mv -f "$scriptLocal"/_get/* "$scriptLocal"/
+	rmdir "$scriptLocal"/_get
+	_safeRMR "$scriptLocal"/_get
 
 	cd "$functionEntryPWD"
 }
