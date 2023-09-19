@@ -376,9 +376,23 @@ jobs:
         shell: bash
         run: |
           export skimfast=${{ inputs.skimfast }}
-          echo $skimfast
+          echo skimfast $skimfast
           export qemuNoKVM=${{ inputs.qemuNoKVM }}
-          echo $qemuNoKVM
+          echo qemuNoKVM $qemuNoKVM
+          echo
+          sudo -n ls -l /dev/kvm
+          sudo -n ls -l /dev/kvm*
+          sudo -n chown -R $USER:docker /dev/kvm
+          sudo -n chmod 664 /dev/kvm
+          echo
+          #grep --color svm /proc/cpuinfo || true
+          #grep --color vmx /proc/cpuinfo || true
+          sudo -n lsmod | grep kvm
+          ls -l /dev/kvm
+          ls -l /dev/kvm*
+          echo $USER
+          groups
+          echo
           ./_create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log && exit ${PIPESTATUS[0]}
       
       - name: _fetchCore

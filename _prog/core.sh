@@ -1723,13 +1723,16 @@ _zSpecial_qemu_sequence() {
 	
 	local currentExitStatus
 	
+	ls -l /dev/kvm
+
 	if [[ "$qemuHeadless" != "true" ]]
 	then
 		_qemu_system_x86_64 "${qemuArgs[@]}"
 		currentExitStatus="$?"
 	else
 		_qemu_system_x86_64 "${qemuArgs[@]}" | tr -dc 'a-zA-Z0-9\n'
-		currentExitStatus="$?"
+		currentExitStatus=${PIPESTATUS[0]}
+		#currentExitStatus="$?"
 	fi
 	
 	
