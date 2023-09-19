@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3585449505'
+export ub_setScriptChecksum_contents='3180383674'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -17868,7 +17868,7 @@ prereqs)
 ;;
 esac
 
-if type dd > /dev/null 2>&1 && type chroot > /dev/null 2>&1 && [ -e /bin/bash ]
+if type dd > /dev/null 2>&1 && type chroot > /dev/null 2>&1 && [ -e /root/bin/bash ]
 then
 	progressFeed() {
 		env -i HOME="/root" SHELL="/bin/bash" PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" USER="root" chroot /root dd of=/dev/null bs=1M status=progress
@@ -46223,6 +46223,27 @@ _live_procedure_exhaustive-rootfs() {
         return 0
     fi
 }
+_live_procedure_exhaustive-includeConfig() {
+    _live_procedure_exhaustive-includeConfig-message() {
+        [[ ! -e "$1"/"$1" ]] && _messagePlain_warn 'warn: missing: '"$1"
+    }
+    _live_procedure_exhaustive-includeConfig-message extIface.exe
+    _live_procedure_exhaustive-includeConfig-message ubDistBuild.exe
+    _live_procedure_exhaustive-includeConfig-message 'Ninite 7Zip CCleaner Discord Firefox GIMP Inkscape Installer.exe'
+}
+_live_procedure_exhaustive-include() {
+    if [[ "$currentLiveExhaustive_include" != "false" ]]
+    then
+        mkdir -p "$scriptLocal"/include-exhaustive
+        
+        _live_procedure_exhaustive-includeConfig
+
+        cp -r "$scriptLocal"/include-exhaustive/* "$scriptLocal"/livefs/image/live/
+        return
+    else
+        return 0
+    fi
+}
 _live_procedure_exhaustive-pattern() {
     if [[ "$currentLiveExhaustive_pattern" != "false" ]]
     then
@@ -46276,6 +46297,13 @@ _live_sequence_exhaustive() {
     rm -f "$safeTmp"/NOTmounted/package_rootfs.tar
     rm -f "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local/package_rootfs.tar
 
+    mkdir -p "$scriptLocal"/livefs/image/live
+
+    _live_procedure_exhaustive-rootfs "$@"
+	du -sh "$scriptLocal"/livefs/image/live/filesystem.squashfs
+    rm -f "$safeTmp"/NOTmounted/package_rootfs.tar
+    rm -f "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local/package_rootfs.tar
+
 
 
     _safeRMR "$safeTmp"/NOTmounted
@@ -46286,6 +46314,8 @@ _live_sequence_exhaustive() {
         _stop 1
         return 1
     fi
+
+    _live_procedure_exhaustive-include
 
     # ATTENTION: Would prefer to append to ISO, but the implications of doing so have not been thoroughly tested.
     _live_procedure_exhaustive-pattern
@@ -46322,6 +46352,8 @@ _convert-live-exhaustive() {
         #_stop 1
         #return 1
 	#fi
+
+    _live_procedure_exhaustive-includeConfig
 
     rm -f "$scriptLocal"/_hash-exhaustive--ubdist.txt
     rm -f "$scriptLocal"/vm-live.iso

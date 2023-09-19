@@ -12,6 +12,27 @@ _live_procedure_exhaustive-rootfs() {
         return 0
     fi
 }
+_live_procedure_exhaustive-includeConfig() {
+    _live_procedure_exhaustive-includeConfig-message() {
+        [[ ! -e "$1"/"$1" ]] && _messagePlain_warn 'warn: missing: '"$1"
+    }
+    _live_procedure_exhaustive-includeConfig-message extIface.exe
+    _live_procedure_exhaustive-includeConfig-message ubDistBuild.exe
+    _live_procedure_exhaustive-includeConfig-message 'Ninite 7Zip CCleaner Discord Firefox GIMP Inkscape Installer.exe'
+}
+_live_procedure_exhaustive-include() {
+    if [[ "$currentLiveExhaustive_include" != "false" ]]
+    then
+        mkdir -p "$scriptLocal"/include-exhaustive
+        
+        _live_procedure_exhaustive-includeConfig
+
+        cp -r "$scriptLocal"/include-exhaustive/* "$scriptLocal"/livefs/image/live/
+        return
+    else
+        return 0
+    fi
+}
 _live_procedure_exhaustive-pattern() {
     if [[ "$currentLiveExhaustive_pattern" != "false" ]]
     then
@@ -65,6 +86,13 @@ _live_sequence_exhaustive() {
     rm -f "$safeTmp"/NOTmounted/package_rootfs.tar
     rm -f "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local/package_rootfs.tar
 
+    mkdir -p "$scriptLocal"/livefs/image/live
+
+    _live_procedure_exhaustive-rootfs "$@"
+	du -sh "$scriptLocal"/livefs/image/live/filesystem.squashfs
+    rm -f "$safeTmp"/NOTmounted/package_rootfs.tar
+    rm -f "$safeTmp"/NOTmounted/home/user/ubDistBuild/_local/package_rootfs.tar
+
 
 
     _safeRMR "$safeTmp"/NOTmounted
@@ -75,6 +103,8 @@ _live_sequence_exhaustive() {
         _stop 1
         return 1
     fi
+
+    _live_procedure_exhaustive-include
 
     # ATTENTION: Would prefer to append to ISO, but the implications of doing so have not been thoroughly tested.
     _live_procedure_exhaustive-pattern
@@ -111,6 +141,8 @@ _convert-live-exhaustive() {
         #_stop 1
         #return 1
 	#fi
+
+    _live_procedure_exhaustive-includeConfig
 
     rm -f "$scriptLocal"/_hash-exhaustive--ubdist.txt
     rm -f "$scriptLocal"/vm-live.iso
