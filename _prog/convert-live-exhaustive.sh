@@ -18,7 +18,12 @@ _live_procedure_exhaustive-includeConfig() {
     }
     _live_procedure_exhaustive-includeConfig-message extIface.exe
     _live_procedure_exhaustive-includeConfig-message ubDistBuild.exe
-    _live_procedure_exhaustive-includeConfig-message 'Ninite 7Zip CCleaner Discord Firefox GIMP Inkscape Installer.exe'
+
+    # https://ninite.com/7zip-ccleaner-gimp-inkscape-klitecodecs-libreoffice-notepadplusplus-vlc-winamp-zoom/
+    #_live_procedure_exhaustive-includeConfig-message 'Ninite 7Zip CCleaner GIMP Inkscape KLite Codecs Installer.exe'
+
+    # https://ninite.com/7zip-ccleaner-discord-firefox-gimp-inkscape-klitecodecs-libreoffice-notepadplusplus-vlc-winamp-zoom/
+    #_live_procedure_exhaustive-includeConfig-message 'Ninite 7Zip CCleaner Discord Firefox GIMP Inkscape Installer.exe'
 }
 _live_procedure_exhaustive-include() {
     if [[ "$currentLiveExhaustive_include" != "false" ]]
