@@ -179,6 +179,7 @@ _convert-live-exhaustive() {
 
 _convert-live-exhaustive-BDXL() {
     export currentLiveExhaustive_rootfs="true"
+    export currentLiveExhaustive_include="true"
     export currentLiveExhaustive_pattern="true"
     
     _convert-live-exhaustive "$@"
@@ -186,6 +187,7 @@ _convert-live-exhaustive-BDXL() {
 
 _convert-live-exhaustive-BDDL() {
     export currentLiveExhaustive_rootfs="false"
+    export currentLiveExhaustive_include="false"
     export currentLiveExhaustive_pattern="false"
    
     _convert-live-exhaustive "$@"
