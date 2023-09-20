@@ -805,10 +805,24 @@ _install_nvidia() {
 	
 	
 	
+	# ATTENTION: Be aware kernel compiling may not be the most time consuming step, yet can fail if out of memory .
+	local current_hostCoreCount=$(grep ^cpu\\scores /proc/cpuinfo | head -n 1 | tr -dc '0-9')
+	local current_hostMemoryTotal=$(cat /proc/meminfo | grep MemTotal | tr -cd '[[:digit:]]')
+
+	local currentParallel
+	currentParallel=1
+
+	# DUBIOUS - MARGIN .
+	[[ "$current_hostMemoryTotal" -ge 16000000 ]] && [[ "$current_hostCoreCount" -ge "2" ]] && currentParallel=2
+
+	[[ "$current_hostMemoryTotal" -ge 32000000 ]] && [[ "$current_hostCoreCount" -ge "3" ]] && currentParallel=3
+	[[ "$current_hostMemoryTotal" -ge 60000000 ]] && [[ "$current_hostCoreCount" -ge "6" ]] && currentParallel=5
 	
 	# ' "  -j CONCURRENCY-LEVEL, --concurrency-level=CONCURRENCY-LEVEL" '
 	# 'default' 'number of detected CPUs' 'nvidia-installer' 'default' 'limited to 32'
 	
+
+
 	# ' --log-file-name=/dev/stdout '
 	# 'default' ' /var/log/nvidia-installer.log '
 	
@@ -817,21 +831,25 @@ _install_nvidia() {
 	# http://us.download.nvidia.com/XFree86/Linux-x86_64/515.43.04/README/kernel_open.html
 	#  'proprietary flavor supports the GPU architectures Maxwell, Pascal, Volta, Turing, Ampere, and forward'
 	#  'open kernel modules cannot support GPUs before Turing, because the open kernel modules depend on the GPU System Processor (GSP) first introduced in Turing'
+	# https://github.com/clearlinux/distribution/issues/2069
+	#  'kernel modules are generally not sensitive to these minor compiler changes' ... '(nvidia has some paranoid check that's not typical for kernel modules)'
+	#--no-cc-version-check
 	#-m=kernel
 	#-m=kernel-open
+	#--run-nvidia-xconfig   ...   # " default response is 'no' "
 	if [[ "$current_nvidia_installAllKernels" == "true" ]]
 	then
 		# If headers for more than 12 kernels are installed, that is an issue.
 		ls -A -1 -d /usr/src/linux-headers-* | sort -r -V | head -n 12 | sed -s 's/.*linux-headers-//' | while read -r currentLine
 		do
 			_messagePlain_probe nvidia "$currentLine"
-			sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s -k "$currentLine" --dkms -m=kernel
+			sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s -j "$currentParallel" --no-cc-version-check -k "$currentLine" --dkms -m=kernel
 			[[ "$?" != "0" ]] && currentExitStatus=1
 		done
 	else
 		local currentKernel=$(uname -r)
 		_messagePlain_probe nvidia uname -r "$currentKernel"
-		sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s -k "$currentKernel" -m=kernel
+		sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s -j "$currentParallel" --no-cc-version-check -k "$currentKernel" -m=kernel
 	fi
 	
 	
