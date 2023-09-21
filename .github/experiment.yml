@@ -1,0 +1,456 @@
+
+
+#cd ..
+#[[ -e ./ubDistBuild ]] || git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
+
+#cd ../ubDistBuild
+
+# _get_vmImg-live   -->   rm/_install_ubDistBuild
+#-->   _openChRoot/_closeChRoot   -->   echo ' sleep /waitFile ... _revert_live | tee /mnt/cache/log ' | crontab
+#-->   _convert-live
+#-->   mkfs.btrfs ./_local/cache.img
+#-->   qemu
+#-->   mount/umount -t btrfs ./_local/cache.img ./_local/cache_fs
+#-->   PASS/FAIL (from logs)
+
+name: build
+
+
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#permissions
+permissions:
+  actions: none
+  checks: none
+  contents: read
+  deployments: none
+  issues: none
+  packages: none
+  pull-requests: none
+  repository-projects: none
+  security-events: none
+  statuses: none
+
+
+on:
+  #push:
+  workflow_dispatch:
+    inputs:
+      releaseLabel:
+        required: false
+        default: base
+        type: choice
+        options:
+        - base
+        - latest
+        - internal
+      devfast:
+        type: boolean
+        default: true
+      skimfast:
+        type: boolean
+        default: true
+      qemuNoKVM:
+        type: boolean
+        default: false
+      runnerName:
+        required: false
+        default: ubuntu-latest-m
+        type: choice
+        options:
+        - ubuntu-latest
+        - ubuntu-latest-m
+  # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
+  schedule:
+    #- cron: '5 7 * * 6'
+    #- cron: '5 1 * * 6'
+    #- cron: '5 1 * * 2,4'
+    #- cron: '5 1 * * 2'
+    #- cron: '5 1 * * 4'
+    #- cron: '5 1 * * 5'
+    #- cron: '5 7 15 * *'
+    - cron: '25 6 1 * *'
+  # https://stackoverflow.com/questions/62750603/github-actions-trigger-another-action-after-one-action-is-completed
+    #workflow_run:
+    workflows: ["build"]
+    types:
+      - completed
+
+# https://docs.github.com/en/actions/using-jobs/using-concurrency
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+
+jobs:
+  
+  test_revert_live:
+    # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
+    runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
+    steps:
+      - name: users
+        shell: bash
+        run: |
+          sudo -u ubuntu -n bash -c 'sudo -n useradd runner --non-unique -u $UID -g $UID' || true
+          sudo -u ubuntu -n bash -c 'sudo -n groupadd runner --non-unique -g $UID' || true
+          sudo -u runner -n bash -c 'sudo -n echo $USER $UID' || true
+          true
+      # Apparently may increase buildJet 'runner' to 77GB (instead of 61GB).
+      # Apparently may increase Github Actions 'runner' to 59GB (instead of 31GB) .
+      - name: Maximize build space
+        if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 1625
+          temp-reserve-mb: 50
+          swap-size-mb: 2
+          #remove-dotnet: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-dotnet: 'true'
+          #remove-android: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-android: 'true'
+          #remove-haskell: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-haskell: 'true'
+          #remove-codeql: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-codeql: 'true'
+          #remove-docker-images: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-docker-images: 'true'
+      # https://github.com/orgs/community/discussions/8305
+      # https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/
+      # https://github.com/actions/runner-images/discussions/7191
+      - name: Enable KVM group perms
+        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
+        shell: bash
+        run: |
+          #echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          echo 'KERNEL=="kvm", GROUP="docker", MODE="0664", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo -n udevadm control --reload-rules
+          sudo -n udevadm trigger --name-match=kvm
+          sudo -n apt-get update
+          sudo -n apt-get install -y libvirt-clients libvirt-daemon-system libvirt-daemon virtinst bridge-utils qemu qemu-system-x86
+          sudo -n usermod -a -G kvm $USER
+          sudo -n usermod -a -G libvirt $USER
+          sudo -n usermod -a -G docker $USER
+          sudo -n adduser $USER kvm
+          #sudo -n chown -R $USER:kvm /dev/kvm
+          sudo -n chown -R $USER:docker /dev/kvm
+          ls -l /dev/kvm
+          ls -l /dev/kvm*
+          echo $USER
+          groups
+          sudo -n lsmod | grep kvm
+          sudo -n modprobe -r kvm_intel
+          sudo -n modprobe -r kvm_amd
+          sudo -n modprobe -r kvm
+          ( grep --color vmx /proc/cpuinfo && sudo -n modprobe kvm_intel ) || ( grep --color svm /proc/cpuinfo && sudo -n modprobe kvm_amd )
+          sudo -n modprobe kvm
+          sudo -n lsmod | grep kvm
+          #sudo -n chown -R $USER:kvm /dev/kvm
+          sudo -n chown -R $USER:docker /dev/kvm
+          ls -l /dev/kvm
+          ls -l /dev/kvm*
+      - name: Check KVM group perms
+        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
+        shell: bash
+        run: |
+          grep --color svm /proc/cpuinfo || true
+          grep --color vmx /proc/cpuinfo || true
+          sudo -n lsmod | grep kvm
+          ls -l /dev/kvm
+          ls -l /dev/kvm*
+          echo $USER
+          groups
+      - name: Force KVM group perms
+        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
+        shell: bash
+        run: |
+          sudo -n ls -l /dev/kvm
+          sudo -n ls -l /dev/kvm*
+          sudo -n chown -R $USER:docker /dev/kvm
+          sudo -n chmod 664 /dev/kvm
+          echo
+          #grep --color svm /proc/cpuinfo || true
+          #grep --color vmx /proc/cpuinfo || true
+          sudo -n lsmod | grep kvm
+          ls -l /dev/kvm
+          ls -l /dev/kvm*
+          echo $USER
+          groups
+          echo
+      - name: Check Network Services
+        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
+        shell: bash
+        run: |
+          sudo -n netstat -l -p
+      - name: _getCore_ub
+        shell: bash
+        timeout-minutes: 90
+        run: |
+          mkdir -p ~/core/infrastructure
+          cd ~/core/infrastructure
+          git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
+          cd ubiquitous_bash
+          ./_setupUbiquitous.bat
+      - name: _getMinimal_cloud
+        shell: bash
+        run: |
+          ! ~/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _getMinimal_cloud && exit 1
+          true
+          #! sudo -n apt-get -y clean && exit 1
+          df -h
+          df -h /
+        timeout-minutes: 90
+
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: _getMinimal_cloud
+        shell: bash
+        run: |
+          ! ./ubiquitous_bash.sh _getMinimal_cloud && exit 1
+          true
+          #! sudo -n apt-get -y clean && exit 1
+          df -h
+          df -h /
+        timeout-minutes: 355
+      # For VBoxManage for _convert . Otherwise historically not apparently necessary.
+      - name: _getMost_ubuntu22-VBoxManage
+        shell: bash
+        run: |
+          #! ./ubiquitous_bash.sh _getMost && exit 1
+          #true
+          #! sudo -n apt-get -y clean && exit 1
+          #! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
+          #sudo -n apt-get update
+          #! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
+          ! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
+          df -h
+          df -h /
+        timeout-minutes: 355
+      - name: _getMost-xvfb
+        shell: bash
+        run: |
+          #! ./ubiquitous_bash.sh _getMost && exit 1
+          #true
+          #! sudo -n apt-get -y clean && exit 1
+          #! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
+          #sudo -n apt-get update
+          #! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
+          #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
+          sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y xvfb
+          df -h
+          df -h /
+        timeout-minutes: 355
+      
+      - name: _test_hash_legacy
+        shell: bash
+        run: |
+          if [[ -e "/etc/ssl/openssl_legacy.cnf" ]]
+          then
+              echo -n | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256
+              exit ${PIPESTATUS[0]}
+          else
+              echo -n | openssl dgst -whirlpool -binary | xxd -p -c 256
+              exit ${PIPESTATUS[0]}
+          fi
+      
+      # ### ##### _get_vmImg   -->   rm/_install_ubDistBuild
+      - name: _get_vmImg_ubDistBuild
+        shell: bash
+        run: |
+          ./ubiquitous_bash _get_vmImg_ubDistBuild
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: _create_ubDistBuild-install-ubDistBuild
+        shell: bash
+        run: |
+          ./_create_ubDistBuild-install-ubDistBuild
+
+
+
+
+
+
+
+      # ### ##### -->   _openChRoot/_closeChRoot   -->   echo ' sleep /waitFile ... _revert_live | tee /mnt/cache/log ' | crontab
+      - name: _run-crontab
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _openChRoot
+          #echo '/root/ubiquitous_bash.sh _wait_rootLock_OTHER'
+          ( ./ubiquitous_bash.sh _chroot crontab -l ; echo '@reboot sleep 35 ; /_rootGrab.sh _wait_rootLock ; /root/_get_nvidia.sh _wait_rootLock ; mkdir -p /media/tmp ; mount -o compress=zstd:2 /dev/sdb /media/tmp ; true > /media/tmp/_run-crontab ; true > /var/log/_run-crontab.log' ) | ./ubiquitous_bash.sh _chroot crontab '-'
+          ./ubiquitous_bash.sh _closeChRoot
+
+
+
+
+
+
+      # ### ##### -->   _convert-live
+      - name: _package_rm 
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _package_rm
+
+      - name: _fetchAccessories extendedInterface
+        shell: bash
+        run: |
+          cd _local
+          git clone https://github.com/mirage335-colossus/extendedInterface.git
+          cd extendedInterface
+          mkdir -p ../extendedInterface-accessories/integrations/ubcp
+          curl -L -o ../extendedInterface-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
+          ./ubiquitous_bash.sh _build_extendedInterface-fetch | sudo -n tee ../../_lib/_extendedInterface.log && exit ${PIPESTATUS[0]}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: _fetchAccessories ubDistBuild
+        shell: bash
+        run: |
+          cd _local
+          git clone https://github.com/soaringDistributions/ubDistBuild.git
+          cd ubDistBuild
+          mkdir -p ../ubDistBuild-accessories/integrations/ubcp
+          curl -L -o ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
+          ./ubiquitous_bash.sh _build_ubDistBuild-fetch | sudo -n tee ../../_lib/_ubDistBuild.log && exit ${PIPESTATUS[0]}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: _convert-live _create_ubDistBuild_feedAccessories
+        shell: bash
+        run: |
+          export current_diskConstrained="true"
+          ./ubiquitous_bash.sh _convert_rm
+          ./ubiquitous_bash.sh _create_ubDistBuild_feedAccessories | sudo -n tee ./_create_ubDistBuild_feedAccessories.log && exit ${PIPESTATUS[0]}
+          ./ubiquitous_bash.sh _safeRMR ./_local/livefs
+          true
+      
+      # DANGER: GitHub Actions ONLY!
+      - name: _create_ubDistBuild_feedAccessories rm
+        shell: bash
+        run: |
+          rm -rf ../extendedInterface-accessories
+          [[ -e ../extendedInterface-accessories ]] && exit 1 || true
+          rm -rf ../ubDistBuild-accessories
+          [[ -e ../ubDistBuild-accessories ]] && exit 1 || true
+      
+      # DANGER: GitHub Actions ONLY!
+      - name: _fetchAccessories rm
+        shell: bash
+        run: |
+          cd _local
+          rm -rf extendedInterface
+          [[ -e extendedInterface ]] && exit 1 || true
+          rm -rf ubDistBuild
+          [[ -e ubDistBuild ]] && exit 1 || true
+      
+      - name: _convert-live _convert-live_ISO
+        shell: bash
+        run: |
+          export current_diskConstrained="true"
+          ./ubiquitous_bash.sh _convert_rm
+          ./ubiquitous_bash.sh _convert-live_ISO | sudo -n tee ./_convert-live_ISO.log && exit ${PIPESTATUS[0]}
+          ./ubiquitous_bash.sh _safeRMR ./_local/livefs
+          true
+
+
+
+
+
+
+
+
+      # ### ##### -->   mkfs.btrfs ./_local/cache.img
+      - name: mkfs.btrfs ./_local/cache.img
+        shell: bash
+        run: |
+          #26572
+          #28.25 GiB == 28928 MiB
+          dd if=/dev/zero of=./_local/cache.img bs=1M count=28928
+          mkfs.btrfs --checksum xxhash -M -d single ./_local/cache.img
+
+
+
+
+
+
+      # ### ##### -->   qemu
+      #_qemu_system_x86_64 -nographic -usb -smp 4 -device usb-tablet -device qxl-vga -machine accel=kvm -bios /usr/share/OVMF/OVMF_CODE.fd -drive format=raw,file=/home/runner/work/ubDistBuild/ubDistBuild/_local/vm.img -drive file=/home/runner/work/ubDistBuild/ubDistBuild/v_uid/htg/htg.iso,media=cdrom -boot d -m 1664 -net nic,model=rtl8139 -net user,restrict=n
+      - name: qemu
+        shell: bash
+        run: |
+          export skimfast=${{ inputs.skimfast }}
+          echo skimfast $skimfast
+          export qemuNoKVM=${{ inputs.qemuNoKVM }}
+          echo qemuNoKVM $qemuNoKVM
+          echo
+          qemuArgs+=(-nographic -usb -smp $(nproc) -device usb-tablet -device qxl-vga)
+          if ./ubiquitous_bash.sh _testQEMU_hostArch_x64_hardwarevt
+          then
+            # Apparently, qemu kvm, can be unreliable if nested (eg. within VMWare Workstation VM).
+            if [[ "$qemuNoKVM" == "true" ]] || [[ "$qemuNoKVM" != "false" ]]
+            then
+              _messagePlain_good 'ignored: kvm'
+            else
+              qemuArgs+=(-machine accel=kvm)
+            fi
+          else
+            _messagePlain_warn 'missing: kvm'
+          fi
+          [[ -e /usr/share/OVMF/OVMF_CODE.fd ]] && qemuArgs+=(-bios /usr/share/OVMF/OVMF_CODE.fd)
+          #qemuUserArgs+=(-drive format=raw,file=./_local/vm.img)
+          #qemuUserArgs+=(-drive file=./v_uid/htg/htg.iso,media=cdrom)
+          qemuUserArgs+=(-drive file=./_local/vm-live.iso,media=cdrom)
+          qemuUserArgs+=(-drive format=raw,file=./_local/cache.img)
+          #qemuUserArgs+=(-boot c)
+          qemuUserArgs+=(-boot d)
+          qemuUserArgs+=(-m "6144")
+          qemuUserArgs+=(-net nic,model=rtl8139 -net user,restrict=n)
+          qemuArgs+=("${qemuSpecialArgs[@]}" "${qemuUserArgs[@]}")
+          echo qemu_system_x86_64 "${qemuArgs[@]}"
+          qemu_system_x86_64 "${qemuArgs[@]}"
+          true
+
+
+
+
+
+
+
+      # ### ##### -->   mount/umount -t btrfs ./_local/cache.img ./_local/cache_fs
+      - name: export
+        shell: bash
+        run: |
+          mkdir -p ./_local/cache_fs
+          mount -t btrfs ./_local/cache.img ./_local/cache_fs
+          ls ./_local/cache_fs
+
+
+
+
+
+
+
+
+
+
+      # ### ##### -->   PASS/FAIL (from logs)
+      - name: check
+        shell: bash
+        run: |
+          mkdir -p ./_local/cache_fs
+          #mount -t btrfs ./_local/cache.img ./_local/cache_fs
+          ls ./_local/cache_fs
+          [[ -e ./_local/cache_fs/_run-crontab ]]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
