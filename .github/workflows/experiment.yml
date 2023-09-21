@@ -373,6 +373,23 @@ jobs:
 
       # ### ##### -->   qemu
       #_qemu_system_x86_64 -nographic -usb -smp 4 -device usb-tablet -device qxl-vga -machine accel=kvm -bios /usr/share/OVMF/OVMF_CODE.fd -drive format=raw,file=/home/runner/work/ubDistBuild/ubDistBuild/_local/vm.img -drive file=/home/runner/work/ubDistBuild/ubDistBuild/v_uid/htg/htg.iso,media=cdrom -boot d -m 1664 -net nic,model=rtl8139 -net user,restrict=n
+      - name: Force KVM group perms
+        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
+        shell: bash
+        run: |
+          sudo -n ls -l /dev/kvm
+          sudo -n ls -l /dev/kvm*
+          sudo -n chown -R $USER:docker /dev/kvm
+          sudo -n chmod 664 /dev/kvm
+          echo
+          #grep --color svm /proc/cpuinfo || true
+          #grep --color vmx /proc/cpuinfo || true
+          sudo -n lsmod | grep kvm
+          ls -l /dev/kvm
+          ls -l /dev/kvm*
+          echo $USER
+          groups
+          echo
       - name: qemu
         shell: bash
         run: |
