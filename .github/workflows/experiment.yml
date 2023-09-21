@@ -421,8 +421,8 @@ jobs:
           qemuUserArgs+=(-m "6144")
           qemuUserArgs+=(-net nic,model=rtl8139 -net user,restrict=n)
           qemuArgs+=("${qemuSpecialArgs[@]}" "${qemuUserArgs[@]}")
-          echo qemu_system_x86_64 "${qemuArgs[@]}"
-          qemu_system_x86_64 "${qemuArgs[@]}"
+          echo qemu-system-x86_64 "${qemuArgs[@]}"
+          qemu-system_x86_64 "${qemuArgs[@]}"
           true
 
 
