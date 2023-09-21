@@ -36,7 +36,12 @@ _hash_file() {
     else
         echo "openssl dgst -sha3-512 -binary | xxd -p -c 256" | tee -a "$scriptLocal"/_hash-"$currentListName".txt
     fi
-    cat "$currentFilePath" | "$@" | openssl dgst -sha3-512 -binary | xxd -p -c 256 | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+    if [[ "$skimfast" == "true" ]]
+    then
+        cat "$currentFilePath" | "$@" | openssl dgst -sha3-512 -binary | xxd -p -c 256 | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+    else
+        echo
+    fi
     
     echo | tee -a "$scriptLocal"/_hash-"$currentListName".txt
 }
