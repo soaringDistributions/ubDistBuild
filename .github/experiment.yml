@@ -69,7 +69,7 @@ on:
     #- cron: '5 7 15 * *'
     - cron: '25 6 1 * *'
   # https://stackoverflow.com/questions/62750603/github-actions-trigger-another-action-after-one-action-is-completed
-    #workflow_run:
+  workflow_run:
     workflows: ["build"]
     types:
       - completed
