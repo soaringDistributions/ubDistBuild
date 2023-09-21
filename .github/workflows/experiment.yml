@@ -255,7 +255,9 @@ jobs:
       - name: _get_vmImg_ubDistBuild
         shell: bash
         run: |
-          ./ubiquitous_bash.sh _get_vmImg_ubDistBuild ${{ inputs.releaseLabel }}
+          current_releaseLabel="${{ inputs.releaseLabel }}"
+          [[ "$current_releaseLabel" == "" ]] && current_releaseLabel="base"
+          ./ubiquitous_bash.sh _get_vmImg_ubDistBuild "$current_releaseLabel"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -276,7 +278,7 @@ jobs:
         run: |
           ./ubiquitous_bash.sh _openChRoot
           #echo '/root/ubiquitous_bash.sh _wait_rootLock_OTHER'
-          ( ./ubiquitous_bash.sh _chroot crontab -l ; echo '@reboot sleep 35 ; /_rootGrab.sh _wait_rootLock ; /root/_get_nvidia.sh _wait_rootLock ; mkdir -p /media/tmp ; mount -o compress=zstd:2 /dev/sdb /media/tmp ; true > /media/tmp/_run-crontab ; true > /var/log/_run-crontab.log' ) | ./ubiquitous_bash.sh _chroot crontab '-'
+          ( ./ubiquitous_bash.sh _chroot crontab -l ; echo '@reboot sleep 35 ; /_rootGrab.sh _wait_rootLock ; /root/_get_nvidia.sh _wait_rootLock ; mkdir -p /media/tmp ; mount -o compress=zstd:2 /dev/sdb /media/tmp ; true > /media/tmp/_run-crontab ; true > /var/log/_run-crontab.log ; poweroff' ) | ./ubiquitous_bash.sh _chroot crontab '-'
           ./ubiquitous_bash.sh _closeChRoot
 
 
@@ -422,7 +424,7 @@ jobs:
           qemuUserArgs+=(-net nic,model=rtl8139 -net user,restrict=n)
           qemuArgs+=("${qemuSpecialArgs[@]}" "${qemuUserArgs[@]}")
           echo qemu-system-x86_64 "${qemuArgs[@]}"
-          qemu-system_x86_64 "${qemuArgs[@]}"
+          qemu-system-x86_64 "${qemuArgs[@]}"
           true
 
 
