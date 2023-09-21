@@ -372,7 +372,9 @@ jobs:
           export devfast=${{ inputs.devfast }}
           echo $devfast
           ./_chroot_test | sudo -n tee ./_local/_chroot_test.log && exit ${PIPESTATUS[0]}
-      - name: _create_ubDistBuild-bootOnce
+
+      - name: Enable KVM group perms
+        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
         shell: bash
         run: |
           export skimfast=${{ inputs.skimfast }}
@@ -393,8 +395,11 @@ jobs:
           echo $USER
           groups
           echo
+      - name: _create_ubDistBuild-bootOnce
+        shell: bash
+        run: |
           ./_create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log && exit ${PIPESTATUS[0]}
-      
+
       - name: _fetchCore
         shell: bash
         run: |
