@@ -36,7 +36,8 @@ on:
     inputs:
       releaseLabel:
         required: false
-        default: base
+        #default: base
+        default: latest
         type: choice
         options:
         - base
@@ -257,7 +258,8 @@ jobs:
         shell: bash
         run: |
           current_releaseLabel="${{ inputs.releaseLabel }}"
-          [[ "$current_releaseLabel" == "" ]] && current_releaseLabel="base"
+          #[[ "$current_releaseLabel" == "" ]] && current_releaseLabel="base"
+          [[ "$current_releaseLabel" == "" ]] && current_releaseLabel="latest"
           ./ubiquitous_bash.sh _get_vmImg_ubDistBuild "$current_releaseLabel"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -396,6 +398,7 @@ jobs:
           echo
       - name: qemu
         shell: bash
+        continue-on-error: true
         timeout-minutes: 20
         run: |
           export skimfast=${{ inputs.skimfast }}
