@@ -377,11 +377,6 @@ jobs:
         if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
         shell: bash
         run: |
-          export skimfast=${{ inputs.skimfast }}
-          echo skimfast $skimfast
-          export qemuNoKVM=${{ inputs.qemuNoKVM }}
-          echo qemuNoKVM $qemuNoKVM
-          echo
           sudo -n ls -l /dev/kvm
           sudo -n ls -l /dev/kvm*
           sudo -n chown -R $USER:docker /dev/kvm
@@ -398,6 +393,11 @@ jobs:
       - name: _create_ubDistBuild-bootOnce
         shell: bash
         run: |
+          export skimfast=${{ inputs.skimfast }}
+          echo skimfast $skimfast
+          export qemuNoKVM=${{ inputs.qemuNoKVM }}
+          echo qemuNoKVM $qemuNoKVM
+          echo
           ./_create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log && exit ${PIPESTATUS[0]}
 
       - name: _fetchCore
