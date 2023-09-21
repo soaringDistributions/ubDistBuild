@@ -956,6 +956,11 @@ _detect_wsl() {
 	
 	return 0
 }
+_detect_live() {
+	_messagePlain_probe '_detect_live'
+	mountpoint /run/live/overlay && echo 'detect: mountpoint: live' && return 0
+	return 1
+}
 _autoinstall_procedure() {
 	_mustBeRoot
 	
@@ -992,6 +997,11 @@ _autoinstall_procedure() {
 		exit
 		return 1
 		return
+	fi
+
+	if ! ! _detect_live
+	then
+		sleep 200
 	fi
 	
 	

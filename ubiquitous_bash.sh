@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='4202170317'
+export ub_setScriptChecksum_contents='1259555104'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -17896,6 +17896,23 @@ then
 	echo "_____ preload: /root/root"
 	find /root/root -type f -exec dd if={} bs=16384 2>/dev/null \; | progressFeed
 
+	
+	# CAUTION: DUBIOUS .
+	echo "_____ preload: /VBoxGuestAdditions"
+	find /root/VBoxGuestAdditions -type f -exec dd if={} bs=16384 2>/dev/null \; | progressFeed
+
+	# CAUTION: DUBIOUS .
+	echo "_____ preload: /opt"
+	find /root/opt -type f -exec dd if={} bs=16384 2>/dev/null \; | progressFeed
+	
+	# CAUTION: DUBIOUS .
+	echo "_____ preload: /run"
+	find /root/run -type f -exec dd if={} bs=16384 2>/dev/null \; | progressFeed
+	
+	# CAUTION: DUBIOUS .
+	echo "_____ preload: /srv"
+	find /root/srv -type f -exec dd if={} bs=16384 2>/dev/null \; | progressFeed
+
 
 	echo '_____ preload: /root/var'
 	find /root/var -type f -exec dd if={} bs=16384 2>/dev/null \; | progressFeed
@@ -17921,6 +17938,7 @@ then
 
 	echo '_____ preload: /root/etc'
 	find /root/etc -type f -exec dd if={} bs=16384 2>/dev/null \; | progressFeed
+# WARNING: May be untested.
 else
 	echo "_____ preload: /root/home -not core -not .nix -not .gcloud"
 	find /root/home -not \( -path \/root/home/\*/core\* -prune \) -not \( -path \/root/home/\*/.nix\* -prune \) -not \( -path \/root/home/\*/.gcloud\* -prune \) -type f -exec cat {} > /dev/null \;
@@ -17943,6 +17961,24 @@ else
 
 	echo "_____ preload: /root/root"
 	find /root/root -type f -exec cat {} > /dev/null \;
+
+
+
+	# CAUTION: DUBIOUS .
+	echo '_____ preload: /root/VBoxGuestAdditions'
+	find /root/VBoxGuestAdditions -type f -exec cat {} > /dev/null \;
+
+	# CAUTION: DUBIOUS .
+	echo '_____ preload: /root/opt'
+	find /root/opt -type f -exec cat {} > /dev/null \;
+
+	# CAUTION: DUBIOUS .
+	echo '_____ preload: /root/run'
+	find /root/run -type f -exec cat {} > /dev/null \;
+
+	# CAUTION: DUBIOUS .
+	echo '_____ preload: /root/srv'
+	find /root/srv -type f -exec cat {} > /dev/null \;
 
 
 	echo '_____ preload: /root/var'
@@ -18103,9 +18139,11 @@ _live_sequence_in() {
 	# Consider reducing below 12 iteratively.
 	# Alternatively, this may need to increase. Cron jobs may otherwise fail with such error message as 'fork retry resource temporarily unavailable' .
 	# Uncertain whether 'DefaultTasksMax' limits only the number of systemd services started simuntaneously, or also the number of threads total prior to interactive shell.
-	sudo -n mv -n "$globalVirtFS"/etc/systemd/system.conf "$globalVirtFS"/etc/systemd/system.conf.orig
-	echo '[Manager]
-DefaultTasksMax=24' | sudo -n tee "$globalVirtFS"/etc/systemd/system.conf > /dev/null
+	# CAUTION: Apparently sets 'ulimit' unfavorably against cron .
+	#  Hopefully, preload will be sufficient to prevent excessive disc seeking issues .
+	#sudo -n mv -n "$globalVirtFS"/etc/systemd/system.conf "$globalVirtFS"/etc/systemd/system.conf.orig
+	#echo '[Manager]
+#DefaultTasksMax=24' | sudo -n tee "$globalVirtFS"/etc/systemd/system.conf > /dev/null
 
 
 	_chroot update-initramfs -u -k all
@@ -46063,9 +46101,9 @@ _hash_file() {
     fi
     if [[ "$skimfast" == "true" ]]
     then
-        cat "$currentFilePath" | "$@" | openssl dgst -sha3-512 -binary | xxd -p -c 256 | tee -a "$scriptLocal"/_hash-"$currentListName".txt
-    else
         echo
+    else
+        cat "$currentFilePath" | "$@" | openssl dgst -sha3-512 -binary | xxd -p -c 256 | tee -a "$scriptLocal"/_hash-"$currentListName".txt
     fi
     
     echo | tee -a "$scriptLocal"/_hash-"$currentListName".txt

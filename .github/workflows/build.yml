@@ -373,7 +373,7 @@ jobs:
           echo $devfast
           ./_chroot_test | sudo -n tee ./_local/_chroot_test.log && exit ${PIPESTATUS[0]}
 
-      - name: Enable KVM group perms
+      - name: Force KVM group perms
         if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
         shell: bash
         run: |
