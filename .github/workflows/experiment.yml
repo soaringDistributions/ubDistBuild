@@ -403,7 +403,8 @@ jobs:
           export qemuNoKVM=${{ inputs.qemuNoKVM }}
           echo qemuNoKVM $qemuNoKVM
           echo
-          qemuArgs+=(-nographic -usb -smp $(nproc) -device usb-tablet -device qxl-vga)
+          qemuArgs+=(-usb -smp $(nproc) -device usb-tablet -device qxl-vga)
+          #[[ "$qemuHeadless" == "true" ]] && qemuArgs+=(-nographic)
           if ./ubiquitous_bash.sh _testQEMU_hostArch_x64_hardwarevt
           then
             # Apparently, qemu kvm, can be unreliable if nested (eg. within VMWare Workstation VM).
