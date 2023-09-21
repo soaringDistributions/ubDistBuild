@@ -452,6 +452,8 @@ jobs:
       - name: _hash_img
         shell: bash
         run: |
+          export skimfast=${{ inputs.skimfast }}
+          echo $skimfast
           ./ubiquitous_bash.sh _hash_img
       
       - name: release! report! internal
@@ -658,6 +660,8 @@ jobs:
       - name: _hash_rootfs
         shell: bash
         run: |
+          export skimfast=${{ inputs.skimfast }}
+          echo $skimfast
           ./ubiquitous_bash.sh _hash_rootfs
       
       - name: _ubDistBuild_split-rootfs
@@ -855,6 +859,8 @@ jobs:
       - name: _hash_live
         shell: bash
         run: |
+          export skimfast=${{ inputs.skimfast }}
+          echo $skimfast
           ./ubiquitous_bash.sh _hash_live
       
       - name: _ubDistBuild_split-live
