@@ -235,6 +235,7 @@ jobs:
           #! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
           #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
           sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y xvfb
+          sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y x11-apps
           df -h
           df -h /
         timeout-minutes: 355
@@ -395,7 +396,7 @@ jobs:
           echo
       - name: qemu
         shell: bash
-        timeout-minutes: 12
+        timeout-minutes: 20
         run: |
           export skimfast=${{ inputs.skimfast }}
           echo skimfast $skimfast
@@ -425,13 +426,38 @@ jobs:
           qemuUserArgs+=(-m "6144")
           qemuUserArgs+=(-net nic,model=rtl8139 -net user,restrict=n)
           qemuArgs+=("${qemuSpecialArgs[@]}" "${qemuUserArgs[@]}")
+
+          Xvfb :30 > /dev/null 2>&1 &
+          sleep 1
+          export DISPLAY=:30
+
           echo qemu-system-x86_64 "${qemuArgs[@]}"
-          qemu-system-x86_64 "${qemuArgs[@]}"
-          true
+          qemu-system-x86_64 "${qemuArgs[@]}" &
+          currentPID=$!
+
+          mkdir -p ./_local/analysis/screenshots
+          currentIterationWait=0
+          while [[ "$currentIterationWait" -lt 720 ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
+          do
+            sleep 1
+            [[ "$currentIterationWait" -le 55 ]] && [[ $(bc <<< "$currentIterationWait % 5") == 0 ]] && xwd -root -silent | convert xwd:- png:./_local/analysis/screenshots/qemu-"$currentIterationWait".png
+            [[ $(bc <<< "$currentIterationWait % 30") == 0 ]] && xwd -root -silent | convert xwd:- png:./_local/analysis/screenshots/qemu-"$currentIterationWait".png
+            let currentIterationWait=currentIterationWait+1
+          done
+          echo currentIterationWait
+          [[ "$currentIterationWait" -ge 720 ]] && echo 'bad: fail: bootdisc: poweroff' && currentExitStatus=1
+          
+          exit "$currentExitStatus"
 
 
 
-
+          
+      - name: artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: analysis
+          path: |
+            ./_local/analysis/screenshots/*
 
 
 
