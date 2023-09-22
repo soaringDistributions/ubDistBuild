@@ -374,8 +374,9 @@ jobs:
         shell: bash
         run: |
           #26572
-          #28.25 GiB == 28928 MiB
-          dd if=/dev/zero of=./_local/cache.img bs=1M count=28928
+          #28.25 GiB == 28928 MiB == 30333206528 bytes
+          #dd if=/dev/zero of=./_local/cache.img bs=1M count=28928
+          fallocate -l 30333206528 ./_local/cache.img
           mkfs.btrfs --checksum xxhash -M -d single ./_local/cache.img
 
 
@@ -445,9 +446,12 @@ jobs:
           qemu-system-x86_64 "${qemuArgs[@]}" &
           currentPID=$!
 
+          currentExitStatus=0
+
           mkdir -p ./_local/analysis/screenshots
           currentIterationWait=0
-          currentIterationMax=360
+          #currentIterationMax=360
+          currentIterationMax=3200
           while [[ "$currentIterationWait" -lt "$currentIterationMax" ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
           do
             sleep 1
@@ -455,7 +459,7 @@ jobs:
             [[ $(bc <<< "$currentIterationWait % 30") == 0 ]] && xwd -root -silent | convert xwd:- png:./_local/analysis/screenshots/qemu-"$currentIterationWait".png
             let currentIterationWait=currentIterationWait+1
           done
-          echo currentIterationWait
+          echo 'currentIterationWait='"$currentIterationWait"
           [[ "$currentIterationWait" -ge "$currentIterationMax" ]] && echo 'bad: fail: run: poweroff' && currentExitStatus=1
           
           exit "$currentExitStatus"
