@@ -336,7 +336,7 @@ jobs:
           ./ubiquitous_bash.sh _openChRoot
           #echo '/root/ubiquitous_bash.sh _wait_rootLock_OTHER'
           #( ./ubiquitous_bash.sh _chroot crontab -l ; echo '@reboot sleep 35 ; /_rootGrab.sh _wait_rootLock ; /root/_get_nvidia.sh _wait_rootLock ; mkdir -p /media/tmp ; mount -o compress=zstd:2 /dev/sdb /media/tmp ; true > /media/tmp/_run-crontab ; true > /var/log/_run-crontab.log ; poweroff' ) | ./ubiquitous_bash.sh _chroot crontab '-'
-          ( ./ubiquitous_bash.sh _chroot crontab -l ; echo '@reboot /usr/sbin/poweroff ; /sbin/poweroff ; poweroff' ) | ./ubiquitous_bash.sh _chroot crontab '-'
+          ( ./ubiquitous_bash.sh _chroot crontab -l ; echo '@reboot /usr/bin/mkdir -p /media/tmp ; /usr/bin/mount -o compress=zstd:2 /dev/sdb /media/tmp ; cp -a /home/user/ubDistBuild /media/tmp/ ; /bin/sudo -n -u user /media/tmp/ubDistBuild/ubiquitous_bash.sh _revert-fromLive > /media/tmp/_revert-fromLive.log ; /bin/true > /media/tmp/_run-crontab.log ; /bin/true > /var/log/_run-crontab.log ; /usr/sbin/poweroff ; /sbin/poweroff ; poweroff' ) | ./ubiquitous_bash.sh _chroot crontab '-'
           ./ubiquitous_bash.sh _chroot crontab -l
           ./ubiquitous_bash.sh _closeChRoot
 
@@ -562,10 +562,15 @@ jobs:
           mkdir -p ./_local/cache_fs
           #sudo -n mount -t btrfs ./_local/cache.img ./_local/cache_fs
           ls ./_local/cache_fs
-          [[ -e ./_local/cache_fs/_run-crontab ]]
+          [[ -e ./_local/cache_fs/_run-crontab.log ]]
 
 
-
+      - name: artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: analysis-screenshots
+          path: |
+            ./_local/cache_fs/*.log
 
 
 
