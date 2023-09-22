@@ -532,9 +532,8 @@ jobs:
             then
               #xwd -root -silent | convert xwd:- png:./_local/analysis/screenshots/qemu-"$currentIterationWait".png
               xwd -root -silent | convert xwd:- -quality 35 jpg:./_local/analysis/screenshots/qemu-"$currentIterationWait".jpg
+              jp2a --background=dark --colors --width=280 ./_local/analysis/screenshots/qemu-"$currentIterationWait".jpg
             fi
-
-            jp2a --background=dark --colors --width=280 ./_local/analysis/screenshots/qemu-"$currentIterationWait".jpg
 
             let currentIterationWait=currentIterationWait+1
           done
