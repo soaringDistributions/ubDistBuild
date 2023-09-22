@@ -175,11 +175,6 @@ jobs:
           echo $USER
           groups
           echo
-      - name: Check Network Services
-        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
-        shell: bash
-        run: |
-          sudo -n netstat -l -p
       - name: _getCore_ub
         shell: bash
         timeout-minutes: 90
@@ -263,8 +258,14 @@ jobs:
           current_releaseLabel="${{ inputs.releaseLabel }}"
           #[[ "$current_releaseLabel" == "" ]] && current_releaseLabel="base"
           [[ "$current_releaseLabel" == "" ]] && current_releaseLabel="latest"
+          #export FORCE_AXEL=8
+          #./ubiquitous_bash.sh _get_vmImg_ubDistBuild "$current_releaseLabel"
+          # DANGER: Github Actions ONLY!
+          # DANGER: Do NOT use for any kind of release, push, etc .
           export FORCE_AXEL=8
-          ./ubiquitous_bash.sh _get_vmImg_ubDistBuild "$current_releaseLabel"
+          export MANDATORY_HASH="true"
+          cd ./_local
+          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
