@@ -521,7 +521,7 @@ jobs:
             echo
 
             echo 'cat ./_local/cache_fs/_revert-fromLive.log'
-            sudo -n cat ./_local/cache_fs/_revert-fromLive.log
+            sudo -n cat ./_local/cache_fs/_revert-fromLive.log || true
             echo
 
             sudo -n umount ./_local/cache_fs
