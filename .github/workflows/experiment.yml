@@ -314,7 +314,7 @@ jobs:
           export FORCE_AXEL=8
           export MANDATORY_HASH="true"
           cd ./_local
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" 2> /dev/null | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -336,7 +336,8 @@ jobs:
           ./ubiquitous_bash.sh _openChRoot
           #echo '/root/ubiquitous_bash.sh _wait_rootLock_OTHER'
           #( ./ubiquitous_bash.sh _chroot crontab -l ; echo '@reboot sleep 35 ; /_rootGrab.sh _wait_rootLock ; /root/_get_nvidia.sh _wait_rootLock ; mkdir -p /media/tmp ; mount -o compress=zstd:2 /dev/sdb /media/tmp ; true > /media/tmp/_run-crontab ; true > /var/log/_run-crontab.log ; poweroff' ) | ./ubiquitous_bash.sh _chroot crontab '-'
-          ( ./ubiquitous_bash.sh _chroot crontab -l ; echo '@reboot /usr/bin/mkdir -p /media/tmp ; /usr/bin/mount -o compress=zstd:2 /dev/sdb /media/tmp ; cp -a /home/user/ubDistBuild /media/tmp/ ; /bin/sudo -n -u user /media/tmp/ubDistBuild/ubiquitous_bash.sh _revert-fromLive > /media/tmp/_revert-fromLive.log ; /bin/true > /media/tmp/_run-crontab.log ; /bin/true > /var/log/_run-crontab.log ; /usr/sbin/poweroff ; /sbin/poweroff ; poweroff' ) | ./ubiquitous_bash.sh _chroot crontab '-'
+          #( ./ubiquitous_bash.sh _chroot crontab -l ; echo '@reboot /usr/bin/mkdir -p /media/tmp ; /usr/bin/mount -o compress=zstd:2 /dev/sda /media/tmp ; cp -a /home/user/ubDistBuild /media/tmp/ ; /bin/sudo -n -u user /media/tmp/ubDistBuild/ubiquitous_bash.sh _revert-fromLive > /media/tmp/_revert-fromLive.log ; /bin/true > /media/tmp/_run-crontab.log ; /bin/true > /var/log/_run-crontab.log ; /usr/sbin/poweroff ; /sbin/poweroff ; poweroff' ) | ./ubiquitous_bash.sh _chroot crontab '-'
+          ( ./ubiquitous_bash.sh _chroot crontab -l ; echo '@reboot /usr/bin/mkdir -p /media/tmp ; /usr/bin/mount -o compress=zstd:2 /dev/sda /media/tmp ; cp -a /home/user/ubDistBuild /media/tmp/ ; /bin/true > /media/tmp/_run-crontab.log ; /bin/true > /var/log/_run-crontab.log ; /usr/sbin/poweroff ; /sbin/poweroff ; poweroff' ) | ./ubiquitous_bash.sh _chroot crontab '-'
           ./ubiquitous_bash.sh _chroot crontab -l
           ./ubiquitous_bash.sh _closeChRoot
 
@@ -504,8 +505,36 @@ jobs:
           while [[ "$currentIterationWait" -lt "$currentIterationMax" ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
           do
             sleep 1
-            [[ "$currentIterationWait" -le 55 ]] && [[ $(bc <<< "$currentIterationWait % 5") == 0 ]] && xwd -root -silent | convert xwd:- png:./_local/analysis/screenshots/qemu-"$currentIterationWait".png
-            [[ $(bc <<< "$currentIterationWait % 30") == 0 ]] && xwd -root -silent | convert xwd:- png:./_local/analysis/screenshots/qemu-"$currentIterationWait".png
+
+            echo
+            echo
+            echo
+            echo currentIterationWait="$currentIterationWait"
+            echo
+
+
+            sudo -n mount -t btrfs -o ro ./_local/cache.img ./_local/cache_fs
+
+            echo 'ls ./_local/cache_fs'
+            sudo -n ls ./_local/cache_fs
+            echo
+
+            echo 'cat ./_local/cache_fs/_revert-fromLive.log'
+            sudo -n cat ./_local/cache_fs/_revert-fromLive.log
+            echo
+
+            sudo -n umount ./_local/cache_fs
+
+
+
+            if ( [[ "$currentIterationWait" -le 55 ]] && [[ $(bc <<< "$currentIterationWait % 5") == 0 ]] ) || [[ $(bc <<< "$currentIterationWait % 30") == 0 ]]
+            then
+              #xwd -root -silent | convert xwd:- png:./_local/analysis/screenshots/qemu-"$currentIterationWait".png
+              xwd -root -silent | convert xwd:- -quality 65 jpg:./_local/analysis/screenshots/qemu-"$currentIterationWait".jpg
+            fi
+
+            jp2a --background=dark --colors --width=280 ./_local/analysis/screenshots/qemu-"$currentIterationWait".jpg
+
             let currentIterationWait=currentIterationWait+1
           done
           echo 'currentIterationWait='"$currentIterationWait"
