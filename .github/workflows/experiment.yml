@@ -513,6 +513,7 @@ jobs:
             echo
 
 
+            mkdir -p ./_local/cache_fs
             sudo -n mount -t btrfs -o ro ./_local/cache.img ./_local/cache_fs
 
             echo 'ls ./_local/cache_fs'
