@@ -254,6 +254,46 @@ jobs:
               exit ${PIPESTATUS[0]}
           fi
       
+      
+      - name: txt-stat/tboot
+        shell: bash
+        run: |
+          cat /proc/cpuinfo | grep 'model name'
+          echo
+          
+          sudo -n txt-stat
+      
+      - name: sev/AMD
+        shell: bash
+        run: |
+          cat /proc/cpuinfo | grep 'model name'
+          echo
+
+          echo 'cat /sys/module/kvm_amd/parameters/sev'
+          cat /sys/module/kvm_amd/parameters/sev
+          
+          echo 'dmesg | grep -i sev'
+          sudo -n dmesg | grep -i sev
+      
+      - name: sgx/Intel
+        shell: bash
+        run: |
+          cat /proc/cpuinfo | grep 'model name'
+          echo
+          
+          echo 'grep sgx /proc/cpuinfo'
+          grep sgx /proc/cpuinfo
+
+          echo 'dmesg | grep sgx'
+          sudo -n dmesg | grep -i sgx
+          # Apparently normal: ' sgx: [Firmware Bug]: Unable to map EPC section to online node. Fallback to the NUMA node 0. '
+
+
+
+
+
+
+
       # ### ##### _get_vmImg   -->   rm/_install_ubDistBuild
       - name: _get_vmImg_ubDistBuild
         shell: bash
