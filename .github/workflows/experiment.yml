@@ -59,9 +59,9 @@ on:
         options:
         - ubuntu-latest
         - ubuntu-latest-m
-      debug_enabled:
-        type: boolean
-        default: false
+      #debug_enabled:
+        #type: boolean
+        #default: false
   # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
   schedule:
     #- cron: '5 7 * * 6'
@@ -475,7 +475,7 @@ jobs:
               qemuArgs+=(-machine accel=kvm)
             fi
           else
-            _messagePlain_warn 'missing: kvm'
+            echo 'missing: kvm'
           fi
           [[ -e /usr/share/OVMF/OVMF_CODE.fd ]] && qemuArgs+=(-bios /usr/share/OVMF/OVMF_CODE.fd)
           #qemuUserArgs+=(-drive format=raw,file=./_local/vm.img)
