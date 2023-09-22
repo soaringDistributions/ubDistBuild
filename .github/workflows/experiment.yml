@@ -261,7 +261,7 @@ jobs:
           cat /proc/cpuinfo | grep 'model name'
           echo
           
-          sudo -n txt-stat
+          sudo -n txt-stat || true
 
           true
       
@@ -275,7 +275,7 @@ jobs:
           cat /sys/module/kvm_amd/parameters/sev
           
           echo 'dmesg | grep -i sev'
-          sudo -n dmesg | grep -i sev
+          sudo -n dmesg | grep -i sev || true
 
           true
       
@@ -289,7 +289,7 @@ jobs:
           grep sgx /proc/cpuinfo
 
           echo 'dmesg | grep sgx'
-          sudo -n dmesg | grep -i sgx
+          sudo -n dmesg | grep -i sgx || true
           # Apparently normal: ' sgx: [Firmware Bug]: Unable to map EPC section to online node. Fallback to the NUMA node 0. '
 
           true
