@@ -59,6 +59,9 @@ on:
         options:
         - ubuntu-latest
         - ubuntu-latest-m
+      debug_enabled:
+        type: boolean
+        default: false
   # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
   schedule:
     #- cron: '5 7 * * 6'
@@ -480,7 +483,7 @@ jobs:
       - name: _export
         shell: bash
         run: |
-          lsmod | grep loop
+          lsmod | grep loop || true
           mkdir -p ./_local/cache_fs
           mount -t btrfs ./_local/cache.img ./_local/cache_fs
           ls ./_local/cache_fs
@@ -489,6 +492,17 @@ jobs:
 
 
 
+      - name: Setup upterm session
+        #if: ${{ github.event.inputs.debug_enabled == 'true' }}
+        if: ( ${{ failure() && ( github.event.inputs.debug_enabled == 'true' ) }} )
+        uses: lhotari/action-upterm@v1
+        with:
+          ## limits ssh access and adds the ssh public key for the user which triggered the workflow
+          limit-access-to-actor: true
+          ## limits ssh access and adds the ssh public keys of the listed GitHub users
+          # DANGER: Discouraged. Prefer 'limit-access-to-actor' instead.
+          #limit-access-to-users: githubuser1,githubuser2
+        timeout-minutes: 320
 
 
 
