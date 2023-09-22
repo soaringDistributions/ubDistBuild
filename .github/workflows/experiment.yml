@@ -531,7 +531,7 @@ jobs:
             if ( [[ "$currentIterationWait" -le 55 ]] && [[ $(bc <<< "$currentIterationWait % 5") == 0 ]] ) || [[ $(bc <<< "$currentIterationWait % 30") == 0 ]]
             then
               #xwd -root -silent | convert xwd:- png:./_local/analysis/screenshots/qemu-"$currentIterationWait".png
-              xwd -root -silent | convert xwd:- -quality 65 jpg:./_local/analysis/screenshots/qemu-"$currentIterationWait".jpg
+              xwd -root -silent | convert xwd:- -quality 35 jpg:./_local/analysis/screenshots/qemu-"$currentIterationWait".jpg
             fi
 
             jp2a --background=dark --colors --width=280 ./_local/analysis/screenshots/qemu-"$currentIterationWait".jpg
