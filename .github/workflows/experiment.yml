@@ -287,7 +287,7 @@ jobs:
           ./ubiquitous_bash.sh _openChRoot
           #echo '/root/ubiquitous_bash.sh _wait_rootLock_OTHER'
           #( ./ubiquitous_bash.sh _chroot crontab -l ; echo '@reboot sleep 35 ; /_rootGrab.sh _wait_rootLock ; /root/_get_nvidia.sh _wait_rootLock ; mkdir -p /media/tmp ; mount -o compress=zstd:2 /dev/sdb /media/tmp ; true > /media/tmp/_run-crontab ; true > /var/log/_run-crontab.log ; poweroff' ) | ./ubiquitous_bash.sh _chroot crontab '-'
-          ( ./ubiquitous_bash.sh _chroot crontab -l ; echo '@reboot poweroff' ) | ./ubiquitous_bash.sh _chroot crontab '-'
+          ( ./ubiquitous_bash.sh _chroot crontab -l ; echo '@reboot /usr/sbin/poweroff ; /sbin/poweroff ; poweroff' ) | ./ubiquitous_bash.sh _chroot crontab '-'
           ./ubiquitous_bash.sh _chroot crontab -l
           ./ubiquitous_bash.sh _closeChRoot
 
