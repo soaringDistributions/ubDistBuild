@@ -262,6 +262,8 @@ jobs:
           echo
           
           sudo -n txt-stat
+
+          true
       
       - name: sev/AMD
         shell: bash
@@ -274,6 +276,8 @@ jobs:
           
           echo 'dmesg | grep -i sev'
           sudo -n dmesg | grep -i sev
+
+          true
       
       - name: sgx/Intel
         shell: bash
@@ -287,6 +291,8 @@ jobs:
           echo 'dmesg | grep sgx'
           sudo -n dmesg | grep -i sgx
           # Apparently normal: ' sgx: [Firmware Bug]: Unable to map EPC section to online node. Fallback to the NUMA node 0. '
+
+          true
 
 
 
