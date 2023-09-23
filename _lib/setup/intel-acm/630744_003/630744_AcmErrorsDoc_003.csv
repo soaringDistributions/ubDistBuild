@@ -1,0 +1,660 @@
+Cmt,Class #,Class Name,Class Desc,Major #,Major Name,Major Desc,Minor #,Minor Name,Minor Desc
+,0x00,CLASS_ACM_PROGRESS,ACM execution progress codes,,,,,,
+,0x1,CLASS_ACM_ENTRY,,,,,,,
+,,,,0x1,ERR_LAUNCH,Error in ACM entry conditions second line comment third line comment,,,
+,,,,,,,0x1,ERR_LAUNCH_PARAM,Reserved bits in launch parameter (EDX/EDI) must be clear Second line comment  Third line comment
+,,,,,,,0x2,ERR_LAUNCH_LEAF,BIOSAC entered not via GETSEC.ENTERACCS
+,,,,,,,0x3,ERR_LAUNCH_SENTER,BIOSAC entered via GETSEC.SENTER or SINIT entered via GETSEC.ENTERACCS
+,,,,,,,0x4,ERR_LAUNCH_MEASUR,Startup ACM failed as indicated by SPAD register BIT32 & BIT62
+,,,,0x2,ERR_NEM_ENABLED,No Eviction Mode is enabled,,,
+,,,,0x3,ERR_CPU_LT_TYPE,CPU type as indicated by BIT34 of MSR 0x13A mismatches platform type (client / server),,,
+,,,,0x4,ERR_DEV_ID,Platform hub as indicated by device ID is not supported,,,
+,,,,0x5,ERR_CPU_ID,CPU type as indicated by Family/Model/Stepping is not supported,,,
+,,,,0x6,ERR_NO_UCODE_UPDATE,Microcode update patch is not loaded,,,
+,,,,0x7,ERR_DEBUG_MCU,Debug microcode update patch is forbidden for module kind,,,
+,,,,0x8,ERR_DMI_LINK_DOWN,DMI link is determined down,,,
+,,,,0x9,ERR_ACM_REVOKED,ACM is revoked,,,
+,,,,0xa,ERR_TPM_DOUBLE_AUX,Two AUX indices are detected with handles 0x50000002 and 0x50000003,,,
+,,,,0xb,ERR_FIT_POLICY,,,,
+,,,,0xc,ERR_ORIGINAL_EIP,Address of launching GETSEC instruction is too close to code segment limit,,,
+,,,,0xd,ERR_DBG_INTRF_ENABLED,Debug Interface MSR 0xC80 is either enabled or not locked,,,
+,,,,0xe,ERR_PW_PS2_WRITELOCK,Production Module and PS index attribute indicates it isn't locked,,,
+,,,,0xf,ERR_CONFIG_SCHECK,,,,
+,,,,0x10,ERR_SACM_FAIL,,,,
+,,,,0x11,ERR_ACM_FATAL,,,,
+,,,,,,,0x1,ERR_PCH_DWR,
+,,,,0x12,ERR_CPU_PCH_MISMATCH,,,,
+,,,,0x13,ERR_INVALID_HEADER,,,,
+,,,,0x14,ERR_WRONG_STARTUP_TYPE,Startup type should be something else.,,,
+,0x2,CLASS_MTRR_CHECK,,,,,,,
+,,,,0x1,ERR_RULE1,One of the following errors: variable MTRRs are disabled fixed MTRRs are enabled default memory type is not UC,,,
+,,,,0x2,ERR_RULE2,Not all enabled variable MTRRs have memory type WB,,,
+,,,,0x3,ERR_RULE3,Enabled variable MTRRs overlap,,,
+,,,,0x4,ERR_RULE4,Base of one of enabled variable MTRRs is not size aligned,,,
+,,,,0x5,ERR_RULE5,Enabled variable MTRRs cover more than ACM size rounded up to the next 4KB,,,
+,,,,0x6,ERR_RULE6,There are gaps between enabled variable MTRRs,,,
+,,,,0x7,ERR_MASK,High bits of MTRR mask (BIT32+) are Incorrect,,,
+,,,,0x8,ERR_MAP,ACM overlaps LT register space,,,
+,,,,0x9,ERR_COUNT,Internal error. Too many MTRRs detected - cannot handle,,,
+,0x3,CLASS_RANGE_CHECK,,,,,,,
+,,,,0x1,ERR_BASIC_RANGE_CHECK,One of ranges in array failed the check: alignment is incorrect top address is below base Range placement is incorrect as required by its attributes,,,
+,,,,,,,0x1,ERR_DMAR_TAB,
+,,,,,,,0x2,ERR_OSSINIT_TAB,
+,,,,,,,0x3,ERR_LAPIC,
+,,,,,,,0x4,ERR_PMR,
+,,,,,,,0x5,ERR_PRIMARY,
+,,,,,,,0x6,ERR_SECONDARY,
+,,,,,,,0x7,ERR_VTD_IA_EXC,
+,,,,,,,0x8,ERR_VTD_GT_EXC,
+,,,,,,,0x9,ERR_ACPI_TAB,
+,,,,,,,0xA,ERR_MLE_PD_PAGE1,
+,,,,,,,0xB,ERR_MLE_PD_PAGE2,
+,,,,,,,0xC,ERR_MLE_PT_PAGE,
+,,,,,,,0xD,ERR_MLE_PAGE,
+,,,,0x2,ERR_RANGE_OVERLAPPING,One or several ranges in array overlap,,,
+,,,,0x3,ERR_RANGE_SEQUENCE,Ranges are not located in required sequence,,,
+,0x4,CLASS_TPM_ACCESS,Errors related to TPM access,,,,,,
+,,,,0x0,ERR_OK,Indicator of successful execution of the function.,,,
+,,,,0x1,ERR_TPM_ERROR,TPM returned an error,,,
+,,,,0x2,ERR_LOCALITY,One of localities is active,,,
+,,,,0x3,ERR_ACC_INVLD,Locality change request failed,,,
+,,,,,,,0x1,ERR_ACC_INVLD_0_ON,Request to activate locality 0 failed
+,,,,,,,0x2,ERR_ACC_INVLD_0_OF,Request to relinquish locality 0 failed
+,,,,,,,0x3,ERR_ACC_INVLD_GEN_ON,Request to activate any locality failed
+,,,,,,,0x4,ERR_ACC_INVLD_GEN_OF,Request to relinquish any locality failed
+,,,,,,,0x5,ERR_ACC_INVLD_3_ON,Request to activate locality 3 failed
+,,,,,,,0x6,ERR_ACC_INVLD_3_OF,Request to relinquish locality 3 failed
+,,,,0x4,ERR_NV_UNLOCKED,TPM NV RAM not locked,,,
+,,,,0x5,ERR_TPM_DISABLED,TPM is disabled,,,
+,,,,0x6,ERR_TPM_DEACTIVATED,TPM is deactivated,,,
+,,,,0x7,ERR_TPM_NV_INDEX_INVALID,TPM NV indices incorrectly defined,,,
+,,,,,,,0x1,ERR_TPM_NV_INDEX_INVALID_AUX,One or more of TPM AUX index properties are incorrect: localities attributes or index size
+,,,,,,,0x2,ERR_TPM_NV_INDEX_INVALID_AUX_ATTR,TPM AUX index attributes incorrect
+,,,,,,,0x3,ERR_TPM_NV_INDEX_INVALID_AUX_ALG,TPM AUX index nameAlg incorrect
+,,,,,,,0x4,ERR_TPM_NV_INDEX_INVALID_AUX_POL_SZ,TPM AUX index policy digest size is incorrect
+,,,,,,,0x5,ERR_TPM_NV_INDEX_INVALID_AUX_POL_VAL,TPM AUX index policy digest value is incorrect
+,,,,,,,0x6,ERR_TPM_NV_INDEX_INVALID_AUX_SIZE,TPM AUX index data size is incorrect
+,,,,,,,0x7,ERR_TPM_NV_INDEX_INVALID_PO,One or more of TPM PO index properties are incorrect: localities attributes or index size
+,,,,,,,0x8,ERR_TPM_NV_INDEX_INVALID_PO_ATTR,TPM PO index attributes incorrect
+,,,,,,,0x9,ERR_TPM_NV_INDEX_INVALID_PO_ALG,TPM PO index nameAlg incorrect
+,,,,,,,0xa,ERR_TPM_NV_INDEX_INVALID_PO_POL_SZ,TPM PO index policy digest size is incorrect
+,,,,,,,0xb,ERR_TPM_NV_INDEX_INVALID_PO_POL_VAL,TPM PO index policy digest value is incorrect
+,,,,,,,0xc,ERR_TPM_NV_INDEX_INVALID_PO_SIZE,TPM PO index data size is incorrect
+,,,,,,,0xd,ERR_TPM_NV_INDEX_INVALID_PS,One or more of TPM PS index properties are incorrect: localities attributes or index size
+,,,,,,,0xe,ERR_TPM_NV_INDEX_INVALID_PS_ATTR,TPM PS index attributes incorrect
+,,,,,,,0xf,ERR_TPM_NV_INDEX_INVALID_PS_ALG,TPM PS index nameAlg incorrect
+,,,,,,,0x10,ERR_TPM_NV_INDEX_INVALID_PS_POL_SZ,TPM PS index PSlicy digest size is incorrect
+,,,,,,,0x11,ERR_TPM_NV_INDEX_INVALID_PS_POL_VAL,TPM PS index PSlicy digest value is incorrect
+,,,,,,,0x12,ERR_TPM_NV_INDEX_INVALID_PS_SIZE,TPM PS index data size is incorrect
+,,,,0x8,ERR_TPM_INCOMPAT_BIOSAC,Incompatible BIOS ACM,,,
+,,,,0x9,ERR_TPM_INCOMPAT_AUXREV,Incompatible AUX revision.,,,
+,,,,0xa,ERR_TPM_INBUF_TOO_SHORT,Input buffer is too short.,,,
+,,,,0xb,ERR_TPM_OUTBUF_TOO_SHORT,Output buffer is too short.,,,
+,,,,0xc,ERR_SECRETS_BIT_SET,Secrets bit is set.,,,
+,,,,0xd,ERR_INTRF_NOT_SUP,Interface is not supported,,,
+,,,,0xe,ERR_FAMILY_NOT_SUP,Family is not supported,,,
+,,,,0xf,ERR_BANK_COUNT,Too many banks := 3,,,
+,,,,,,,0x1,ERR_BANK_COUNT_EVT,TPM2_PCR_Event command
+,,,,,,,0x2,ERR_BANK_COUNT_SEQ,TPM2_PCR_EventSequenceComplete command
+,,,,0x10,ERR_ALG_NOT_SUPPORTED,Mandatory hashing algorithm not supported,,,
+,,,,0x11,ERR_TPM_NV_INDEX_RO,Read only index. Attempt to write to Read Only (RO) TPM NV index,,,
+,,,,0x12,ERR_TPM_NV_DATA_SIZE_OVER,Read only index. TPM command data size is too large,,,
+,,,,,,,0x1,ERR_TPM_NV_DATA_SIZE_OVER_RD,TPM2_NV_Read command
+,,,,,,,0x2,ERR_TPM_NV_DATA_SIZE_OVER_WR,TPM2_NV_Write command
+,,,,,,,0x3,ERR_TPM_NV_DATA_SIZE_OVER_EV,TPM2_NV_Event command
+,,,,0x13,ERR_NO_TPM_PRESENT,TPM not found,,,
+,,,,0x14,ERR_PCR_BANKS_NOT_SUPPORTED,Embedded SW policy is selected but implemented PCR banks are not supported by ACM SW,,,
+,,,,,,,0x1,ERR_PCR_BANKS_CAPPED,
+,,,,0x15,ERR_S3_TPM_STARTUP_FAILED,TPM2Startup(STATE) failed. Soft TXT/BTG error.,,,
+,,,,0x16,ERR_OUTPUT_BUFFER_TOO_SHORT,Output buffer for the TPM response to short.,,,
+,,,,0x17,ERR_INVALID_INPUT_PARA,Input parameter for the function invalid.,,,
+,,,,0x18,ERR_INVALID_RESPONSE_WR,Exhausted retry attempts during command reception.,,,
+,,,,0x19,ERR_INVALID_RESPONSE_RD,Exhausted retry attempts during command completion.,,,
+,,,,0x1A,ERR_RESPONSE_TIMEOUT,Time out for TPM response.,,,
+,,,,,,,0x1,ERR_WAIT_COMMAND_READY,FIFO I/F. Command ready bit set
+,,,,,,,0x2,ERR_WAIT_SELFTEST_DONE,FIFO I/F. Self-test done bit set
+,,,,,,,0x3,ERR_WAIT_STATUS_VALID,FIFO I/F. Status register valid bit set
+,,,,,,,0x4,ERR_WAIT_BURSTCOUNT_READY,FIFO I/F. Burst count to be positive
+,,,,,,,0x5,ERR_WAIT_COMMAND_COMPLETE,FIFO I/F. DataAvail bit to unset
+,,,,,,,0x6,ERR_WAIT_ACCESS_VALID,FIFO I/F. Access register valid bit set
+,,,,,,,0x7,ERR_WAIT_ACTIVE_LOCALITY,FIFO I/F. Active locality bit set
+,,,,,,,0x8,ERR_WAIT_FWSTS4_PTT_VALID,
+,,,,,,,0x20,ERR_CRB_WAIT_LOC_STATE_VALID,CRB I/F. Wait time-out for locality to activate
+,,,,,,,0x21,ERR_CRB_WAIT_ACTIVE_LOCALITY,CRB I/F. Wait time-out for locality to activate
+,,,,,,,0x22,ERR_CRB_WAIT_LOCALITY_ASSIGNED,CRB I/F. Wait time-out for locality to inactivate
+,,,,,,,0x23,ERR_CRB_WAIT_TPM_IDLE,CRB I/F. Wait time-out for TPM to enter idle state
+,,,,,,,0x24,ERR_CRB_WAIT_COMMAND_READY,CRB I/F. Command ready bit set
+,,,,,,,0x25,ERR_CRB_WAIT_COMMAND_COMPLETE,CRB I/F. Control area command complete bit set
+,,,,,,,0x26,ERR_CRB_WAIT_ACCESS_VALID,CRB I/F. Locality state valid bit set
+,,,,0x1B,ERR_OVER_UNDER_RUN,Broken handshaking of last byte - this error is never returned.,,,
+,0x5,CLASS_CHIPSET_CONFIG,Chipset configuration errors,,,,,,
+,,,,0x1,ERR_TXT_RANGE_ENABLES,One of parameters (base or size) of mandatory TXT ranges is invalid: HEAP SINIT DPR,,,
+,,,,0x2,ERR_TXT_RANGE_SIZES,Size of one or more of mandatory TXT ranges is insufficient: HEAP SINIT DPR,,,
+,,,,0x3,ERR_GMS_SIZE,Graphics memory size field in GGC register is incorrect,,,
+,,,,0x4,ERR_GTT_SIZE,GTT size field in GGC register is incorrect,,,
+,,,,0x5,ERR_GM_APP_SIZE,Graphics memory aperture size is incorrect,,,
+,,,,0x6,ERR_MC_NOT_LOCKED,Memory controller lock register is not locked,,,
+,,,,0x7,ERR_MC_LOCKED,Memory controller lock register is locked,,,
+,,,,0x8,ERR_LT_CONFIG_NOT_LOCKED,TXT configuration is not locked in MSR 0x2E7,,,
+,,,,0x9,ERR_REMAP_CONFIG,Remap configuration is incorrect,,,
+,,,,,,,0x1,ERR_REMAP_CONFIG_EN,Enable bit is unset in either base or limit register
+,,,,,,,0x2,ERR_REMAP_CONFIG_LEN,Length of remapped memory is incorrect relative to programming of bases of ME UMA and/or PCI MMIO
+,,,,0xa,ERR_SMRR_CONFIG,SMRR configuration error,,,
+,,,,,,,0x1,ERR_SMRR_CONFIG_LOMSK,Low DWORD of mask register is incorrect
+,,,,,,,0x2,ERR_SMRR_CONFIG_HIMSK,High DWORD of mask register is incorrect
+,,,,,,,0x3,ERR_SMRR_CONFIG_TYP,Caching type of SMRAM is not Write Back (WB)
+,,,,,,,0x4,ERR_SMRR_CONFIG_TSEG,SMRR and TSEG ranges are not equal
+,,,,0xb,ERR_SINIT_CONFIG,Loaded ACM is not located inside of SINIT memory,,,
+,,,,0xc,ERR_APIC_CONFIG,ACM is loaded not by Boot Strap Processor (BSP),,,
+,,,,0xd,ERR_PMR_CONFIG,Protected Memory Range (PMR) configuration error,,,
+,,,,,,,0x1,ERR_PMR_CONFIG_EN,DMA remapping engines in platform are not identically programmed (enabled or disabled)
+,,,,,,,0x2,ERR_PMR_CONFIG_RNG_L,DMA remapping engines in platform are not identically programmed (different Low PMR programming)
+,,,,,,,0x3,ERR_PMR_CONFIG_RNG_H,DMA remapping engines in platform are not identically programmed (different High PMR programming)
+,,,,,,,0x4,ERR_PMR_CAP1,
+,,,,,,,0x5,ERR_PMR_CAP2,
+,,,,,,,0x6,ERR_PMR_STS1,
+,,,,,,,0x7,ERR_PMR_STS3,
+,,,,,,,0x8,ERR_DESCRIPTOR_INVALID1,
+,,,,,,,0x9,ERR_DESCRIPTOR_INVALID2,
+,,,,,,,0xa,ERR_FAULT_STATUS,
+,,,,0xe,ERR_DPR_CONFIG,DPR configuration error,,,
+,,,,,,,0x1,ERR_DPR_CONFIG_EN,DPR is not enabled
+,,,,,,,0x2,ERR_DPR_CONFIG_SZ,One or more of the following is detected: DPR size programmed into uncore register is less than in PCH register DPR size is less than minimal required DPR region is not 1MB aligned DPR top Is not equal TSEG base
+,,,,0xf,ERR_TOLUD_CONFIG,TOLUD register is unlocked,,,
+,,,,0x10,ERR_MEUMA_CONFIG,ME UMA configuration error,,,
+,,,,,,,0x1,ERR_MEUMA_CONFIG_EN,MESEG mask register is not enabled
+,,,,,,,0x2,ERR_MEUMA_CONFIG_ALIGN,ME UMA memory alignment error
+,,,,,,,0x3,ERR_MEUMA_CONFIG_VLD,Misc Shadow register valid bit is unset
+,,,,,,,0x4,ERR_MEUMA_CONFIG_MATCH,ME UMA memory size as detected from MESEG mask and Misc. shadow registers don't match
+,,,,,,,0x5,ERR_MEUMA_CONFIG_SZ,Erroneous ME UMA size
+,,,,0x11,ERR_TOM_CONFIG,TOM configuration error: Lock bit is in unexpected state incorrect address as compared to ME UMA programming,,,
+,,,,0x12,ERR_GGC_CONFIG,Erroneous GGC register programming,,,
+,,,,,,,0x1,ERR_GGC_CONFIG_EN,GGC enable bit is unset
+,,,,,,,0x2,ERR_GGC_CONFIG_LK,GGC lock bit is unset
+,,,,0x13,ERR_BDSM_CONFIG,BDSM register is unlocked,,,
+,,,,0x14,ERR_BGSM_CONFIG,BGSM register is unlocked,,,
+,,,,0x15,ERR_TSEG_CONFIG,TSEGMB register is unlocked,,,
+,,,,0x16,ERR_TOUUD_CONFIG,TOUUD is either unlocked or miss-programmed relative to TOM or TOLUD or REMAP,,,
+,,,,0x17,ERR_PCIEX_CONFIG,Erroneous PCIEXBAR register programming,,,
+,,,,0x18,ERR_WAKE_ERR_BIT_SET,TXT.STS.WAKE-ERR bit is set,,,
+,,,,0x19,ERR_FLASH_CONFIG,Erroneous BIOS decode register programming,,,
+,,,,,,,0x1,ERR_FLASH_CONFIG_SZ,Size error
+,,,,,,,0x2,ERR_FLASH_CONFIG_LK,Unlocked
+,,,,0x1a,ERR_MCHBAR_CONFIG,MCHBAR disabled or outside of PCI MMIO or above 4GB,,,
+,,,,,,,0x1,ERR_MCHBAR_CONFIG_OVERLAP,
+,,,,0x1b,ERR_SMRR2_CONFIG,SMRR2 configuration error,,,
+,,,,0x1c,ERR_BTG_CONFIG,Not supported BtG profile,,,
+,,,,0x1d,ERR_GFXVTBAR_CONFIG,GFXVTBAR and Graphics device 2 enable state mismatch,,,
+,,,,0x1e,ERR_DLCK_CONFIG,DLOCK bit state unexpected,,,
+,,,,0x1f,ERR_P2SB_CONFIG,,,,
+,,,,,,,0x1,ERR_P2SB_CONFIG_LK,
+,0x6,CLASS_LAUNCH_CONTROL_POLICY,Errors generated by the Launch control policy,,,,,,
+,,,,0x1,ERR_RESERVED,Reserved - don't use,,,
+,,,,0x2,ERR_SINIT_REVOKED,SINIT is revoked,,,
+,,,,,,,0x1,ERR_SINIT_REVOKED_POL_CTR,
+,,,,,,,0x2,ERR_SINIT_REVOKED_PS,SINIT Version is below minimum specified in PS index
+,,,,,,,0x3,ERR_SINIT_REVOKED_PO,SINIT Version is below minimum specified in PO index
+,,,,0x3,ERR_BIOSAC_REVOKED,BIOSAC is revoked,,,
+,,,,0x4,ERR_ELT_MISMATCH,No match found for policy element,,,
+,,,,,,,0x1,ERR_LCP_POLELT_TYPE_MLE,
+,,,,,,,0x2,ERR_LCP_POLELT_TYPE_PCONF,
+,,,,,,,0x3,ERR_LCP_POLELT_TYPE_SBIOS,
+,,,,,,,0x4,ERR_LCP_POLELT_TYPE_CUSTOM,
+,,,,,,,0x5,ERR_LCP_POLELT_TYPE_STM,
+,,,,0x5,ERR_AUTOPROMOTE_FAIL,BIOS hash differs from hash value saved in AUX index,,,
+,,,,0x6,ERR_FAILSAFE_FAIL,Fail-safe mode failure,,,
+,,,,0x7,ERR_PO_POL_INTEGRITY_FAIL,PO policy integrity check failure,,,
+,,,,,,,0x1,ERR_POLDATA_WRONG_SIGNATURE,Header of LCP policy data file has wrong ID string
+,,,,,,,0x2,ERR_POLDATA_WRONG_NUMLISTS,Header of LCP policy data file has one of the following errors: Reserved fields are not 0 or NumLists is either 0 or more than 8
+,,,,,,,0x3,ERR_POLDATA_CANNOT_ACCESS_DATA,LCP policy data file is above 4GB
+,,,,,,,0x4,ERR_POLDATA_DIGEST_MISMATCH,LCP policy data file hash mismatches value stored in TPM NV index
+,,,,,,,0x5,ERR_POLDATA_SIZE,Computed size of LCP data file mismatches header value
+,,,,,,,0x6,ERR_POL_WRONG_VERSION,Unsupported TPM NV LCP policy version
+,,,,,,,0x7,ERR_POL_WRONG_HASH_ALG,TPM NV LCP policy. Unsupported hash algorithm
+,,,,,,,0x8,ERR_POL_UNKNOWN_POLICY_TYPE,TPM NV LCP policy. Unknown policy type
+,,,,,,,0x9,ERR_POL_NPW_NOT_ALLOW,Running of NPW module is disallowed by TPM NV LCP policy
+,,,,,,,0xa,ERR_POL_AUX_DELETION_EN,TPM NV LCP policy. Policy Control. AUX deletion control bit is set
+,,,,,,,0xb,ERR_LIST_RSA_WRONG_KEY_SIZE,LCP policy list. Unsupported signing key size for RSASSA signature
+,,,,,,,0xc,ERR_LIST_WRONG_VERSION,LCP policy list. Unsupported version
+,,,,,,,0xd,ERR_LIST_WRONG_SIZE,LCP policy list. Computed size mismatches header value
+,,,,,,,0xe,ERR_LIST_WRONG_SIGNATURE_ALG,LCP policy list. Unsupported signature algorithm
+,,,,,,,0xf,ERR_LIST_SIGNATURE_FAILURE,LCP policy list. Invalid signature
+,,,,,,,0x10,ERR_LIST_REVOKED,LCP policy list. List is revoked
+,,,,,,,0x11,ERR_ELT_WRONG_HASH_ALG,LCP policy element. Unsupported hash algorithm
+,,,,,,,0x12,ERR_ELT_WRONG_SIZE,LCP policy element. Computed size mismatches header value
+,,,,,,,0x13,ERR_PCRINFO_INTEGRITY_FAIL,PCONF element. One of the sizes used in TPM 1.2 style TPM_PCR_INFO_SHORT structure is wrong
+,,,,,,,0x14,ERR_NO_POLICY_DATA,LCP element. Matching element was found but disallowed to match due to not suported hash or signature algorithm or placed in revoked list
+,,,,,,,0x15,ERR_LIST_ECDSA_WRONG_KEY_SIZE,LCP policy list. Unsupported signing key size for ECDSA signature
+,,,,,,,0x16,ERR_LIST_SM2_WRONG_KEY_SIZE,LCP policy list. Unsupported signing key size for SM2_256 signature
+,,,,,,,0x17,ERR_LIST_UNSUPPORTED_KEY_SIZE,LCP policy list. Unsupported signing key size
+,,,,,,,0x18,ERR_LIST_UNSUPPORTED_HASH_ALG,LCP Policy Hash Algorithm is not selected in effective LcpSignatureMask
+,,,,,,,0x19,ERR_POL_NO_HASH_ALG,LCP Policy LcpHashAlgorithmMask is 0
+,,,,,,,0x1a,ERR_POL_UNSUPPORTED_HASH_ALG,LCP Policy Hash Algorithm is not selected in effective LcpAlgorithmMask
+,,,,,,,0x1b,ERR_POL_NO_SIGNATURE_ALG,LCP Policy LcpSignatureAlgMask is 0
+,,,,,,,0x1c,ERR_POL_AUXHASH_INVALID_ALGMASK,LCP Policy AuxHashAlgMask has more than 1 algorithm selected or no algorithms selected
+,,,,,,,0x1d,ERR_POL_AUXHASH_UNSUPPORTED_ALG,Algorithm selected in LCP Policy's AuxHashAlgMask is not supported
+,,,,,,,0x1e,ERR_POL_AUXHASH_INCOMPAT_PCR_ALG,Algorithm selected in LCP Policy's AuxHashAlgMask is not supported by TPM bank
+,,,,,,,0x1f,ERR_PCONF_ENFORCE,PO PCONF element has Override set in EltControl and LCP Policy has PCONF_Enforce set
+,,,,,,,0x20,ERR_LIST_SIGNATURE_NOT_UNIQUE,
+,,,,0x8,ERR_PS_POL_INTEGRITY_FAIL,PS policy integrity check failure,,,
+,,,,,,,0x1,ERR_PS_POLDATA_WRONG_SIGNATURE,Header of LCP policy data file has wrong ID string
+,,,,,,,0x2,ERR_PS_POLDATA_WRONG_NUMLISTS,Header of LCP policy data file has one of the following errors: Reserved fields are not 0 or NumLists is either 0 or more than 8
+,,,,,,,0x3,ERR_PS_POLDATA_CANNOT_ACCESS_DATA,LCP policy data file is above 4GB
+,,,,,,,0x4,ERR_PS_POLDATA_DIGEST_MISMATCH,LCP policy data file hash mismatches value stored in TPM NV index
+,,,,,,,0x5,ERR_PS_POLDATA_SIZE,Computed size of LCP data file mismatches header value
+,,,,,,,0x6,ERR_PS_POL_WRONG_VERSION,Unsupported TPM NV LCP policy version
+,,,,,,,0x7,ERR_PS_POL_WRONG_HASH_ALG,TPM NV LCP policy. Unsupported hash algorithm
+,,,,,,,0x8,ERR_PS_POL_UNKNOWN_POLICY_TYPE,TPM NV LCP policy. Unknown policy type
+,,,,,,,0x9,ERR_PS_POL_NPW_NOT_ALLOW,Running of NPW module is disallowed by TPM NV LCP policy
+,,,,,,,0xa,ERR_PS_POL_AUX_DELETION_EN,TPM NV LCP policy. Policy Control. AUX deletion control bit is set
+,,,,,,,0xb,ERR_PS_LIST_RSA_WRONG_KEY_SIZE,LCP policy list. Unsupported signing key size for RSASSA signature
+,,,,,,,0xc,ERR_PS_LIST_WRONG_VERSION,LCP policy list. Unsupported version
+,,,,,,,0xd,ERR_PS_LIST_WRONG_SIZE,LCP policy list. Computed size mismatches header value
+,,,,,,,0xe,ERR_PS_LIST_WRONG_SIGNATURE_ALG,LCP policy list. Unsupported signature algorithm
+,,,,,,,0xf,ERR_PS_LIST_SIGNATURE_FAILURE,LCP policy list. Invalid signature
+,,,,,,,0x10,ERR_PS_LIST_REVOKED,LCP policy list. List is revoked
+,,,,,,,0x11,ERR_PS_ELT_WRONG_HASH_ALG,LCP policy element. Unsupported hash algorithm
+,,,,,,,0x12,ERR_PS_ELT_WRONG_SIZE,LCP policy element. Computed size mismatches header value
+,,,,,,,0x13,ERR_TPM_PS_PCRINFO_INTEGRITY_FAIL,PCONF element. One of the sizes used in TPM 1.2 style TPM_PCR_INFO_SHORT structure is wrong
+,,,,,,,0x14,ERR_PS_NO_POLICY_DATA,LCP element. Matching element was found but disallowed to match due to not suported hash or signature algorithm or placed in revoked list
+,,,,,,,0x15,ERR_PS_LIST_ECDSA_WRONG_KEY_SIZE,LCP policy list. Unsupported signing key size for ECDSA signature
+,,,,,,,0x16,ERR_PS_LIST_SM2_WRONG_KEY_SIZE,LCP policy list. Unsupported signing key size for SM2_256 signature
+,,,,,,,0x17,ERR_PS_LIST_UNSUPPORTED_KEY_SIZE,LCP policy list. Unsupported signing key size
+,,,,,,,0x18,ERR_PS_LIST_UNSUPPORTED_HASH_ALG,LCP Policy Hash Algorithm is not selected in effective LcpSignatureMask
+,,,,,,,0x19,ERR_PS_POL_NO_HASH_ALG,LCP Policy LcpHashAlgorithmMask is 0
+,,,,,,,0x1a,ERR_PS_POL_UNSUPPORTED_HASH_ALG,LCP Policy Hash Algorithm is not selected in effective LcpAlgorithmMask
+,,,,,,,0x1b,ERR_PS_POL_NO_SIGNATURE_ALG,LCP Policy LcpSignatureAlgMask is 0
+,,,,,,,0x1c,ERR_PS_POL_AUXHASH_INVALID_ALGMASK,LCP Policy AuxHashAlgMask has more than 1 algorithm selected or no algorithms selected
+,,,,,,,0x1d,ERR_PS_POL_AUXHASH_UNSUPPORTED_ALG,Algorithm selected in LCP Policy's AuxHashAlgMask is not supported
+,,,,,,,0x1e,ERR_PS_POL_AUXHASH_INCOMPAT_PCR_ALG,Algorithm selected in LCP Policy's AuxHashAlgMask is not supported by TPM bank
+,,,,,,,0x1f,ERR_PS_PCONF_ENFORCE,PO PCONF element has Override set in EltControl and LCP Policy has PCONF_Enforce set
+,,,,,,,0x20,ERR_PS_LIST_SIGNATURE_NOT_UNIQUE,
+,,,,0x9,ERR_NPW_REQ_POL,NPW ACM file is detected but not permitted due to no policy defined (PS and / or PO),,,
+,,,,0xa,ERR_TPM_NOT_PROVISIONED,TPM is missing NV index required for TXT,,,
+,,,,,,,0x0,ERR_PS_INDEX_NOT_DEFINED,PS (Default LCP) index was not defined. Check TPM provisioning
+,0x7,CLASS_ACM_EXIT,Errors on exiting ACM,,,,,,
+,,,,0x1,ERR_RLP_TIMEOUT,Timeout waking up RLPs,,,
+,,,,0x2,ERR_NO_RLP_UCODE_UPDATE,Microcode patch is detected not loaded in one of RLPs,,,
+,,,,0x3,ERR_RLP_SMRR_CONFIG,Mismatch of SMRR programming between ILP and one of RLPs,,,
+,,,,0x4,ERR_RLP_SMRR2_CONFIG,Mismatch of SMRR2 programming between ILP and one of RLPs,,,
+,0x8,CLASS_MISC_CONFIG,Miscellaneous configuration errors not described in other classes,,,,,,
+,,,,0x1,ERR_INTERRUPT,Internal error. Interrupt has occurred due to CPU exception,,,
+,,,,0x2,ERR_MISC_CONFIG_TIMEOUT,Detected time-out,,,
+,,,,,,,0x1,ERR_RESOURCE_TIMEOUT,Time-out waiting lock to set or threads to rendezvous
+,,,,0x3,ERR_MISC_CONFIG_THREAD,Thread error,,,
+,,,,,,,0x1,ERR_THREAD_RENDEZVOUS,Time-out waiting threads to rendezvous
+,,,,,,,0x2,ERR_THREAD_MISSING,Thread didn't join environment
+,,,,0x4,ERR_MISC_CONFIG_INTERNAL,Unspecified internal error,,,
+,,,,0x5,ERR_MISC_CONFIG_PREVIOUS_ERR_DETECTED,Detected error of previous launch,,,
+,,,,0x6,ERR_RANDOM,Failure to get random number,,,
+,,,,0x7,ERR_COPY_BOUNDS,Violation of bounds during copy operation.,,,
+,,,,,,,0x1,ERR_BOUNDS_PCR_EVENT,
+,,,,,,,0x2,ERR_BOUNDS_PCR_EVENT_SEQ,
+,,,,,,,0x3,ERR_BOUNDS_READ_PUBLIC,
+,,,,,,,0x4,ERR_BOUNDS_PCR_BANKS_1,
+,,,,,,,0x5,ERR_BOUNDS_PCR_BANKS_2,
+,,,,,,,0x6,ERR_BOUNDS_PCR_BANKS_3,
+,,,,0x8,ERR_MISC_CONFIG_INVALID_ALGORITHM,Being asked to use an unsupported algorithm,,,
+,,,,0x9,ERR_INTERNAL_ERROR,All kind of non-correctable errors,,,
+,,,,,,,0x1,ERR_TIMEOUT_1,
+,,,,,,,0x2,ERR_TIMEOUT_2,
+,,,,,,,0x3,ERR_TIMEOUT_3,
+,,,,,,,0x4,ERR_TIMEOUT_4,
+,,,,,,,0x5,ERR_TIMEOUT_5,
+,,,,,,,0x6,ERR_TIMEOUT_6,
+,,,,,,,0x7,ERR_TIMEOUT_7,
+,,,,,,,0x8,ERR_TIMEOUT_8,
+,,,,,,,0x9,ERR_TIMEOUT_9,
+,,,,,,,0xa,ERR_TIMEOUT_10,
+,,,,,,,0xb,ERR_TIMEOUT_11,
+,,,,,,,0xc,ERR_TIMEOUT_12,
+,,,,,,,0xd,ERR_TIMEOUT_13,
+,,,,,,,0xe,ERR_TIMEOUT_14,
+,,,,,,,0xf,ERR_TIMEOUT_15,
+,,,,,,,0x10,ERR_TIMEOUT_16,
+,,,,0xa,ERR_ROGUE_ACM,,,,
+,0x9,CLASS_HEAP_TABLE_CHECK,,,,,,,
+,,,,0x1,ERR_SIZE,,,,
+,,,,0x2,ERR_VERSION,Unsupported heap data table version,,,
+,,,,,,,0x1,ERR_VERSION_BIOS_DATA,
+,,,,,,,0x2,ERR_VERSION_OS_SINIT_DATA,
+,,,,0x3,ERR_PMRL_ALIGNMENT,Incorrect PMR low range alignment,,,
+,,,,0x4,ERR_PMRH_ALIGNMENT,Incorrect PMR high range alignment,,,
+,,,,0x5,ERR_MLE_LOCATION,One of the MLE placement errors: MLE base or page tables are above 4GB MLE size is above 4GB,,,
+,,,,0x6,ERR_REQ_CAPABILITIES,MLE requested and SINIT supported capabilities mismatch,,,
+,,,,,,,0x1,ERR_REQ_CAPABILITIES_WAKEUP,
+,,,,,,,0x2,ERR_REQ_CAPABILITIES_PCR_MAP,DMAR ACPI table
+,,,,0x7,ERR_HEAPMEM_SIZE_OVER,Not enough room in heap memory for data allocation,,,
+,,,,,,,0x1,ERR_HEAPMEM_SIZE_OVER_ACPI_1,SINIT to MLE data table. MDR data
+,,,,,,,0x2,ERR_HEAPMEM_SIZE_OVER_ACPI_2,Total heap data size
+,,,,,,,0x3,ERR_HEAPMEM_SIZE_OVER_ACPI_3,
+,,,,,,,0x4,ERR_HEAPMEM_SIZE_OVER_HEAP_1,
+,,,,,,,0x5,ERR_HEAPMEM_SIZE_OVER_HEAP_2,
+,,,,,,,0x6,ERR_HEAPMEM_SIZE_OVER_HEAP_3,
+,,,,,,,0x7,ERR_HEAPMEM_SIZE_OVER_ACPI_4,
+,,,,,,,0x8,ERR_HEAPMEM_SIZE_OVER_ACPI_5,
+,,,,0x8,ERR_BAD_EXT_ELT_TYPE,Unsupported heap extended element type,,,
+,,,,0x9,ERR_BAD_EXT_ELT_SIZE,Incorrect heap extended element size,,,
+,,,,0xa,ERR_NOT_TERMINATED,Unterminated list of heap extended elements,,,
+,,,,0xb,ERR_BAD_LOG_POINTER,Incorrect log pointer,,,
+,,,,,,,0x1,ERR_BAD_LOG_POINTER_PTR,Requested log types via heap extended log pointer element mismatch supported TPM PCR bank hash algorithms
+,,,,,,,0x2,ERR_BAD_LOG_POINTER_BASE,
+,,,,,,,0x3,ERR_BAD_LOG_POINTER_PTR2,
+,,,,,,,0x4,ERR_BAD_LOG_POINTER_PTR2_REQ,
+,,,,,,,0x5,ERR_BAD_LOG_POINTER_PTR2_MATCH,
+,,,,,,,0x6,ERR_BAD_LOG_POINTER_PTR2_ALG,
+,,,,,,,0x7,ERR_BAD_LOG_POINTER_DUP_DSCR,
+,,,,0xc,ERR_BAD_ACPI_POINTER,ACPI RSDP/RSDT pointer requested via OS to SINIT data table is above 4GB,,,
+,0x9,CLASS_FN_SCLEAN,,,,,,,
+,,,,0x1,ERR_MEMSCRUB,,,,
+,0xA,CLASS_FN_RESET_EST,,,,,,,
+,,,,0x1,ERR_EST_TXT_NOT_LOCKED_DISABLED,,,,
+,0xB,CLASS_LOCK_CONFIG,,,,,,,
+,,,,0x1,ERR_LOCK_CONFIG_STARTUP_FAILED,,,,
+,,,,0x2,ERR_LOCK_CONFIG_MEMORY_LOCKED,,,,
+,,,,0x3,ERR_LOCK_CONFIG_HASH_REGS_NOT_LOCKED,,,,
+,,,,0x4,ERR_LOCK_CONFIG_SYSTEM_SETUP,,,,
+,0xB,CLASS_ALIAS_CHECK,,,,,,,
+,0xC,CLASS_ACPI_CHECK,,,,,,,
+,,,,0x1,ERR_RSDP_CHKSM,RSDP checksum error,,,
+,,,,0x2,ERR_NO_RSDT,RSDT not found,,,
+,,,,0x3,ERR_INVALID_RSDT,Validation of RSDT table failed,,,
+,,,,0x4,ERR_NO_DMAR,DMAR table not found,,,
+,,,,0x5,ERR_INVALID_DMAR,Validation of DMAR table failed,,,
+,,,,0x6,ERR_NO_MADT,MADT table not found,,,
+,,,,0x7,ERR_INVALID_MADT,Validation of MADT table failed,,,
+,,,,0x8,ERR_INVALID_RSDP,Validation of RSDP table failed,,,
+,,,,0x9,ERR_INVALID_XSDT,Validation of XSDT table failed,,,
+,,,,0xa,ERR_NO_MCFG,,,,
+,0xC,CLASS_STARTUPACM,,,,,,,
+,,,,0x1,ERR_STARTUPACM_FIT_TABLE,,,,
+,,,,0x2,ERR_STARTUPACM_INTERNAL,,,,
+,,,,0x3,ERR_STARTUPACM_TPM_ERROR,,,,
+,,,,,,,0x1,TXT_STARTUPTPM_SUCCESS,
+,,,,,,,0x2,TXT_STARTUPTPM_NO_TPM,
+,,,,,,,0x3,TXT_STARTUPTPM_AUX1,
+,,,,,,,0x4,TXT_STARTUPTPM_AUX2,
+,,,,,,,0x5,TXT_STARTUPTPM_AUX3,
+,,,,,,,0x6,TXT_STARTUPTPM_AUX4,
+,,,,,,,0x7,TXT_STARTUPTPM_TOO_MANY_BANKS,
+,,,,0x4,ERR_STARTUPACM_TXT_ERROR,,,,
+,,,,,,,0x1,TXT_STARTUPTXT_EXECUTION_POLICY,
+,,,,,,,0x2,TXT_STARTUPTXT_SCRUBBING_POLICY,
+,,,,,,,0x3,TXT_STARTUPTXT_BACKUP_POLICY,
+,,,,,,,0x4,TXT_STARTUPTXT_PLATFORM_TYPE,
+,,,,,,,0x5,TXT_STARTUPTXT_HECI_DEVICE_DIS,
+,,,,,,,0x6,TXT_STARTUPTXT_PDRS_INVALID,
+,,,,,,,0x7,TXT_STARTUPTXT_SMX_NOT_SUPPORTED,
+,,,,,,,0x8,TXT_STARTUPTXT_PTT_NOT_SUPPORTED,
+,,,,,,,0x9,TXT_STARTUPTXT_COSIGN_NOT_SUPPORTED,
+,,,,0x5,ERR_STARTUPACM_INFO,,,,
+,,,,,,,0x1,TXT_STARTUPINFO_POWER_DOWN_EXECUTED,
+,,,,,,,0x2,TXT_STARTUPINFO_SCRUBBING_CODE_ERR,
+,0xC,CLASS_MRC_CONFIG,,,,,,,
+,,,,0x1,ERR_DDR_TYPE_MISMATCH,,,,
+,0xD,CLASS_DMAR_CHECK,,,,,,,
+,,,,0x1,ERR_DRHD_BAR_VTD0,One of DRHD structure fields has incorrect value: type or flags or length or address of configuration registers differs from value of programmed into VTD_GSTS base address register,,,
+,,,,0x2,ERR_DRHD_BAR_VTD1,,,,
+,,,,0x3,ERR_DRHD_BAR_VTD2,,,,
+,,,,0x4,ERR_INCLUDE_ALL_VTD0,Either GFX VT-d engine disabled while GFX device is enabled or DMI-PEG engine is disabled,,,
+,,,,0x5,ERR_INCLUDE_ALL_VTD1,,,,
+,,,,0x6,ERR_INCLUDE_ALL_VTD2,,,,
+,,,,0x7,ERR_RMRR,Incorrect placement of PMRR. Must be in GFX UMA for GFX VT-d engine and in DRAM for DMI-PEG engine,,,
+,,,,0x8,ERR_DMAR_INVALID_TYPE,Unknown structure type is detected in DMAR table,,,
+,,,,0x9,ERR_DMAR_LENGTH,Computed DMAR length mismatches value in header,,,
+,,,,0xa,ERR_DMAR_IR,Interrupt remapping is required but not supported,,,
+,,,,0xb,ERR_DMAR_IR_VTD0,,,,
+,,,,0xc,ERR_DMAR_IR_VTD1,,,,
+,,,,0xd,ERR_DMAR_IR_VTD2,,,,
+,,,,0xe,ERR_DMAR_ADDR_WIDTH,Memory bus address width differs from reported in DMAR header,,,
+,,,,0xf,ERR_DRHD_DEV_SCOPE_VTD0,Device scope error is detected,,,
+,,,,0x10,ERR_DRHD_DEV_SCOPE_VTD1,,,,
+,,,,0x11,ERR_DRHD_DEV_SCOPE_VTD2,,,,
+,0xD,CLASS_CLEAR_SECRETS,,,,,,,
+,,,,0x1,ERR_CLEAR_SECRETS_MEMORY_LOCKED,,,,
+,,,,0x2,ERR_CLEAR_SECRETS_BIOS_UNTRUSTED,,,,
+,0xD,CLASS_FN_RESET_AUX,,,,,,,
+,,,,0x1,ERR_AUX_TXT_NOT_LOCKED_DISABLED,,,,
+,0xE,CLASS_PMR_CONFIG,,,,,,,
+,,,,0x1,ERR_DMA_REMAP,DMA remapping is turned on,,,
+,,,,0x2,ERR_PMRL_CONFIG,PMR low configuration error - it is either enabled but not requested or request differs from actual programming,,,
+,,,,0x3,ERR_PMRH_CONFIG,PMR low configuration error - it is either enabled but not requested or request differs from actual programming,,,
+,0xE,CLASS_SCHECK,,,,,,,
+,0xE,CLASS_FN_SCHECK,,,,,,,
+,,,,0x1,ERR_CLEAR_SECRETS_NOT_CALLED,,,,
+,0xF,CLASS_BIOS_PROPERTIES,,,,,,,
+,,,,0x1,ERR_BIOS_PROPERTIES_NO_ENTRY_POINT,,,,
+,,,,0x2,ERR_BIOS_PROPERTIES_NO_BIOS_MODULES,,,,
+,,,,0x3,ERR_BIOS_PROPERTIES_NO_MANIFEST,,,,
+,,,,0x4,ERR_BIOS_PROPERTIES_FIT_BIOS_MODULE_RECORD,,,,
+,,,,0x5,ERR_BIOS_PROPERTIES_FIT_END,,,,
+,,,,0x6,ERR_BIOS_PROPERTIES_FIT_RESET,,,,
+,,,,0x7,ERR_BIOS_PROPERTIES_FIT_PTR,,,,
+,,,,0x8,ERR_BIOS_PROPERTIES_FIT_STARTUP_REGIONS,,,,
+,,,,0x9,ERR_BIOS_PROPERTIES_FIT_STARTUP_ACM_OVERLAP,,,,
+,,,,0xa,ERR_BIOS_PROPERTIES_FIT_BIOS_POLICY_OVERLAP,,,,
+,,,,0xb,ERR_BIOS_PROPERTIES_FIT_POLICY_RECORD,,,,
+,0xF,CLASS_IBBL,,,,,,,
+,,,,0x1,ERR_IBBL_BPM_VER_UNSUPPORTED,,,,
+,,,,0x2,ERR_IBBL_BPM_ACCESS_ERROR,,,,
+,,,,0x3,ERR_IBBL_NEM_SETUP_ERROR,,,,
+,,,,0x4,ERR_IBBL_LLC_TOO_SMALL,,,,
+,0x10,CLASS_BTG_STARTUP,,,,,,,
+,,,,0x0,BTG_SUCCESS,,,,
+,,,,0x1,BTG_INIT_ERROR,,,,
+,,,,,,,0x0,BTG_INIT_SUCCESS,
+,,,,,,,0x1,BTG_INIT_PBE_NOT_SET_ERROR,
+,,,,,,,0x2,BTG_INIT_INVALID_BOOT_TYPE_ERROR,
+,,,,,,,0x3,BTG_INIT_POLICY_ERROR,
+,,,,,,,0x4,BTG_INIT_INVALID_KM_ID_ERROR,
+,,,,,,,0x5,BTG_INIT_INVALID_BP_KEY_ERROR,
+,,,,,,,0x6,BTG_INIT_INVALID_BP_PROFILE_ERROR,
+,,,,,,,0x7,BTG_INIT_ACM_ADDRESS_RANGE_ERROR,
+,,,,,,,0x8,BTG_INIT_ACM_REVOKED_ERROR,
+,,,,,,,0x9,BTG_INIT_ME_OK_PROCEED_ERROR,
+,,,,,,,0xa,BTG_INIT_MCP_BAD_ERROR,
+,,,,,,,0xb,BTG_INIT_MCP_MISMATCH_ERROR,
+,,,,0x2,BTG_NEM_ERROR,,,,
+,,,,,,,0x0,BTG_NEM_SUCCESS,
+,,,,,,,0x1,BTG_NEM_MTRR_COUNT_ERROR,
+,,,,,,,0x2,BTG_NEM_INSUFFICIENT_NUMOF_MTRRS_ERROR,
+,,,,,,,0x3,BTG_NEM_IBB_SEGMENT_ERROR,
+,,,,,,,0x4,BTG_NEM_IBB_SEGMENT_OVERLAP_ERROR,
+,,,,,,,0x5,BTG_NEM_IBB_OUT_OF_MTRR_RANGE_ERROR,
+,,,,,,,0x6,BTG_NEM_IBB_ENTRY_POINT_OUT_OF_IBB_ERROR,
+,,,,,,,0x7,BTG_NEM_IBB_HASH_NOT_VALID_ERROR,
+,,,,,,,0x8,BTG_NEM_CANT_READ_LLC_SIZE_ERROR,
+,,,,,,,0x9,BTG_NEM_LLC_SIZE_TOO_SMALL_ERROR,
+,,,,,,,0xa,BTG_NEM_MANIFEST_FLASH_CRAM_COMPARE_ERROR,
+,,,,,,,0xb,BTG_NEM_FIT_FLASH_CRAM_COMPARE_ERROR,
+,,,,,,,0xc,BTG_NEM_VTD_RANGE_CHECK_ERROR,
+,,,,,,,0xd,BTG_NEM_VTD_DISABLED_IN_HARDWARE,
+,,,,,,,0xe,BTG_NEM_DMA_BPM_DEF,
+,,,,,,,0xf,BTG_NEM_DMA_BPM_OVRLAP,
+,,,,,,,0x10,BTG_NEM_VTD_ENABLE_FAILED,
+,,,,,,,0x11,BTG_NEM_ALIGNMENT_ERROR,
+,,,,,,,0x12,BTG_NEM_VTD_DISABLED_IN_BPM,
+,,,,,,,0x13,BTG_NEM_ACM_ALIGNMENT,
+,,,,,,,0x14,BTG_NEM_MTRR_RANGE_UNDER_4KB,
+,,,,,,,0x15,BTG_NEM_MTRR_RANGE_NOT_2PN,
+,,,,,,,0x16,BTG_NEM_MTRR_INVALID_BASE_ALIGNMENT,
+,,,,0x3,BTG_MANIFEST_ERROR,,,,
+,,,,,,,0x0,BTG_MANIFEST_SUCCESS,
+,,,,,,,0x1,BTG_KM_INVALID_STRUCT_ERROR,
+,,,,,,,0x2,BTG_KM_INVALID_KM_ID_ERROR,
+,,,,,,,0x3,BTG_KM_REVOKED_ERROR,
+,,,,,,,0x4,BTG_MANIFEST_INVALID_HEADER_STRUCT_ERROR,
+,,,,,,,0x5,BTG_MANIFEST_INVALID_IBB_STRUCT_ERROR,
+,,,,,,,0x6,BTG_MANIFEST_INVALID_PM_DATA_STRUCT_ERROR,
+,,,,,,,0x7,BTG_MANIFEST_INVALID_SIGNATURE_STRUCT_ERROR,
+,,,,,,,0x8,BTG_MANIFEST_REVOKED_ERROR,
+,,,,,,,0x9,BTG_MANIFEST_INVALID_SIZE_ERROR,
+,,,,,,,0xa,BTG_MANIFEST_OVER_BUFFSER_SIZE_ERROR,
+,,,,,,,0xb,BTG_FIT_INVALID_HEADER_ERROR,
+,,,,,,,0xc,BTG_FIT_KM_ENTRY_ERROR,
+,,,,,,,0xd,BTG_FIT_MANIFEST_ENTRY_ERROR,
+,,,,,,,0xe,BTG_FIT_KM_ENTRY_MISSING_ERROR,
+,,,,,,,0xf,BTG_FIT_MANIFEST_ENTRY_MISSING_ERROR,
+,,,,0x4,BTG_MEASURE_ERROR,,,,
+,,,,,,,0x0,BTG_MEASURE_SUCCESS,
+,,,,,,,0x1,BTG_CRYPTO_HASH_NOT_VALID_ERROR,
+,,,,,,,0x2,BTG_CRYPTO_VERIFY_SIG_FAIL_ERROR,
+,,,,0x5,BTG_POLICY_ERROR,,,,
+,,,,0x6,BTG_FAIL,,,,
+,0x11,CLASS_STM_CHECK,,,,,,,
+,,,,0x1,ERR_STM_RANGE_CHECK,Error in placement or alignment of STM related range,,,
+,,,,0x2,ERR_MSEG_BASE,MSEG base is not programmed,,,
+,,,,0x3,ERR_STM_SMBASE_NOT_FOUND,Base of SMRAM code is not found,,,
+,,,,0x4,ERR_STM_WRONG_IEDBASE,IED range incorrectly programmed,,,
+,,,,0x5,ERR_STM_CANNOT_ENABLE,Request to enable STM via OS to SINIT table and MLE capabilities don't match,,,
+,,,,0x6,ERR_STM_IS_REQUIRED,Fail if MLE requested STM support via OsSinitDataReqCaps but no STM elements were found in LCP data or MLE requested disabling STM support via OsSinitDataReqCaps while STM required bit is set in MLE PolEltControl,,,
+,,,,0x7,ERR_MSEG_SIZE,MSEG size is not programmed,,,
+,,,,0x8,ERR_MSR_IA32_VMX_MISC,Error out if MSEG_HEADER.MsegHeaderRevisionId is different from reported by MSR_IA32_VMX_MISC,,,
+,,,,0x9,ERR_STM_HEADER_FEATURES,STM header error,,,
+,,,,0xa,ERR_STM_CPU_CAP,CPU capabilities insufficient,,,
+,,,,0xb,ERR_STM_HEADER_BLANK_FIELD,CS selector in header is blank,,,
+,,,,0xc,ERR_STM_HEADER_OFFSET,STM header error,,,
+,,,,0xd,ERR_STM_HEADER_VALUE,One or more of the sizes in STM header is above 16MB,,,
+,,,,0xe,ERR_STM_REV_ID,Unsupported STM version,,,
+,0x11,CLASS_BPT_INTEGRITY,,,,,,,
+,,,,0x0,ERR_SUCCESS,,,,
+,,,,0x1,ERR_FPF_POLICY,,,,
+,,,,,,,0x1,ERR_FPF_MSR_READ,
+,,,,,,,0x2,ERR_FPF_KM_ID_VALUE,
+,,,,,,,0x3,ERR_FPF_KM_PUBKEY_DGST_VALUE,
+,,,,0x2,ERR_BPT_ACM_REVOKED,,,,
+,,,,0x3,ERR_FIT,,,,
+,,,,,,,0x1,ERR_FIT_INVALID_SIZE, Somethint something here
+,,,,,,,0x2,ERR_FIT_INVALID_HEADER,
+,,,,,,,0x3,ERR_FIT_KM_ENTRY_MISSING,
+,,,,,,,0x4,ERR_FIT_KM_ENTRY_INVALID,
+,,,,,,,0x5,ERR_FIT_BPM_ENTRY_MISSING,
+,,,,,,,0x6,ERR_FIT_BPM_ENTRY_INVALID,
+,,,,,,,0x7,ERR_FIT_SACM_ENTRY_MISSING,
+,,,,,,,0x8,ERR_FIT_SACM_ENTRY_INVALID,
+,,,,,,,0x9,ERR_FIT_TXT_POLICY_INVALID,
+,,,,0x4,ERR_KM,,,,
+,,,,,,,0x1,ERR_KM_INVALID_SIZE,
+,,,,,,,0x2,ERR_KM_STRUCTURE_INVALID,
+,,,,,,,0x3,ERR_KM_KEYSIGN_PTR_INVALID,
+,,,,,,,0x4,ERR_KM_SIGN_PTR_INVALID,
+,,,,,,,0x5,ERR_KM_SIGNATURE_STRUCTURE_INVALID,
+,,,,,,,0x6,ERR_KM_CRYPTO_VERIFY_SIG_FAIL,
+,,,,,,,0x7,ERR_KM_ID_VALUE,
+,,,,,,,0x8,ERR_KM_REVOKED,
+,,,,0x5,ERR_BPM,,,,
+,,,,,,,0x1,ERR_BPM_INVALID_SIZE,
+,,,,,,,0x2,ERR_BPM_STRUCTURE_INVALID,
+,,,,,,,0x3,ERR_BPM_SE_STRUCTURE_INVALID,
+,,,,,,,0x4,ERR_BPM_SE_POSTIBB_DGST_STRUCTURE_INVALID,
+,,,,,,,0x5,ERR_BPM_SE_PTR_INVALID,
+,,,,,,,0x6,ERR_BPM_SE_ENTRY_POINT_PTR_INVALID,
+,,,,,,,0x7,ERR_BPM_SE_ENTRY_POINT_VALUE_INVALID,
+,,,,,,,0x8,ERR_BPM_SE_IBB_DGST_PTR_INVALID,
+,,,,,,,0x9,ERR_BPM_SE_IBB_DGST_STRUCTURE_INVALID,
+,,,,,,,0xa,ERR_BPM_SE_SEG_CNT_PTR_INVALID,
+,,,,,,,0xb,ERR_BPM_SE_SEG_CNT_VALUE_INVALID,
+,,,,,,,0xc,ERR_BPM_TXTE_STRUCTURE_INVALID,
+,,,,,,,0xd,ERR_BPM_TXTE_SEG_CNT_PTR_INVALID,
+,,,,,,,0xe,ERR_BPM_TXTE_SEG_CNT_VALUE_INVALID,
+,,,,,,,0xf,ERR_BPM_PFRE_PTR_INVALID,
+,,,,,,,0x10,ERR_BPM_PFRE_STRUCTURE_INVALID,
+,,,,,,,0x11,ERR_BPM_PCDE_PTR_INVALID,
+,,,,,,,0x12,ERR_BPM_PCDE_STRUCTURE_INVALID,
+,,,,,,,0x13,ERR_BPM_PCDE_PWR_DN_PTR_INVALID,
+,,,,,,,0x14,ERR_BPM_PCDE_PWR_DN_STRUCTURE_INVALID,
+,,,,,,,0x15,ERR_BPM_PCDE_PWR_DN_EFF_PTR_INVALID,
+,,,,,,,0x16,ERR_BPM_PMDE_STRUCTURE_INVALID,
+,,,,,,,0x17,ERR_BPM_SIGE_PTR_INVALID,
+,,,,,,,0x18,ERR_BPM_SIGE_STRUCTURE_INVALID,
+,,,,,,,0x19,ERR_BPM_SIGE_KEYSIGN_PTR_INVALID,
+,,,,,,,0x1a,ERR_BPM_SIGE_SIGN_PTR_INVALID,
+,,,,,,,0x1b,ERR_BPM_SIGE_CRYPTO_VERIFY_SIG_FAIL,
+,,,,,,,0x1c,ERR_BPM_REVOKED,
+,,,,,,,0x1d,ERR_BPM_FIT_SIZE_MISMATCH,
+,,,,,,,0x1e,ERR_BPM_TXTE_PTR_INVALID,
+,,,,,,,0x1f,ERR_BPM_FIT_PTR_INVALID,
+,,,,0x6,ERR_IBB,,,,
+,,,,,,,0x1,ERR_BPM_SE_IBB_STRUCTURE_INVALID,
+,,,,,,,0x2,ERR_BPM_SE_IBB_ENTRY_POINT,
+,,,,,,,0x3,ERR_BPM_SE_IBB_DGST_VALUE_INVALID,
+,,,,,,,0x4,ERR_BPM_SE_IBB_SEG_OVERLAP,
+,,,,,,,0x5,ERR_BPM_SE_INVALID_SEGMENT_CACHE_TYPE,
+,,,,,,,0x6,ERR_BPM_SE_CANNOT_CLUSTER_CACHE_TYPES,
+,,,,,,,0x7,ERR_BPM_SE_CANNOT_CLUSTER_SEGMENT_TYPES,
+,,,,,,,0x8,ERR_BPM_SE_FIT_OBJECTS_OUTSIDE_TC,
+,,,,,,,0x9,ERR_BPM_SE_INVALID_SEGMENT_TYPE_BC,
+,,,,,,,0xa,ERR_BPM_SE_INVALID_SEGMENT_TYPE_TC,
+,,,,,,,0xb,ERR_BPM_SE_TOTAL_WB_WP_SEGMENT_COUNT,
+,,,,0x7,ERR_PRE_BOOT_OBJ,Computed heap data table size mismatches value in header,,,
+,0x12,CLASS_PFR,Startup ACM PFR specific errors,,,,,,
+,,,,0x1,ERR_PFR_UNSUPPORTED,,,,
+,,,,0x2,ERR_CPLD_INTERFACE,,,,
+,,,,,,,0x1,ERR_CPLD_ADDR_NOT_INITIALIZED,
+,,,,,,,0x2,ERR_SMBUS_REG_NOT_INITIALIZED,
+,,,,,,,0x3,ERR_SMBUS_READ,
+,,,,,,,0x4,ERR_SMBUS_WRITE,
+,0x13,CLASS_PCR_INTEGRITY_CHECK,,,,,,,
+,,,,0x1,ERR_PCR17_VALUE,Value in PCR17 does not match expected result,,,
+,,,,0x2,ERR_PCR18_VALUE,Value in PCR18 does not match expected result,,,
+,,,,0x3,ERR_PCRFMT_NOT_SUPPORTED,PCR mapping (legacy or D/A) is not supported for TPM family and / or mismatches request,,,
+,,,,0x4,ERR_PCR_NOT_SUPPORTED,,,,
+,,,,0x5,ERR_PCR_BIOS_DIGEST,,,,
+,0x14,CLASS_EVENT_LOG,,,,,,,
+,,,,0x1,ERR_LOG_HEADER_GUID,Error log GUID is wrong,,,
+,,,,0x2,ERR_LOG_HEADER_VERSION,Unsupported event log version,,,
+,,,,0x3,ERR_LOG_HEADER_FIELDS,Inconsistent offsets in log header,,,
+,,,,0x4,ERR_LOG_SIZE,Log size is less than minimum requested or no room to place event entry,,,
+,,,,0x5,ERR_LOG_RECORD_VERSION,Unsupported event log record version,,,
+,0x15,CLASS_HEAP_TABLE_BUILD,,,,,,,
+,0x16,CLASS_SINIT64_MODE,,,,,,,
+,,,,0x1,ERR_BUSY_TIME_OUT_1,,,,
+,,,,0x2,ERR_BUSY_TIME_OUT_2,,,,
+,,,,0x3,ERR_BUSY_TIME_OUT_3,,,,
+,,,,0x4,ERR_READ_BOOT_POL,,,,
+,,,,0x5,ERR_READ_BTG_BP_KEY0,,,,
+,,,,0x6,ERR_READ_BTG_BP_KEY1,,,,
+,,,,0x7,ERR_READ_BTG_BP_KEY2,,,,
+,,,,0x8,ERR_READ_BTG_BP_KEY3,,,,
+,0x17,CLASS_SAI_POLICY_CHECK,,,,,,,
+,,,,0x1,ERR_SAI_POLICY_LB_W,,,,
+,,,,0x2,ERR_SAI_POLICY_LB_MCHECK_W,,,,
+,,,,0x3,ERR_SAI_POLICY_DFX,,,,
+,,,,0x4,ERR_SAI_POLICY_OS_W,,,,
+,,,,0x5,ERR_SAI_POLICY_BTSMM_W,,,,
+,,,,0x6,ERR_SAI_POLICY_BOOT_W,,,,
+,,,,0x7,ERR_SAI_POLICY_BIOS_W,,,,
+,,,,0x8,ERR_SAI_POLICY_MCHECK_W,,,,
+,,,,0x9,ERR_SAI_POLICY_LB_MCHECK_WCP,,,,
+,,,,0xa,ERR_SAI_POLICY_OS_W_CP,,,,
+,,,,0xb,ERR_SAI_POLICY_DFX_CP,,,,
+,,,,0xc,ERR_SAI_POLICY_LB_MCHECK_W_WAC,,,,
+,,,,0xd,ERR_SAI_POLICY_OS_W_WAC,,,,
+,,,,0xe,ERR_SAI_POLICY_BTSMM_W_WAC,,,,
+,,,,0xf,ERR_SAI_POLICY_IMR3_SAI,,,,
+,,,,0x10,ERR_SAI_POLICY_IMR3_SAI_WAC,,,,
+,0x35,CLASS_EXT_CHIPSET_CONFIG,Additional errors regarding chipset configuration,,,,,,
+,,,,0x1,ERR_PRMRR_CONFIG,,,,
+,,,,,,,0x1,ERR_PRMRR_LOCKED,
+,,,,,,,0x2,ERR_PRMRR_NOT_LOCKED,
+,,,,,,,0x3,ERR_PRMRR_CONFIG_ALIGN,
+,,,,0x2,ERR_TXT_NOT_DISABLED_LOCKED,,,,
+,,,,0x3,ERR_PMEM_CONFIG,,,,
+,,,,0x4,ERR_ACPI_PWRM_CONFIG,,,,
+,,,,0x5,ERR_ACPI_COIN_BATT_STS,,,,
+,,,,0x6,ERR_ISPMMADRLO_CONFIG,,,,
+,,,,0x7,ERR_MTBLBAR_CONFIG,,,,
+,,,,0x8,ERR_SWLBAR_CONFIG,,,,
+,,,,0x9,ERR_RTITLBAR_CONFIG,,,,
+,,,,0xa,ERR_NPFWLBAR_CONFIG,,,,
+,,,,0xb,ERR_MSR_BIOS_DONE,,,,
+,,,,0xc,ERR_OVERCLOCKING_UNLOCKED,,,,
+,,,,0xd,ERR_IMR_CONFIG,,,,
+,,,,,,,0x1,ERR_IMR_CONFIG_SIZE,
+,,,,,,,0x2,ERR_IMR_CONFIG_OVERLAP,
+,,,,,,,0x3,ERR_IA_EXC_NOT_LOCKED,
+,,,,,,,0x4,ERR_IA_EXC_DISABLED,
+,,,,,,,0x5,ERR_GT_EXC_NOT_LOCKED,
+,,,,,,,0x6,ERR_GT_EXC_DISABLED,
+,,,,,,,0x7,ERR_IMR_PCIALL_DISABLED,
+,,,,0xe,ERR_PAVPC_CONFIG,,,,
