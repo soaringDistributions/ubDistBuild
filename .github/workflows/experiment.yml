@@ -337,7 +337,7 @@ jobs:
           #echo '/root/ubiquitous_bash.sh _wait_rootLock_OTHER'
           #( ./ubiquitous_bash.sh _chroot crontab -l ; echo '@reboot /bin/true uk4uPhB6 ; sleep 35 ; /_rootGrab.sh _wait_rootLock ; /root/_get_nvidia.sh _wait_rootLock ; mkdir -p /media/tmp ; mount -o compress=zstd:2 /dev/sdb /media/tmp ; true > /media/tmp/_run-crontab ; true > /var/log/_run-crontab.log ; poweroff' ) | ./ubiquitous_bash.sh _chroot crontab '-'
           #( ./ubiquitous_bash.sh _chroot crontab -l ; echo '@reboot /bin/true uk4uPhB6 ; /usr/bin/mkdir -p /media/tmp ; /usr/bin/mount -o compress=zstd:2 /dev/sda /media/tmp ; cp -a /home/user/ubDistBuild /media/tmp/ ; /bin/true > /media/tmp/_run-crontab.log ; /bin/true > /var/log/_run-crontab.log ; /usr/sbin/poweroff ; /sbin/poweroff ; poweroff' ) | ./ubiquitous_bash.sh _chroot crontab '-'
-          ( ./ubiquitous_bash.sh _chroot crontab -l ; echo '@reboot /bin/true uk4uPhB6 ; /usr/bin/mkdir -p /media/tmp ; /usr/bin/mount -o compress=zstd:2 /dev/sda /media/tmp ; cp -a /home/user/ubDistBuild /media/tmp/ ; /bin/sudo -n -u user /media/tmp/ubDistBuild/ubiquitous_bash.sh _revert-fromLive > /media/tmp/_revert-fromLive.log 2>&1 ; /bin/true > /media/tmp/_run-crontab.log ; /bin/true > /var/log/_run-crontab.log ; /usr/sbin/poweroff ; /sbin/poweroff ; poweroff' ) | ./ubiquitous_bash.sh _chroot crontab '-'
+          ( ./ubiquitous_bash.sh _chroot crontab -l ; echo '@reboot /bin/true uk4uPhB6 ; /usr/bin/mkdir -p /media/tmp ; /usr/bin/mount -o compress=zstd:2 /dev/sda /media/tmp ; cp -a /home/user/ubDistBuild /media/tmp/ ; /bin/bash -c "/bin/sudo -n -u user /media/tmp/ubDistBuild/ubiquitous_bash.sh _revert-fromLive > /media/tmp/_revert-fromLive.log 2>&1 ; /bin/true > /media/tmp/_run-crontab.log ; /bin/true > /var/log/_run-crontab.log ; sudo -n /usr/sbin/poweroff ; sudo -n /sbin/poweroff ; sudo -n poweroff"' ) | ./ubiquitous_bash.sh _chroot crontab '-'
           
           ./ubiquitous_bash.sh _chroot crontab -l
           ./ubiquitous_bash.sh _closeChRoot
@@ -454,7 +454,7 @@ jobs:
           echo $USER
           groups
           echo
-      - name: qemu
+      - name: qemu-fromLive
         shell: bash
         continue-on-error: true
         timeout-minutes: 355
@@ -525,7 +525,8 @@ jobs:
             sudo -n cat ./_local/cache_fs/_revert-fromLive.log || true
             echo
 
-            sudo -n umount ./_local/cache_fs
+            sudo -n umount ./_local/cache.img
+            sudo -n umount ./_local/cache_fs || true
 
 
 
@@ -533,7 +534,7 @@ jobs:
             then
               #xwd -root -silent | convert xwd:- png:./_local/analysis/screenshots/qemu-01-"$currentIterationWait".png
               xwd -root -silent | convert xwd:- -quality 35 jpg:./_local/analysis/screenshots/qemu-01-"$currentIterationWait".jpg
-              jp2a --background=dark --colors --width=280 ./_local/analysis/screenshots/qemu-01-"$currentIterationWait".jpg
+              #jp2a --background=dark --colors --width=280 ./_local/analysis/screenshots/qemu-01-"$currentIterationWait".jpg
             fi
 
             let currentIterationWait=currentIterationWait+1
@@ -559,7 +560,7 @@ jobs:
           ./ubiquitous_bash.sh _package_rm || true
           rm -f ./_local/vm.img || true
 
-      - name: _export
+      - name: _export-fromLive
         shell: bash
         run: |
           lsmod | grep loop || true
@@ -578,7 +579,8 @@ jobs:
       - name: umount
         shell: bash
         run: |
-          sudo -n umount ./_local/cache_fs
+          sudo -n umount ./_local/cache.img
+          sudo -n umount ./_local/cache_fs || true
 
 
 
@@ -701,14 +703,15 @@ jobs:
             sudo -n cat ./_local/cache_fs/_revert-fromRevert.log || true
             echo
 
-            sudo -n umount ./_local/cache_fs
+            sudo -n umount ./_local/cache.img
+            sudo -n umount ./_local/cache_fs || true
 
 
 
             if ( [[ "$currentIterationWait" -le 55 ]] && [[ $(bc <<< "$currentIterationWait % 5") == 0 ]] ) || [[ $(bc <<< "$currentIterationWait % 30") == 0 ]]
             then
               xwd -root -silent | convert xwd:- -quality 35 jpg:./_local/analysis/screenshots/qemu-20-fromRevert-"$currentIterationWait".jpg
-              jp2a --background=dark --colors --width=280 ./_local/analysis/screenshots/qemu-20-fromRevert-"$currentIterationWait".jpg
+              #jp2a --background=dark --colors --width=280 ./_local/analysis/screenshots/qemu-20-fromRevert-"$currentIterationWait".jpg
             fi
 
             let currentIterationWait=currentIterationWait+1
@@ -733,7 +736,7 @@ jobs:
         run: |
           ./ubiquitous_bash.sh _package_rm || true
           rm -f ./_local/vm.img || true
-      - name: _export
+      - name: _export-fromRevert
         shell: bash
         run: |
           lsmod | grep loop || true
