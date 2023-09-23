@@ -740,12 +740,6 @@ jobs:
             ./_local/analysis/screenshots/*
 
 
-      - name: ______________________________ _ls-fromRevert.log
-        shell: bash
-        run: |
-          cat ./_local/cache_fs/_ls-fromRevert.log || true
-
-
 
       # ### ##### -->   mount/umount -t btrfs ./_local/cache.img ./_local/cache_fs
       - name: _rm
@@ -769,6 +763,12 @@ jobs:
             ./_local/cache_fs/*.log
 
 
+
+
+      - name: ______________________________ _ls-fromRevert.log
+        shell: bash
+        run: |
+          cat ./_local/cache_fs/_ls-fromRevert.log || true
 
 
 
