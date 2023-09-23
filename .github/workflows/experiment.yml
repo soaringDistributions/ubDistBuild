@@ -458,7 +458,7 @@ jobs:
         continue-on-error: true
         timeout-minutes: 355
         run: |
-          sudo -n losetup /dev/loop7 ./_local/cache.img || true
+          #sudo -n losetup /dev/loop7 ./_local/cache.img || true
           export skimfast=${{ inputs.skimfast }}
           echo skimfast $skimfast
           export qemuNoKVM=${{ inputs.qemuNoKVM }}
@@ -516,7 +516,7 @@ jobs:
 
             mkdir -p ./_local/cache_fs
             #sudo -n mount -t btrfs -o ro ./_local/cache.img ./_local/cache_fs
-            sudo -n mount -t btrfs -o ro /dev/loop7 ./_local/cache_fs
+            #sudo -n mount -t btrfs -o ro /dev/loop7 ./_local/cache_fs
 
             echo 'ls ./_local/cache_fs'
             sudo -n ls ./_local/cache_fs
@@ -544,7 +544,7 @@ jobs:
           echo 'currentIterationWait='"$currentIterationWait"
           [[ "$currentIterationWait" -ge "$currentIterationMax" ]] && echo 'bad: fail: run: poweroff' && currentExitStatus=1
           
-          sudo -n losetup -d /dev/loop7
+          #sudo -n losetup -d /dev/loop7
 
           exit "$currentExitStatus"
           
