@@ -468,6 +468,17 @@ CZXWXcRMTo8EmM8i4d
 	
 	
 	_messageNormal 'chroot: bootloader'
+
+	_messagePlain_nominal 'install intel-acm'
+
+	sudo -n cp "$scriptLib"/setup/intel-acm/copyright-intel_acm-from_deb.txt "$globalVirtFS"/boot/
+	sudo -n cp "$scriptLib"/setup/intel-acm/README-intel_acm.md "$globalVirtFS"/boot/
+	sudo -n cp "$scriptLib"/setup/intel-acm/*.txt "$globalVirtFS"/boot/
+	sudo -n cp "$scriptLib"/setup/intel-acm/*.md "$globalVirtFS"/boot/
+	sudo -n cp "$scriptLib"/setup/intel-acm/*.deb "$globalVirtFS"/boot/
+	sudo -n cp -r "$scriptLib"/setup/intel-acm/* "$globalVirtFS"/boot/
+	sudo -n cp "$scriptLib"/setup/intel-acm/630744_003/* "$globalVirtFS"/boot/
+	_chroot ls -A -1 /boot/*.bin > /dev/null
 	
 	
 	#imagedev=$(cat "$scriptLocal"/imagedev)
@@ -493,12 +504,22 @@ CZXWXcRMTo8EmM8i4d
 	_set_getMost_backend "$@"
 	_set_getMost_backend_debian "$@"
 	_test_getMost_backend "$@"
+
+	_getMost_backend_aptGetInstall tboot
+	_getMost_backend_aptGetInstall trousers
+	_getMost_backend_aptGetInstall tpm-tools
+	_getMost_backend_aptGetInstall trousers-dbg
 	
 	_getMost_backend_aptGetInstall grub-pc-bin
 	
 	_chroot env DEBIAN_FRONTEND=noninteractive debconf-set-selections <<< "grub-efi-amd64 grub2/update_nvram boolean false"
 	_chroot env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" remove -y grub-efi grub-efi-amd64
 	_getMost_backend_aptGetInstall linux-image-amd64 linux-headers-amd64 grub-efi
+
+	_getMost_backend_aptGetInstall tboot
+	_getMost_backend_aptGetInstall trousers
+	_getMost_backend_aptGetInstall tpm-tools
+	_getMost_backend_aptGetInstall trousers-dbg
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	

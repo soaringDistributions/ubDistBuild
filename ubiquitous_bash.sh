@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2891856843'
+export ub_setScriptChecksum_contents='3154419667'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -18036,6 +18036,26 @@ CZXWXcRMTo8EmM8i4d
 }
 
 
+# https://master.dl.sourceforge.net/project/tboot/intel-txt-software-development-guide.pdf?viasf=1
+# 'Measured Launched Environment Developer-s Guide'
+# ...
+# https://fedoraproject.org/wiki/Tboot
+# 'last edited on 22 June 2012'
+#  As of 2023-09-23 .
+# 'module /2nd_gen_i5_i7_SINIT_51.BIN'
+# 'module /list.data'
+#  MAJOR - 'You may download all of the ACM modules into /boot and list them all as modules in your grub.conf. tboot will pick the right module for your platform.'
+# ...
+# https://sourceforge.net/p/tboot/mailman/tboot-devel/?page=1
+#  'when multiple SINITs is loaded, there is a chance that one (or more) of them will be overwritten by some TBOOT data structures that have hardcoded addresses'
+#   'Fri, 11 Mar 2022'
+#  'Being able to use e.g. the same Live CD on all pieces of hardware would be a huge win.'
+# ...
+# https://sourceforge.net/projects/tboot/files/
+#  'The location of SINIT Authenticated Code Module (ACM) files has been moved from this site to the following location: http://software.intel.com/en-us/articles/intel-trusted-execution-technology/'
+#  'The content, license, etc. of the ACMs has not changed.'
+#  'New ACMs and updates to existing ACMs will only be posted to the new site.'
+# ...
 # https://manpages.debian.org/testing/live-boot-doc/live-boot.7.en.html
 # https://github.com/bugra9/persistent
 # https://manpages.debian.org/testing/live-boot-doc/persistence.conf.5.en.html
@@ -18068,14 +18088,30 @@ menuentry "Live - ( persistence )" {
     initrd /initrd
 }
 
-menuentry "Live - ( hint: ignored: resume disabled ) ( mem: all )" {
+menuentry "Live - ( hint: ignored: resume disabled ) ( mem: all ) - tboot" {
 	#linux /vmlinuz boot=live config debug=1 noeject nopersistence selinux=0
     #initrd /initrd
 
     insmod multiboot2
 	multiboot2 /tboot.gz logging=serial,memory,vga
-	module2 linux /vmlinuz boot=live config debug=1 noeject nopersistence selinux=0
+	module2 /vmlinuz boot=live config debug=1 noeject nopersistence selinux=0
 	module2 /initrd
+	#module2 /SNB_IVB_SINIT_20190708_PW.bin
+	module2 /BDW_SINIT_20190708_1.3.2_PW.bin
+	#module2 /SKL_KBL_AML_SINIT_20211019_PRODUCTION_REL_NT_O1_1.10.0.bin
+	#module2 /CFL_SINIT_20221220_PRODUCTION_REL_NT_O1_1.10.1_signed.bin
+	#module2 /CML_S_SINIT_1_13_33_REL_NT_O1.PW_signed.bin
+	#module2 /CMLSTGP_SINIT_v1_14_46_20220819_REL_NT_O1.PW_signed.bin
+	#module2 /RKLS_SINIT_v1_14_46_20220819_REL_NT_O1.PW_signed.bin
+	#module2 /TGL_SINIT_v1_14_46_20220819_REL_NT_O1.PW_signed.bin
+	module2 /ADL_SINIT_v1_18_16_20230427_REL_NT_O1.PW_signed.bin
+
+	#module /list.data
+}
+
+menuentry "Live - ( hint: ignored: resume disabled ) ( mem: all )" {
+	linux /vmlinuz boot=live config debug=1 noeject nopersistence selinux=0
+    initrd /initrd
 }
 
 CZXWXcRMTo8EmM8i4d
@@ -18180,6 +18216,7 @@ _live_sequence_in() {
 
 
 
+	# WARNING: Now also provides essential information about intel-acm .
 	# Solely to provide more information to convert 'vm-live.iso' back to 'vm.img' offline from only a Live BD-ROM disc .
 	mkdir -p "$safeTmp"/root002
 	#sudo -n cp -a "$globalVirtFS"/boot "$safeTmp"/root002/boot-copy
@@ -18372,6 +18409,7 @@ _live_sequence_in() {
 	cp "${currentFilesList[0]}" "$scriptLocal"/livefs/image/initrd
 	
 	cp "$globalVirtFS"/boot/tboot* "$scriptLocal"/livefs/image/
+	cp "$globalVirtFS"/boot/*.bin "$scriptLocal"/livefs/image/
 	
 	_live_grub_here > "$scriptLocal"/livefs/partial/grub.cfg
 	touch "$scriptLocal"/livefs/image/ROOT_TEXT
@@ -42713,6 +42751,17 @@ CZXWXcRMTo8EmM8i4d
 	
 	
 	_messageNormal 'chroot: bootloader'
+
+	_messagePlain_nominal 'install intel-acm'
+
+	sudo -n cp "$scriptLib"/setup/intel-acm/copyright-intel_acm-from_deb.txt "$globalVirtFS"/boot/
+	sudo -n cp "$scriptLib"/setup/intel-acm/README-intel_acm.md "$globalVirtFS"/boot/
+	sudo -n cp "$scriptLib"/setup/intel-acm/*.txt "$globalVirtFS"/boot/
+	sudo -n cp "$scriptLib"/setup/intel-acm/*.md "$globalVirtFS"/boot/
+	sudo -n cp "$scriptLib"/setup/intel-acm/*.deb "$globalVirtFS"/boot/
+	sudo -n cp -r "$scriptLib"/setup/intel-acm/* "$globalVirtFS"/boot/
+	sudo -n cp "$scriptLib"/setup/intel-acm/630744_003/* "$globalVirtFS"/boot/
+	_chroot ls -A -1 /boot/*.bin > /dev/null
 	
 	
 	#imagedev=$(cat "$scriptLocal"/imagedev)
@@ -42738,12 +42787,22 @@ CZXWXcRMTo8EmM8i4d
 	_set_getMost_backend "$@"
 	_set_getMost_backend_debian "$@"
 	_test_getMost_backend "$@"
+
+	_getMost_backend_aptGetInstall tboot
+	_getMost_backend_aptGetInstall trousers
+	_getMost_backend_aptGetInstall tpm-tools
+	_getMost_backend_aptGetInstall trousers-dbg
 	
 	_getMost_backend_aptGetInstall grub-pc-bin
 	
 	_chroot env DEBIAN_FRONTEND=noninteractive debconf-set-selections <<< "grub-efi-amd64 grub2/update_nvram boolean false"
 	_chroot env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" remove -y grub-efi grub-efi-amd64
 	_getMost_backend_aptGetInstall linux-image-amd64 linux-headers-amd64 grub-efi
+
+	_getMost_backend_aptGetInstall tboot
+	_getMost_backend_aptGetInstall trousers
+	_getMost_backend_aptGetInstall tpm-tools
+	_getMost_backend_aptGetInstall trousers-dbg
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
@@ -46175,7 +46234,9 @@ _hash_rm() {
 }
 
 # WARNING: CAUTION: Do NOT change correspondence between line number and hash ! Intended for automatic verification of distributed and end point integrity traceable back to Git repository public record !
-_hash_file() {
+_hash_file_sequence() {
+    _start
+    
     _messageNormal '_hash_file: '"$2"
     
     local currentListName="$1"
@@ -46191,29 +46252,39 @@ _hash_file() {
     then
         echo 'dd if=./'"$currentFileName"' bs=2048 count=$(bc <<< '"'"$(wc -c "$currentFilePath" | cut -f1 -d\ | tr -dc '0-9')' / 2048'"'"' ) status=progress | openssl dgst -whirlpool -binary | xxd -p -c 256' | tee -a "$scriptLocal"/_hash-"$currentListName".txt
     else
-        echo "openssl dgst -whirlpool -binary | xxd -p -c 256" | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+        echo "openssl dgst -whirlpool -binary | xxd -p -c 256" | tee -a "$safeTmp"/_hash-"$currentListName"-whirlpool.txt &
     fi
     if [[ -e "/etc/ssl/openssl_legacy.cnf" ]]
     then
-        cat "$currentFilePath" | "$@" | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+        cat "$currentFilePath" | "$@" | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 | tee -a "$safeTmp"/_hash-"$currentListName"-whirlpool.txt &
     else
-        cat "$currentFilePath" | "$@" | openssl dgst -whirlpool -binary | xxd -p -c 256 | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+        cat "$currentFilePath" | "$@" | openssl dgst -whirlpool -binary | xxd -p -c 256 | tee -a "$safeTmp"/_hash-"$currentListName"-whirlpool.txt &
     fi
 
     if [[ "$currentFileName" == *."iso" ]] || [[ "$currentFileName" == *."ISO" ]] || [[ "$currentFilePath" == *."iso" ]] || [[ "$currentFilePath" == *."ISO" ]]
     then
         echo 'dd if=./'"$currentFileName"' bs=2048 count=$(bc <<< '"'"$(wc -c "$currentFilePath" | cut -f1 -d\ | tr -dc '0-9')' / 2048'"'"' ) status=progress | openssl dgst -sha3-512 -binary | xxd -p -c 256' | tee -a "$scriptLocal"/_hash-"$currentListName".txt
     else
-        echo "openssl dgst -sha3-512 -binary | xxd -p -c 256" | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+        echo "openssl dgst -sha3-512 -binary | xxd -p -c 256" | tee -a "$safeTmp"/_hash-"$currentListName"-sha3.txt &
     fi
-    if [[ "$skimfast" == "true" ]]
-    then
-        echo
-    else
-        cat "$currentFilePath" | "$@" | openssl dgst -sha3-512 -binary | xxd -p -c 256 | tee -a "$scriptLocal"/_hash-"$currentListName".txt
-    fi
+    #if [[ "$skimfast" == "true" ]]
+    #then
+        #echo | tee -a "$safeTmp"/_hash-"$currentListName"-sha3.txt &
+    #else
+        cat "$currentFilePath" | "$@" | openssl dgst -sha3-512 -binary | xxd -p -c 256 | tee -a "$safeTmp"/_hash-"$currentListName"-sha3.txt &
+    #fi
+
+    wait
+    cat "$safeTmp"/_hash-"$currentListName"-whirlpool.txt | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+    cat "$safeTmp"/_hash-"$currentListName"-sha3.txt | tee -a "$scriptLocal"/_hash-"$currentListName".txt
     
     echo | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+
+    _stop
+}
+
+_hash_file() {
+    "$scriptAbsoluteLocation" _hash_file_sequence "$@"
 }
 
 
