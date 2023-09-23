@@ -5,7 +5,9 @@ _hash_rm() {
 }
 
 # WARNING: CAUTION: Do NOT change correspondence between line number and hash ! Intended for automatic verification of distributed and end point integrity traceable back to Git repository public record !
-_hash_file() {
+_hash_file_sequence() {
+    _start
+    
     _messageNormal '_hash_file: '"$2"
     
     local currentListName="$1"
@@ -21,29 +23,39 @@ _hash_file() {
     then
         echo 'dd if=./'"$currentFileName"' bs=2048 count=$(bc <<< '"'"$(wc -c "$currentFilePath" | cut -f1 -d\ | tr -dc '0-9')' / 2048'"'"' ) status=progress | openssl dgst -whirlpool -binary | xxd -p -c 256' | tee -a "$scriptLocal"/_hash-"$currentListName".txt
     else
-        echo "openssl dgst -whirlpool -binary | xxd -p -c 256" | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+        echo "openssl dgst -whirlpool -binary | xxd -p -c 256" | tee -a "$safeTmp"/_hash-"$currentListName"-whirlpool.txt &
     fi
     if [[ -e "/etc/ssl/openssl_legacy.cnf" ]]
     then
-        cat "$currentFilePath" | "$@" | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+        cat "$currentFilePath" | "$@" | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 | tee -a "$safeTmp"/_hash-"$currentListName"-whirlpool.txt &
     else
-        cat "$currentFilePath" | "$@" | openssl dgst -whirlpool -binary | xxd -p -c 256 | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+        cat "$currentFilePath" | "$@" | openssl dgst -whirlpool -binary | xxd -p -c 256 | tee -a "$safeTmp"/_hash-"$currentListName"-whirlpool.txt &
     fi
 
     if [[ "$currentFileName" == *."iso" ]] || [[ "$currentFileName" == *."ISO" ]] || [[ "$currentFilePath" == *."iso" ]] || [[ "$currentFilePath" == *."ISO" ]]
     then
         echo 'dd if=./'"$currentFileName"' bs=2048 count=$(bc <<< '"'"$(wc -c "$currentFilePath" | cut -f1 -d\ | tr -dc '0-9')' / 2048'"'"' ) status=progress | openssl dgst -sha3-512 -binary | xxd -p -c 256' | tee -a "$scriptLocal"/_hash-"$currentListName".txt
     else
-        echo "openssl dgst -sha3-512 -binary | xxd -p -c 256" | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+        echo "openssl dgst -sha3-512 -binary | xxd -p -c 256" | tee -a "$safeTmp"/_hash-"$currentListName"-sha3.txt &
     fi
-    if [[ "$skimfast" == "true" ]]
-    then
-        echo
-    else
-        cat "$currentFilePath" | "$@" | openssl dgst -sha3-512 -binary | xxd -p -c 256 | tee -a "$scriptLocal"/_hash-"$currentListName".txt
-    fi
+    #if [[ "$skimfast" == "true" ]]
+    #then
+        #echo | tee -a "$safeTmp"/_hash-"$currentListName"-sha3.txt &
+    #else
+        cat "$currentFilePath" | "$@" | openssl dgst -sha3-512 -binary | xxd -p -c 256 | tee -a "$safeTmp"/_hash-"$currentListName"-sha3.txt &
+    #fi
+
+    wait
+    cat "$safeTmp"/_hash-"$currentListName"-whirlpool.txt | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+    cat "$safeTmp"/_hash-"$currentListName"-sha3.txt | tee -a "$scriptLocal"/_hash-"$currentListName".txt
     
     echo | tee -a "$scriptLocal"/_hash-"$currentListName".txt
+
+    _stop
+}
+
+_hash_file() {
+    "$scriptAbsoluteLocation" _hash_file_sequence "$@"
 }
 
 
