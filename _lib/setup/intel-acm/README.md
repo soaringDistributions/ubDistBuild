@@ -4,6 +4,10 @@ Copyright license is apparently traceable through official reputable origins (eg
 
 
 
+https://cdrdv2.intel.com/v1/dl/getContent/630744?explicitVersion=true
+630744_003
+
+
 # Reference
 
 https://fedoraproject.org/wiki/Tboot
