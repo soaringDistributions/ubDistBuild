@@ -523,13 +523,13 @@ jobs:
           ./ubiquitous_bash.sh _package_rm || true
           rm -f ./_local/vm.img || true
 
-      #- name: _export-fromLive
-        #shell: bash
-        #run: |
-          #lsmod | grep loop || true
-          #mkdir -p ./_local/cache_fs
-          #sudo -n mount -t btrfs ./_local/cache.img ./_local/cache_fs
-          #ls ./_local/cache_fs
+      - name: _export-fromLive
+        shell: bash
+        run: |
+          lsmod | grep loop || true
+          mkdir -p ./_local/cache_fs
+          sudo -n mount -t btrfs ./_local/cache.img ./_local/cache_fs
+          ls ./_local/cache_fs
           #sudo -n dd if=./_local/cache_fs/ubDistBuild/_local/vm.img bs=1M | dd of=./_local/vm.img bs=1M
           
       - name: artifacts
@@ -543,7 +543,7 @@ jobs:
       - name: ______________________________ _ls-fromLive.log
         shell: bash
         run: |
-          cat ./_local/cache_fs/_ls-fromLive.log || true
+          cat ./_local/cache_fs/_ls-fromLive.log
 
 
 
