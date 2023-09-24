@@ -1560,6 +1560,13 @@ _zSpecial_qemu_chroot() {
 		sudo -n chown "$USER":"$USER" "$scriptLocal"/lsmodReport
 	fi
 
+	#_chroot cat /boot/grub/grub.cfg | sudo -n tee "$globalVirtFS"/grub.cfg > /dev/null
+	sudo -n cp -f "$globalVirtFS"/boot/grub/grub.cfg "$scriptLocal"/grub.cfg
+	sudo -n chown "$USER":"$USER" "$scriptLocal"/grub.cfg
+	
+	sudo -n cp -f "$globalVirtFS"/boot/grub/grubenv "$scriptLocal"/grubenv
+	sudo -n chown "$USER":"$USER" "$scriptLocal"/grubenv
+
 
 	_chroot rmdir /var/lib/docker/runtimes
 	

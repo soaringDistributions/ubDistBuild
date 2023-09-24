@@ -462,6 +462,8 @@ jobs:
           tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
           name: build
           files: |
+            ./_local/grub.cfg
+            ./_local/grubenv
             ./_local/dpkg
             ./_local/lsmodReport
             ./_local/binReport
