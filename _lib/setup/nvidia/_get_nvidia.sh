@@ -500,9 +500,12 @@ _set_nvidia() {
 	# Tested apparently successfully.
 	#export currentVersion='535.98'
 
-	export currentVersion='535.104.05'
+	export currentVersion_series535p='535.104.05'
 	export currentVersion_legacy470='470.199.02'
 
+
+
+	export currentVersion="$currentVersion_series535p"
 
 	# https://www.nvidia.com/en-us/drivers/unix/legacy-gpu/
 	# LibreOffice Calc RegEx Search/Replace   (.*)   $1
@@ -672,6 +675,16 @@ _set_nvidia() {
 	#[[ $(lspci -nn -d ':11fc' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470"
 	#lspci | grep -i 'Quadro K2100M' > /dev/null 2>&1 && export currentVersion="$currentVersion_legacy470"
 }
+_write_nvidia-series535p() {
+	_set_nvidia
+
+	echo "$currentVersion_series535p"
+}
+_write_nvidia-legacy470() {
+	_set_nvidia
+
+	echo "$currentVersion_legacy470"
+}
 
 
 
@@ -744,11 +757,10 @@ _detect_nvidia() {
 }
 
 
-_fetch_nvidia() {
-	_messageNormal 'init: _fetch_nvidia'
-	_set_nvidia
 
-	cd "$scriptAbsoluteFolder"
+_fetch_nvidia-wget() {
+	local currentVersion_fetch="$1"
+	[[ "$currentVersion_fetch" == "" ]] && currentVersion_fetch="$currentVersion"
 	
 	# https://gitweb.gentoo.org/repo/gentoo.git/tree/x11-drivers/nvidia-drivers/nvidia-drivers-510.60.02.ebuild
 	# http://gpo.zugaina.org/AJAX/Ebuild/53561524/View
@@ -756,23 +768,29 @@ _fetch_nvidia() {
 	# https://us.download.nvidia.com/XFree86/Linux-x86_64/510.60.02/NVIDIA-Linux-x86_64-510.60.02.run
 	
 	
-	
-	
-	
-	
-	
 	# https://download.nvidia.com/XFree86/
+
+
 	
-	
-	
-	if [[ ! -e "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run ]]
+	if [[ ! -e "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_fetch".run ]]
 	then
-		wget https://us.download.nvidia.com/XFree86/Linux-x86_64/"$currentVersion"/NVIDIA-Linux-x86_64-"$currentVersion".run
+		wget https://us.download.nvidia.com/XFree86/Linux-x86_64/"$currentVersion_fetch"/NVIDIA-Linux-x86_64-"$currentVersion_fetch".run
 	fi
-	chmod u+x "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
+	chmod u+x "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_fetch".run
 	
 	
-	[[ ! -e "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run ]] && _messageFAIL
+	[[ ! -e "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_fetch".run ]] && _messageFAIL
+	return 0
+}
+_fetch_nvidia() {
+	_messageNormal 'init: _fetch_nvidia'
+	_set_nvidia
+
+	cd "$scriptAbsoluteFolder"
+	
+	
+	
+	! _fetch_nvidia-wget && return 1
 	return 0
 }
 
