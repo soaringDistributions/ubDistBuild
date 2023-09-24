@@ -812,11 +812,26 @@ _install_nvidia() {
 	local currentParallel
 	currentParallel=1
 
+
 	# DUBIOUS - MARGIN .
+
 	[[ "$current_hostMemoryTotal" -ge 16000000 ]] && [[ "$current_hostCoreCount" -ge "2" ]] && currentParallel=2
 
+	# DUBIOUS - MARGIN .
+	[[ "$current_hostMemoryTotal" -ge 16000000 ]] && [[ "$current_hostCoreCount" -ge "3" ]] && currentParallel=3
+
 	[[ "$current_hostMemoryTotal" -ge 32000000 ]] && [[ "$current_hostCoreCount" -ge "3" ]] && currentParallel=3
-	[[ "$current_hostMemoryTotal" -ge 60000000 ]] && [[ "$current_hostCoreCount" -ge "6" ]] && currentParallel=5
+	[[ "$current_hostMemoryTotal" -ge 32000000 ]] && [[ "$current_hostCoreCount" -ge "4" ]] && currentParallel=4
+
+	[[ "$current_hostMemoryTotal" -ge 60000000 ]] && [[ "$current_hostCoreCount" -ge "5" ]] && currentParallel=5
+	[[ "$current_hostMemoryTotal" -ge 60000000 ]] && [[ "$current_hostCoreCount" -ge "6" ]] && currentParallel=6
+	[[ "$current_hostMemoryTotal" -ge 60000000 ]] && [[ "$current_hostCoreCount" -ge "8" ]] && currentParallel=8
+
+	[[ "$current_hostMemoryTotal" -ge 96000000 ]] && [[ "$current_hostCoreCount" -ge "10" ]] && currentParallel=10
+	[[ "$current_hostMemoryTotal" -ge 96000000 ]] && [[ "$current_hostCoreCount" -ge "12" ]] && currentParallel=12
+
+	[[ "$current_hostMemoryTotal" -ge 120000000 ]] && [[ "$current_hostCoreCount" -ge "14" ]] && currentParallel=14
+	[[ "$current_hostMemoryTotal" -ge 120000000 ]] && [[ "$current_hostCoreCount" -ge "16" ]] && currentParallel=16
 	
 	# ' "  -j CONCURRENCY-LEVEL, --concurrency-level=CONCURRENCY-LEVEL" '
 	# 'default' 'number of detected CPUs' 'nvidia-installer' 'default' 'limited to 32'
@@ -1001,7 +1016,9 @@ _autoinstall_procedure() {
 
 	if ! ! _detect_live
 	then
-		sleep 200
+		#sleep 200
+		#sleep 80
+		sleep 45
 	fi
 	
 	

@@ -14,7 +14,7 @@ _live_procedure_exhaustive-rootfs() {
 }
 _live_procedure_exhaustive-includeConfig() {
     _live_procedure_exhaustive-includeConfig-message() {
-        [[ ! -e "$1"/"$1" ]] && _messagePlain_warn 'warn: missing: '"$1"
+        [[ ! -e "$scriptLocal"/include-exhaustive/"$1" ]] && _messagePlain_warn 'warn: missing: '"$1"
     }
     _live_procedure_exhaustive-includeConfig-message extIface.exe
     _live_procedure_exhaustive-includeConfig-message ubDistBuild.exe
@@ -32,7 +32,7 @@ _live_procedure_exhaustive-include() {
         
         _live_procedure_exhaustive-includeConfig
 
-        cp -r "$scriptLocal"/include-exhaustive/* "$scriptLocal"/livefs/image/live/
+        cp -r "$scriptLocal"/include-exhaustive/* "$scriptLocal"/livefs/image/
         return
     else
         return 0
@@ -156,14 +156,14 @@ _convert-live-exhaustive() {
 	then
 		_stop 1
 	fi
-	
-	[[ "$current_diskConstrained" == "true" ]] && rm -f "$scriptLocal"/vm.img
 
     if ! "$scriptAbsoluteLocation" _live_sequence_exhaustive "$@"
     then
         _messageFAIL
         _stop 1
     fi
+	
+	[[ "$current_diskConstrained" == "true" ]] && rm -f "$scriptLocal"/vm.img
 	
 	if ! "$scriptAbsoluteLocation" _live_sequence_out "$@"
 	then

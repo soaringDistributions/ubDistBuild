@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2174195082'
+export ub_setScriptChecksum_contents='3369205310'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -46494,7 +46494,7 @@ _live_procedure_exhaustive-rootfs() {
 }
 _live_procedure_exhaustive-includeConfig() {
     _live_procedure_exhaustive-includeConfig-message() {
-        [[ ! -e "$1"/"$1" ]] && _messagePlain_warn 'warn: missing: '"$1"
+        [[ ! -e "$scriptLocal"/include-exhaustive/"$1" ]] && _messagePlain_warn 'warn: missing: '"$1"
     }
     _live_procedure_exhaustive-includeConfig-message extIface.exe
     _live_procedure_exhaustive-includeConfig-message ubDistBuild.exe
@@ -46512,7 +46512,7 @@ _live_procedure_exhaustive-include() {
         
         _live_procedure_exhaustive-includeConfig
 
-        cp -r "$scriptLocal"/include-exhaustive/* "$scriptLocal"/livefs/image/live/
+        cp -r "$scriptLocal"/include-exhaustive/* "$scriptLocal"/livefs/image/
         return
     else
         return 0
@@ -46636,14 +46636,14 @@ _convert-live-exhaustive() {
 	then
 		_stop 1
 	fi
-	
-	[[ "$current_diskConstrained" == "true" ]] && rm -f "$scriptLocal"/vm.img
 
     if ! "$scriptAbsoluteLocation" _live_sequence_exhaustive "$@"
     then
         _messageFAIL
         _stop 1
     fi
+	
+	[[ "$current_diskConstrained" == "true" ]] && rm -f "$scriptLocal"/vm.img
 	
 	if ! "$scriptAbsoluteLocation" _live_sequence_out "$@"
 	then
