@@ -18,7 +18,7 @@
 #-->   mount/umount -t btrfs ./_local/cache.img ./_local/cache_fs
 #-->   PASS/FAIL (from logs)
 
-name: experiment
+name: test-convert-live-exhaustive
 
 
 # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#permissions
