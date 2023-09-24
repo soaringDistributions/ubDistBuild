@@ -101,7 +101,9 @@ concurrency:
 
 jobs:
 
-  test_run_cronQemu--_convert-live-exhaustive:
+  
+  test_run_cronQemu--_revert-fromLive:
+    # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
     runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
     steps:
       - name: users
@@ -340,15 +342,16 @@ jobs:
 
 
 
-      # ### ##### -->   _openChRoot/_closeChRoot   -->   echo ' sleep /waitFile ... _run | tee /mnt/cache/log ' | crontab
+
+
+
+      # ### ##### -->   _openChRoot/_closeChRoot   -->   echo ' sleep /waitFile ... _revert_live | tee /mnt/cache/log ' | crontab
       - name: _run-crontab
         shell: bash
         run: |
           ./ubiquitous_bash.sh _openChRoot
           #echo '/root/ubiquitous_bash.sh _wait_rootLock_OTHER'
-          #ls / /run/live/medium
-          #du -sh /vm.img /package_rootfs.tar /run/live/medium/extIface.exe /run/live/medium/ubDistBuild.exe
-          ( ./ubiquitous_bash.sh _chroot crontab -l ; echo '@reboot /bin/true uk4uPhB6 ; /usr/bin/mkdir -p /media/tmp ; /usr/bin/mount -o compress=zstd:2 /dev/sda /media/tmp ; cp -a /home/user/ubDistBuild /media/tmp/ ; /bin/bash -c "export skimfast=${{ inputs.skimfast }} ; export devfast=${{ inputs.devfast }} ; cd /home/user ; /bin/sudo -n --preserve-env=skimfast,devfast -u user ls / /run/live/medium >> /media/tmp/_ls-fromLive.log 2>&1 ; /bin/true > /media/tmp/_run-crontab.log ; wait ; /bin/true > /var/log/_run-crontab.log ; sudo -n /usr/sbin/poweroff ; sudo -n /sbin/poweroff ; sudo -n poweroff"' ) | ./ubiquitous_bash.sh _chroot crontab '-'
+          ( ./ubiquitous_bash.sh _chroot crontab -l ; echo '@reboot /bin/true uk4uPhB6 ; /usr/bin/mkdir -p /media/tmp ; /usr/bin/mount -o compress=zstd:2 /dev/sda /media/tmp ; cp -a /home/user/ubDistBuild /media/tmp/ ; /bin/bash -c "export skimfast=${{ inputs.skimfast }} ; export devfast=${{ inputs.devfast }} ; cd /home/user ;  /bin/sudo -n --preserve-env=skimfast,devfast -u user /media/tmp/ubDistBuild/ubiquitous_bash.sh _revert-fromLive > /media/tmp/_revert-fromLive.log 2>&1 ; /bin/true > /media/tmp/_run-crontab.log ; wait ; /bin/true > /var/log/_run-crontab.log ; sudo -n /usr/sbin/poweroff ; sudo -n /sbin/poweroff ; sudo -n poweroff"' ) | ./ubiquitous_bash.sh _chroot crontab '-'
           
           ./ubiquitous_bash.sh _chroot crontab -l
           ./ubiquitous_bash.sh _closeChRoot
@@ -356,24 +359,74 @@ jobs:
 
 
 
-      # ### ##### -->   _convert-live-exhaustive
-      - name: fallocate --dig-holes
+
+
+      # ### ##### -->   _convert-live
+      - name: _package_rm 
         shell: bash
         run: |
-          fallocate --dig-holes ./_local/vm.img
-      - name: _convert-live-exhaustive
+          ./ubiquitous_bash.sh _package_rm
+
+      #- name: _fetchAccessories extendedInterface
+        #shell: bash
+        #run: |
+          #cd _local
+          #git clone https://github.com/mirage335-colossus/extendedInterface.git
+          #cd extendedInterface
+          #mkdir -p ../extendedInterface-accessories/integrations/ubcp
+          #curl -L -o ../extendedInterface-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
+          #./ubiquitous_bash.sh _build_extendedInterface-fetch | sudo -n tee ../../_lib/_extendedInterface.log && exit ${PIPESTATUS[0]}
+        #env:
+          #GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #- name: _fetchAccessories ubDistBuild
+        #shell: bash
+        #run: |
+          #cd _local
+          #git clone https://github.com/soaringDistributions/ubDistBuild.git
+          #cd ubDistBuild
+          #mkdir -p ../ubDistBuild-accessories/integrations/ubcp
+          #curl -L -o ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
+          #./ubiquitous_bash.sh _build_ubDistBuild-fetch | sudo -n tee ../../_lib/_ubDistBuild.log && exit ${PIPESTATUS[0]}
+        #env:
+          #GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      #- name: _convert-live _create_ubDistBuild_feedAccessories
+        #shell: bash
+        #run: |
+          #export current_diskConstrained="true"
+          #./ubiquitous_bash.sh _convert_rm
+          #./ubiquitous_bash.sh _create_ubDistBuild_feedAccessories | sudo -n tee ./_create_ubDistBuild_feedAccessories.log && exit ${PIPESTATUS[0]}
+          #./ubiquitous_bash.sh _safeRMR ./_local/livefs
+          #true
+      
+      # DANGER: GitHub Actions ONLY!
+      #- name: _create_ubDistBuild_feedAccessories rm
+        #shell: bash
+        #run: |
+          #rm -rf ../extendedInterface-accessories
+          #[[ -e ../extendedInterface-accessories ]] && exit 1 || true
+          #rm -rf ../ubDistBuild-accessories
+          #[[ -e ../ubDistBuild-accessories ]] && exit 1 || true
+      
+      # DANGER: GitHub Actions ONLY!
+      - name: _fetchAccessories rm
         shell: bash
         run: |
-          echo 'PASS' > ./_local/package_rootfs.tar
-          mkdir -p ./_local/include-exhaustive
-          echo 'PASS' > ./_local/include-exhaustive/extIface.exe
-          echo 'PASS' > ./_local/include-exhaustive/ubDistBuild.exe
+          cd _local
+          rm -rf extendedInterface
+          [[ -e extendedInterface ]] && exit 1 || true
+          rm -rf ubDistBuild
+          [[ -e ubDistBuild ]] && exit 1 || true
+      
+      - name: _convert-live _convert-live_ISO
+        shell: bash
+        run: |
           export current_diskConstrained="true"
-          export currentLiveExhaustive_rootfs="true"
-          export currentLiveExhaustive_include="true"
-          export currentLiveExhaustive_pattern="false"
-          ./ubiquitous_bash.sh _convert-live-exhaustive
-          ! [[ -e ./_local/vm-live.iso ]] && _messagePlain_bad 'missing: vm-live.iso' && exit 1 || true
+          ./ubiquitous_bash.sh _convert_rm
+          ./ubiquitous_bash.sh _convert-live_ISO | sudo -n tee ./_convert-live_ISO.log && exit ${PIPESTATUS[0]}
+          ./ubiquitous_bash.sh _safeRMR ./_local/livefs
+          true
+
 
 
 
@@ -385,7 +438,10 @@ jobs:
       - name: mkfs.btrfs ./_local/cache.img
         shell: bash
         run: |
-          fallocate -l 1000000000 ./_local/cache.img
+          #26572
+          #28.25 GiB == 28928 MiB == 30333206528 bytes
+          #dd if=/dev/zero of=./_local/cache.img bs=1M count=28928
+          fallocate -l 30333206528 ./_local/cache.img
           mkfs.btrfs --checksum xxhash -M -d single ./_local/cache.img
 
 
@@ -460,8 +516,8 @@ jobs:
 
           mkdir -p ./_local/analysis/screenshots
           currentIterationWait=0
-          currentIterationMax=380
-          ! ./ubiquitous_bash.sh _testQEMU_hostArch_x64_hardwarevt && currentIterationMax=3200 || true
+          currentIterationMax=2600
+          ! ./ubiquitous_bash.sh _testQEMU_hostArch_x64_hardwarevt && currentIterationMax=18000 || true
           while [[ "$currentIterationWait" -lt "$currentIterationMax" ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
           do
             sleep 1
@@ -481,8 +537,8 @@ jobs:
             sudo -n ls ./_local/cache_fs
             echo
 
-            echo 'cat ./_local/cache_fs/_ls-fromLive.log'
-            sudo -n cat ./_local/cache_fs/_ls-fromLive.log || true
+            echo 'cat ./_local/cache_fs/_revert-fromLive.log'
+            sudo -n cat ./_local/cache_fs/_revert-fromLive.log || true
             echo
 
             sudo -n umount /dev/loop7 || true
@@ -510,7 +566,7 @@ jobs:
       - name: artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: convert-live-exhaustive---analysis-screenshots-10-fromLive
+          name: revert-fromLive---analysis-screenshots-10-fromLive
           path: |
             ./_local/analysis/screenshots/*
 
@@ -523,27 +579,52 @@ jobs:
           ./ubiquitous_bash.sh _package_rm || true
           rm -f ./_local/vm.img || true
 
-      #- name: _export-fromLive
-        #shell: bash
-        #run: |
-          #lsmod | grep loop || true
-          #mkdir -p ./_local/cache_fs
-          #sudo -n mount -t btrfs ./_local/cache.img ./_local/cache_fs
-          #ls ./_local/cache_fs
-          #sudo -n dd if=./_local/cache_fs/ubDistBuild/_local/vm.img bs=1M | dd of=./_local/vm.img bs=1M
+      - name: _export-fromLive
+        shell: bash
+        run: |
+          lsmod | grep loop || true
+          mkdir -p ./_local/cache_fs
+          sudo -n mount -t btrfs ./_local/cache.img ./_local/cache_fs
+          ls ./_local/cache_fs
+          sudo -n dd if=./_local/cache_fs/ubDistBuild/_local/vm.img bs=1M | dd of=./_local/vm.img bs=1M
           
       - name: artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: convert-live-exhaustive---analysis-log-10-fromLive
+          name: revert-fromLive---analysis-log-10-fromLive
           path: |
             ./_local/cache_fs/*.log
 
 
-      - name: ______________________________ _ls-fromLive.log
+      - name: ______________________________ _revert-fromLive.log
         shell: bash
         run: |
-          cat ./_local/cache_fs/_ls-fromLive.log || true
+          cat ./_local/cache_fs/_revert-fromLive.log || true
+
+      - name: umount
+        shell: bash
+        run: |
+          sudo -n umount ./_local/cache.img
+          sudo -n umount ./_local/cache_fs || true
+
+
+
+
+
+
+
+          
+      # ### ##### -->   _openChRoot/_closeChRoot   -->   echo ' sleep 35 ; poweroff ' | crontab
+      - name: _run-crontab
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _openChRoot
+          #echo '/root/ubiquitous_bash.sh _wait_rootLock_OTHER'
+
+          ( ./ubiquitous_bash.sh _chroot crontab -l | /bin/grep -v uk4uPhB6 ; /bin/sleep 35 ; echo '@reboot /bin/true uk4uPhB6 ; /usr/bin/mkdir -p /media/tmp ; /usr/bin/mount -o compress=zstd:2 /dev/sdb /media/tmp ; cp -a /home/user/ubDistBuild /media/tmp/ ; /bin/sudo -n -u user ls / > /media/tmp/_ls-fromRevert.log ; /bin/true > /media/tmp/_run-crontab.log ; /bin/true > /var/log/_run-crontab.log ; /usr/sbin/poweroff ; /sbin/poweroff ; poweroff' ) | ./ubiquitous_bash.sh _chroot crontab '-'
+          
+          ./ubiquitous_bash.sh _chroot crontab -l
+          ./ubiquitous_bash.sh _closeChRoot
 
 
 
@@ -553,6 +634,195 @@ jobs:
 
 
 
+
+
+
+
+      # ### ##### -->   qemu-fromRevert
+      #_qemu_system_x86_64 -nographic -usb -smp 4 -device usb-tablet -device qxl-vga -machine accel=kvm -bios /usr/share/OVMF/OVMF_CODE.fd -drive format=raw,file=/home/runner/work/ubDistBuild/ubDistBuild/_local/vm.img -drive file=/home/runner/work/ubDistBuild/ubDistBuild/v_uid/htg/htg.iso,media=cdrom -boot d -m 1664 -net nic,model=rtl8139 -net user,restrict=n
+      - name: Force KVM group perms
+        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
+        shell: bash
+        run: |
+          sudo -n ls -l /dev/kvm
+          sudo -n ls -l /dev/kvm*
+          sudo -n chown -R $USER:docker /dev/kvm
+          sudo -n chmod 664 /dev/kvm
+          echo
+          #grep --color svm /proc/cpuinfo || true
+          #grep --color vmx /proc/cpuinfo || true
+          sudo -n lsmod | grep kvm
+          ls -l /dev/kvm
+          ls -l /dev/kvm*
+          echo $USER
+          groups
+          echo
+      - name: qemu-fromRevert
+        shell: bash
+        continue-on-error: true
+        timeout-minutes: 355
+        run: |
+          export skimfast=${{ inputs.skimfast }}
+          echo skimfast $skimfast
+          export qemuNoKVM=${{ inputs.qemuNoKVM }}
+          echo qemuNoKVM $qemuNoKVM
+          echo
+          qemuArgs+=(-usb -smp $(nproc) -device usb-tablet -device qxl-vga)
+          #[[ "$qemuHeadless" == "true" ]] && qemuArgs+=(-nographic)
+          if ./ubiquitous_bash.sh _testQEMU_hostArch_x64_hardwarevt
+          then
+            # Apparently, qemu kvm, can be unreliable if nested (eg. within VMWare Workstation VM).
+            if [[ "$qemuNoKVM" == "true" ]] || [[ "$qemuNoKVM" != "false" ]]
+            then
+              _messagePlain_good 'ignored: kvm'
+            else
+              qemuArgs+=(-machine accel=kvm)
+            fi
+          else
+            echo 'missing: kvm'
+          fi
+          [[ -e /usr/share/OVMF/OVMF_CODE.fd ]] && qemuArgs+=(-bios /usr/share/OVMF/OVMF_CODE.fd)
+          qemuUserArgs+=(-drive format=raw,file=./_local/vm.img)
+          #qemuUserArgs+=(-drive file=./v_uid/htg/htg.iso,media=cdrom)
+          #qemuUserArgs+=(-drive file=./_local/vm-live.iso,media=cdrom)
+          qemuUserArgs+=(-drive format=raw,file=./_local/cache.img)
+          qemuUserArgs+=(-boot c)
+          #qemuUserArgs+=(-boot d)
+          qemuUserArgs+=(-m "6144")
+          qemuUserArgs+=(-net nic,model=rtl8139 -net user,restrict=n)
+          qemuArgs+=("${qemuSpecialArgs[@]}" "${qemuUserArgs[@]}")
+
+          Xvfb :30 > /dev/null 2>&1 &
+          sleep 1
+          export DISPLAY=:30
+
+          echo qemu-system-x86_64 "${qemuArgs[@]}"
+          qemu-system-x86_64 "${qemuArgs[@]}" &
+          currentPID=$!
+
+          currentExitStatus=0
+
+          mkdir -p ./_local/analysis/screenshots
+          currentIterationWait=0
+          currentIterationMax=360
+          ! ./ubiquitous_bash.sh _testQEMU_hostArch_x64_hardwarevt && currentIterationMax=3200 || true
+          while [[ "$currentIterationWait" -lt "$currentIterationMax" ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
+          do
+            sleep 1
+
+            echo
+            echo
+            echo
+            echo currentIterationWait="$currentIterationWait"
+            echo
+
+
+            mkdir -p ./_local/cache_fs
+            #sudo -n mount -t btrfs -o ro ./_local/cache.img ./_local/cache_fs
+
+            echo 'ls ./_local/cache_fs'
+            sudo -n ls ./_local/cache_fs
+            echo
+
+            echo 'cat ./_local/cache_fs/_ls-fromRevert.log'
+            sudo -n cat ./_local/cache_fs/_ls-fromRevert.log || true
+            echo
+
+            sudo -n umount /dev/loop7 || true
+            sudo -n umount ./_local/cache.img || true
+            sudo -n umount ./_local/cache_fs || true
+
+
+
+            if ( [[ "$currentIterationWait" -le 320 ]] && [[ $(bc <<< "$currentIterationWait % 5") == 0 ]] ) || [[ $(bc <<< "$currentIterationWait % 30") == 0 ]]
+            then
+              xwd -root -silent | convert xwd:- -quality 35 jpg:./_local/analysis/screenshots/qemu-20-fromRevert-"$currentIterationWait".jpg
+              #jp2a --background=dark --colors --width=280 ./_local/analysis/screenshots/qemu-20-fromRevert-"$currentIterationWait".jpg
+            fi
+
+            let currentIterationWait=currentIterationWait+1
+          done
+          echo 'currentIterationWait='"$currentIterationWait"
+          [[ "$currentIterationWait" -ge "$currentIterationMax" ]] && echo 'bad: fail: run: poweroff' && currentExitStatus=1
+          
+          exit "$currentExitStatus"
+          
+      - name: artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: revert-fromLive---analysis-screenshots-20-fromRevert
+          path: |
+            ./_local/analysis/screenshots/*
+
+
+
+      # ### ##### -->   mount/umount -t btrfs ./_local/cache.img ./_local/cache_fs
+      - name: _rm
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _package_rm || true
+          rm -f ./_local/vm.img || true
+      - name: _export-fromRevert
+        shell: bash
+        run: |
+          lsmod | grep loop || true
+          mkdir -p ./_local/cache_fs
+          sudo -n mount -t btrfs ./_local/cache.img ./_local/cache_fs
+          ls ./_local/cache_fs
+          
+      - name: artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: revert-fromLive---analysis-log-20-fromRevert
+          path: |
+            ./_local/cache_fs/*.log
+
+
+
+
+      - name: ______________________________ _ls-fromRevert.log
+        shell: bash
+        run: |
+          cat ./_local/cache_fs/_ls-fromRevert.log || true
+
+
+
+
+
+
+            
+
+
+
+      # WARNING: May be untested.
+      #- name: Setup upterm session
+        ##if: ${{ github.event.inputs.debug_enabled == 'true' }}
+        #if: ( ${{ failure() && ( github.event.inputs.debug_enabled == 'true' ) }} )
+        #uses: lhotari/action-upterm@v1
+        #with:
+          ### limits ssh access and adds the ssh public key for the user which triggered the workflow
+          #limit-access-to-actor: true
+          ### limits ssh access and adds the ssh public keys of the listed GitHub users
+          ## DANGER: Discouraged. Prefer 'limit-access-to-actor' instead.
+          ##limit-access-to-users: githubuser1,githubuser2
+          ##wait-timeout-minutes: 5
+        ##timeout-minutes: 320
+
+
+
+
+
+      # ### ##### -->   PASS/FAIL (from logs)
+
+      - name: check
+        shell: bash
+        run: |
+          mkdir -p ./_local/cache_fs
+          #sudo -n mount -t btrfs ./_local/cache.img ./_local/cache_fs
+          ls ./_local/cache_fs
+          [[ -e ./_local/cache_fs/_run-crontab.log ]]
+          [[ -e ./_local/cache_fs/_revert-fromLive.log ]]
+          [[ -e ./_local/cache_fs/_ls-fromRevert.log ]]
 
 
 
