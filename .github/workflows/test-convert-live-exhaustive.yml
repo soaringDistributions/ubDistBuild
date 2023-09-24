@@ -550,6 +550,16 @@ jobs:
 
 
 
+      - name: check
+        shell: bash
+        run: |
+          grep vm.img ./_local/cache_fs/_ls-fromLive.log
+          grep package_rootfs.tar ./_local/cache_fs/_ls-fromLive.log
+          grep package_rootfs.tar ./_local/cache_fs/_ls-fromLive.log
+          grep extIface.exe ./_local/cache_fs/_ls-fromLive.log
+          grep ubDistBuild.exe ./_local/cache_fs/_ls-fromLive.log
+
+
 
 
 
