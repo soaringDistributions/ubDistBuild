@@ -694,6 +694,8 @@ jobs:
           sleep 1
           export DISPLAY=:30
 
+          bash -c '
+
           echo qemu-system-x86_64 "${qemuArgs[@]}"
           qemu-system-x86_64 "${qemuArgs[@]}" &
           currentPID=$!
@@ -718,11 +720,11 @@ jobs:
             mkdir -p ./_local/cache_fs
             #sudo -n mount -t btrfs -o ro ./_local/cache.img ./_local/cache_fs
 
-            echo 'ls ./_local/cache_fs'
+            echo "ls ./_local/cache_fs"
             sudo -n ls ./_local/cache_fs
             echo
 
-            echo 'cat ./_local/cache_fs/_ls-fromRevert.log'
+            echo "cat ./_local/cache_fs/_ls-fromRevert.log"
             sudo -n cat ./_local/cache_fs/_ls-fromRevert.log || true
             echo
 
@@ -740,10 +742,12 @@ jobs:
 
             let currentIterationWait=currentIterationWait+1
           done
-          echo 'currentIterationWait='"$currentIterationWait"
-          [[ "$currentIterationWait" -ge "$currentIterationMax" ]] && echo 'bad: fail: run: poweroff' && currentExitStatus=1
+          echo "currentIterationWait=""$currentIterationWait"
+          [[ "$currentIterationWait" -ge "$currentIterationMax" ]] && echo "bad: fail: run: poweroff" && currentExitStatus=1
           
           exit "$currentExitStatus"
+
+          '
           
       - name: artifacts
         uses: actions/upload-artifact@v3
