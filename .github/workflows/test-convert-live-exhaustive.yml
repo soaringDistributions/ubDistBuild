@@ -457,7 +457,7 @@ jobs:
           mkdir -p ./_local/analysis/screenshots
           currentIterationWait=0
           currentIterationMax=380
-          ! ./ubiquitous_bash.sh _testQEMU_hostArch_x64_hardwarevt && currentIterationMax=3200 || true
+          ! ./ubiquitous_bash.sh _testQEMU_hostArch_x64_hardwarevt && currentIterationMax=22800 || true
           while [[ "$currentIterationWait" -lt "$currentIterationMax" ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
           do
             sleep 1
