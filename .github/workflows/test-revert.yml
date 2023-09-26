@@ -473,6 +473,7 @@ jobs:
           export qemuNoKVM=${{ inputs.qemuNoKVM }}
           echo qemuNoKVM $qemuNoKVM
           echo
+          bash -c '
           qemuArgs+=(-usb -smp $(nproc) -device usb-tablet -device qxl-vga)
           #[[ "$qemuHeadless" == "true" ]] && qemuArgs+=(-nographic)
           if ./ubiquitous_bash.sh _testQEMU_hostArch_x64_hardwarevt
@@ -480,12 +481,12 @@ jobs:
             # Apparently, qemu kvm, can be unreliable if nested (eg. within VMWare Workstation VM).
             if [[ "$qemuNoKVM" == "true" ]] || [[ "$qemuNoKVM" != "false" ]]
             then
-              _messagePlain_good 'ignored: kvm'
+              _messagePlain_good "ignored: kvm"
             else
               qemuArgs+=(-machine accel=kvm)
             fi
           else
-            echo 'missing: kvm'
+            echo "missing: kvm"
           fi
           [[ -e /usr/share/OVMF/OVMF_CODE.fd ]] && qemuArgs+=(-bios /usr/share/OVMF/OVMF_CODE.fd)
           #qemuUserArgs+=(-drive format=raw,file=./_local/vm.img)
@@ -502,8 +503,6 @@ jobs:
           sleep 1
           export DISPLAY=:30
 
-
-          bash -c '
 
           echo qemu-system-x86_64 "${qemuArgs[@]}"
           qemu-system-x86_64 "${qemuArgs[@]}" &
@@ -665,6 +664,7 @@ jobs:
           export qemuNoKVM=${{ inputs.qemuNoKVM }}
           echo qemuNoKVM $qemuNoKVM
           echo
+          bash -c '
           qemuArgs+=(-usb -smp $(nproc) -device usb-tablet -device qxl-vga)
           #[[ "$qemuHeadless" == "true" ]] && qemuArgs+=(-nographic)
           if ./ubiquitous_bash.sh _testQEMU_hostArch_x64_hardwarevt
@@ -672,12 +672,12 @@ jobs:
             # Apparently, qemu kvm, can be unreliable if nested (eg. within VMWare Workstation VM).
             if [[ "$qemuNoKVM" == "true" ]] || [[ "$qemuNoKVM" != "false" ]]
             then
-              _messagePlain_good 'ignored: kvm'
+              _messagePlain_good "ignored: kvm"
             else
               qemuArgs+=(-machine accel=kvm)
             fi
           else
-            echo 'missing: kvm'
+            echo "missing: kvm"
           fi
           [[ -e /usr/share/OVMF/OVMF_CODE.fd ]] && qemuArgs+=(-bios /usr/share/OVMF/OVMF_CODE.fd)
           qemuUserArgs+=(-drive format=raw,file=./_local/vm.img)
@@ -694,7 +694,6 @@ jobs:
           sleep 1
           export DISPLAY=:30
 
-          bash -c '
 
           echo qemu-system-x86_64 "${qemuArgs[@]}"
           qemu-system-x86_64 "${qemuArgs[@]}" &
