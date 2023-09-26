@@ -36,7 +36,7 @@ on:
         default: true
       skimfast:
         type: boolean
-        default: true
+        default: false
       qemuNoKVM:
         type: boolean
         default: false
