@@ -821,9 +821,9 @@ jobs:
           #sudo -n mount -t btrfs ./_local/cache.img ./_local/cache_fs
           ls ./_local/cache_fs
           
-          grep regenerate ./_local/cache_fs/_ls-fromLive.log
-          grep regenerate_rootGrab ./_local/cache_fs/_ls-fromLive.log
-          grep lock_nvidia_autoinstall ./_local/cache_fs/_ls-fromLive.log
+          grep regenerate ./_local/cache_fs/_ls-fromRevert.log
+          grep regenerate_rootGrab ./_local/cache_fs/_ls-fromRevert.log
+          grep lock_nvidia_autoinstall ./_local/cache_fs/_ls-fromRevert.log
 
           [[ -e ./_local/cache_fs/_run-crontab.log ]]
           [[ -e ./_local/cache_fs/_revert-fromLive.log ]]
