@@ -840,7 +840,7 @@ _create_ubDistBuild-rotten_install-core() {
 
 
 
-
+	_chroot systemctl disable man-db
 
 
 
@@ -1135,7 +1135,7 @@ CZXWXcRMTo8EmM8i4d
 
 
 
-
+	_chroot sudo -n -u user bash -c 'cd /home/user/ ; kded5 --check'
 
 
 
@@ -1609,6 +1609,10 @@ _zSpecial_qemu_sequence_prog() {
 	echo '! sudo -n lsmod | grep -i vboxdrv && sudo -n /sbin/vboxconfig' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sleep 75' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sudo -n lsmod | sudo -n tee /lsmodReport' >> "$hostToGuestFiles"/cmd.sh
+	echo 'kded5 --check' >> "$hostToGuestFiles"/cmd.sh
+	echo 'sleep 90' >> "$hostToGuestFiles"/cmd.sh
+	echo 'kded5 --check' >> "$hostToGuestFiles"/cmd.sh
+	echo 'sleep 420' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sudo -n poweroff' >> "$hostToGuestFiles"/cmd.sh
 }
 
