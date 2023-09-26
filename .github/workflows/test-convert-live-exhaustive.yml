@@ -343,7 +343,7 @@ jobs:
           #echo '/root/ubiquitous_bash.sh _wait_rootLock_OTHER'
           #ls / /run/live/medium
           #du -sh /vm.img /package_rootfs.tar /run/live/medium/extIface.exe /run/live/medium/ubDistBuild.exe
-          ( ./ubiquitous_bash.sh _chroot crontab -l ; echo '@reboot /bin/true uk4uPhB6 ; /usr/bin/mkdir -p /media/tmp ; /usr/bin/mount -o compress=zstd:2 /dev/sda /media/tmp ; cp -a /home/user/ubDistBuild /media/tmp/ ; /bin/bash -c "export skimfast=${{ inputs.skimfast }} ; export devfast=${{ inputs.devfast }} ; cd /home/user ; /bin/sudo -n --preserve-env=skimfast,devfast -u user ls / /run/live/medium >> /media/tmp/_ls-fromLive.log 2>&1 ; /bin/true > /media/tmp/_run-crontab.log ; wait ; /bin/true > /var/log/_run-crontab.log ; sudo -n /usr/sbin/poweroff ; sudo -n /sbin/poweroff ; sudo -n poweroff"' ) | ./ubiquitous_bash.sh _chroot crontab '-'
+          ( ./ubiquitous_bash.sh _chroot crontab -l ; echo '@reboot /bin/true uk4uPhB6 ; /usr/bin/mkdir -p /media/tmp ; /usr/bin/mount -o compress=zstd:2 -L Y2FjaGUK /media/tmp ; cp -a /home/user/ubDistBuild /media/tmp/ ; /bin/bash -c "export skimfast=${{ inputs.skimfast }} ; export devfast=${{ inputs.devfast }} ; cd /home/user ; /bin/sudo -n --preserve-env=skimfast,devfast -u user ls / /run/live/medium >> /media/tmp/_ls-fromLive.log 2>&1 ; /bin/true > /media/tmp/_run-crontab.log ; wait ; /bin/true > /var/log/_run-crontab.log ; sudo -n /usr/sbin/poweroff ; sudo -n /sbin/poweroff ; sudo -n poweroff"' ) | ./ubiquitous_bash.sh _chroot crontab '-'
           
           ./ubiquitous_bash.sh _chroot crontab -l
           ./ubiquitous_bash.sh _closeChRoot
@@ -381,7 +381,7 @@ jobs:
         shell: bash
         run: |
           fallocate -l 1000000000 ./_local/cache.img
-          mkfs.btrfs --checksum xxhash -M -d single ./_local/cache.img
+          mkfs.btrfs -L Y2FjaGUK --checksum xxhash -M -d single ./_local/cache.img
 
 
 
@@ -551,6 +551,10 @@ jobs:
       - name: check
         shell: bash
         run: |
+          grep regenerate ./_local/cache_fs/_ls-fromLive.log
+          grep regenerate_rootGrab ./_local/cache_fs/_ls-fromLive.log
+          grep lock_nvidia_autoinstall ./_local/cache_fs/_ls-fromLive.log
+          
           grep vm.img ./_local/cache_fs/_ls-fromLive.log
           grep package_rootfs.tar ./_local/cache_fs/_ls-fromLive.log
           grep extIface.exe ./_local/cache_fs/_ls-fromLive.log
