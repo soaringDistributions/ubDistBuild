@@ -206,7 +206,7 @@ jobs:
 
 
 
-      - name: _get_vmImg_ubDistBuild
+      - name: _get_vmImg_ubDistBuild-rootfs
         shell: bash
         run: |
           current_releaseLabel="${{ inputs.releaseLabel }}"
@@ -228,7 +228,7 @@ jobs:
 
 
 
-      - name: _get_vmImg_ubDistBuild
+      - name: _get_vmImg_ubDistBuild-live
         shell: bash
         run: |
           current_releaseLabel="${{ inputs.releaseLabel }}"
@@ -261,7 +261,7 @@ jobs:
         with:
           name: _hash-ubdist.txt
           path: |
-            ./_hash-ubdist.txt
+            ./_local/_hash-ubdist.txt
 
 
 
