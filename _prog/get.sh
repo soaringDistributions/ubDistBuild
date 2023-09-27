@@ -71,7 +71,8 @@ _get_vmImg_ubDistBuild_sequence() {
 	local currentHash
 	export MANDATORY_HASH=
 	unset MANDATORY_HASH
-	currentHash=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 3 | tail -n 1)
+	[[ "$2" != "" ]] && currentHash="$2"
+	[[ "$2" == "" ]] && currentHash=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 3 | tail -n 1)
 	export MANDATORY_HASH=
 	unset MANDATORY_HASH
 
@@ -132,7 +133,8 @@ _get_vmImg_ubDistBuild-live_sequence() {
 	local currentHash
 	export MANDATORY_HASH=
 	unset MANDATORY_HASH
-	currentHash=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 15 | tail -n 1)
+	[[ "$2" != "" ]] && currentHash="$2"
+	[[ "$2" == "" ]] && currentHash=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 15 | tail -n 1)
 	export MANDATORY_HASH=
 	unset MANDATORY_HASH
 
@@ -190,7 +192,8 @@ _get_vmImg_ubDistBuild-rootfs_sequence() {
 	local currentHash
 	export MANDATORY_HASH=
 	unset MANDATORY_HASH
-	currentHash=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 9 | tail -n 1)
+	[[ "$2" != "" ]] && currentHash="$2"
+	[[ "$2" == "" ]] && currentHash=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 9 | tail -n 1)
 	export MANDATORY_HASH=
 	unset MANDATORY_HASH
 
