@@ -439,7 +439,8 @@ jobs:
           qemuUserArgs+=(-drive format=raw,file=./_local/cache.img)
           #qemuUserArgs+=(-boot c)
           qemuUserArgs+=(-boot d)
-          qemuUserArgs+=(-m "6144")
+          #qemuUserArgs+=(-m "6144")
+          qemuUserArgs+=(-m "1664")
           qemuUserArgs+=(-net nic,model=rtl8139 -net user,restrict=n)
           qemuArgs+=("${qemuSpecialArgs[@]}" "${qemuUserArgs[@]}")
 
