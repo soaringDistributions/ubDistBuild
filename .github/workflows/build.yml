@@ -474,7 +474,8 @@ jobs:
             gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/lsmodReport
             gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/binReport
             gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/coreReport
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} /proc/cpuinfo
+            cat /proc/cpuinfo > ./_local/cpuinfo
+            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/cpuinfo
         env:
           GH_TOKEN: ${{ github.token }}
             
@@ -1170,13 +1171,9 @@ jobs:
 
 
 
-
       - name: release! hash
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: build-${{ github.run_id }}-${{ github.run_attempt }}
-          name: build
-          files: |
-            ./_local/_hash-ubdist.txt
+        shell: bash
+        run: |
+          gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/_hash-ubdist.txt
 
 
