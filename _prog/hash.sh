@@ -6,6 +6,8 @@ _hash_rm() {
 
 # WARNING: CAUTION: Do NOT change correspondence between line number and hash ! Intended for automatic verification of distributed and end point integrity traceable back to Git repository public record !
 _hash_file_sequence() {
+    _custom_splice_opensslConfig
+    
     _start
     
     _messageNormal '_hash_file: '"$2"
