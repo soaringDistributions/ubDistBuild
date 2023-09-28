@@ -557,8 +557,8 @@ jobs:
           bash -c '
           for currentFile in ./_local/package_image.tar.flx.part*
           do
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
-            while [[ $(jobs | wc -l) -ge 3 ]]
+            ./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
+            while [[ $(jobs | wc -l) -ge 12 ]]
             do
               sleep 2
             done
@@ -587,6 +587,7 @@ jobs:
   build-convert-rootfs:
     needs: [build, build_release]
     runs-on: ubuntu-latest
+    # WARNING: Must also enable/disable 'Maximize build space' as appropriate .
     #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
     steps:
       - name: users
@@ -599,7 +600,7 @@ jobs:
       # Apparently may increase buildJet 'runner' to 77GB (instead of 61GB).
       # Apparently may increase Github Actions 'runner' to 59GB (instead of 31GB) .
       - name: Maximize build space
-        if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+        #if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
         uses: easimon/maximize-build-space@master
         with:
           root-reserve-mb: 1625
@@ -724,7 +725,7 @@ jobs:
           bash -c '
           for currentFile in ./_local/package_rootfs.tar.flx.part*
           do
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
+            ./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
             while [[ $(jobs | wc -l) -ge 3 ]]
             do
               sleep 2
@@ -747,6 +748,7 @@ jobs:
   build-convert-live:
     needs: [build, build_release]
     runs-on: ubuntu-latest
+    # WARNING: Must also enable/disable 'Maximize build space' as appropriate .
     #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
     steps:
       - name: users
@@ -759,7 +761,7 @@ jobs:
       # Apparently may increase buildJet 'runner' to 77GB (instead of 61GB).
       # Apparently may increase Github Actions 'runner' to 59GB (instead of 31GB) .
       - name: Maximize build space
-        if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+        #if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
         uses: easimon/maximize-build-space@master
         with:
           root-reserve-mb: 1625
@@ -944,7 +946,7 @@ jobs:
           bash -c '
           for currentFile in ./_local/vm-live.iso.part*
           do
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
+            ./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
             while [[ $(jobs | wc -l) -ge 3 ]]
             do
               sleep 2
@@ -987,6 +989,7 @@ jobs:
 
   build-hash:
     needs: [build, build-convert-rootfs, build-convert-live]
+    # WARNING: Must also enable/disable 'Maximize build space' as appropriate .
     runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
     steps:
       - name: users
