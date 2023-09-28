@@ -985,6 +985,7 @@ jobs:
 
 
   build-hash:
+    needs: [build, build-convert-rootfs, build-convert-live]
     runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
     steps:
       - name: users
