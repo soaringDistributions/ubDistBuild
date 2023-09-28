@@ -95,8 +95,8 @@ jobs:
 
   build_installer:
     needs: [build_release]
-    runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
-    #runs-on: 'ubuntu-latest'
+    #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
+    runs-on: 'ubuntu-latest'
     steps:
       - uses: actions/checkout@v3
         with:
