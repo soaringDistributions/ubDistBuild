@@ -249,7 +249,7 @@ jobs:
           export FORCE_AXEL=8
           export MANDATORY_HASH="true"
           cd ./_local
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "vm-live.iso" 2> /dev/null
+          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "vm-live.iso" 2> /dev/null > ./vm-live.iso
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
