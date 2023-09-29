@@ -398,32 +398,32 @@ jobs:
           echo $devfast
           ./_chroot_test | sudo -n tee ./_local/_chroot_test.log && exit ${PIPESTATUS[0]}
 
-      - name: Force KVM group perms
-        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
-        shell: bash
-        run: |
-          sudo -n ls -l /dev/kvm
-          sudo -n ls -l /dev/kvm*
-          sudo -n chown -R $USER:docker /dev/kvm
-          sudo -n chmod 664 /dev/kvm
-          echo
-          #grep --color svm /proc/cpuinfo || true
-          #grep --color vmx /proc/cpuinfo || true
-          sudo -n lsmod | grep kvm
-          ls -l /dev/kvm
-          ls -l /dev/kvm*
-          echo $USER
-          groups
-          echo
-      - name: _create_ubDistBuild-bootOnce
-        shell: bash
-        run: |
-          export skimfast=${{ inputs.skimfast }}
-          echo skimfast $skimfast
-          export qemuNoKVM=${{ inputs.qemuNoKVM }}
-          echo qemuNoKVM $qemuNoKVM
-          echo
-          ./_create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log && exit ${PIPESTATUS[0]}
+      #- name: Force KVM group perms
+        #if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
+        #shell: bash
+        #run: |
+          #sudo -n ls -l /dev/kvm
+          #sudo -n ls -l /dev/kvm*
+          #sudo -n chown -R $USER:docker /dev/kvm
+          #sudo -n chmod 664 /dev/kvm
+          #echo
+          ##grep --color svm /proc/cpuinfo || true
+          ##grep --color vmx /proc/cpuinfo || true
+          #sudo -n lsmod | grep kvm
+          #ls -l /dev/kvm
+          #ls -l /dev/kvm*
+          #echo $USER
+          #groups
+          #echo
+      #- name: _create_ubDistBuild-bootOnce
+        #shell: bash
+        #run: |
+          #export skimfast=${{ inputs.skimfast }}
+          #echo skimfast $skimfast
+          #export qemuNoKVM=${{ inputs.qemuNoKVM }}
+          #echo qemuNoKVM $qemuNoKVM
+          #echo
+          #./_create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log && exit ${PIPESTATUS[0]}
 
       - name: _fetchCore
         shell: bash
@@ -460,10 +460,7 @@ jobs:
         shell: bash
         run: |
           ./_create_ubDistBuild-install-ubDistBuild | sudo -n tee ./_create_ubDistBuild-install-ubDistBuild.log && exit ${PIPESTATUS[0]}
-      #- name: _create_ubDistBuild-bootOnce
-        #shell: bash
-        #run: |
-          #./_create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log- name: release! package_image
+
       - name: scribe! info! github
         shell: bash
         run: |
@@ -473,6 +470,35 @@ jobs:
           ! date +"%Y-%m-%d" | ./ubiquitous_bash.sh _chroot tee -a /info-github && exit 1
           ! ./ubiquitous_bash.sh _closeChRoot && exit 1
           true
+
+
+      - name: Force KVM group perms
+        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
+        shell: bash
+        run: |
+          sudo -n ls -l /dev/kvm
+          sudo -n ls -l /dev/kvm*
+          sudo -n chown -R $USER:docker /dev/kvm
+          sudo -n chmod 664 /dev/kvm
+          echo
+          #grep --color svm /proc/cpuinfo || true
+          #grep --color vmx /proc/cpuinfo || true
+          sudo -n lsmod | grep kvm
+          ls -l /dev/kvm
+          ls -l /dev/kvm*
+          echo $USER
+          groups
+          echo
+      - name: _create_ubDistBuild-bootOnce
+        shell: bash
+        run: |
+          export skimfast=${{ inputs.skimfast }}
+          echo skimfast $skimfast
+          export qemuNoKVM=${{ inputs.qemuNoKVM }}
+          echo qemuNoKVM $qemuNoKVM
+          echo
+          ./_create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log && exit ${PIPESTATUS[0]}
+
 
       - name: _hash_img
         shell: bash
