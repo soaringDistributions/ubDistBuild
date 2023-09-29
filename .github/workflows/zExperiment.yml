@@ -197,7 +197,6 @@ jobs:
           export skimfast=${{ inputs.skimfast }}
           echo $skimfast
           ./ubiquitous_bash.sh _hash_img
-          rm -f ./_local/vm.img
 
 
       - name: _convert-rootfs
@@ -346,7 +345,6 @@ jobs:
           export skimfast=${{ inputs.skimfast }}
           echo $skimfast
           ./ubiquitous_bash.sh _hash_img
-          rm -f ./_local/vm.img
 
 
 
@@ -611,7 +609,7 @@ jobs:
           export FORCE_AXEL=8
           export MANDATORY_HASH="true"
           cd ./_local
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_rootfs.tar.flx" 2> /dev/null | lz4 -d -c > ./package_rootfs.tar
+          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_rootfs.tar.flx" 2> /dev/null > ./package_rootfs.tar.flx
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -621,7 +619,7 @@ jobs:
           export skimfast=${{ inputs.skimfast }}
           echo $skimfast
           ./ubiquitous_bash.sh _hash_rootfs
-          rm -f ./_local/package_rootfs.tar
+          rm -f ./_local/package_rootfs.tar.flx
 
 
 
