@@ -693,7 +693,7 @@ jobs:
           export FORCE_AXEL=8
           export MANDATORY_HASH="true"
           cd ./_local
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "latest" "package_image.tar.flx" 2> /dev/null | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image.tar.flx" 2> /dev/null | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -859,7 +859,7 @@ jobs:
           export FORCE_AXEL=8
           export MANDATORY_HASH="true"
           cd ./_local
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "latest" "package_image.tar.flx" 2> /dev/null | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image.tar.flx" 2> /dev/null | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -1121,7 +1121,7 @@ jobs:
           export FORCE_AXEL=8
           export MANDATORY_HASH="true"
           cd ./_local
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "latest" "package_image.tar.flx" 2> /dev/null | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image.tar.flx" 2> /dev/null | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -1145,7 +1145,7 @@ jobs:
           export FORCE_AXEL=8
           export MANDATORY_HASH="true"
           cd ./_local
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "latest" "package_rootfs.tar.flx" 2> /dev/null | lz4 -d -c > ./package_rootfs.tar
+          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_rootfs.tar.flx" 2> /dev/null | lz4 -d -c > ./package_rootfs.tar
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -1169,7 +1169,7 @@ jobs:
           export FORCE_AXEL=8
           export MANDATORY_HASH="true"
           cd ./_local
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "latest" "vm-live.iso" 2> /dev/null
+          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "vm-live.iso" 2> /dev/null
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
