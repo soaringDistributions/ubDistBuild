@@ -86,16 +86,21 @@ jobs:
         run: |
           curl -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ""${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28"  https://api.github.com/rate_limit
           #curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/rate_limit | jq -r ".rate"
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          submodules: 'recursive'
       - name: release! create
         shell: bash
         run: |
           gh release create build-${{ github.run_id }}-${{ github.run_attempt }} --title build --notes ""
         env:
           GH_TOKEN: ${{ github.token }}
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-          submodules: 'recursive'
+      - name: report! API Rate Limit
+        shell: bash
+        run: |
+          curl -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ""${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28"  https://api.github.com/rate_limit
+          #curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/rate_limit | jq -r ".rate"
 
 
   build_installer:
