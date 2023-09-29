@@ -1307,5 +1307,7 @@ jobs:
         shell: bash
         run: |
           gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/_hash-ubdist.txt
+        env:
+          GH_TOKEN: ${{ github.token }}
 
 
