@@ -697,6 +697,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: _hash_img
+        shell: bash
+        run: |
+          export skimfast=${{ inputs.skimfast }}
+          echo $skimfast
+          ./ubiquitous_bash.sh _hash_img
+          rm -f ./_local/vm.img
+
 
       - name: _convert-rootfs
         shell: bash
@@ -862,6 +870,14 @@ jobs:
           ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image.tar.flx" 2> /dev/null | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: _hash_img
+        shell: bash
+        run: |
+          export skimfast=${{ inputs.skimfast }}
+          echo $skimfast
+          ./ubiquitous_bash.sh _hash_img
+          rm -f ./_local/vm.img
 
 
 

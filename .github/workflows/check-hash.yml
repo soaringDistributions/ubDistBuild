@@ -187,11 +187,13 @@ jobs:
       - name: _get_vmImg_ubDistBuild
         shell: bash
         run: |
-          current_releaseLabel="${{ inputs.releaseLabel }}"
-          #[[ "$current_releaseLabel" == "" ]] && current_releaseLabel="base"
-          [[ "$current_releaseLabel" == "" ]] && current_releaseLabel="latest"
+          #export FORCE_AXEL=8
+          #./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
+          # DANGER: Github Actions (strictly internal) ONLY!
           export FORCE_AXEL=8
-          ./ubiquitous_bash.sh _get_vmImg_ubDistBuild "$current_releaseLabel"
+          export MANDATORY_HASH="true"
+          cd ./_local
+          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image.tar.flx" 2> /dev/null | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -209,11 +211,13 @@ jobs:
       - name: _get_vmImg_ubDistBuild-rootfs
         shell: bash
         run: |
-          current_releaseLabel="${{ inputs.releaseLabel }}"
-          #[[ "$current_releaseLabel" == "" ]] && current_releaseLabel="base"
-          [[ "$current_releaseLabel" == "" ]] && current_releaseLabel="latest"
+          #export FORCE_AXEL=8
+          #./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
+          # DANGER: Github Actions (strictly internal) ONLY!
           export FORCE_AXEL=8
-          ./ubiquitous_bash.sh _get_vmImg_ubDistBuild-rootfs "$current_releaseLabel"
+          export MANDATORY_HASH="true"
+          cd ./_local
+          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_rootfs.tar.flx" 2> /dev/null | lz4 -d -c > ./package_rootfs.tar
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -231,11 +235,13 @@ jobs:
       - name: _get_vmImg_ubDistBuild-live
         shell: bash
         run: |
-          current_releaseLabel="${{ inputs.releaseLabel }}"
-          #[[ "$current_releaseLabel" == "" ]] && current_releaseLabel="base"
-          [[ "$current_releaseLabel" == "" ]] && current_releaseLabel="latest"
+          #export FORCE_AXEL=8
+          #./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
+          # DANGER: Github Actions (strictly internal) ONLY!
           export FORCE_AXEL=8
-          ./ubiquitous_bash.sh _get_vmImg_ubDistBuild-live "$current_releaseLabel"
+          export MANDATORY_HASH="true"
+          cd ./_local
+          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "vm-live.iso" 2> /dev/null
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
