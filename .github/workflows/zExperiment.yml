@@ -511,6 +511,14 @@ jobs:
           ##! sudo -n apt-get -y clean && exit 1
           #df -h
           #df -h /
+      
+      - name: _getMost-aria2
+        shell: bash
+        run: |
+          sudo -n apt-get -y clean
+          sudo -n apt-get update
+          sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y aria2
+        timeout-minutes: 355
 
       - uses: actions/checkout@v3
         with:
