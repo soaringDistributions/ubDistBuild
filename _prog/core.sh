@@ -765,6 +765,11 @@ _create_ubDistBuild-rotten_install-core() {
 	_messageNormal 'chroot: rotten_install: core: extra'
 
 
+	export getMost_backend="chroot"
+	_set_getMost_backend "$@"
+	_set_getMost_backend_debian "$@"
+	_test_getMost_backend "$@"
+	
 	_getMost_backend_aptGetInstall gnucash
 
 	
