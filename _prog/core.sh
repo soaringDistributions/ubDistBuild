@@ -770,6 +770,8 @@ _create_ubDistBuild-rotten_install-core() {
 	_set_getMost_backend_debian "$@"
 	_test_getMost_backend "$@"
 	
+	_getMost_backend apt-get update
+	
 	_getMost_backend_aptGetInstall gnucash
 
 	
