@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1508902130'
+export ub_setScriptChecksum_contents='426471824'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -10635,6 +10635,7 @@ _getMost_debian11_install() {
 
 
 	_getMost_backend_aptGetInstall fldigi
+	_getMost_backend_aptGetInstall psk31lx
 	
 	
 	_getMost_backend apt-get remove --autoremove -y plasma-discover
@@ -43137,7 +43138,80 @@ _create_ubDistBuild-rotten_install-core() {
 	
 	_getMost_backend apt-get update
 	
+	#_getMost_backend_aptGetInstall fldigi
+	#_getMost_backend_aptGetInstall psk31lx
+	
 	_getMost_backend_aptGetInstall gnucash
+
+	_getMost_backend_aptGetInstall gnuradio
+	_getMost_backend_aptGetInstall gnuradio-doc
+	_getMost_backend_aptGetInstall gnuradio-dev
+
+	_chroot sudo -n -u user bash -c 'cd /home/user/core/installations/gr-pipe ; mkdir -p ./build ; cd ./build ; cmake .. ; make ; sudo -n make install'
+
+	_getMost_backend_aptGetInstall gr-air-modes
+	_getMost_backend_aptGetInstall gr-fosphor
+	_getMost_backend_aptGetInstall gr-funcube
+	_getMost_backend_aptGetInstall gr-gsm
+	_getMost_backend_aptGetInstall gr-iqbal
+	_getMost_backend_aptGetInstall gr-radar
+	_getMost_backend_aptGetInstall gr-radar-doc
+	_getMost_backend_aptGetInstall gr-rds
+	_getMost_backend_aptGetInstall gr-satellites
+
+	_getMost_backend_aptGetInstall inspectrum
+
+
+	# https://github.com/merbanan/rtl_433
+	_chroot rm -f /etc/modprobe.d/blacklist-dvb-rtl.conf
+	echo 'blacklist dvb_usb_rtl28xxu' | sudo -n tee -a "$globalVirtFS"/etc/modprobe.d/blacklist-dvb-rtl.conf
+
+	_getMost_backend_aptGetInstall rtl-433
+
+
+	_getMost_backend_aptGetInstall gqrx-sdr
+
+	_getMost_backend_aptGetInstall rtl-sdr
+
+
+	_getMost_backend_aptGetInstall hamradio-sdr
+
+	_getMost_backend_aptGetInstall airspy
+	_getMost_backend_aptGetInstall bladerf
+	_getMost_backend_aptGetInstall cubicsdr
+	_getMost_backend_aptGetInstall cutesdr
+	_getMost_backend_aptGetInstall gnss-sdr
+	_getMost_backend_aptGetInstall gr-hpsdr
+	_getMost_backend_aptGetInstall gr-limesdr
+	_getMost_backend_aptGetInstall gr-osmosdr
+	_getMost_backend_aptGetInstall hackrf
+	_getMost_backend_aptGetInstall indi-limesdr
+	_getMost_backend_aptGetInstall limesuite
+	_getMost_backend_aptGetInstall limesuite-udev
+	_getMost_backend_aptGetInstall miri-sdr
+	_getMost_backend_aptGetInstall osmo-fl2k
+	_getMost_backend_aptGetInstall osmo-sdr
+	_getMost_backend_aptGetInstall osmo-trx
+	_getMost_backend_aptGetInstall python3-bladerf
+	_getMost_backend_aptGetInstall python3-soapysdr
+	_getMost_backend_aptGetInstall python3-qthid-fcd-controller
+	_getMost_backend_aptGetInstall quisk
+	_getMost_backend_aptGetInstall soapysdr-tools
+	_getMost_backend_aptGetInstall soapysdr-module-all
+	_getMost_backend_aptGetInstall soapysdr-module xtrx
+	_getMost_backend_aptGetInstall uhd-soapysdr
+
+	_getMost_backend apt-get remove -y xtrx-dkms
+	_getMost_backend apt-get remove -y xtrx-fft
+	#_getMost_backend_aptGetInstall xtrx-dkms
+	#_getMost_backend_aptGetInstall xtrx-fft
+
+	
+	_getMost_backend_aptGetInstall wfview
+	
+
+	_getMost_backend_aptGetInstall gpsbabel
+
 
 	
 
@@ -43217,6 +43291,13 @@ _create_ubDistBuild-rotten_install-core() {
 
 
 
+
+	_chroot sudo -n systemctl disable ssh
+	_chroot systemctl disable ssh.service
+
+	_chroot sudo -n systemctl disable sshd
+	_chroot systemctl disable sshd.service
+	
 
 	_chroot systemctl disable man-db
 
