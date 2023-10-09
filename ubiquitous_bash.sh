@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3402523074'
+export ub_setScriptChecksum_contents='634859113'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -8147,11 +8147,11 @@ _cfgFW_procedure() {
 	ufw deny 49152:65535/udp
 	
 	
-	! ufw status verbose | grep '^Default' | grep -F 'deny (incoming)' > /dev/null 2>&1 && messagePlain_warn 'warn: missing: default: ''ufw default deny incoming'
+	! ufw status verbose | grep '^Default' | grep -F 'deny (incoming)' > /dev/null 2>&1 && _messagePlain_warn 'warn: missing: default: ''ufw default deny incoming'
 	ufw default deny incoming
 	if ! ufw status verbose | grep '^Default' | grep -F 'deny (incoming)' > /dev/null 2>&1
 	then
-		messagePlain_bad 'bad: missing: default: ''ufw default deny incoming'
+		_messagePlain_bad 'bad: missing: default: ''ufw default deny incoming'
 	else
 		_messagePlain_good 'deny (apparently): ufw: ''incoming'
 	fi
@@ -44009,6 +44009,40 @@ _create_ubDistBuild-rotten_install-core() {
     _writeFW_ip-cloudfareDNS-port "$globalVirtFS"
 	_writeFW_ip-DUBIOUS "$globalVirtFS"
 
+	
+	sudo -n mv "$globalVirtFS"/usr/bin/iptables "$globalVirtFS"/usr/bin/iptables-orig
+	sudo -n mv "$globalVirtFS"/bin/iptables "$globalVirtFS"/bin/iptables-orig
+	sudo -n mv "$globalVirtFS"/usr/sbin/iptables "$globalVirtFS"/usr/sbin/iptables-orig
+	sudo -n mv "$globalVirtFS"/sbin/iptables "$globalVirtFS"/sbin/iptables-orig
+	sudo -n mv "$globalVirtFS"/usr/bin/ip6tables "$globalVirtFS"/usr/bin/ip6tables-orig
+	sudo -n mv "$globalVirtFS"/bin/ip6tables "$globalVirtFS"/bin/ip6tables-orig
+	sudo -n mv "$globalVirtFS"/usr/sbin/ip6tables "$globalVirtFS"/usr/sbin/ip6tables-orig
+	sudo -n mv "$globalVirtFS"/sbin/ip6tables "$globalVirtFS"/sbin/ip6tables-orig
+
+	sudo -n rm -f "$globalVirtFS"/usr/bin/iptables
+	sudo -n rm -f "$globalVirtFS"/bin/iptables
+	sudo -n rm -f "$globalVirtFS"/usr/sbin/iptables
+	sudo -n rm -f "$globalVirtFS"/sbin/iptables
+	sudo -n rm -f "$globalVirtFS"/usr/bin/ip6tables
+	sudo -n rm -f "$globalVirtFS"/bin/ip6tables
+	sudo -n rm -f "$globalVirtFS"/usr/sbin/ip6tables
+	sudo -n rm -f "$globalVirtFS"/sbin/ip6tables
+
+	cat << 'CZXWXcRMTo8EmM8i4d' | sudo -n tee "$globalVirtFS"/usr/bin/iptables > /dev/null
+#!/bin/bash
+
+true
+
+exit 0
+CZXWXcRMTo8EmM8i4d
+	sudo -n cat "$globalVirtFS"/usr/bin/iptables | sudo -n tee "$globalVirtFS"/usr/bin/ip6tables > /dev/null
+
+	sudo -n chown root:root "$globalVirtFS"/usr/bin/iptables
+	sudo -n chmod 755 "$globalVirtFS"/usr/bin/iptables
+	sudo -n chown root:root "$globalVirtFS"/usr/bin/ip6tables
+	sudo -n chmod 755 "$globalVirtFS"/usr/bin/ip6tables
+
+	_messagePlain_probe '__________________________________________________'
 	# Stricter rules (ie. '_cfgFW-terminal' ) may be applied later if appropriate.
 	#_chroot sudo -n -u user bash -c 'cd /home/user/.ubcore/ubiquitous_bash ; ./ubiquitous_bash.sh _cfgFW'
 	#echo
@@ -44020,6 +44054,29 @@ _create_ubDistBuild-rotten_install-core() {
 	echo
 	echo
 	_chroot sudo -n -u user bash -c 'cd /home/user/.ubcore/ubiquitous_bash ; ./ubiquitous_bash.sh _cfgFW-desktop'
+	_messagePlain_probe '__________________________________________________'
+
+	sudo -n rm -f "$globalVirtFS"/usr/bin/iptables
+	sudo -n rm -f "$globalVirtFS"/bin/iptables
+	sudo -n rm -f "$globalVirtFS"/usr/sbin/iptables
+	sudo -n rm -f "$globalVirtFS"/sbin/iptables
+	sudo -n rm -f "$globalVirtFS"/usr/bin/ip6tables
+	sudo -n rm -f "$globalVirtFS"/bin/ip6tables
+	sudo -n rm -f "$globalVirtFS"/usr/sbin/ip6tables
+	sudo -n rm -f "$globalVirtFS"/sbin/ip6tables
+
+	sudo -n mv -f "$globalVirtFS"/usr/bin/iptables-orig "$globalVirtFS"/usr/bin/iptables
+	sudo -n mv -f "$globalVirtFS"/bin/iptables-orig "$globalVirtFS"/bin/iptables
+	sudo -n mv -f "$globalVirtFS"/usr/sbin/iptables-orig "$globalVirtFS"/usr/sbin/iptables
+	sudo -n mv -f "$globalVirtFS"/sbin/iptables-orig "$globalVirtFS"/sbin/iptables
+	sudo -n mv -f "$globalVirtFS"/usr/bin/ip6tables-orig "$globalVirtFS"/usr/bin/ip6tables
+	sudo -n mv -f "$globalVirtFS"/bin/ip6tables-orig "$globalVirtFS"/bin/ip6tables
+	sudo -n mv -f "$globalVirtFS"/usr/sbin/ip6tables-orig "$globalVirtFS"/usr/sbin/ip6tables
+	sudo -n mv -f "$globalVirtFS"/sbin/ip6tables-orig "$globalVirtFS"/sbin/ip6tables
+
+
+
+
 
 
 
