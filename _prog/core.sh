@@ -1011,11 +1011,29 @@ _create_ubDistBuild-rotten_install-core() {
 	cat << 'CZXWXcRMTo8EmM8i4d' | sudo -n tee "$globalVirtFS"/usr/bin/iptables > /dev/null
 #!/bin/bash
 
+if [[ "$1" == "--version" ]] || [[ "$1" == "-V" ]]
+then
+	echo "iptables v1.8.7 (nf_tables)"
+	exit 0
+fi
+
 true
 
 exit 0
 CZXWXcRMTo8EmM8i4d
-	sudo -n cat "$globalVirtFS"/usr/bin/iptables | sudo -n tee "$globalVirtFS"/usr/bin/ip6tables > /dev/null
+	cat << 'CZXWXcRMTo8EmM8i4d' | sudo -n tee "$globalVirtFS"/usr/bin/ip6tables > /dev/null
+#!/bin/bash
+
+if [[ "$1" == "--version" ]] || [[ "$1" == "-V" ]]
+then
+	echo "ip6tables v1.8.7 (nf_tables)"
+	exit 0
+fi
+
+true
+
+exit 0
+CZXWXcRMTo8EmM8i4d
 
 	sudo -n chown root:root "$globalVirtFS"/usr/bin/iptables
 	sudo -n chmod 755 "$globalVirtFS"/usr/bin/iptables

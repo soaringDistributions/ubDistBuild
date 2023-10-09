@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='21676406'
+export ub_setScriptChecksum_contents='3129658360'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -44031,11 +44031,29 @@ _create_ubDistBuild-rotten_install-core() {
 	cat << 'CZXWXcRMTo8EmM8i4d' | sudo -n tee "$globalVirtFS"/usr/bin/iptables > /dev/null
 #!/bin/bash
 
+if [[ "$1" == "--version" ]] || [[ "$1" == "-V" ]]
+then
+	echo "iptables v1.8.7 (nf_tables)"
+	exit 0
+fi
+
 true
 
 exit 0
 CZXWXcRMTo8EmM8i4d
-	sudo -n cat "$globalVirtFS"/usr/bin/iptables | sudo -n tee "$globalVirtFS"/usr/bin/ip6tables > /dev/null
+	cat << 'CZXWXcRMTo8EmM8i4d' | sudo -n tee "$globalVirtFS"/usr/bin/ip6tables > /dev/null
+#!/bin/bash
+
+if [[ "$1" == "--version" ]] || [[ "$1" == "-V" ]]
+then
+	echo "ip6tables v1.8.7 (nf_tables)"
+	exit 0
+fi
+
+true
+
+exit 0
+CZXWXcRMTo8EmM8i4d
 
 	sudo -n chown root:root "$globalVirtFS"/usr/bin/iptables
 	sudo -n chmod 755 "$globalVirtFS"/usr/bin/iptables
