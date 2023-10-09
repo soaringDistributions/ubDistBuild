@@ -984,6 +984,7 @@ _create_ubDistBuild-rotten_install-core() {
 
     _writeFW_ip-github-port "$globalVirtFS"
 	_writeFW_ip-google-port "$globalVirtFS"
+	_writeFW_ip-misc-port "$globalVirtFS"
     _writeFW_ip-googleDNS-port "$globalVirtFS"
     _writeFW_ip-cloudfareDNS-port "$globalVirtFS"
 
