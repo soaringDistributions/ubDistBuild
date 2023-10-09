@@ -1792,7 +1792,7 @@ _zSpecial_qemu_sequence_prog() {
 	echo 'sleep 15' >> "$hostToGuestFiles"/cmd.sh
 	echo '! sudo -n lsmod | grep -i vboxdrv && sudo -n /sbin/vboxconfig' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sleep 75' >> "$hostToGuestFiles"/cmd.sh
-	echo 'sudo -n lsmod | sudo -n tee /lsmodReport' >> "$hostToGuestFiles"/cmd.sh
+	echo 'sudo -n lsmod | cut -f1 -d\  | sudo -n tee /lsmodReport' >> "$hostToGuestFiles"/cmd.sh
 	echo 'kded5 --check' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sleep 90' >> "$hostToGuestFiles"/cmd.sh
 	echo 'kded5 --check' >> "$hostToGuestFiles"/cmd.sh
