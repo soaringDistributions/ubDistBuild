@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='540092245'
+export ub_setScriptChecksum_contents='3500197359'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -8276,8 +8276,8 @@ _ip-githubDotCOM() {
 }
 _ip-githubassetsDotCOM() {
     # ATTRIBUTION: ChatGPT4 2023-10-08 .
-    dig github.githubassets.com A +short | tr -dc 'a-zA-Z0-9\:\/\.\n' @8.8.8.8
-    dig github.githubassets.com AAAA +short | tr -dc 'a-zA-Z0-9\:\/\.\n' @8.8.8.8
+    dig github.githubassets.com A +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    dig github.githubassets.com AAAA +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
 }
 _ip-github() {
     _ip-githubDotCOM
@@ -8285,37 +8285,37 @@ _ip-github() {
 }
 
 _ip-google() {
-    dig google.com A +short | tr -dc 'a-zA-Z0-9\:\/\.\n' @8.8.8.8
-    dig google.com AAAA +short | tr -dc 'a-zA-Z0-9\:\/\.\n' @8.8.8.8
-    dig accounts.google.com A +short | tr -dc 'a-zA-Z0-9\:\/\.\n' @8.8.8.8
-    dig accounts.google.com AAAA +short | tr -dc 'a-zA-Z0-9\:\/\.\n' @8.8.8.8
-    dig gmail.com A +short | tr -dc 'a-zA-Z0-9\:\/\.\n' @8.8.8.8
-    dig gmail.com AAAA +short | tr -dc 'a-zA-Z0-9\:\/\.\n' @8.8.8.8
+    dig google.com A +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    dig google.com AAAA +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    dig accounts.google.com A +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    dig accounts.google.com AAAA +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    dig gmail.com A +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    dig gmail.com AAAA +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
 }
 
 # WARNING: May be untested.
 # DANGER: Strongly discouraged. May not be protective against embedded malicious adds. In particular, many Google ads may be present at other (ie. Facebook) sites.
 # ATTENTION: Override with 'ops.sh' or similar .
 _ip-misc() {
-    dig wikipedia.com A +short | tr -dc 'a-zA-Z0-9\:\/\.\n' @8.8.8.8
-    dig wikipedia.com AAAA +short | tr -dc 'a-zA-Z0-9\:\/\.\n' @8.8.8.8
+    dig wikipedia.com A +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    dig wikipedia.com AAAA +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
 
-    dig gitlab.com A +short | tr -dc 'a-zA-Z0-9\:\/\.\n' @8.8.8.8
-    dig gitlab.com AAAA +short | tr -dc 'a-zA-Z0-9\:\/\.\n' @8.8.8.8
+    dig gitlab.com A +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    dig gitlab.com AAAA +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
 
-    dig linkedin.com A +short | tr -dc 'a-zA-Z0-9\:\/\.\n' @8.8.8.8
-    dig linkedin.com AAAA +short | tr -dc 'a-zA-Z0-9\:\/\.\n' @8.8.8.8
-    dig facebook.com A +short | tr -dc 'a-zA-Z0-9\:\/\.\n' @8.8.8.8
-    dig facebook.com AAAA +short | tr -dc 'a-zA-Z0-9\:\/\.\n' @8.8.8.8
-    dig microsoft.com A +short | tr -dc 'a-zA-Z0-9\:\/\.\n' @8.8.8.8
-    dig microsoft.com AAAA +short | tr -dc 'a-zA-Z0-9\:\/\.\n' @8.8.8.8
-    dig youtube.com A +short | tr -dc 'a-zA-Z0-9\:\/\.\n' @8.8.8.8
-    dig youtube.com AAAA +short | tr -dc 'a-zA-Z0-9\:\/\.\n' @8.8.8.8
+    dig linkedin.com A +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    dig linkedin.com AAAA +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    dig facebook.com A +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    dig facebook.com AAAA +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    dig microsoft.com A +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    dig microsoft.com AAAA +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    dig youtube.com A +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    dig youtube.com AAAA +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
 
-    dig openai.com A +short | tr -dc 'a-zA-Z0-9\:\/\.\n' @8.8.8.8
-    dig openai.com AAAA +short | tr -dc 'a-zA-Z0-9\:\/\.\n' @8.8.8.8
-    dig chat.openai.com A +short | tr -dc 'a-zA-Z0-9\:\/\.\n' @8.8.8.8
-    dig chat.openai.com AAAA +short | tr -dc 'a-zA-Z0-9\:\/\.\n' @8.8.8.8
+    dig openai.com A +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    dig openai.com AAAA +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    dig chat.openai.com A +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    dig chat.openai.com AAAA +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
 }
 
 _ip-googleDNS() {
