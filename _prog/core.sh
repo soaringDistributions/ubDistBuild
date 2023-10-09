@@ -987,6 +987,7 @@ _create_ubDistBuild-rotten_install-core() {
 	_writeFW_ip-misc-port "$globalVirtFS"
     _writeFW_ip-googleDNS-port "$globalVirtFS"
     _writeFW_ip-cloudfareDNS-port "$globalVirtFS"
+	_writeFW_ip-DUBIOUS "$globalVirtFS"
 
 	# Stricter rules (ie. '_cfgFW-terminal' ) may be applied later if appropriate.
 	#_chroot sudo -n -u user bash -c 'cd /home/user/.ubcore/ubiquitous_bash ; ./ubiquitous_bash.sh _cfgFW'

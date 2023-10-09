@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3500197359'
+export ub_setScriptChecksum_contents='1722297915'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -8181,11 +8181,26 @@ _cfgFW-desktop() {
     export ub_cfgFW="desktop"
     sudo -n --preserve-env=ub_cfgFW "$scriptAbsoluteLocation" _cfgFW_procedure "$@"
 }
+_cfgFW-limited() {
+    _messageNormal 'init: _cfgFW-limited'
+
+    export ub_cfgFW="desktop"
+    sudo -n --preserve-env=ub_cfgFW "$scriptAbsoluteLocation" _cfgFW_procedure "$@"
+
+    _writeFW_ip-DUBIOUS
+
+    _messageNormal '_cfgFW-terminal: deny'
+    _messagePlain_probe 'probe: ufw deny to   DUBIOUS'
+    sudo -n xargs -r -L 1 -P 10 "$scriptAbsoluteLocation" _messagePlain_probe_cmd ufw deny out from any to < <(cat /ip-DUBIOUS.txt | grep -v '^#')
+}
 
 _cfgFW-terminal_prog() {
     #_messageNormal 'init: _cfgFW-terminal_prog'
     true
 }
+# https://serverfault.com/questions/907607/slow-rules-inserting-in-ufw
+#  Possibly might be less reliable.
+#  DANGER: Syntax may be different for 'output' instead of 'input' .
 _cfgFW-terminal() {
     _messageNormal 'init: _cfgFW-terminal'
     export ub_cfgFW="terminal"
@@ -8196,21 +8211,22 @@ _cfgFW-terminal() {
     #_writeFW_ip-misc-port
     _writeFW_ip-googleDNS-port
     _writeFW_ip-cloudfareDNS-port
+    #_writeFW_ip-DUBIOUS
 
     sudo -n --preserve-env=ub_cfgFW "$scriptAbsoluteLocation" _cfgFW_procedure "$@"
 
     _messageNormal '_cfgFW-terminal: _cfgFW-github'
-    sudo -n xargs -r -L 1 "$scriptAbsoluteLocation" _messagePlain_probe_cmd ufw allow out from any to < <(cat /ip-github-port.txt)
+    sudo -n xargs -r -L 1 -P 10 "$scriptAbsoluteLocation" _messagePlain_probe_cmd ufw allow out from any to < <(cat /ip-github-port.txt | grep -v '^#')
 
     _messageNormal '_cfgFW-terminal: allow'
     #_messagePlain_probe 'probe: ufw allow to   Google'
-    #sudo -n xargs -r -L 1 "$scriptAbsoluteLocation" _messagePlain_probe_cmd ufw allow out from any to < <(cat /ip-google-port.txt)
+    #sudo -n xargs -r -L 1 -P 10 "$scriptAbsoluteLocation" _messagePlain_probe_cmd ufw allow out from any to < <(cat /ip-google-port.txt | grep -v '^#')
     #_messagePlain_probe 'probe: ufw allow to   misc'
-    #sudo -n xargs -r -L 1 "$scriptAbsoluteLocation" _messagePlain_probe_cmd ufw allow out from any to < <(cat /ip-misc-port.txt)
+    #sudo -n xargs -r -L 1 -P 10 "$scriptAbsoluteLocation" _messagePlain_probe_cmd ufw allow out from any to < <(cat /ip-misc-port.txt | grep -v '^#')
 
     _messagePlain_probe 'probe: ufw allow to   DNS'
-    sudo -n xargs -r -L 1 "$scriptAbsoluteLocation" _messagePlain_probe_cmd ufw allow out from any to < <(cat /ip-googleDNS-port.txt)
-    sudo -n xargs -r -L 1 "$scriptAbsoluteLocation" _messagePlain_probe_cmd ufw allow out from any to < <(cat /ip-cloudfareDNS-port.txt)
+    sudo -n xargs -r -L 1 "$scriptAbsoluteLocation" _messagePlain_probe_cmd ufw allow out from any to < <(cat /ip-googleDNS-port.txt | grep -v '^#')
+    sudo -n xargs -r -L 1 "$scriptAbsoluteLocation" _messagePlain_probe_cmd ufw allow out from any to < <(cat /ip-cloudfareDNS-port.txt | grep -v '^#')
 
     _messageNormal '_cfgFW-terminal: resolv'
     _ip-googleDNS | sed -e 's/^/nameserver /g' | sudo -n tee /etc/resolv.conf > /dev/null
@@ -8225,6 +8241,51 @@ _cfgFW-terminal() {
 }
 
 
+
+_cfgFW-misc_prog() {
+    #_messageNormal 'init: _cfgFW-terminal_prog'
+    true
+}
+_cfgFW-misc() {
+    _messageNormal 'init: _cfgFW-misc'
+    export ub_cfgFW="terminal"
+    
+    #_start
+    _writeFW_ip-github-port
+    _writeFW_ip-google-port
+    _writeFW_ip-misc-port
+    _writeFW_ip-googleDNS-port
+    _writeFW_ip-cloudfareDNS-port
+    #_writeFW_ip-DUBIOUS
+
+    sudo -n --preserve-env=ub_cfgFW "$scriptAbsoluteLocation" _cfgFW_procedure "$@"
+
+    _messageNormal '_cfgFW-misc: _cfgFW-github'
+    sudo -n xargs -r -L 1 -P 10 "$scriptAbsoluteLocation" _messagePlain_probe_cmd ufw allow out from any to < <(cat /ip-github-port.txt | grep -v '^#')
+
+    _messageNormal '_cfgFW-misc: allow'
+    _messagePlain_probe 'probe: ufw allow to   Google'
+    sudo -n xargs -r -L 1 -P 10 "$scriptAbsoluteLocation" _messagePlain_probe_cmd ufw allow out from any to < <(cat /ip-google-port.txt | grep -v '^#')
+    _messagePlain_probe 'probe: ufw allow to   misc'
+    sudo -n xargs -r -L 1 -P 10 "$scriptAbsoluteLocation" _messagePlain_probe_cmd ufw allow out from any to < <(cat /ip-misc-port.txt | grep -v '^#')
+
+    _messagePlain_probe 'probe: ufw allow to   DNS'
+    sudo -n xargs -r -L 1 "$scriptAbsoluteLocation" _messagePlain_probe_cmd ufw allow out from any to < <(cat /ip-googleDNS-port.txt | grep -v '^#')
+    sudo -n xargs -r -L 1 "$scriptAbsoluteLocation" _messagePlain_probe_cmd ufw allow out from any to < <(cat /ip-cloudfareDNS-port.txt | grep -v '^#')
+
+    _messageNormal '_cfgFW-misc: resolv'
+    _ip-googleDNS | sed -e 's/^/nameserver /g' | sudo -n tee /etc/resolv.conf > /dev/null
+
+    _cfgFW-misc_prog "$@"
+
+    _messageNormal '_cfgFW-misc: status'
+    sudo -n ufw status verbose
+    sudo -n ufw reload
+
+    #_stop
+}
+
+
 _writeFW_ip-github-port() {
     [[ ! $(sudo -n wc -c "$1"/ip-github-port.txt 2>/dev/null | cut -f1 -d\  | tr -dc '0-9') -gt 2 ]] && "$scriptAbsoluteLocation" _ip-github | sed 's/$/ port 22,443 proto tcp/g' | sudo -n tee "$1"/ip-github-port.txt > /dev/null
 }
@@ -8232,13 +8293,16 @@ _writeFW_ip-google-port() {
     [[ ! $(sudo -n wc -c "$1"/ip-google-port.txt 2>/dev/null | cut -f1 -d\  | tr -dc '0-9') -gt 2 ]] && "$scriptAbsoluteLocation" _ip-google | sed 's/$/ port 443/g' | sudo -n tee "$1"/ip-google-port.txt > /dev/null
 }
 _writeFW_ip-misc-port() {
-    [[ ! $(sudo -n wc -c "$1"/ip-google-port.txt 2>/dev/null | cut -f1 -d\  | tr -dc '0-9') -gt 2 ]] && "$scriptAbsoluteLocation" _ip-misc | sed 's/$/ port 443/g' | sudo -n tee "$1"/ip-misc-port.txt > /dev/null
+    [[ ! $(sudo -n wc -c "$1"/ip-misc-port.txt 2>/dev/null | cut -f1 -d\  | tr -dc '0-9') -gt 2 ]] && "$scriptAbsoluteLocation" _ip-misc | sed 's/$/ port 443/g' | sudo -n tee "$1"/ip-misc-port.txt > /dev/null
 }
 _writeFW_ip-googleDNS-port() {
     [[ ! $(sudo -n wc -c "$1"/ip-googleDNS-port.txt 2>/dev/null | cut -f1 -d\  | tr -dc '0-9') -gt 2 ]] && "$scriptAbsoluteLocation" _ip-googleDNS | sed 's/$/ port 53/g' | sudo -n tee "$1"/ip-googleDNS-port.txt > /dev/null
 }
 _writeFW_ip-cloudfareDNS-port() {
     [[ ! $(sudo -n wc -c "$1"/ip-cloudfareDNS-port.txt 2>/dev/null | cut -f1 -d\  | tr -dc '0-9') -gt 2 ]] && "$scriptAbsoluteLocation" _ip-cloudfareDNS | sed 's/$/ port 53/g' | sudo -n tee "$1"/ip-cloudfareDNS-port.txt > /dev/null
+}
+_writeFW_ip-DUBIOUS() {
+    [[ ! $(sudo -n wc -c "$1"/ip-DUBIOUS.txt 2>/dev/null | cut -f1 -d\  | tr -dc '0-9') -gt 2 ]] && "$scriptAbsoluteLocation" _ip-DUBIOUS | sudo -n tee "$1"/ip-DUBIOUS.txt > /dev/null
 }
 
 
@@ -8262,6 +8326,15 @@ _test_fw() {
 
 
 
+_ip-dig() {
+    # https://unix.stackexchange.com/questions/723287/using-dig-to-query-an-address-without-resolving-cnames
+    # https://serverfault.com/questions/965368/how-do-i-ask-dig-to-only-return-the-ip-from-a-cname-record
+    echo '#'"$1"
+    dig -t a +short "$1" @8.8.8.8 2>/dev/null | tr -dc 'a-zA-Z0-9\:\/\.\n' | grep -v '\.$' | grep -v 'error'
+    dig -t aaaa +short "$1" @8.8.8.8 2>/dev/null | tr -dc 'a-zA-Z0-9\:\/\.\n' | grep -v '\.$' | grep -v 'error'
+    true
+}
+
 
 # WARNING: May be untested.
 _ip-githubDotCOM() {
@@ -8276,8 +8349,7 @@ _ip-githubDotCOM() {
 }
 _ip-githubassetsDotCOM() {
     # ATTRIBUTION: ChatGPT4 2023-10-08 .
-    dig github.githubassets.com A +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
-    dig github.githubassets.com AAAA +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    _ip-dig github.githubassets.com
 }
 _ip-github() {
     _ip-githubDotCOM
@@ -8285,37 +8357,88 @@ _ip-github() {
 }
 
 _ip-google() {
-    dig google.com A +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
-    dig google.com AAAA +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
-    dig accounts.google.com A +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
-    dig accounts.google.com AAAA +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
-    dig gmail.com A +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
-    dig gmail.com AAAA +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    _ip-dig google.com
+    _ip-dig accounts.google.com
+    _ip-dig mail.google.com
+    _ip-dig gmail.com
 }
 
 # WARNING: May be untested.
 # DANGER: Strongly discouraged. May not be protective against embedded malicious adds. In particular, many Google ads may be present at other (ie. Facebook) sites.
 # ATTENTION: Override with 'ops.sh' or similar .
 _ip-misc() {
-    dig wikipedia.com A +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
-    dig wikipedia.com AAAA +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    _ip-dig ic3.gov
+    _ip-dig www.ic3.gov
 
-    dig gitlab.com A +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
-    dig gitlab.com AAAA +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    _ip-dig cvedetails.com
+    _ip-dig www.cvedetails.com
 
-    dig linkedin.com A +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
-    dig linkedin.com AAAA +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
-    dig facebook.com A +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
-    dig facebook.com AAAA +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
-    dig microsoft.com A +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
-    dig microsoft.com AAAA +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
-    dig youtube.com A +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
-    dig youtube.com AAAA +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    _ip-dig wikipedia.com
+    _ip-dig www.wikipedia.com
 
-    dig openai.com A +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
-    dig openai.com AAAA +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
-    dig chat.openai.com A +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
-    dig chat.openai.com AAAA +short @8.8.8.8 | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    _ip-dig stackexchange.com
+    _ip-dig serverfault.com
+    _ip-dig superuser.com
+    _ip-dig cyberciti.biz
+    _ip-dig www.cyberciti.biz
+    _ip-dig arduino.cc
+    _ip-dig forum.arduino.cc
+
+    _ip-dig debian.org
+    _ip-dig www.debian.org
+    _ip-dig gpo.zugaina.org
+    
+    _ip-dig appimage.org
+
+    _ip-dig weather.gov
+    _ip-dig radar.weather.gov
+    _ip-dig fcc.gov
+    _ip-dig www.fcc.gov
+
+    _ip-dig bing.com
+    _ip-dig www.bing.com
+
+    _ip-dig gitlab.com
+    
+    _ip-dig twitter.com
+    _ip-dig x.com
+    
+    _ip-dig hackaday.com
+
+    _ip-dig linkedin.com
+    _ip-dig facebook.com
+    _ip-dig microsoft.com
+    _ip-dig youtube.com
+    
+    _ip-dig discord.com
+
+    _ip-dig live.com
+    _ip-dig login.live.com
+    _ip-dig outlook.live.com
+    
+    _ip-dig proton.me
+    _ip-dig mail.proton.me
+    _ip-dig account.proton.me
+
+    _ip-dig netflix.com
+    _ip-dig www.netflix.com
+    _ip-dig spotify.com
+    _ip-dig open.spotify.com
+    
+    _ip-dig amazon.com
+    _ip-dig ebay.com
+
+    _ip-dig openai.com
+    _ip-dig chat.openai.com
+    
+    _ip-dig signal.org
+    _ip-dig wire.com
+    _ip-dig app.wire.com
+
+    _ip-dig liberra.chat
+    _ip-dig web.liberra.chat
+
+    _ip-dig mozilla.org
 }
 
 _ip-googleDNS() {
@@ -8334,6 +8457,57 @@ _ip-cloudfareDNS() {
     echo '1.0.0.1'
     echo '2606:4700:4700::1111'
     echo '2606:4700:4700::1001'
+}
+
+
+
+# No disrespect . Limited purpose computers, outgoing connections to only the arguably largest moderated reasonably friendly tech companies .
+# https://youtu.be/RoZeVbbZ0o0?si=Q6l7fkBciFM-JKo3&t=3117
+# https://www.ipdeny.com/ipblocks/
+# https://en.wikipedia.org/wiki/United_States_sanctions#Countries
+_ip-DUBIOUS() {
+    echo '#ru'
+    wget -O - -q 'https://www.ipdeny.com/ipblocks/data/aggregated/ru-aggregated.zone' | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    wget -O - -q 'https://www.ipdeny.com/ipv6/ipaddresses/aggregated/ru-aggregated.zone' | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    echo '#by'
+    wget -O - -q 'https://www.ipdeny.com/ipblocks/data/aggregated/by-aggregated.zone' | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    wget -O - -q 'https://www.ipdeny.com/ipv6/ipaddresses/aggregated/by-aggregated.zone' | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    echo '#sy'
+    wget -O - -q 'https://www.ipdeny.com/ipblocks/data/aggregated/sy-aggregated.zone' | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    wget -O - -q 'https://www.ipdeny.com/ipv6/ipaddresses/aggregated/sy-aggregated.zone' | tr -dc 'a-zA-Z0-9\:\/\.\n'
+
+    echo '#kp'
+    wget -O - -q 'https://www.ipdeny.com/ipblocks/data/aggregated/kp-aggregated.zone' | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    wget -O - -q 'https://www.ipdeny.com/ipv6/ipaddresses/aggregated/kp-aggregated.zone' | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    echo '#ir'
+    wget -O - -q 'https://www.ipdeny.com/ipblocks/data/aggregated/ir-aggregated.zone' | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    wget -O - -q 'https://www.ipdeny.com/ipv6/ipaddresses/aggregated/ir-aggregated.zone' | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    echo '#cu'
+    wget -O - -q 'https://www.ipdeny.com/ipblocks/data/aggregated/cu-aggregated.zone' | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    wget -O - -q 'https://www.ipdeny.com/ipv6/ipaddresses/aggregated/cu-aggregated.zone' | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    echo '#af'
+    wget -O - -q 'https://www.ipdeny.com/ipblocks/data/aggregated/af-aggregated.zone' | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    wget -O - -q 'https://www.ipdeny.com/ipv6/ipaddresses/aggregated/af-aggregated.zone' | tr -dc 'a-zA-Z0-9\:\/\.\n'
+
+    echo '#ve'
+    wget -O - -q 'https://www.ipdeny.com/ipblocks/data/aggregated/ve-aggregated.zone' | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    wget -O - -q 'https://www.ipdeny.com/ipv6/ipaddresses/aggregated/ve-aggregated.zone' | tr -dc 'a-zA-Z0-9\:\/\.\n'
+
+    echo '#ph'
+    wget -O - -q 'https://www.ipdeny.com/ipblocks/data/aggregated/ph-aggregated.zone' | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    wget -O - -q 'https://www.ipdeny.com/ipv6/ipaddresses/aggregated/ph-aggregated.zone' | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    echo '#vn'
+    wget -O - -q 'https://www.ipdeny.com/ipblocks/data/aggregated/vn-aggregated.zone' | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    wget -O - -q 'https://www.ipdeny.com/ipv6/ipaddresses/aggregated/vn-aggregated.zone' | tr -dc 'a-zA-Z0-9\:\/\.\n'
+
+    # Arguably large moderated reasonably friendly tech companies here. Think: AliExpress .
+    #echo '#cn'
+    #wget -O - -q 'https://www.ipdeny.com/ipblocks/data/aggregated/cn-aggregated.zone' | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    #wget -O - -q 'https://www.ipdeny.com/ipv6/ipaddresses/aggregated/cn-aggregated.zone' | tr -dc 'a-zA-Z0-9\:\/\.\n'
+
+    echo '#aq'
+    wget -O - -q 'https://www.ipdeny.com/ipblocks/data/aggregated/aq-aggregated.zone' | tr -dc 'a-zA-Z0-9\:\/\.\n'
+    wget -O - -q 'https://www.ipdeny.com/ipv6/ipaddresses/aggregated/aq-aggregated.zone' | tr -dc 'a-zA-Z0-9\:\/\.\n'
 }
 
 
@@ -43829,6 +44003,7 @@ _create_ubDistBuild-rotten_install-core() {
 	_writeFW_ip-misc-port "$globalVirtFS"
     _writeFW_ip-googleDNS-port "$globalVirtFS"
     _writeFW_ip-cloudfareDNS-port "$globalVirtFS"
+	_writeFW_ip-DUBIOUS "$globalVirtFS"
 
 	# Stricter rules (ie. '_cfgFW-terminal' ) may be applied later if appropriate.
 	#_chroot sudo -n -u user bash -c 'cd /home/user/.ubcore/ubiquitous_bash ; ./ubiquitous_bash.sh _cfgFW'
