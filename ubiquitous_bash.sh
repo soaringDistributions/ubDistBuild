@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3129658360'
+export ub_setScriptChecksum_contents='940106962'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -44009,6 +44009,10 @@ _create_ubDistBuild-rotten_install-core() {
     _writeFW_ip-cloudfareDNS-port "$globalVirtFS"
 	_writeFW_ip-DUBIOUS "$globalVirtFS"
 
+
+	# ### ATTENTION: Block comment. ### #
+	if false
+	then
 	
 	sudo -n mv "$globalVirtFS"/usr/bin/iptables "$globalVirtFS"/usr/bin/iptables-orig
 	sudo -n mv "$globalVirtFS"/bin/iptables "$globalVirtFS"/bin/iptables-orig
@@ -44092,8 +44096,8 @@ CZXWXcRMTo8EmM8i4d
 	sudo -n mv -f "$globalVirtFS"/usr/sbin/ip6tables-orig "$globalVirtFS"/usr/sbin/ip6tables
 	sudo -n mv -f "$globalVirtFS"/sbin/ip6tables-orig "$globalVirtFS"/sbin/ip6tables
 
-
-
+	fi
+	# ### ATTENTION: Block comment. ### #
 
 
 
@@ -44781,6 +44785,11 @@ _zSpecial_qemu_chroot() {
 		sudo -n cp -f "$globalVirtFS"/lsmodReport "$scriptLocal"/lsmodReport
 		sudo -n chown "$USER":"$USER" "$scriptLocal"/lsmodReport
 	fi
+	if [[ -e "$globalVirtFS"/cfgFW.log ]]
+	then
+		sudo -n cp -f "$globalVirtFS"/cfgFW.log "$scriptLocal"/cfgFW.log
+		sudo -n chown "$USER":"$USER" "$scriptLocal"/cfgFW.log
+	fi
 
 	#_chroot cat /boot/grub/grub.cfg | sudo -n tee "$globalVirtFS"/grub.cfg > /dev/null
 	sudo -n cp -f "$globalVirtFS"/boot/grub/grub.cfg "$scriptLocal"/grub.cfg
@@ -44833,6 +44842,9 @@ _zSpecial_qemu_sequence_prog() {
 	echo 'sudo -n lsmod | cut -f1 -d\  | sudo -n tee /lsmodReport' >> "$hostToGuestFiles"/cmd.sh
 	echo 'kded5 --check' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sleep 90' >> "$hostToGuestFiles"/cmd.sh
+
+	echo 'cd /home/user/.ubcore/ubiquitous_bash ; ./ubiquitous_bash.sh _cfgFW-desktop | sudo -n tee /cfgFW.log ; cd' >> "$hostToGuestFiles"/cmd.sh
+
 	echo 'kded5 --check' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sleep 420' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sudo -n poweroff' >> "$hostToGuestFiles"/cmd.sh
