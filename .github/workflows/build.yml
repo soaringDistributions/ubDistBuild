@@ -505,6 +505,11 @@ jobs:
           export skimfast=${{ inputs.skimfast }}
           echo $skimfast
           ./ubiquitous_bash.sh _hash_img
+
+      - name: report! cfgFW
+        shell: bash
+        run: |
+          cat ./_local/cfgFW.log
       
       - name: release! report! internal
         shell: bash
