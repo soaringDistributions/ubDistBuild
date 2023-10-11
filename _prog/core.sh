@@ -850,6 +850,20 @@ _create_ubDistBuild-rotten_install-core() {
 
 
 
+	_getMost_backend_aptGetInstall sox
+	
+	_getMost_backend_aptGetInstall ladspa-sdk
+	#_getMost_backend_aptGetInstall ladspa-plugin
+	_getMost_backend_aptGetInstall swh-plugins
+	_getMost_backend_aptGetInstall tap-plugins
+	_getMost_backend_aptGetInstall cmt
+	_getMost_backend_aptGetInstall bs2b-ladspa
+
+	_getMost_backend_aptGetInstall mplayer
+	_getMost_backend_aptGetInstall w-scan
+
+
+
 
 	_getMost_backend apt-get remove -y avahi-daemon
 	_getMost_backend apt-get remove -y avahi-utils
