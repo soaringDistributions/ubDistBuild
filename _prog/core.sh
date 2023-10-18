@@ -861,6 +861,10 @@ _create_ubDistBuild-rotten_install-core() {
 
 	_getMost_backend_aptGetInstall mplayer
 	_getMost_backend_aptGetInstall w-scan
+	
+	
+	
+	#_getMost_backend_aptGetInstall stellarium
 
 
 
@@ -870,6 +874,18 @@ _create_ubDistBuild-rotten_install-core() {
 	_getMost_backend apt-get remove -y ipp-usb
 
 	_getMost_backend apt-get remove -y kdeconnect
+	
+	
+	# DANGER: ChRoot or similar incomplete use of entire dist/OS may invalidate essential presumptions.
+	#  DANGER: Presuming trust for these binaries is already equivalent to trust of an entire dist/OS .
+	#  CAUTION: Presuming conflicts with other installed software is a non-issue for an entire dist/OS .
+	_getMost_backend_aptGetInstall yubikey-manager
+	_getMost_backend_aptGetInstall yubico-piv-tool
+	
+	
+	
+	
+	_getMost_backend apt-get -y clean
 
 	
 
