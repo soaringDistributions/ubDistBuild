@@ -55,11 +55,11 @@ _get_vmImg_ubDistBuild_sequence() {
 	local currentExitStatus
 	if [[ "$3" == "" ]] || [[ "$FORCE_AXEL" != "" ]]
 	then
-		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild xv --overwrite
+		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild -x -v --overwrite
 		currentExitStatus="$?"
 	else
 		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild --extract vm.img --to-stdout | _dd of="$3" bs=1M
-		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild --extract vm.img --to-stdout | sudo -n dd of="$3" bs=1M status=progress
+		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild --extract ./vm.img --to-stdout | sudo -n dd of="$3" bs=1M status=progress
 		currentExitStatus="$?"
 	fi
 	if [[ "$currentExitStatus" != "0" ]]
