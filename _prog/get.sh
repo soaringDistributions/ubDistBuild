@@ -9,7 +9,9 @@ _get_extract_ubDistBuild() {
 
 	#xz -d | tar xv --overwrite "$@"
 
-	lz4 -d -c | tar xv --overwrite "$@"
+	#lz4 -d -c | tar xv --overwrite "$@"
+	
+	lz4 -d -c | tar "$@"
 }
 
 
@@ -49,8 +51,16 @@ _get_vmImg_ubDistBuild_sequence() {
 	mkdir -p "$scriptLocal"/_get
 	cd "$scriptLocal"/_get
 	export MANDATORY_HASH="true"
-	_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild
-	if [[ "$?" != "0" ]]
+	local currentExitStatus
+	if [[ "$3" == "" ]] || [[ "$FORCE_AXEL" != "" ]]
+	then
+		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild xv --overwrite
+		currentExitStatus="$?"
+	else
+		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild --extract --to-stdout | _dd of="$3" bs=1M
+		currentExitStatus="$?"
+	fi
+	if [[ "$currentExitStatus" != "0" ]]
 	then
 		rm -f "$scriptLocal"/_get/ops.sh
 		_messageFAIL
@@ -58,10 +68,18 @@ _get_vmImg_ubDistBuild_sequence() {
 	export MANDATORY_HASH=
 	unset MANDATORY_HASH
 
-
-
+	#if [[ "$3" == "" ]] || [[ "$FORCE_AXEL" != "" ]]
+	#then
+		#true
+	#else
+		#_messagePlain_good 'done: dd: '"$3"
+		#_stop 0
+		#return 0
+	#fi
+	
+	
 	_messagePlain_nominal '_get_vmImg: hash'
-
+	
 	if [[ "$FORCE_AXEL" != "" ]] && [[ -e "$scriptLocal"/ops.sh ]]
 	then
 		mv -f "$scriptLocal"/_get/ops.sh "$scriptLocal"/_get/ops.sh.ref
@@ -69,10 +87,20 @@ _get_vmImg_ubDistBuild_sequence() {
 	fi
 	
 	local currentHash
+	local currentHash_bytes
 	export MANDATORY_HASH=
 	unset MANDATORY_HASH
-	[[ "$2" != "" ]] && currentHash="$2"
-	[[ "$2" == "" ]] && currentHash=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 3 | tail -n 1)
+	if [[ "$2" != "" ]]
+	then
+		currentHash="$2"
+		currentHash_bytes=$( [[ "$currentFilePath" != "/dev"* ]] && wc -c "$currentFilePath" )
+	fi
+	if [[ "$currentHash" == "" ]] || [[ "$currentHash_bytes" == "" ]]
+	then
+		currentHash=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 3 | tail -n 1)
+		currentHash_bytes=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 2 | tail -n 1 | sed 's/^.*count=$(bc <<< '"'"'//' | cut -f1 -d\  )
+	fi
+	( [[ "$currentHash" == "" ]] || [[ "$currentHash_bytes" == "" ]] ) && _messageFAIL
 	export MANDATORY_HASH=
 	unset MANDATORY_HASH
 
@@ -80,23 +108,25 @@ _get_vmImg_ubDistBuild_sequence() {
 	currentFilePath="$scriptLocal"/_get/vm.img
 	local currentHashLocal
 	if [[ -e "/etc/ssl/openssl_legacy.cnf" ]]
-    then
-        currentHashLocal=$(cat "$currentFilePath" | cat | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256)
-    else
-        currentHashLocal=$(cat "$currentFilePath" | cat | openssl dgst -whirlpool -binary | xxd -p -c 256)
-    fi
-
+	then
+		#currentHashLocal=$(cat "$currentFilePath" | cat | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256)
+		currentHashLocal=$(dd if="$currentFilePath" bs=1M count=$(bc <<< "$currentHash_bytes"' / 1048576') status=progress | cat | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256)
+	else
+		#currentHashLocal=$(cat "$currentFilePath" | cat | openssl dgst -whirlpool -binary | xxd -p -c 256)
+		currentHashLocal=$(dd if="$currentFilePath" bs=1M count=$(bc <<< "$currentHash_bytes"' / 1048576') status=progress | cat | openssl dgst -whirlpool -binary | xxd -p -c 256)
+	fi
+	
 	_messagePlain_probe_var currentHash
 	_messagePlain_probe_var currentHashLocal
 	[[ "$currentHash" != "$currentHashLocal" ]] && _messageFAIL
-
+	
 	_messagePlain_good 'done: hash'
-
+	
 	mv -f "$scriptLocal"/_get/vm.img "$scriptLocal"/vm.img
 	mv -f "$scriptLocal"/_get/* "$scriptLocal"/
 	rmdir "$scriptLocal"/_get
 	_safeRMR "$scriptLocal"/_get
-
+	
 	cd "$functionEntryPWD"
 }
 _get_vmImg_ubDistBuild() {
@@ -120,40 +150,62 @@ _get_vmImg_ubDistBuild-live_sequence() {
 	mkdir -p "$scriptLocal"
 	cd "$scriptLocal"
 	export MANDATORY_HASH="true"
-	_wget_githubRelease_join "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso"
-	[[ "$?" != "0" ]] && _messageFAIL
+	if [[ "$3" == "" ]] || [[ "$FORCE_AXEL" != "" ]]
+	then
+		_wget_githubRelease_join "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso"
+		currentExitStatus="$?"
+	else
+		currentHash_bytes=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 14 | tail -n 1 | sed 's/^.*count=$(bc <<< '"'"'//' | cut -f1 -d\  )
+		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | sudo -n wodim -v -sao dev="$3" tsize="$currentHash_bytes" -waiti -
+		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | sudo -n growisofs -dvd-compat -Z "$3"=/dev/stdin -use-the-force-luke=notray
+		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | cat > /dev/null
+		currentExitStatus="$?"
+	fi
+	[[ "$currentExitStatus" != "0" ]] && _messageFAIL
 	export MANDATORY_HASH=
 	unset MANDATORY_HASH
-
-
-
+	
+	
+	
 	_messagePlain_nominal '_get_vmImg: hash'
-
+	
 	
 	local currentHash
 	export MANDATORY_HASH=
 	unset MANDATORY_HASH
-	[[ "$2" != "" ]] && currentHash="$2"
-	[[ "$2" == "" ]] && currentHash=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 15 | tail -n 1)
+	if [[ "$2" != "" ]]
+	then
+		currentHash="$2"
+		currentHash_bytes=$( [[ "$currentFilePath" != "/dev"* ]] && wc -c "$currentFilePath" )
+	fi
+	if [[ "$currentHash" == "" ]] || [[ "$currentHash_bytes" == "" ]]
+	then
+		currentHash=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 15 | tail -n 1)
+		currentHash_bytes=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 14 | tail -n 1 | sed 's/^.*count=$(bc <<< '"'"'//' | cut -f1 -d\  )
+	fi
+	( [[ "$currentHash" == "" ]] || [[ "$currentHash_bytes" == "" ]] ) && _messageFAIL
 	export MANDATORY_HASH=
 	unset MANDATORY_HASH
-
+	
 	local currentFilePath
 	currentFilePath="$scriptLocal"/vm-live.iso
 	local currentHashLocal
 	if [[ -e "/etc/ssl/openssl_legacy.cnf" ]]
-    then
-        currentHashLocal=$(cat "$currentFilePath" | cat | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256)
-    else
-        currentHashLocal=$(cat "$currentFilePath" | cat | openssl dgst -whirlpool -binary | xxd -p -c 256)
-    fi
-
+	then
+		#currentHashLocal=$(cat "$currentFilePath" | cat | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256)
+		currentHashLocal=$(dd if="$currentFilePath" bs=2048 count=$(bc <<< "$currentHash_bytes"' / 2048') status=progress | cat | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256)
+	else
+		#currentHashLocal=$(cat "$currentFilePath" | cat | openssl dgst -whirlpool -binary | xxd -p -c 256)
+		currentHashLocal=$(dd if="$currentFilePath" bs=2048 count=$(bc <<< "$currentHash_bytes"' / 2048') status=progress | cat | openssl dgst -whirlpool -binary | xxd -p -c 256)
+	fi
+	
+	_messagePlain_probe_var currentHash_bytes
 	_messagePlain_probe_var currentHash
 	_messagePlain_probe_var currentHashLocal
 	[[ "$currentHash" != "$currentHashLocal" ]] && _messageFAIL
-
+	
 	_messagePlain_good 'done: hash'
-
+	
 	cd "$functionEntryPWD"
 }
 _get_vmImg_ubDistBuild-live() {
@@ -252,7 +304,7 @@ _get_core_ubDistFetch_sequence() {
 	#if ( [[ -e /rclone.conf ]] && grep distLLC_release /rclone.conf ) || ( [[ -e "$scriptLocal"/rclone_limited/rclone.conf ]] && grep distLLC_release "$scriptLocal"/rclone_limited/rclone.conf )
 	#then
 		## https://rclone.org/commands/rclone_cat/
-		#_rclone_limited cat distLLC_release:/ubDistFetch/core.tar.xz | _get_extract_ubDistBuild
+		#_rclone_limited cat distLLC_release:/ubDistFetch/core.tar.xz | _get_extract_ubDistBuild xv --overwrite
 		#[[ "$?" != "0" ]] && _messageFAIL
 	#fi
 	
