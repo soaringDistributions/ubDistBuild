@@ -5,6 +5,9 @@
 #export skimfast=true
 #export devfast=true
 _revert-fromLive() {
+	[[ "$1" != "" ]] && export ubVirtImageOverride="$1"
+
+
 	# /run/live/rootfs/filesystem.squashfs
     # "$scriptLocal"/vm.img
     
@@ -14,7 +17,7 @@ _revert-fromLive() {
 
     [[ -e "$scriptLocal"/package_rootfs.tar.flx ]] && _messagePlain_bad 'unexpected: good: found: package_rootfs.tar.flx' && return 0
     
-    [[ -e "$scriptLocal"/vm.img ]] && _messagePlain_bad 'unexpected: bad: missing: /run/live/rootfs/filesystem.squashfs' && return 0
+    [[ ! -e /run/live/rootfs/filesystem.squashfs ]] && _messagePlain_bad 'unexpected: bad: missing: /run/live/rootfs/filesystem.squashfs' && return 0
     
     # /run/live/rootfs/filesystem.squashfs
     
@@ -29,7 +32,7 @@ _revert-fromLive() {
 	
 	
 	
-	_createVMimage "$@"
+	_createVMimage
 
 
     _messageNormal 'os: globalVirtFS: write: rootfs'
