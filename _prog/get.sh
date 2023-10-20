@@ -50,6 +50,7 @@ _get_vmImg_ubDistBuild_sequence() {
 	cd "$scriptLocal"
 	mkdir -p "$scriptLocal"/_get
 	cd "$scriptLocal"/_get
+	rm -f "$scriptLocal"/_get/ops.sh
 	export MANDATORY_HASH="true"
 	local currentExitStatus
 	if [[ "$3" == "" ]] || [[ "$FORCE_AXEL" != "" ]]
@@ -57,7 +58,8 @@ _get_vmImg_ubDistBuild_sequence() {
 		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild xv --overwrite
 		currentExitStatus="$?"
 	else
-		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild --extract --to-stdout | _dd of="$3" bs=1M
+		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild --extract vm.img --to-stdout | _dd of="$3" bs=1M
+		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild --extract vm.img --to-stdout | sudo -n dd of="$3" bs=1M status=progress
 		currentExitStatus="$?"
 	fi
 	if [[ "$currentExitStatus" != "0" ]]
@@ -116,6 +118,7 @@ _get_vmImg_ubDistBuild_sequence() {
 		currentHashLocal=$(dd if="$currentFilePath" bs=1M count=$(bc <<< "$currentHash_bytes"' / 1048576') status=progress | cat | openssl dgst -whirlpool -binary | xxd -p -c 256)
 	fi
 	
+	_messagePlain_probe_var currentHash_bytes
 	_messagePlain_probe_var currentHash
 	_messagePlain_probe_var currentHashLocal
 	[[ "$currentHash" != "$currentHashLocal" ]] && _messageFAIL
@@ -123,9 +126,9 @@ _get_vmImg_ubDistBuild_sequence() {
 	_messagePlain_good 'done: hash'
 	
 	mv -f "$scriptLocal"/_get/vm.img "$scriptLocal"/vm.img
-	mv -f "$scriptLocal"/_get/* "$scriptLocal"/
+	#mv -f "$scriptLocal"/_get/* "$scriptLocal"/
 	rmdir "$scriptLocal"/_get
-	_safeRMR "$scriptLocal"/_get
+	#_safeRMR "$scriptLocal"/_get
 	
 	cd "$functionEntryPWD"
 }

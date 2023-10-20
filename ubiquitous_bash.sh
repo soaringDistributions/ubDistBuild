@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2253319826'
+export ub_setScriptChecksum_contents='562880230'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -11127,7 +11127,7 @@ _getMost_debian11_install() {
 	_getMost_backend_aptGetInstall genisoimage
 	
 	
-	_getMost_backend_aptGetInstall wodim
+	#_getMost_backend_aptGetInstall wodim
 	
 	
 	
@@ -46029,6 +46029,7 @@ _get_vmImg_ubDistBuild_sequence() {
 	cd "$scriptLocal"
 	mkdir -p "$scriptLocal"/_get
 	cd "$scriptLocal"/_get
+	rm -f "$scriptLocal"/_get/ops.sh
 	export MANDATORY_HASH="true"
 	local currentExitStatus
 	if [[ "$3" == "" ]] || [[ "$FORCE_AXEL" != "" ]]
@@ -46036,7 +46037,8 @@ _get_vmImg_ubDistBuild_sequence() {
 		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild xv --overwrite
 		currentExitStatus="$?"
 	else
-		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild --extract --to-stdout | _dd of="$3" bs=1M
+		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild --extract vm.img --to-stdout | _dd of="$3" bs=1M
+		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild --extract vm.img --to-stdout | sudo -n dd of="$3" bs=1M status=progress
 		currentExitStatus="$?"
 	fi
 	if [[ "$currentExitStatus" != "0" ]]
@@ -46095,6 +46097,7 @@ _get_vmImg_ubDistBuild_sequence() {
 		currentHashLocal=$(dd if="$currentFilePath" bs=1M count=$(bc <<< "$currentHash_bytes"' / 1048576') status=progress | cat | openssl dgst -whirlpool -binary | xxd -p -c 256)
 	fi
 	
+	_messagePlain_probe_var currentHash_bytes
 	_messagePlain_probe_var currentHash
 	_messagePlain_probe_var currentHashLocal
 	[[ "$currentHash" != "$currentHashLocal" ]] && _messageFAIL
@@ -46102,9 +46105,9 @@ _get_vmImg_ubDistBuild_sequence() {
 	_messagePlain_good 'done: hash'
 	
 	mv -f "$scriptLocal"/_get/vm.img "$scriptLocal"/vm.img
-	mv -f "$scriptLocal"/_get/* "$scriptLocal"/
+	#mv -f "$scriptLocal"/_get/* "$scriptLocal"/
 	rmdir "$scriptLocal"/_get
-	_safeRMR "$scriptLocal"/_get
+	#_safeRMR "$scriptLocal"/_get
 	
 	cd "$functionEntryPWD"
 }
@@ -46178,6 +46181,7 @@ _get_vmImg_ubDistBuild-live_sequence() {
 		currentHashLocal=$(dd if="$currentFilePath" bs=2048 count=$(bc <<< "$currentHash_bytes"' / 2048') status=progress | cat | openssl dgst -whirlpool -binary | xxd -p -c 256)
 	fi
 	
+	_messagePlain_probe_var currentHash_bytes
 	_messagePlain_probe_var currentHash
 	_messagePlain_probe_var currentHashLocal
 	[[ "$currentHash" != "$currentHashLocal" ]] && _messageFAIL
