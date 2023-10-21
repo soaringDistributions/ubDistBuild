@@ -11,8 +11,8 @@ _get_extract_ubDistBuild() {
 
 	#lz4 -d -c | tar xv --overwrite "$@"
 	
-	_messagePlain_probe 'tar '"$@"
-	lz4 -d -c | tar "$@"
+	#lz4 -d -c | tar "$@"
+	lz4 -d -c
 }
 
 
@@ -56,11 +56,11 @@ _get_vmImg_ubDistBuild_sequence() {
 	local currentExitStatus
 	if [[ "$3" == "" ]] || [[ "$FORCE_AXEL" != "" ]]
 	then
-		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild -x -v --overwrite
+		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild | tar -x -v --overwrite
 		currentExitStatus="$?"
 	else
 		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild --extract vm.img --to-stdout | _dd of="$3" bs=1M
-		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild --extract ./vm.img --to-stdout | sudo -n dd of="$3" bs=1M status=progress
+		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild | tar --extract ./vm.img --to-stdout | sudo -n dd of="$3" bs=1M status=progress
 		currentExitStatus="$?"
 	fi
 	if [[ "$currentExitStatus" != "0" ]]
@@ -308,7 +308,7 @@ _get_core_ubDistFetch_sequence() {
 	#if ( [[ -e /rclone.conf ]] && grep distLLC_release /rclone.conf ) || ( [[ -e "$scriptLocal"/rclone_limited/rclone.conf ]] && grep distLLC_release "$scriptLocal"/rclone_limited/rclone.conf )
 	#then
 		## https://rclone.org/commands/rclone_cat/
-		#_rclone_limited cat distLLC_release:/ubDistFetch/core.tar.xz | _get_extract_ubDistBuild xv --overwrite
+		#_rclone_limited cat distLLC_release:/ubDistFetch/core.tar.xz | _get_extract_ubDistBuild | tar xv --overwrite
 		#[[ "$?" != "0" ]] && _messageFAIL
 	#fi
 	
