@@ -5,7 +5,12 @@
 #export skimfast=true
 #export devfast=true
 _revert-fromLive() {
-	[[ "$1" != "" ]] && export ubVirtImageOverride="$1"
+	if [[ "$1" != "" ]]
+	then
+		#export ubVirtImageIsRootPartition='true'
+		export ubVirtImageIsDevice='true'
+		export ubVirtImageOverride="$1"
+	fi
 
 
 	# /run/live/rootfs/filesystem.squashfs
