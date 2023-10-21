@@ -11,6 +11,7 @@ _get_extract_ubDistBuild() {
 
 	#lz4 -d -c | tar xv --overwrite "$@"
 	
+	_messagePlain_probe 'tar '"$@"
 	lz4 -d -c | tar "$@"
 }
 
