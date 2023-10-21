@@ -137,9 +137,9 @@ CZXWXcRMTo8EmM8i4d
 	
 	#_getMost_backend_aptGetInstall grub-pc-bin
 	
-	_chroot env DEBIAN_FRONTEND=noninteractive debconf-set-selections <<< "grub-efi-amd64 grub2/update_nvram boolean false"
-	_chroot env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" remove -y grub-efi grub-efi-amd64
-	_getMost_backend_aptGetInstall linux-image-amd64 linux-headers-amd64 grub-efi
+	#_chroot env DEBIAN_FRONTEND=noninteractive debconf-set-selections <<< "grub-efi-amd64 grub2/update_nvram boolean false"
+	#_chroot env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" remove -y grub-efi grub-efi-amd64
+	#_getMost_backend_aptGetInstall linux-image-amd64 linux-headers-amd64 grub-efi
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 
