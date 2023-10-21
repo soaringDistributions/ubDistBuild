@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='4259101002'
+export ub_setScriptChecksum_contents='3357235535'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -15453,6 +15453,11 @@ _loopImage_imagefilename() {
 # "$1" == imagefilename
 # "$2" == imagedev (text)
 _loopImage_procedure_losetup() {
+	# SEVERE - Disabled for more consistent behavior. Aside from now 'wasting' a loopback device, this may break any legacy uses of 'ubVirtImageOverride' .
+	#  CAUTION: TODO: Testing.
+	# WARNING: Partition names (ie. '/dev/loop1' , '/dev/loop1p1') may change (eg. to '/dev/sda' , '/dev/sda1') .
+	#  If uncommenting this functionality, also ensure 'ubVirtImageEFI' declaration (eg. used by '_createVMimage()' ) is sufficiently dynamic .
+	# WARNING: If uncommenting this functionality, also uncomment related use of '_detect_deviceAsVirtImage' within _closeLoop related functions.
 	#if _detect_deviceAsVirtImage "$1"
 	#then
 		#! [[ -e "$1" ]] && _stop 1
@@ -17210,7 +17215,7 @@ _chroot() {
 	
 	local chrootExitStatus
 	
-	sudo -n env -i HOME="/root" TERM="${TERM}" SHELL="/bin/bash" PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" DISPLAY="$DISPLAY" XSOCK="$XSOCK" XAUTH="$XAUTH" localPWD="$localPWD" hostArch=$(uname -m) virtSharedUser="$virtGuestUser" USER="root" chrootName="chrt" devfast="$devfast" $(sudo -n bash -c "type -p chroot") "$chrootDir" "$@"
+	sudo -n env -i HOME="/root" TERM="${TERM}" SHELL="/bin/bash" PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" DISPLAY="$DISPLAY" XSOCK="$XSOCK" XAUTH="$XAUTH" localPWD="$localPWD" hostArch=$(uname -m) virtSharedUser="$virtGuestUser" USER="root" chrootName="chrt" devfast="$devfast" nonet="$nonet" $(sudo -n bash -c "type -p chroot") "$chrootDir" "$@"
 	
 	chrootExitStatus="$?"
 	
@@ -47474,7 +47479,7 @@ _revert-fromLive() {
 	imagedev=$(cat "$scriptLocal"/imagedev)
 	#_mountChRoot_image_x64_prog
 
-    sudo -n rsync -ax --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/. "$globalVirtFS"/
+    sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/. "$globalVirtFS"/
     
     _createVMfstab
     #sudo -n mv -f "$globalVirtFS"/fstab-copy "$globalVirtFS"/etc/fstab
@@ -47595,10 +47600,26 @@ CZXWXcRMTo8EmM8i4d
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 
 
-    _chroot_test
+	export nonet="true"
+	_chroot_test
 }
 
-
+_revert-fromLive-test() {
+	if [[ "$1" != "" ]]
+	then
+		#export ubVirtImageIsRootPartition='true'
+		export ubVirtImageIsDevice='true'
+		export ubVirtImageOverride="$1"
+	fi
+	
+	[[ -e "$scriptLocal"/vm.img ]] && _messagePlain_bad 'unexpected: good: found: vm.img' && return 0
+	[[ -e "$scriptLocal"/vm-live.iso ]] && _messagePlain_bad 'unexpected: good: found: vm-live.iso' && return 0
+	
+	[[ ! -e /run/live/rootfs/filesystem.squashfs ]] && _messagePlain_bad 'unexpected: bad: missing: /run/live/rootfs/filesystem.squashfs' && return 0
+	
+	export nonet="true"
+	_chroot_test
+}
 
 
 

@@ -47,7 +47,7 @@ _revert-fromLive() {
 	imagedev=$(cat "$scriptLocal"/imagedev)
 	#_mountChRoot_image_x64_prog
 
-    sudo -n rsync -ax --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/. "$globalVirtFS"/
+    sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/. "$globalVirtFS"/
     
     _createVMfstab
     #sudo -n mv -f "$globalVirtFS"/fstab-copy "$globalVirtFS"/etc/fstab
@@ -168,9 +168,25 @@ CZXWXcRMTo8EmM8i4d
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 
 
-    _chroot_test
+	export nonet="true"
+	_chroot_test
 }
 
-
+_revert-fromLive-test() {
+	if [[ "$1" != "" ]]
+	then
+		#export ubVirtImageIsRootPartition='true'
+		export ubVirtImageIsDevice='true'
+		export ubVirtImageOverride="$1"
+	fi
+	
+	[[ -e "$scriptLocal"/vm.img ]] && _messagePlain_bad 'unexpected: good: found: vm.img' && return 0
+	[[ -e "$scriptLocal"/vm-live.iso ]] && _messagePlain_bad 'unexpected: good: found: vm-live.iso' && return 0
+	
+	[[ ! -e /run/live/rootfs/filesystem.squashfs ]] && _messagePlain_bad 'unexpected: bad: missing: /run/live/rootfs/filesystem.squashfs' && return 0
+	
+	export nonet="true"
+	_chroot_test
+}
 
 
