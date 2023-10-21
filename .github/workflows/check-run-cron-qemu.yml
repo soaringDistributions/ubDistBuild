@@ -323,7 +323,8 @@ jobs:
           export FORCE_AXEL=8
           export MANDATORY_HASH="true"
           cd ./_local
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" 2> /dev/null | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+          [[ "$current_releaseLabel" == "latest" ]] && current_releaseLabel=""
+          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$current_releaseLabel" "package_image.tar.flx" 2> /dev/null | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
