@@ -33,18 +33,12 @@ on:
         - base
         - latest
         - internal
-      devfast:
-        type: boolean
-        default: true
       skimfast:
         type: boolean
         default: true
-      qemuNoKVM:
-        type: boolean
-        default: false
       runnerName:
         required: false
-        default: ubuntu-latest-m
+        default: ubuntu-latest
         type: choice
         options:
         - ubuntu-latest
