@@ -112,6 +112,7 @@ _get_vmImg_ubDistBuild_sequence() {
 
 	local currentFilePath
 	currentFilePath="$scriptLocal"/_get/vm.img
+	[[ "$3" != "" ]] && currentFilePath="$3"
 	local currentHashLocal
 	if [[ -e "/etc/ssl/openssl_legacy.cnf" ]]
 	then
@@ -196,6 +197,7 @@ _get_vmImg_ubDistBuild-live_sequence() {
 	
 	local currentFilePath
 	currentFilePath="$scriptLocal"/vm-live.iso
+	[[ "$3" != "" ]] && currentFilePath="$3"
 	local currentHashLocal
 	if [[ -e "/etc/ssl/openssl_legacy.cnf" ]]
 	then
