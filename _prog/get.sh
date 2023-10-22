@@ -197,6 +197,7 @@ _get_vmImg_ubDistBuild-live_sequence() {
 		
 		
 		#growisofs -M /dev/dvd=/dev/zero
+		growisofs -M /dev/sr1=/dev/zero -use-the-force-luke=notray
 	fi
 	[[ "$currentExitStatus" != "0" ]] && _messageFAIL
 	export MANDATORY_HASH=
