@@ -57,7 +57,7 @@ _get_vmImg_ubDistBuild_sequence() {
 	rm -f "$scriptLocal"/_get/ops.sh
 	export MANDATORY_HASH="true"
 	local currentExitStatus
-	if [[ "$3" == "" ]] || [[ "$FORCE_AXEL" != "" ]]
+	if [[ "$3" == "" ]] # || [[ "$FORCE_AXEL" != "" ]]
 	then
 		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image.tar.flx" | _get_extract_ubDistBuild-tar xv --overwrite
 		currentExitStatus="$?"
@@ -158,7 +158,7 @@ _get_vmImg_ubDistBuild-live_sequence() {
 	mkdir -p "$scriptLocal"
 	cd "$scriptLocal"
 	export MANDATORY_HASH="true"
-	if [[ "$3" == "" ]] || [[ "$FORCE_AXEL" != "" ]]
+	if [[ "$3" == "" ]] # || [[ "$FORCE_AXEL" != "" ]]
 	then
 		_wget_githubRelease_join "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso"
 		currentExitStatus="$?"
