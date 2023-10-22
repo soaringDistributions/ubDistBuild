@@ -165,7 +165,7 @@ _get_vmImg_ubDistBuild-live_sequence() {
 	else
 		currentHash_bytes=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 14 | tail -n 1 | sed 's/^.*count=$(bc <<< '"'"'//' | cut -f1 -d\  )
 		
-		# ATTENTION: If no sparing area is set here, the assumption is that directly written discs are intended for immediate use rather than as an archival longevity set.
+		# ATTENTION: If no sparing area is set here, the assumption is that directly written discs are intended for immediate use rather than as an archival quality set for which longevity would definitely be essential..
 		# CAUTION: No sparing area, defect management, is somewhat bad practice, relying exclusively on hash, and not ensuring good margin for readability.
 		#  There IS some evidence that ancient (>30years) optical discs used without defect management have had minor corruption as a direct result.
 		#   Weak areas may be a strong indication of factory contamination with corrosive material.
