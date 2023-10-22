@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3549903743'
+export ub_setScriptChecksum_contents='3074164416'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -25142,7 +25142,10 @@ _wget_githubRelease_join-stdout() {
 			fi
 			
 			
-			
+			# CAUTION: ATTENTION: Very important. Simultaneous reading and writing is *very* important for writing directly to slow media (ie. BD-R) .
+			#  NOTICE: Wirting directly to slow BD-R is essential for burning a Live disc from having booted a Live disc.
+			#   DANGER: Critical for rapid recovery back to recent upstream 'ubdist/OS' ! Do NOT unnecessarily degrade this capability!
+			#  Also theoretically helpful with especially fast network connections.
 			#if [[ "$currentIteration" != "0" ]]
 			if [[ -e "$currentAxelTmpFile".tmp2 ]]
 			then
@@ -46209,7 +46212,8 @@ _get_vmImg_ubDistBuild-live_sequence() {
 	else
 		currentHash_bytes=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 14 | tail -n 1 | sed 's/^.*count=$(bc <<< '"'"'//' | cut -f1 -d\  )
 		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | sudo -n wodim -v -sao dev="$3" tsize="$currentHash_bytes" -waiti -
-		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | sudo -n growisofs -dvd-compat -Z "$3"=/dev/stdin -use-the-force-luke=notray
+		#-speed=256
+		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | sudo -n growisofs -speed=256 -dvd-compat -Z "$3"=/dev/stdin -use-the-force-luke=notray
 		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | cat > /dev/null
 		currentExitStatus="$?"
 	fi

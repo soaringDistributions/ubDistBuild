@@ -165,7 +165,8 @@ _get_vmImg_ubDistBuild-live_sequence() {
 	else
 		currentHash_bytes=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 14 | tail -n 1 | sed 's/^.*count=$(bc <<< '"'"'//' | cut -f1 -d\  )
 		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | sudo -n wodim -v -sao dev="$3" tsize="$currentHash_bytes" -waiti -
-		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | sudo -n growisofs -dvd-compat -Z "$3"=/dev/stdin -use-the-force-luke=notray
+		#-speed=256
+		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | sudo -n growisofs -speed=256 -dvd-compat -Z "$3"=/dev/stdin -use-the-force-luke=notray
 		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | cat > /dev/null
 		currentExitStatus="$?"
 	fi
