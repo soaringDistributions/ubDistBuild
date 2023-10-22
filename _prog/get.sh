@@ -190,14 +190,27 @@ _get_vmImg_ubDistBuild-live_sequence() {
 		#-use-the-force-luke=bufsize:2560m
 		#pv -pterbTCB 1G
 		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | sudo -n growisofs -speed=256 -dvd-compat -Z "$3"=/dev/stdin -use-the-force-luke=notray
-		( _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | tee >(openssl dgst -whirlpool -binary | xxd -p -c 256 >> "$scriptLocal"/hash-download.txt) ; dd if=/dev/zero bs=2048 count=$(bc <<< '0 / 2048' ) ) | sudo -n growisofs -speed=4 -dvd-compat -Z "$3"=/dev/stdin -use-the-force-luke=notray -use-the-force-luke=spare:min -use-the-force-luke=bufsize:128m
 		
-		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | cat > /dev/null
+		
+		
+		
+		
+		#( _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | tee >(openssl dgst -whirlpool -binary | xxd -p -c 256 >> "$scriptLocal"/hash-download.txt) ; dd if=/dev/zero bs=2048 count=$(bc <<< '1000000000000 / 2048' ) ) | sudo -n growisofs -speed=4 -dvd-compat -Z "$3"=/dev/stdin -use-the-force-luke=notray -use-the-force-luke=spare:min -use-the-force-luke=bufsize:128m
+		#currentExitStatus="$?"
+		
+		( _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | tee >(openssl dgst -whirlpool -binary | xxd -p -c 256 >> "$scriptLocal"/hash-download.txt) ; dd if=/dev/zero bs=2048 count=$(bc <<< '1000000000000 / 2048' ) ) | sudo -n cdrecord -v -sao dev="$3" /dev/stdin
 		currentExitStatus="$?"
 		
 		
+		
+		
+		
+		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | cat > /dev/null
+		#currentExitStatus="$?"
+		
+		
 		#growisofs -M /dev/dvd=/dev/zero
-		growisofs -M /dev/sr1=/dev/zero -use-the-force-luke=notray
+		#growisofs -M /dev/sr1=/dev/zero -use-the-force-luke=notray
 	fi
 	[[ "$currentExitStatus" != "0" ]] && _messageFAIL
 	export MANDATORY_HASH=
