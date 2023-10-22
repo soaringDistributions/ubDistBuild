@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1840414901'
+export ub_setScriptChecksum_contents='643236397'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -46227,6 +46227,7 @@ _get_vmImg_ubDistBuild-live_sequence() {
 		fi
 		
 		# CAUTION: Cannot write interrupted pipe to disc without default management, apparently.
+		#  Outrunning the input by more than approximately one minute still seems to cause disc corruption. Possibly hardware specific.
 		# ATTENTION: If no sparing area is set here, the assumption is that directly written discs are intended for immediate use rather than as an archival quality set for which longevity would definitely be essential..
 		# CAUTION: No sparing area, defect management, is somewhat bad practice, relying exclusively on hash, and not ensuring good margin for readability.
 		#  There IS some evidence that ancient (>30years) optical discs used without defect management have had minor corruption as a direct result.
@@ -46234,16 +46235,17 @@ _get_vmImg_ubDistBuild-live_sequence() {
 		#-force -blank
 		#sudo -n dvd+rw-format -ssa=default "$3"
 		#sudo -n dvd+rw-format -ssa=min "$3"
-		sudo -n dvd+rw-format -ssa=256M "$3"
+		#sudo -n dvd+rw-format -ssa=256m "$3"
 		#sudo -n dvd+rw-format -ssa=none "$3"
 		
 		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | sudo -n wodim -v -sao dev="$3" tsize="$currentHash_bytes" -waiti -
 		#-speed=256
 		#-dvd-compat
 		#-overburn
-		#-use-the-force-luke=bufsize:2560M
+		#-use-the-force-luke=bufsize:2560m
+		#pv -pterbTCB 1G
 		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | sudo -n growisofs -speed=256 -dvd-compat -Z "$3"=/dev/stdin -use-the-force-luke=notray
-		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | sudo -n growisofs -speed=12 -overburn -Z "$3"=/dev/stdin -use-the-force-luke=notray -use-the-force-luke=spare:min
+		( _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | tee >(openssl dgst -whirlpool -binary | xxd -p -c 256 >> "$scriptLocal"/hash-download.txt) ; dd if=/dev/zero bs=2048 count=$(bc <<< '0 / 2048' ) ) | pv -pterbTCB 512M | sudo -n growisofs -speed=4 -dvd-compat -Z "$3"=/dev/stdin -use-the-force-luke=notray -use-the-force-luke=spare:min -use-the-force-luke=bufsize:128m
 		
 		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | cat > /dev/null
 		currentExitStatus="$?"
@@ -46295,6 +46297,7 @@ _get_vmImg_ubDistBuild-live_sequence() {
 	_messagePlain_probe_var currentHashLocal
 	[[ "$currentHash" != "$currentHashLocal" ]] && _messageFAIL
 	
+	rm -f "$scriptLocal"/hash-download.txt
 	_messagePlain_good 'done: hash'
 	
 	cd "$functionEntryPWD"
