@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3660068031'
+export ub_setScriptChecksum_contents='1161791866'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -46253,11 +46253,15 @@ _get_vmImg_ubDistBuild-live_sequence() {
 		
 		
 		
-		#( _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | tee >(openssl dgst -whirlpool -binary | xxd -p -c 256 >> "$scriptLocal"/hash-download.txt) ; dd if=/dev/zero bs=2048 count=$(bc <<< '1000000000000 / 2048' ) ) | sudo -n growisofs -speed=4 -dvd-compat -Z "$3"=/dev/stdin -use-the-force-luke=notray -use-the-force-luke=spare:min -use-the-force-luke=bufsize:128m
-		#currentExitStatus="$?"
-		
-		( _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | tee >(openssl dgst -whirlpool -binary | xxd -p -c 256 >> "$scriptLocal"/hash-download.txt) ; dd if=/dev/zero bs=2048 count=$(bc <<< '1000000000000 / 2048' ) ) | sudo -n cdrecord -v -sao dev="$3" /dev/stdin
+		( _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | tee >(openssl dgst -whirlpool -binary | xxd -p -c 256 >> "$scriptLocal"/hash-download.txt) ; dd if=/dev/zero bs=2048 count=$(bc <<< '1000000000000 / 2048' ) ) | sudo -n growisofs -speed=4 -dvd-compat -Z "$3"=/dev/stdin -use-the-force-luke=notray -use-the-force-luke=spare:min -use-the-force-luke=bufsize:128m
 		currentExitStatus="$?"
+		
+		
+		
+		# May be untested.
+		# Theoretically, wodim may be usable with Cygwin/MSW . Unfortunately, defect management may not be available. In any case, 'growisofs' is definitely preferable whenever possible.
+		#( _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | tee >(openssl dgst -whirlpool -binary | xxd -p -c 256 >> "$scriptLocal"/hash-download.txt) ; dd if=/dev/zero bs=2048 count=$(bc <<< '0 / 2048' ) ) | sudo -n wodim -v -sao fs=128m dev="$3" blank=session tsize="$currentHash_bytes" /dev/stdin
+		#currentExitStatus="$?"
 		
 		
 		
@@ -46270,7 +46274,11 @@ _get_vmImg_ubDistBuild-live_sequence() {
 		#growisofs -M /dev/dvd=/dev/zero
 		#growisofs -M /dev/sr1=/dev/zero -use-the-force-luke=notray
 	fi
-	[[ "$currentExitStatus" != "0" ]] && _messageFAIL
+	#[[ "$currentExitStatus" != "0" ]] && _messageFAIL
+	if [[ "$currentExitStatus" != "0" ]]
+	then
+		echo "Exit status 1 may be normal if caused by  'No space left on device'  ."
+	fi
 	export MANDATORY_HASH=
 	unset MANDATORY_HASH
 	

@@ -195,11 +195,15 @@ _get_vmImg_ubDistBuild-live_sequence() {
 		
 		
 		
-		#( _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | tee >(openssl dgst -whirlpool -binary | xxd -p -c 256 >> "$scriptLocal"/hash-download.txt) ; dd if=/dev/zero bs=2048 count=$(bc <<< '1000000000000 / 2048' ) ) | sudo -n growisofs -speed=4 -dvd-compat -Z "$3"=/dev/stdin -use-the-force-luke=notray -use-the-force-luke=spare:min -use-the-force-luke=bufsize:128m
-		#currentExitStatus="$?"
-		
-		( _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | tee >(openssl dgst -whirlpool -binary | xxd -p -c 256 >> "$scriptLocal"/hash-download.txt) ; dd if=/dev/zero bs=2048 count=$(bc <<< '1000000000000 / 2048' ) ) | sudo -n cdrecord -v -sao dev="$3" /dev/stdin
+		( _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | tee >(openssl dgst -whirlpool -binary | xxd -p -c 256 >> "$scriptLocal"/hash-download.txt) ; dd if=/dev/zero bs=2048 count=$(bc <<< '1000000000000 / 2048' ) ) | sudo -n growisofs -speed=4 -dvd-compat -Z "$3"=/dev/stdin -use-the-force-luke=notray -use-the-force-luke=spare:min -use-the-force-luke=bufsize:128m
 		currentExitStatus="$?"
+		
+		
+		
+		# May be untested.
+		# Theoretically, wodim may be usable with Cygwin/MSW . Unfortunately, defect management may not be available. In any case, 'growisofs' is definitely preferable whenever possible.
+		#( _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | tee >(openssl dgst -whirlpool -binary | xxd -p -c 256 >> "$scriptLocal"/hash-download.txt) ; dd if=/dev/zero bs=2048 count=$(bc <<< '0 / 2048' ) ) | sudo -n wodim -v -sao fs=128m dev="$3" blank=session tsize="$currentHash_bytes" /dev/stdin
+		#currentExitStatus="$?"
 		
 		
 		
@@ -212,7 +216,11 @@ _get_vmImg_ubDistBuild-live_sequence() {
 		#growisofs -M /dev/dvd=/dev/zero
 		#growisofs -M /dev/sr1=/dev/zero -use-the-force-luke=notray
 	fi
-	[[ "$currentExitStatus" != "0" ]] && _messageFAIL
+	#[[ "$currentExitStatus" != "0" ]] && _messageFAIL
+	if [[ "$currentExitStatus" != "0" ]]
+	then
+		echo "Exit status 1 may be normal if caused by  'No space left on device'  ."
+	fi
 	export MANDATORY_HASH=
 	unset MANDATORY_HASH
 	
