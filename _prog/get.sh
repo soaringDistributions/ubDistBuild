@@ -171,7 +171,7 @@ _get_vmImg_ubDistBuild-live_sequence() {
 		#   Weak areas may be a strong indication of factory contamination with corrosive material.
 		#sudo -n dvd+rw-format -force -blank -ssa=default
 		#sudo -n dvd+rw-format -force -blank -ssa=min
-		sudo -n dvd+rw-format -force -blank -ssa=none
+		sudo -n dvd+rw-format -force -blank -ssa=none "$3"
 		
 		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | sudo -n wodim -v -sao dev="$3" tsize="$currentHash_bytes" -waiti -
 		#-speed=256
