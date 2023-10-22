@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1560679788'
+export ub_setScriptChecksum_contents='2074052698'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -46228,7 +46228,8 @@ _get_vmImg_ubDistBuild-live_sequence() {
 		#  There IS some evidence that ancient (>30years) optical discs used without defect management have had minor corruption as a direct result.
 		#   Weak areas may be a strong indication of factory contamination with corrosive material.
 		#sudo -n dvd+rw-format -force -blank -ssa=default "$3"
-		sudo -n dvd+rw-format -force -blank -ssa=min "$3"
+		#sudo -n dvd+rw-format -force -blank -ssa=min "$3"
+		sudo -n dvd+rw-format -force -blank -ssa=256M "$3"
 		#sudo -n dvd+rw-format -force -blank -ssa=none "$3"
 		
 		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | sudo -n wodim -v -sao dev="$3" tsize="$currentHash_bytes" -waiti -

@@ -173,7 +173,8 @@ _get_vmImg_ubDistBuild-live_sequence() {
 		#  There IS some evidence that ancient (>30years) optical discs used without defect management have had minor corruption as a direct result.
 		#   Weak areas may be a strong indication of factory contamination with corrosive material.
 		#sudo -n dvd+rw-format -force -blank -ssa=default "$3"
-		sudo -n dvd+rw-format -force -blank -ssa=min "$3"
+		#sudo -n dvd+rw-format -force -blank -ssa=min "$3"
+		sudo -n dvd+rw-format -force -blank -ssa=256M "$3"
 		#sudo -n dvd+rw-format -force -blank -ssa=none "$3"
 		
 		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | sudo -n wodim -v -sao dev="$3" tsize="$currentHash_bytes" -waiti -
