@@ -165,6 +165,8 @@ _get_vmImg_ubDistBuild-live_sequence() {
 	else
 		currentHash_bytes=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 14 | tail -n 1 | sed 's/^.*count=$(bc <<< '"'"'//' | cut -f1 -d\  )
 		
+		! [[ $(df --block-size=1000000 --output=avail "$safeTmp" | tr -dc '0-9') -gt "3880" ]] && _messagePlain_bad 'bad: Detected <3.88GB disk free. Assuming TMPFS from booted LiveISO, insufficient unoccupied RAM.'
+		
 		# CAUTION: Cannot write interrupted pipe to disc without default management, apparently.
 		# ATTENTION: If no sparing area is set here, the assumption is that directly written discs are intended for immediate use rather than as an archival quality set for which longevity would definitely be essential..
 		# CAUTION: No sparing area, defect management, is somewhat bad practice, relying exclusively on hash, and not ensuring good margin for readability.
@@ -176,11 +178,16 @@ _get_vmImg_ubDistBuild-live_sequence() {
 		
 		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | sudo -n wodim -v -sao dev="$3" tsize="$currentHash_bytes" -waiti -
 		#-speed=256
+		#-dvd-compat
+		#-overburn
 		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | sudo -n growisofs -speed=256 -dvd-compat -Z "$3"=/dev/stdin -use-the-force-luke=notray
-		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | sudo -n growisofs -speed=12 -dvd-compat -Z "$3"=/dev/stdin -use-the-force-luke=notray -use-the-force-luke=spare:min
+		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | sudo -n growisofs -speed=12 -overburn -Z "$3"=/dev/stdin -use-the-force-luke=notray -use-the-force-luke=spare:min -use-the-force-luke=bufsize=2560m
 		
 		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | cat > /dev/null
 		currentExitStatus="$?"
+		
+		
+		#growisofs -M /dev/dvd=/dev/zero
 	fi
 	[[ "$currentExitStatus" != "0" ]] && _messageFAIL
 	export MANDATORY_HASH=

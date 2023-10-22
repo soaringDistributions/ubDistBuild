@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2996451484'
+export ub_setScriptChecksum_contents='1560679788'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -25171,7 +25171,7 @@ _wget_githubRelease_join-stdout() {
 				if [[ "$currentIteration" == "0" ]]
 				then
 					# ATTENTION: Staggered.
-					sleep 6 > /dev/null 2>&1
+					#sleep 6 > /dev/null 2>&1
 					true
 				fi
 			fi
@@ -25218,6 +25218,14 @@ _wget_githubRelease_join-stdout() {
 			#wait "$currentPID_1" >&2
 			#wait "$currentPID_2" >&2
 			#wait >&2
+			
+			if [[ "$currentIteration" == "0" ]]
+			then
+				sleep 6 > /dev/null 2>&1
+				[[ "$currentPID_2" == "" ]] && sleep 35 > /dev/null 2>&1
+				[[ "$currentPID_2" != "" ]] && wait "$currentPID_2" >&2
+				wait >&2
+			fi
 
 			wait "$currentPID_1" >&2
 			sleep 0.2 > /dev/null 2>&1
@@ -46212,6 +46220,8 @@ _get_vmImg_ubDistBuild-live_sequence() {
 	else
 		currentHash_bytes=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 14 | tail -n 1 | sed 's/^.*count=$(bc <<< '"'"'//' | cut -f1 -d\  )
 		
+		! [[ $(df --block-size=1000000 --output=avail "$safeTmp" | tr -dc '0-9') -gt "3880" ]] && _messagePlain_bad 'bad: Detected <3.88GB disk free. Assuming TMPFS from booted LiveISO, insufficient unoccupied RAM.'
+		
 		# CAUTION: Cannot write interrupted pipe to disc without default management, apparently.
 		# ATTENTION: If no sparing area is set here, the assumption is that directly written discs are intended for immediate use rather than as an archival quality set for which longevity would definitely be essential..
 		# CAUTION: No sparing area, defect management, is somewhat bad practice, relying exclusively on hash, and not ensuring good margin for readability.
@@ -46223,11 +46233,16 @@ _get_vmImg_ubDistBuild-live_sequence() {
 		
 		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | sudo -n wodim -v -sao dev="$3" tsize="$currentHash_bytes" -waiti -
 		#-speed=256
+		#-dvd-compat
+		#-overburn
 		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | sudo -n growisofs -speed=256 -dvd-compat -Z "$3"=/dev/stdin -use-the-force-luke=notray
-		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | sudo -n growisofs -speed=12 -dvd-compat -Z "$3"=/dev/stdin -use-the-force-luke=notray -use-the-force-luke=spare:min
+		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | sudo -n growisofs -speed=12 -overburn -Z "$3"=/dev/stdin -use-the-force-luke=notray -use-the-force-luke=spare:min -use-the-force-luke=bufsize=2560m
 		
 		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | cat > /dev/null
 		currentExitStatus="$?"
+		
+		
+		#growisofs -M /dev/dvd=/dev/zero
 	fi
 	[[ "$currentExitStatus" != "0" ]] && _messageFAIL
 	export MANDATORY_HASH=
