@@ -851,7 +851,7 @@ jobs:
       # Apparently may increase buildJet 'runner' to 77GB (instead of 61GB).
       # Apparently may increase Github Actions 'runner' to 59GB (instead of 31GB) .
       - name: Maximize build space
-        #if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+        if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
         uses: easimon/maximize-build-space@master
         with:
           root-reserve-mb: 1625
@@ -1122,25 +1122,25 @@ jobs:
           sudo -u ubuntu -n bash -c 'sudo -n groupadd runner --non-unique -g $UID' || true
           sudo -u runner -n bash -c 'sudo -n echo $USER $UID' || true
           true
-      ## Apparently may increase buildJet 'runner' to 77GB (instead of 61GB).
-      ## Apparently may increase Github Actions 'runner' to 59GB (instead of 31GB) .
-      #- name: Maximize build space
-        #if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
-        #uses: easimon/maximize-build-space@master
-        #with:
-          #root-reserve-mb: 1625
-          #temp-reserve-mb: 50
-          #swap-size-mb: 2
-          ##remove-dotnet: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
-          #remove-dotnet: 'true'
-          ##remove-android: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
-          #remove-android: 'true'
-          ##remove-haskell: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
-          #remove-haskell: 'true'
-          ##remove-codeql: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
-          #remove-codeql: 'true'
-          ##remove-docker-images: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
-          #remove-docker-images: 'true'
+      # Apparently may increase buildJet 'runner' to 77GB (instead of 61GB).
+      # Apparently may increase Github Actions 'runner' to 59GB (instead of 31GB) .
+      - name: Maximize build space
+        if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 1625
+          temp-reserve-mb: 50
+          swap-size-mb: 2
+          #remove-dotnet: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-dotnet: 'true'
+          #remove-android: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-android: 'true'
+          #remove-haskell: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-haskell: 'true'
+          #remove-codeql: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-codeql: 'true'
+          #remove-docker-images: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-docker-images: 'true'
           
       - name: _getCore_ub
         shell: bash
