@@ -277,10 +277,10 @@ CZXWXcRMTo8EmM8i4d
 	if false && wget -qO- --dns-timeout=15 --connect-timeout=15 --read-timeout=15 --timeout=15 https://mirror.hetzner.com > /dev/null
 	then
 		cat << CZXWXcRMTo8EmM8i4d | sudo -n tee -a "$globalVirtFS"/etc/apt/sources.list > /dev/null
-deb https://mirror.hetzner.com/debian/packages  bookworm           main contrib non-free
-deb https://mirror.hetzner.com/debian/packages  bookworm-updates   main contrib non-free
-deb https://mirror.hetzner.com/debian/security  bookworm-security  main contrib non-free
-#deb https://mirror.hetzner.com/debian/packages  bookworm-backports main contrib non-free
+deb https://mirror.hetzner.com/debian/packages  bookworm           main contrib non-free non-free-firmware
+deb https://mirror.hetzner.com/debian/packages  bookworm-updates   main contrib non-free non-free-firmware
+deb https://mirror.hetzner.com/debian/security  bookworm-security  main contrib non-free non-free-firmware
+#deb https://mirror.hetzner.com/debian/packages  bookworm-backports main contrib non-free non-free-firmware
 
 
 
@@ -289,17 +289,17 @@ CZXWXcRMTo8EmM8i4d
 	
 	
 	cat << CZXWXcRMTo8EmM8i4d | sudo -n tee -a "$globalVirtFS"/etc/apt/sources.list > /dev/null
-deb https://deb.debian.org/debian/ bookworm main contrib non-free
-deb-src https://deb.debian.org/debian/ bookworm main contrib non-free
+deb http://deb.debian.org/debian/ bookworm main contrib non-free non-free-firmware
+deb-src http://deb.debian.org/debian/ bookworm main contrib non-free non-free-firmware
 
-deb https://security.debian.org/debian-security bookworm-security main contrib non-free
-deb-src https://security.debian.org/debian-security bookworm-security main contrib non-free
+deb https://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware
+deb-src https://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware
 
-deb https://deb.debian.org/debian/ bookworm-updates main contrib non-free
-deb-src https://deb.debian.org/debian/ bookworm-updates main contrib non-free
+deb https://deb.debian.org/debian/ bookworm-updates main contrib non-free non-free-firmware
+deb-src https://deb.debian.org/debian/ bookworm-updates main contrib non-free non-free-firmware
 
-#deb http://deb.debian.org/debian bookworm-backports main contrib non-free
-#deb-src http://deb.debian.org/debian bookworm-backports main contrib non-free
+#deb http://deb.debian.org/debian bookworm-backports main contrib non-free non-free-firmware
+#deb-src http://deb.debian.org/debian bookworm-backports main contrib non-free non-free-firmware
 
 
 
