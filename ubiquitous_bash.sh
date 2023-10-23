@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2945473424'
+export ub_setScriptChecksum_contents='2783005183'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -43562,6 +43562,18 @@ CZXWXcRMTo8EmM8i4d
 		
 		_chroot dpkg -i ./firmware-iwlwifi_20230515-3_all.deb
 	fi
+
+	sudo -n cp "$scriptLib"/setup/debian/firmware-misc-nonfree_20230210-5_all.deb "$globalVirtFS"/
+	if _chroot ls -A -1 /firmware-misc-nonfree_20230210-5_all.deb > /dev/null
+	then
+		_chroot dpkg -i /firmware-misc-nonfree_20230210-5_all.deb
+	else
+		# WARNING: HTTP (as opposed to HTTPS) strongly discouraged.
+		#_chroot wget http://ftp.us.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-misc-nonfree_20230210-5_all.deb
+		#_chroot wget https://mirrorservice.org/sites/ftp.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-misc-nonfree_20230210-5_all.deb
+		
+		_chroot dpkg -i ./firmware-misc-nonfree_20230210-5_all.deb
+	fi
 	
 	#sudo -n cp "$scriptLib"/setup/debian/firmware-amd-graphics_20210818-1_all.deb "$globalVirtFS"/
 	#if _chroot ls -A -1 /firmware-amd-graphics_20210818-1_all.deb > /dev/null
@@ -47601,6 +47613,12 @@ _revert-fromLive() {
 
     sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/. "$globalVirtFS"/
     
+    
+    
+	# https://unix.stackexchange.com/questions/703887/update-initramfs-is-disabled-live-system-is-running-without-media-mounted-on-r
+	_chroot mv -f /usr/sbin/update-initramfs.orig.initramfs-tools /usr/sbin/update-initramfs
+    
+    
     _createVMfstab
     #sudo -n mv -f "$globalVirtFS"/fstab-copy "$globalVirtFS"/etc/fstab
     sudo -n rm -f "$globalVirtFS"/fstab-copy
@@ -47715,7 +47733,9 @@ CZXWXcRMTo8EmM8i4d
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 
 	# https://unix.stackexchange.com/questions/703887/update-initramfs-is-disabled-live-system-is-running-without-media-mounted-on-r
-	_chroot /usr/sbin/update-initramfs.orig.initramfs-tools -u -k all
+	#_chroot mv -f /usr/sbin/update-initramfs.orig.initramfs-tools /usr/sbin/update-initramfs
+	#_chroot /usr/sbin/update-initramfs.orig.initramfs-tools -u -k all
+	_chroot /usr/sbin/initramfs-tools -u -k all
 
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 

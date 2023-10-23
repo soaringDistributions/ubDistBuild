@@ -49,6 +49,12 @@ _revert-fromLive() {
 
     sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/. "$globalVirtFS"/
     
+    
+    
+	# https://unix.stackexchange.com/questions/703887/update-initramfs-is-disabled-live-system-is-running-without-media-mounted-on-r
+	_chroot mv -f /usr/sbin/update-initramfs.orig.initramfs-tools /usr/sbin/update-initramfs
+    
+    
     _createVMfstab
     #sudo -n mv -f "$globalVirtFS"/fstab-copy "$globalVirtFS"/etc/fstab
     sudo -n rm -f "$globalVirtFS"/fstab-copy
@@ -163,7 +169,9 @@ CZXWXcRMTo8EmM8i4d
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 
 	# https://unix.stackexchange.com/questions/703887/update-initramfs-is-disabled-live-system-is-running-without-media-mounted-on-r
-	_chroot /usr/sbin/update-initramfs.orig.initramfs-tools -u -k all
+	#_chroot mv -f /usr/sbin/update-initramfs.orig.initramfs-tools /usr/sbin/update-initramfs
+	#_chroot /usr/sbin/update-initramfs.orig.initramfs-tools -u -k all
+	_chroot /usr/sbin/initramfs-tools -u -k all
 
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 
