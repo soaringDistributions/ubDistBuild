@@ -184,88 +184,37 @@ jobs:
 
 
 
-
-
-      - name: _get_vmImg_ubDistBuild
-        shell: bash
-        run: |
-          current_releaseLabel="${{ inputs.releaseLabel }}"
-          #[[ "$current_releaseLabel" == "" ]] && current_releaseLabel="base"
-          [[ "$current_releaseLabel" == "" ]] && current_releaseLabel="latest"
-          #export FORCE_AXEL=8
-          #./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
-          # DANGER: Github Actions (strictly internal) ONLY!
-          export FORCE_AXEL=8
-          export MANDATORY_HASH="true"
-          cd ./_local
-          [[ "$current_releaseLabel" == "latest" ]] && current_releaseLabel=""
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$current_releaseLabel" "package_image.tar.flx" 2> /dev/null | ../ubiquitous_bash.sh _get_extract_ubDistBuild
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: _hash_img
         shell: bash
         run: |
+          current_releaseLabel="${{ inputs.releaseLabel }}"
+          #[[ "$current_releaseLabel" == "" ]] && current_releaseLabel="base"
+          [[ "$current_releaseLabel" == "" ]] && current_releaseLabel="latest"
+          [[ "$current_releaseLabel" == "latest" ]] && current_releaseLabel=""
           export skimfast=${{ inputs.skimfast }}
           echo $skimfast
-          ./ubiquitous_bash.sh _hash_img
-          rm -f ./_local/vm.img
+          export FORCE_AXEL=8
+          export MANDATORY_HASH="true"
+          ./ubiquitous_bash.sh _hash_img-stream "$current_releaseLabel"
+          rm -f ./_local/_hash-ubdist-img.txt
+          rm -f ./_local/_hash-ubdist.txt
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-
-
-
-      - name: _get_vmImg_ubDistBuild-rootfs
+      - name: _hash_ubdist-fast-img-live
         shell: bash
         run: |
           current_releaseLabel="${{ inputs.releaseLabel }}"
           #[[ "$current_releaseLabel" == "" ]] && current_releaseLabel="base"
           [[ "$current_releaseLabel" == "" ]] && current_releaseLabel="latest"
-          #export FORCE_AXEL=8
-          #./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
-          # DANGER: Github Actions (strictly internal) ONLY!
-          export FORCE_AXEL=8
-          export MANDATORY_HASH="true"
-          cd ./_local
           [[ "$current_releaseLabel" == "latest" ]] && current_releaseLabel=""
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$current_releaseLabel" "package_rootfs.tar.flx" 2> /dev/null > ./package_rootfs.tar.flx
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: _hash_rootfs
-        shell: bash
-        run: |
           export skimfast=${{ inputs.skimfast }}
           echo $skimfast
-          ./ubiquitous_bash.sh _hash_rootfs
-          rm -f ./_local/package_rootfs.tar.flx
-
-
-
-
-      - name: _get_vmImg_ubDistBuild-live
-        shell: bash
-        run: |
-          current_releaseLabel="${{ inputs.releaseLabel }}"
-          #[[ "$current_releaseLabel" == "" ]] && current_releaseLabel="base"
-          [[ "$current_releaseLabel" == "" ]] && current_releaseLabel="latest"
-          #export FORCE_AXEL=8
-          #./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
-          # DANGER: Github Actions (strictly internal) ONLY!
           export FORCE_AXEL=8
           export MANDATORY_HASH="true"
-          cd ./_local
-          [[ "$current_releaseLabel" == "latest" ]] && current_releaseLabel=""
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$current_releaseLabel" "vm-live.iso" 2> /dev/null > ./vm-live.iso
+          ./ubiquitous_bash.sh _hash_ubdist-fast-img-live "$current_releaseLabel"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: _hash_live
-        shell: bash
-        run: |
-          export skimfast=${{ inputs.skimfast }}
-          echo $skimfast
-          ./ubiquitous_bash.sh _hash_live
-          rm -f ./_local/vm-live.iso
 
 
 

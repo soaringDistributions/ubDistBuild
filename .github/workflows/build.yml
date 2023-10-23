@@ -753,7 +753,8 @@ jobs:
           export FORCE_AXEL=8
           export MANDATORY_HASH="true"
           cd ./_local
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image.tar.flx" 2> /dev/null | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+          rm -f hash-download.txt
+          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -762,7 +763,8 @@ jobs:
         run: |
           export skimfast=${{ inputs.skimfast }}
           echo $skimfast
-          ./ubiquitous_bash.sh _hash_img
+          #./ubiquitous_bash.sh _hash_img
+          cat hash-download.txt
 
 
       - name: _convert-rootfs
@@ -940,7 +942,8 @@ jobs:
           export FORCE_AXEL=8
           export MANDATORY_HASH="true"
           cd ./_local
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image.tar.flx" 2> /dev/null | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+          rm -f hash-download.txt
+          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -950,6 +953,7 @@ jobs:
           export skimfast=${{ inputs.skimfast }}
           echo $skimfast
           ./ubiquitous_bash.sh _hash_img
+          cat hash-download.txt
 
 
 
@@ -1221,74 +1225,97 @@ jobs:
 
 
 
-      - name: _get_vmImg_ubDistBuild
-        shell: bash
-        run: |
+      #- name: _get_vmImg_ubDistBuild
+        #shell: bash
+        #run: |
+          ##export FORCE_AXEL=8
+          ##./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
+          ## DANGER: Github Actions (strictly internal) ONLY!
           #export FORCE_AXEL=8
-          #./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
-          # DANGER: Github Actions (strictly internal) ONLY!
-          export FORCE_AXEL=8
-          export MANDATORY_HASH="true"
-          cd ./_local
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image.tar.flx" 2> /dev/null | ../ubiquitous_bash.sh _get_extract_ubDistBuild
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          #export MANDATORY_HASH="true"
+          #cd ./_local
+          #../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image.tar.flx" 2> /dev/null | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+        #env:
+          #GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: _hash_img
+      #- name: _hash_img
+        #shell: bash
+        #run: |
+          #export skimfast=${{ inputs.skimfast }}
+          #echo $skimfast
+          #./ubiquitous_bash.sh _hash_img
+          #rm -f ./_local/vm.img
+
+
+
+
+      #- name: _get_vmImg_ubDistBuild-rootfs
+        #shell: bash
+        #run: |
+          ##export FORCE_AXEL=8
+          ##./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
+          ## DANGER: Github Actions (strictly internal) ONLY!
+          #export FORCE_AXEL=8
+          #export MANDATORY_HASH="true"
+          #cd ./_local
+          #../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_rootfs.tar.flx" 2> /dev/null > ./package_rootfs.tar.flx
+        #env:
+          #GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      #- name: _hash_rootfs
+        #shell: bash
+        #run: |
+          #export skimfast=${{ inputs.skimfast }}
+          #echo $skimfast
+          #./ubiquitous_bash.sh _hash_rootfs
+          #rm -f ./_local/package_rootfs.tar.flx
+
+
+
+
+      #- name: _get_vmImg_ubDistBuild-live
+        #shell: bash
+        #run: |
+          ##export FORCE_AXEL=8
+          ##./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
+          ## DANGER: Github Actions (strictly internal) ONLY!
+          #export FORCE_AXEL=8
+          #export MANDATORY_HASH="true"
+          #cd ./_local
+          #../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "vm-live.iso" 2> /dev/null > ./vm-live.iso
+        #env:
+          #GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      #- name: _hash_live
+        #shell: bash
+        #run: |
+          #export skimfast=${{ inputs.skimfast }}
+          #echo $skimfast
+          #./ubiquitous_bash.sh _hash_live
+          #rm -f ./_local/vm-live.iso
+
+
+
+
+
+
+      - name: _hash_ubdist-fast-img-live
         shell: bash
         run: |
           export skimfast=${{ inputs.skimfast }}
           echo $skimfast
-          ./ubiquitous_bash.sh _hash_img
-          rm -f ./_local/vm.img
-
-
-
-
-      - name: _get_vmImg_ubDistBuild-rootfs
-        shell: bash
-        run: |
-          #export FORCE_AXEL=8
-          #./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
-          # DANGER: Github Actions (strictly internal) ONLY!
           export FORCE_AXEL=8
           export MANDATORY_HASH="true"
-          cd ./_local
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_rootfs.tar.flx" 2> /dev/null > ./package_rootfs.tar.flx
+          ./ubiquitous_bash.sh _hash_ubdist-fast-img-live
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: _hash_rootfs
-        shell: bash
-        run: |
-          export skimfast=${{ inputs.skimfast }}
-          echo $skimfast
-          ./ubiquitous_bash.sh _hash_rootfs
-          rm -f ./_local/package_rootfs.tar.flx
 
 
 
 
-      - name: _get_vmImg_ubDistBuild-live
-        shell: bash
-        run: |
-          #export FORCE_AXEL=8
-          #./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
-          # DANGER: Github Actions (strictly internal) ONLY!
-          export FORCE_AXEL=8
-          export MANDATORY_HASH="true"
-          cd ./_local
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "vm-live.iso" 2> /dev/null > ./vm-live.iso
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: _hash_live
-        shell: bash
-        run: |
-          export skimfast=${{ inputs.skimfast }}
-          echo $skimfast
-          ./ubiquitous_bash.sh _hash_live
-          rm -f ./_local/vm-live.iso
+
 
 
 
