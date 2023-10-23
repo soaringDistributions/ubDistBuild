@@ -251,6 +251,7 @@ CZXWXcRMTo8EmM8i4d
 	_test_getMost_backend "$@"
 	
 	_getMost_backend apt-get update
+	_getMost_backend_aptGetInstall auto-apt-proxy
 	
 	
 	_messagePlain_nominal 'ca-certificates, repositories, mirrors, tasksel standard, hostnamectl'
@@ -289,8 +290,9 @@ CZXWXcRMTo8EmM8i4d
 	
 	
 	cat << CZXWXcRMTo8EmM8i4d | sudo -n tee -a "$globalVirtFS"/etc/apt/sources.list > /dev/null
-deb http://deb.debian.org/debian/ bookworm main contrib non-free non-free-firmware
-deb-src http://deb.debian.org/debian/ bookworm main contrib non-free non-free-firmware
+#https://wiki.debian.org/AptCacherNg
+deb http://ftp.us.debian.org/debian/ bookworm main contrib non-free non-free-firmware
+deb-src http://ftp.us.debian.org/debian/ bookworm main contrib non-free non-free-firmware
 
 deb https://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware
 deb-src https://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware
