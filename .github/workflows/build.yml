@@ -305,20 +305,20 @@ jobs:
           df -h
           df -h /
         timeout-minutes: 355
-      # For VBoxManage for _convert . Otherwise historically not apparently necessary.
-      - name: _getMost_ubuntu22-VBoxManage
-        shell: bash
-        run: |
-          #! ./ubiquitous_bash.sh _getMost && exit 1
-          #true
-          #! sudo -n apt-get -y clean && exit 1
-          #! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
-          #sudo -n apt-get update
-          #! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
-          ! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
-          df -h
-          df -h /
-        timeout-minutes: 355
+      ## For VBoxManage for _convert . Otherwise historically not apparently necessary.
+      #- name: _getMost_ubuntu22-VBoxManage
+        #shell: bash
+        #run: |
+          ##! ./ubiquitous_bash.sh _getMost && exit 1
+          ##true
+          ##! sudo -n apt-get -y clean && exit 1
+          ##! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
+          ##sudo -n apt-get update
+          ##! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
+          #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
+          #df -h
+          #df -h /
+        #timeout-minutes: 355
       - name: _getMost-xvfb
         shell: bash
         run: |
@@ -701,34 +701,34 @@ jobs:
           sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y aria2
         timeout-minutes: 355
 
-      # For VBoxManage for _convert . Otherwise historically not apparently necessary.
-      - name: _getMost_ubuntu22-VBoxManage
-        shell: bash
-        run: |
-          #! ./ubiquitous_bash.sh _getMost && exit 1
-          #true
-          #! sudo -n apt-get -y clean && exit 1
-          #! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
-          #sudo -n apt-get update
-          #! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
-          ! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
-          df -h
-          df -h /
-        timeout-minutes: 355
-      - name: _getMost-xvfb
-        shell: bash
-        run: |
-          #! ./ubiquitous_bash.sh _getMost && exit 1
-          #true
-          #! sudo -n apt-get -y clean && exit 1
-          #! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
-          #sudo -n apt-get update
-          #! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
+      ## For VBoxManage for _convert . Otherwise historically not apparently necessary.
+      #- name: _getMost_ubuntu22-VBoxManage
+        #shell: bash
+        #run: |
+          ##! ./ubiquitous_bash.sh _getMost && exit 1
+          ##true
+          ##! sudo -n apt-get -y clean && exit 1
+          ##! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
+          ##sudo -n apt-get update
+          ##! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
           #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
-          sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y xvfb
-          df -h
-          df -h /
-        timeout-minutes: 355
+          #df -h
+          #df -h /
+        #timeout-minutes: 355
+      #- name: _getMost-xvfb
+        #shell: bash
+        #run: |
+          ##! ./ubiquitous_bash.sh _getMost && exit 1
+          ##true
+          ##! sudo -n apt-get -y clean && exit 1
+          ##! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
+          ##sudo -n apt-get update
+          ##! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
+          ##! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
+          #sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y xvfb
+          #df -h
+          #df -h /
+        #timeout-minutes: 355
       
       - name: _test_hash_legacy
         shell: bash
@@ -890,34 +890,34 @@ jobs:
           sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y aria2
         timeout-minutes: 355
 
-      # For VBoxManage for _convert . Otherwise historically not apparently necessary.
-      - name: _getMost_ubuntu22-VBoxManage
-        shell: bash
-        run: |
-          #! ./ubiquitous_bash.sh _getMost && exit 1
-          #true
-          #! sudo -n apt-get -y clean && exit 1
-          #! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
-          #sudo -n apt-get update
-          #! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
-          ! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
-          df -h
-          df -h /
-        timeout-minutes: 355
-      - name: _getMost-xvfb
-        shell: bash
-        run: |
-          #! ./ubiquitous_bash.sh _getMost && exit 1
-          #true
-          #! sudo -n apt-get -y clean && exit 1
-          #! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
-          #sudo -n apt-get update
-          #! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
+      ## For VBoxManage for _convert . Otherwise historically not apparently necessary.
+      #- name: _getMost_ubuntu22-VBoxManage
+        #shell: bash
+        #run: |
+          ##! ./ubiquitous_bash.sh _getMost && exit 1
+          ##true
+          ##! sudo -n apt-get -y clean && exit 1
+          ##! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
+          ##sudo -n apt-get update
+          ##! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
           #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
-          sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y xvfb
-          df -h
-          df -h /
-        timeout-minutes: 355
+          #df -h
+          #df -h /
+        #timeout-minutes: 355
+      #- name: _getMost-xvfb
+        #shell: bash
+        #run: |
+          ##! ./ubiquitous_bash.sh _getMost && exit 1
+          ##true
+          ##! sudo -n apt-get -y clean && exit 1
+          ##! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
+          ##sudo -n apt-get update
+          ##! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
+          ##! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
+          #sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y xvfb
+          #df -h
+          #df -h /
+        #timeout-minutes: 355
       
       - name: _test_hash_legacy
         shell: bash
@@ -1106,25 +1106,25 @@ jobs:
           sudo -u ubuntu -n bash -c 'sudo -n groupadd runner --non-unique -g $UID' || true
           sudo -u runner -n bash -c 'sudo -n echo $USER $UID' || true
           true
-      # Apparently may increase buildJet 'runner' to 77GB (instead of 61GB).
-      # Apparently may increase Github Actions 'runner' to 59GB (instead of 31GB) .
-      - name: Maximize build space
-        if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
-        uses: easimon/maximize-build-space@master
-        with:
-          root-reserve-mb: 1625
-          temp-reserve-mb: 50
-          swap-size-mb: 2
-          #remove-dotnet: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
-          remove-dotnet: 'true'
-          #remove-android: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
-          remove-android: 'true'
-          #remove-haskell: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
-          remove-haskell: 'true'
-          #remove-codeql: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
-          remove-codeql: 'true'
-          #remove-docker-images: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
-          remove-docker-images: 'true'
+      ## Apparently may increase buildJet 'runner' to 77GB (instead of 61GB).
+      ## Apparently may increase Github Actions 'runner' to 59GB (instead of 31GB) .
+      #- name: Maximize build space
+        #if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+        #uses: easimon/maximize-build-space@master
+        #with:
+          #root-reserve-mb: 1625
+          #temp-reserve-mb: 50
+          #swap-size-mb: 2
+          ##remove-dotnet: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          #remove-dotnet: 'true'
+          ##remove-android: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          #remove-android: 'true'
+          ##remove-haskell: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          #remove-haskell: 'true'
+          ##remove-codeql: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          #remove-codeql: 'true'
+          ##remove-docker-images: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          #remove-docker-images: 'true'
           
       - name: _getCore_ub
         shell: bash
@@ -1299,14 +1299,14 @@ jobs:
 
 
 
-      - name: _hash_ubdist-fast-img-live
+      - name: _hash_ubdist-fast
         shell: bash
         run: |
           export skimfast=${{ inputs.skimfast }}
           echo $skimfast
           export FORCE_AXEL=8
           export MANDATORY_HASH="true"
-          ./ubiquitous_bash.sh _hash_ubdist-fast-img-live
+          ./ubiquitous_bash.sh _hash_ubdist-fast
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

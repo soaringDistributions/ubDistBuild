@@ -201,7 +201,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: _hash_ubdist-fast-img-live
+      - name: _hash_ubdist-fast
         shell: bash
         run: |
           current_releaseLabel="${{ inputs.releaseLabel }}"
@@ -212,7 +212,7 @@ jobs:
           echo $skimfast
           export FORCE_AXEL=8
           export MANDATORY_HASH="true"
-          ./ubiquitous_bash.sh _hash_ubdist-fast-img-live "$current_releaseLabel"
+          ./ubiquitous_bash.sh _hash_ubdist-fast "$current_releaseLabel"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

@@ -98,7 +98,7 @@ _hash_live-stream() {
 }
 
 
-_hash_ubdist-fast-img-live() {
+_hash_ubdist-fast() {
     export FORCE_AXEL=8
     export MANDATORY_HASH="true"
           
