@@ -130,7 +130,7 @@ _get_vmImg_ubDistBuild_sequence() {
 	
 	_messagePlain_good 'done: hash'
 	
-	mv -f "$scriptLocal"/_get/vm.img "$scriptLocal"/vm.img
+	[[ "$3" == "" ]] && mv -f "$scriptLocal"/_get/vm.img "$scriptLocal"/vm.img
 	#mv -f "$scriptLocal"/_get/* "$scriptLocal"/
 	rmdir "$scriptLocal"/_get
 	#_safeRMR "$scriptLocal"/_get
