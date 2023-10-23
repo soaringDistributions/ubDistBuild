@@ -101,9 +101,9 @@ _hash_img-stream() {
     local currentFilePath=/dev/stdin
     
     _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$1" "package_image.tar.flx" 2> /dev/null | _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | \
-tee >(wc -c /dev/stdin | cut -f1 -d\ | tr -dc '0-9' > "$safeTmp"/.tmp-currentFileBytes) | \
-tee >(openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpool) | \
-tee >(openssl dgst -sha3-512 -binary | xxd -p -c 256 > "$safeTmp"/.tmp-sha3) > /dev/null
+tee >( wc -c /dev/stdin | cut -f1 -d\ | tr -dc '0-9' > "$safeTmp"/.tmp-currentFileBytes ) | \
+tee >( openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpool ) | \
+( [[ "$skimfast" != "true" ]] && openssl dgst -sha3-512 -binary | xxd -p -c 256 > "$safeTmp"/.tmp-sha3 )
 
     wait
     
@@ -144,9 +144,9 @@ _hash_rootfs-stream() {
     local currentFilePath=/dev/stdin
     
     _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$1" "package_rootfs.tar.flx" 2> /dev/null | lz4 -d -c | \
-tee >(wc -c /dev/stdin | cut -f1 -d\ | tr -dc '0-9' > "$safeTmp"/.tmp-currentFileBytes) | \
-tee >(openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpool) | \
-tee >(openssl dgst -sha3-512 -binary | xxd -p -c 256 > "$safeTmp"/.tmp-sha3) > /dev/null
+tee >( wc -c /dev/stdin | cut -f1 -d\ | tr -dc '0-9' > "$safeTmp"/.tmp-currentFileBytes ) | \
+tee >( openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpool ) | \
+( [[ "$skimfast" != "true" ]] && openssl dgst -sha3-512 -binary | xxd -p -c 256 > "$safeTmp"/.tmp-sha3 )
 
     wait
     
@@ -187,9 +187,9 @@ _hash_live-stream() {
     local currentFilePath=/dev/stdin
     
     _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$1" "vm-live.iso" 2> /dev/null | \
-tee >(wc -c /dev/stdin | cut -f1 -d\ | tr -dc '0-9' > "$safeTmp"/.tmp-currentFileBytes) | \
-tee >(openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpool) | \
-tee >(openssl dgst -sha3-512 -binary | xxd -p -c 256 > "$safeTmp"/.tmp-sha3) > /dev/null
+tee >( wc -c /dev/stdin | cut -f1 -d\ | tr -dc '0-9' > "$safeTmp"/.tmp-currentFileBytes ) | \
+tee >( openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpool ) | \
+( [[ "$skimfast" != "true" ]] && openssl dgst -sha3-512 -binary | xxd -p -c 256 > "$safeTmp"/.tmp-sha3 )
 
     wait
     
@@ -218,19 +218,19 @@ tee >(openssl dgst -sha3-512 -binary | xxd -p -c 256 > "$safeTmp"/.tmp-sha3) > /
 
 
 _hash_ubdist-fast() {
-    export FORCE_AXEL=8
+    export FORCE_AXEL=6
     export MANDATORY_HASH="true"
           
     local currentPID_1
-    _hash_img-stream "$@" &
+    "$scriptAbsoluteLocation" _hash_img-stream "$@" &
     currentPID_1="$!"
     
     local currentPID_2
-    _hash_rootfs-stream "$@" &
+    "$scriptAbsoluteLocation" _hash_rootfs-stream "$@" &
     currentPID_2="$!"
     
     local currentPID_3
-    _hash_live-stream "$@" &
+    "$scriptAbsoluteLocation" _hash_live-stream "$@" &
     currentPID_3="$!"
     
     wait "$currentPID_1"

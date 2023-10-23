@@ -821,7 +821,8 @@ jobs:
 
   build-convert-live:
     needs: [build, build_release]
-    runs-on: ubuntu-latest
+    #runs-on: ubuntu-latest
+    runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
     # WARNING: Must also enable/disable 'Maximize build space' as appropriate .
     #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
     steps:
