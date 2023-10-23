@@ -247,6 +247,201 @@ jobs:
 
 
 
+  check-hash-legacy:
+    #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: users
+        shell: bash
+        run: |
+          sudo -u ubuntu -n bash -c 'sudo -n useradd runner --non-unique -u $UID -g $UID' || true
+          sudo -u ubuntu -n bash -c 'sudo -n groupadd runner --non-unique -g $UID' || true
+          sudo -u runner -n bash -c 'sudo -n echo $USER $UID' || true
+          true
+      # Apparently may increase buildJet 'runner' to 77GB (instead of 61GB).
+      # Apparently may increase Github Actions 'runner' to 59GB (instead of 31GB) .
+      - name: Maximize build space
+        if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 1625
+          temp-reserve-mb: 50
+          swap-size-mb: 2
+          #remove-dotnet: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-dotnet: 'true'
+          #remove-android: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-android: 'true'
+          #remove-haskell: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-haskell: 'true'
+          #remove-codeql: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-codeql: 'true'
+          #remove-docker-images: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-docker-images: 'true'
+          
+      - name: _getCore_ub
+        shell: bash
+        run: |
+          mkdir -p ~/core/infrastructure
+          cd ~/core/infrastructure
+          git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
+          cd ubiquitous_bash
+          ./_setupUbiquitous.bat
+          ./ubiquitous_bash.sh _custom_splice_opensslConfig
+      
+      #- name: _getMinimal_cloud
+        #shell: bash
+        #run: |
+          #! ~/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _getMinimal_cloud && exit 1
+          #true
+          ##! sudo -n apt-get -y clean && exit 1
+          #df -h
+          #df -h /
+      
+      - name: _getMost-aria2
+        shell: bash
+        run: |
+          sudo -n apt-get -y clean
+          sudo -n apt-get update
+          sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y aria2
+        timeout-minutes: 355
+
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      
+      
+      - name: _test_hash_legacy
+        shell: bash
+        run: |
+          if [[ -e "/etc/ssl/openssl_legacy.cnf" ]]
+          then
+              echo -n | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256
+              exit ${PIPESTATUS[0]}
+          else
+              echo -n | openssl dgst -whirlpool -binary | xxd -p -c 256
+              exit ${PIPESTATUS[0]}
+          fi
+      
+      
+      - name: txt-stat/tboot
+        shell: bash
+        run: |
+          cat /proc/cpuinfo | grep 'model name'
+          echo
+          
+          sudo -n txt-stat || true
+          true
+      
+      - name: sev/AMD
+        shell: bash
+        run: |
+          cat /proc/cpuinfo | grep 'model name'
+          echo
+          echo 'cat /sys/module/kvm_amd/parameters/sev'
+          cat /sys/module/kvm_amd/parameters/sev || true
+          
+          echo 'dmesg | grep -i sev'
+          sudo -n dmesg | grep -i sev || true
+          true
+      
+      - name: sgx/Intel
+        shell: bash
+        run: |
+          cat /proc/cpuinfo | grep 'model name'
+          echo
+          
+          echo 'grep sgx /proc/cpuinfo'
+          grep sgx /proc/cpuinfo || true
+          echo 'dmesg | grep sgx'
+          sudo -n dmesg | grep -i sgx || true
+          # Apparently normal: ' sgx: [Firmware Bug]: Unable to map EPC section to online node. Fallback to the NUMA node 0. '
+          true
+      - name: _get_vmImg_ubDistBuild
+        shell: bash
+        run: |
+          current_releaseLabel="${{ inputs.releaseLabel }}"
+          #[[ "$current_releaseLabel" == "" ]] && current_releaseLabel="base"
+          [[ "$current_releaseLabel" == "" ]] && current_releaseLabel="latest"
+          #export FORCE_AXEL=8
+          #./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
+          # DANGER: Github Actions (strictly internal) ONLY!
+          export FORCE_AXEL=8
+          export MANDATORY_HASH="true"
+          cd ./_local
+          [[ "$current_releaseLabel" == "latest" ]] && current_releaseLabel=""
+          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$current_releaseLabel" "package_image.tar.flx" 2> /dev/null | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: _hash_img
+        shell: bash
+        run: |
+          export skimfast=${{ inputs.skimfast }}
+          echo $skimfast
+          ./ubiquitous_bash.sh _hash_img
+          rm -f ./_local/vm.img
+      - name: _get_vmImg_ubDistBuild-rootfs
+        shell: bash
+        run: |
+          current_releaseLabel="${{ inputs.releaseLabel }}"
+          #[[ "$current_releaseLabel" == "" ]] && current_releaseLabel="base"
+          [[ "$current_releaseLabel" == "" ]] && current_releaseLabel="latest"
+          #export FORCE_AXEL=8
+          #./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
+          # DANGER: Github Actions (strictly internal) ONLY!
+          export FORCE_AXEL=8
+          export MANDATORY_HASH="true"
+          cd ./_local
+          [[ "$current_releaseLabel" == "latest" ]] && current_releaseLabel=""
+          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$current_releaseLabel" "package_rootfs.tar.flx" 2> /dev/null > ./package_rootfs.tar.flx
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: _hash_rootfs
+        shell: bash
+        run: |
+          export skimfast=${{ inputs.skimfast }}
+          echo $skimfast
+          ./ubiquitous_bash.sh _hash_rootfs
+          rm -f ./_local/package_rootfs.tar.flx
+      - name: _get_vmImg_ubDistBuild-live
+        shell: bash
+        run: |
+          current_releaseLabel="${{ inputs.releaseLabel }}"
+          #[[ "$current_releaseLabel" == "" ]] && current_releaseLabel="base"
+          [[ "$current_releaseLabel" == "" ]] && current_releaseLabel="latest"
+          #export FORCE_AXEL=8
+          #./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
+          # DANGER: Github Actions (strictly internal) ONLY!
+          export FORCE_AXEL=8
+          export MANDATORY_HASH="true"
+          cd ./_local
+          [[ "$current_releaseLabel" == "latest" ]] && current_releaseLabel=""
+          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$current_releaseLabel" "vm-live.iso" 2> /dev/null > ./vm-live.iso
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: _hash_live
+        shell: bash
+        run: |
+          export skimfast=${{ inputs.skimfast }}
+          echo $skimfast
+          ./ubiquitous_bash.sh _hash_live
+          rm -f ./_local/vm-live.iso
+      - name: hash ___________________________
+        shell: bash
+        run: |
+          cat ./_local/_hash-ubdist.txt
+
+      - name: artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: _hash-ubdist-legacy
+          path: |
+            ./_local/_hash-ubdist.txt
+
+
+
 
 
 

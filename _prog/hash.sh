@@ -25,10 +25,10 @@ _hash_file_sequence() {
 
     if [[ "$currentFileName" == *."iso" ]] || [[ "$currentFileName" == *."ISO" ]] || [[ "$currentFilePath" == *."iso" ]] || [[ "$currentFilePath" == *."ISO" ]]
     then
-        echo 'dd if=./'"$currentFileName"' bs=2048 count=$(bc <<< '"'"$(wc -c "$currentFilePath" | cut -f1 -d\ | tr -dc '0-9')' / 2048'"'"' ) status=progress | openssl dgst -whirlpool -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-whirlpool.txt
+        echo 'dd if=./'"$currentFileName"' bs=2048 count=$(bc <<< '"'"$(cat "$currentFilePath" | "$@" | wc -c | cut -f1 -d\ | tr -dc '0-9')' / 2048'"'"' ) status=progress | openssl dgst -whirlpool -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-whirlpool.txt
     else
         #echo "openssl dgst -whirlpool -binary | xxd -p -c 256" >> "$safeTmp"/_hash-"$currentListName"-whirlpool.txt
-        echo 'dd if=./'"$currentFileName"' bs=1048576 count=$(bc <<< '"'"$(wc -c "$currentFilePath" | cut -f1 -d\ | tr -dc '0-9')' / 1048576'"'"' ) status=progress | openssl dgst -whirlpool -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-whirlpool.txt
+        echo 'dd if=./'"$currentFileName"' bs=1048576 count=$(bc <<< '"'"$(cat "$currentFilePath" | "$@" | wc -c | cut -f1 -d\ | tr -dc '0-9')' / 1048576'"'"' ) status=progress | openssl dgst -whirlpool -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-whirlpool.txt
     fi
     if [[ -e "/etc/ssl/openssl_legacy.cnf" ]]
     then
@@ -39,10 +39,10 @@ _hash_file_sequence() {
 
     if [[ "$currentFileName" == *."iso" ]] || [[ "$currentFileName" == *."ISO" ]] || [[ "$currentFilePath" == *."iso" ]] || [[ "$currentFilePath" == *."ISO" ]]
     then
-        echo 'dd if=./'"$currentFileName"' bs=2048 count=$(bc <<< '"'"$(wc -c "$currentFilePath" | cut -f1 -d\ | tr -dc '0-9')' / 2048'"'"' ) status=progress | openssl dgst -sha3-512 -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-sha3.txt
+        echo 'dd if=./'"$currentFileName"' bs=2048 count=$(bc <<< '"'"$(cat "$currentFilePath" | "$@" | wc -c | cut -f1 -d\ | tr -dc '0-9')' / 2048'"'"' ) status=progress | openssl dgst -sha3-512 -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-sha3.txt
     else
         #echo "openssl dgst -sha3-512 -binary | xxd -p -c 256" >> "$safeTmp"/_hash-"$currentListName"-sha3.txt
-        echo 'dd if=./'"$currentFileName"' bs=1048576 count=$(bc <<< '"'"$(wc -c "$currentFilePath" | cut -f1 -d\ | tr -dc '0-9')' / 1048576'"'"' ) status=progress | openssl dgst -sha3-512 -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-sha3.txt
+        echo 'dd if=./'"$currentFileName"' bs=1048576 count=$(bc <<< '"'"$(cat "$currentFilePath" | "$@" | wc -c | cut -f1 -d\ | tr -dc '0-9')' / 1048576'"'"' ) status=progress | openssl dgst -sha3-512 -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-sha3.txt
     fi
     #if [[ "$skimfast" == "true" ]]
     #then
