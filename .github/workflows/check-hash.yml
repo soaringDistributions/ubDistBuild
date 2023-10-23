@@ -35,7 +35,7 @@ on:
         - internal
       skimfast:
         type: boolean
-        default: true
+        default: false
       runnerName:
         required: false
         default: ubuntu-latest
