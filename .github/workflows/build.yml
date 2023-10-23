@@ -578,6 +578,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
+      - name: fallocate --dig-holes
+        shell: bash
+        run: |
+          fallocate --dig-holes ./_local/vm.img
+
       - name: _package_ubDistBuild_image
         shell: bash
         run: |
@@ -757,6 +762,11 @@ jobs:
           ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: fallocate --dig-holes
+        shell: bash
+        run: |
+          fallocate --dig-holes ./_local/vm.img
 
       - name: _hash_img
         shell: bash
@@ -947,6 +957,11 @@ jobs:
           ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: fallocate --dig-holes
+        shell: bash
+        run: |
+          fallocate --dig-holes ./_local/vm.img
 
       - name: _hash_img
         shell: bash
