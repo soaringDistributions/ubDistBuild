@@ -115,7 +115,12 @@ tee >( openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpo
     
     echo 'dd if=./'"$currentFileName"' bs=1048576 count=$(bc <<< '"'"$(cat "$safeTmp"/.tmp-currentFileBytes)' / 1048576'"'"' ) status=progress | openssl dgst -sha3-512 -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-sha3.txt
     
-    cat "$safeTmp"/.tmp-sha3 >> "$safeTmp"/_hash-"$currentListName"-sha3.txt
+    if [[ "$skimfast" != "true" ]]
+    then
+        cat "$safeTmp"/.tmp-sha3 >> "$safeTmp"/_hash-"$currentListName"-sha3.txt
+    else
+        echo  >> "$safeTmp"/_hash-"$currentListName"-sha3.txt
+    fi
     
     
     wait
@@ -158,7 +163,12 @@ tee >( openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpo
     
     echo 'dd if=./'"$currentFileName"' bs=1048576 count=$(bc <<< '"'"$(cat "$safeTmp"/.tmp-currentFileBytes)' / 1048576'"'"' ) status=progress | openssl dgst -sha3-512 -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-sha3.txt
     
-    cat "$safeTmp"/.tmp-sha3 >> "$safeTmp"/_hash-"$currentListName"-sha3.txt
+    if [[ "$skimfast" != "true" ]]
+    then
+        cat "$safeTmp"/.tmp-sha3 >> "$safeTmp"/_hash-"$currentListName"-sha3.txt
+    else
+        echo  >> "$safeTmp"/_hash-"$currentListName"-sha3.txt
+    fi
     
     
     wait
@@ -201,7 +211,12 @@ tee >( openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpo
     
     echo 'dd if=./'"$currentFileName"' bs=2048 count=$(bc <<< '"'"$(cat "$safeTmp"/.tmp-currentFileBytes)' / 2048'"'"' ) status=progress | openssl dgst -sha3-512 -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-sha3.txt
     
-    cat "$safeTmp"/.tmp-sha3 >> "$safeTmp"/_hash-"$currentListName"-sha3.txt
+    if [[ "$skimfast" != "true" ]]
+    then
+        cat "$safeTmp"/.tmp-sha3 >> "$safeTmp"/_hash-"$currentListName"-sha3.txt
+    else
+        echo  >> "$safeTmp"/_hash-"$currentListName"-sha3.txt
+    fi
     
     
     wait
