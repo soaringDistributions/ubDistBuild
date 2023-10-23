@@ -107,6 +107,7 @@ tee >( openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpo
 
     wait
     
+    echo "$currentFileName" >> "$scriptLocal"/_hash-"$currentListName".txt
     
     echo 'dd if=./'"$currentFileName"' bs=1048576 count=$(bc <<< '"'"$(cat "$safeTmp"/.tmp-currentFileBytes)' / 1048576'"'"' ) status=progress | openssl dgst -whirlpool -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-whirlpool.txt
     
@@ -155,6 +156,7 @@ tee >( openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpo
 
     wait
     
+    echo "$currentFileName" >> "$scriptLocal"/_hash-"$currentListName".txt
     
     echo 'dd if=./'"$currentFileName"' bs=1048576 count=$(bc <<< '"'"$(cat "$safeTmp"/.tmp-currentFileBytes)' / 1048576'"'"' ) status=progress | openssl dgst -whirlpool -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-whirlpool.txt
     
@@ -203,6 +205,7 @@ tee >( openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpo
 
     wait
     
+    echo "$currentFileName" >> "$scriptLocal"/_hash-"$currentListName".txt
     
     echo 'dd if=./'"$currentFileName"' bs=2048 count=$(bc <<< '"'"$(cat "$safeTmp"/.tmp-currentFileBytes)' / 2048'"'"' ) status=progress | openssl dgst -whirlpool -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-whirlpool.txt
     
@@ -235,6 +238,10 @@ tee >( openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpo
 _hash_ubdist-fast() {
     export FORCE_AXEL=6
     export MANDATORY_HASH="true"
+    
+    rm -f "$scriptLocal"/_hash-ubdist-img.txt
+    rm -f "$scriptLocal"/_hash-ubdist-rootfs.txt
+    rm -f "$scriptLocal"/_hash-ubdist-live.txt
           
     local currentPID_1
     "$scriptAbsoluteLocation" _hash_img-stream "$@" &
@@ -255,7 +262,7 @@ _hash_ubdist-fast() {
     
     rm -f "$scriptLocal"/_hash-ubdist.txt
     
-    cat "$scriptLocal"/_hash-ubdist-img.txt > "$scriptLocal"/_hash-ubdist.txt
+    cat "$scriptLocal"/_hash-ubdist-img.txt >> "$scriptLocal"/_hash-ubdist.txt
     cat "$scriptLocal"/_hash-ubdist-rootfs.txt >> "$scriptLocal"/_hash-ubdist.txt
     cat "$scriptLocal"/_hash-ubdist-live.txt >> "$scriptLocal"/_hash-ubdist.txt
     

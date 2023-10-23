@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1938710809'
+export ub_setScriptChecksum_contents='724544553'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -47585,6 +47585,7 @@ tee >( openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpo
 
     wait
     
+    echo "$currentFileName" >> "$scriptLocal"/_hash-"$currentListName".txt
     
     echo 'dd if=./'"$currentFileName"' bs=1048576 count=$(bc <<< '"'"$(cat "$safeTmp"/.tmp-currentFileBytes)' / 1048576'"'"' ) status=progress | openssl dgst -whirlpool -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-whirlpool.txt
     
@@ -47633,6 +47634,7 @@ tee >( openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpo
 
     wait
     
+    echo "$currentFileName" >> "$scriptLocal"/_hash-"$currentListName".txt
     
     echo 'dd if=./'"$currentFileName"' bs=1048576 count=$(bc <<< '"'"$(cat "$safeTmp"/.tmp-currentFileBytes)' / 1048576'"'"' ) status=progress | openssl dgst -whirlpool -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-whirlpool.txt
     
@@ -47681,6 +47683,7 @@ tee >( openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpo
 
     wait
     
+    echo "$currentFileName" >> "$scriptLocal"/_hash-"$currentListName".txt
     
     echo 'dd if=./'"$currentFileName"' bs=2048 count=$(bc <<< '"'"$(cat "$safeTmp"/.tmp-currentFileBytes)' / 2048'"'"' ) status=progress | openssl dgst -whirlpool -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-whirlpool.txt
     
@@ -47713,6 +47716,10 @@ tee >( openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpo
 _hash_ubdist-fast() {
     export FORCE_AXEL=6
     export MANDATORY_HASH="true"
+    
+    rm -f "$scriptLocal"/_hash-ubdist-img.txt
+    rm -f "$scriptLocal"/_hash-ubdist-rootfs.txt
+    rm -f "$scriptLocal"/_hash-ubdist-live.txt
           
     local currentPID_1
     "$scriptAbsoluteLocation" _hash_img-stream "$@" &
@@ -47733,7 +47740,7 @@ _hash_ubdist-fast() {
     
     rm -f "$scriptLocal"/_hash-ubdist.txt
     
-    cat "$scriptLocal"/_hash-ubdist-img.txt > "$scriptLocal"/_hash-ubdist.txt
+    cat "$scriptLocal"/_hash-ubdist-img.txt >> "$scriptLocal"/_hash-ubdist.txt
     cat "$scriptLocal"/_hash-ubdist-rootfs.txt >> "$scriptLocal"/_hash-ubdist.txt
     cat "$scriptLocal"/_hash-ubdist-live.txt >> "$scriptLocal"/_hash-ubdist.txt
     
