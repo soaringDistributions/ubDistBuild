@@ -4,6 +4,8 @@ _hash_rm() {
     rm -f "$scriptLocal"/_hash-ubdist.txt > /dev/null 2>&1
 }
 
+# WARNING: Legacy. Reference example.
+#  NOTICE: Not recommended for new designs. No further producton use.
 # WARNING: CAUTION: Do NOT change correspondence between line number and hash ! Intended for automatic verification of distributed and end point integrity traceable back to Git repository public record !
 _hash_file_sequence() {
     _custom_splice_opensslConfig
@@ -86,15 +88,132 @@ _hash_live() {
 
 
 _hash_img-stream() {
-    _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$1" "package_image.tar.flx" 2> /dev/null | _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | _hash_file ubdist-img vm.img /dev/stdin cat
+    _custom_splice_opensslConfig
+    
+    _start
+    
+    
+    [[ -e "/etc/ssl/openssl_legacy.cnf" ]] && export OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf"
+    
+    
+    local currentListName=ubdist-img
+    local currentFileName=vm.img
+    local currentFilePath=/dev/stdin
+    
+    _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$1" "package_image.tar.flx" 2> /dev/null | _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | \
+tee >(wc -c /dev/stdin | cut -f1 -d\ | tr -dc '0-9' > "$safeTmp"/.tmp-currentFileBytes) | \
+tee >(openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpool) | \
+tee >(openssl dgst -sha3-512 -binary | xxd -p -c 256 > "$safeTmp"/.tmp-sha3) > /dev/null
+
+
+    
+    
+    echo 'dd if=./'"$currentFileName"' bs=1048576 count=$(bc <<< '"'"$(cat "$safeTmp"/.tmp-currentFileBytes)' / 1048576'"'"' ) status=progress | openssl dgst -whirlpool -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-whirlpool.txt
+    
+    cat "$safeTmp"/.tmp-whirlpool >> "$safeTmp"/_hash-"$currentListName"-whirlpool.txt
+    
+    
+    echo 'dd if=./'"$currentFileName"' bs=1048576 count=$(bc <<< '"'"$(cat "$safeTmp"/.tmp-currentFileBytes)' / 1048576'"'"' ) status=progress | openssl dgst -sha3-512 -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-sha3.txt
+    
+    cat "$safeTmp"/.tmp-sha3 >> "$safeTmp"/_hash-"$currentListName"-sha3.txt
+    
+    
+    wait
+    cat "$safeTmp"/_hash-"$currentListName"-whirlpool.txt >> "$scriptLocal"/_hash-"$currentListName".txt
+    cat "$safeTmp"/_hash-"$currentListName"-sha3.txt >> "$scriptLocal"/_hash-"$currentListName".txt
+    
+    echo >> "$scriptLocal"/_hash-"$currentListName".txt
+
+    cat "$scriptLocal"/_hash-"$currentListName".txt
+    
+
+    _stop
 }
 
 _hash_rootfs-stream() {
-    _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$1" "package_rootfs.tar.flx" 2> /dev/null | _hash_file ubdist-rootfs package_rootfs.tar /dev/stdin lz4 -d -c
+    _custom_splice_opensslConfig
+    
+    _start
+    
+    
+    [[ -e "/etc/ssl/openssl_legacy.cnf" ]] && export OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf"
+    
+    
+    local currentListName=ubdist-rootfs
+    local currentFileName=package_rootfs.tar
+    local currentFilePath=/dev/stdin
+    
+    _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$1" "package_rootfs.tar.flx" 2> /dev/null | lz4 -d -c | \
+tee >(wc -c /dev/stdin | cut -f1 -d\ | tr -dc '0-9' > "$safeTmp"/.tmp-currentFileBytes) | \
+tee >(openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpool) | \
+tee >(openssl dgst -sha3-512 -binary | xxd -p -c 256 > "$safeTmp"/.tmp-sha3) > /dev/null
+
+
+    
+    
+    echo 'dd if=./'"$currentFileName"' bs=1048576 count=$(bc <<< '"'"$(cat "$safeTmp"/.tmp-currentFileBytes)' / 1048576'"'"' ) status=progress | openssl dgst -whirlpool -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-whirlpool.txt
+    
+    cat "$safeTmp"/.tmp-whirlpool >> "$safeTmp"/_hash-"$currentListName"-whirlpool.txt
+    
+    
+    echo 'dd if=./'"$currentFileName"' bs=1048576 count=$(bc <<< '"'"$(cat "$safeTmp"/.tmp-currentFileBytes)' / 1048576'"'"' ) status=progress | openssl dgst -sha3-512 -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-sha3.txt
+    
+    cat "$safeTmp"/.tmp-sha3 >> "$safeTmp"/_hash-"$currentListName"-sha3.txt
+    
+    
+    wait
+    cat "$safeTmp"/_hash-"$currentListName"-whirlpool.txt >> "$scriptLocal"/_hash-"$currentListName".txt
+    cat "$safeTmp"/_hash-"$currentListName"-sha3.txt >> "$scriptLocal"/_hash-"$currentListName".txt
+    
+    echo >> "$scriptLocal"/_hash-"$currentListName".txt
+
+    cat "$scriptLocal"/_hash-"$currentListName".txt
+    
+
+    _stop
 }
 
 _hash_live-stream() {
-    _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$1" "vm-live.iso" 2> /dev/null | _hash_file ubdist-live vm-live.iso /dev/stdin cat
+    _custom_splice_opensslConfig
+    
+    _start
+    
+    
+    [[ -e "/etc/ssl/openssl_legacy.cnf" ]] && export OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf"
+    
+    
+    local currentListName=ubdist-live
+    local currentFileName=vm-live.iso
+    local currentFilePath=/dev/stdin
+    
+    _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$1" "vm-live.iso" 2> /dev/null | \
+tee >(wc -c /dev/stdin | cut -f1 -d\ | tr -dc '0-9' > "$safeTmp"/.tmp-currentFileBytes) | \
+tee >(openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpool) | \
+tee >(openssl dgst -sha3-512 -binary | xxd -p -c 256 > "$safeTmp"/.tmp-sha3) > /dev/null
+
+
+    
+    
+    echo 'dd if=./'"$currentFileName"' bs=2048 count=$(bc <<< '"'"$(cat "$safeTmp"/.tmp-currentFileBytes)' / 2048'"'"' ) status=progress | openssl dgst -whirlpool -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-whirlpool.txt
+    
+    cat "$safeTmp"/.tmp-whirlpool >> "$safeTmp"/_hash-"$currentListName"-whirlpool.txt
+    
+    
+    echo 'dd if=./'"$currentFileName"' bs=2048 count=$(bc <<< '"'"$(cat "$safeTmp"/.tmp-currentFileBytes)' / 2048'"'"' ) status=progress | openssl dgst -sha3-512 -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-sha3.txt
+    
+    cat "$safeTmp"/.tmp-sha3 >> "$safeTmp"/_hash-"$currentListName"-sha3.txt
+    
+    
+    wait
+    cat "$safeTmp"/_hash-"$currentListName"-whirlpool.txt >> "$scriptLocal"/_hash-"$currentListName".txt
+    cat "$safeTmp"/_hash-"$currentListName"-sha3.txt >> "$scriptLocal"/_hash-"$currentListName".txt
+    
+    echo >> "$scriptLocal"/_hash-"$currentListName".txt
+
+    cat "$scriptLocal"/_hash-"$currentListName".txt
+    
+
+    _stop
 }
 
 
@@ -119,9 +238,11 @@ _hash_ubdist-fast() {
     wait "$currentPID_3"
     wait
     
+    rm -f "$scriptLocal"/_hash-ubdist.txt
+    
     cat "$scriptLocal"/_hash-ubdist-img.txt > "$scriptLocal"/_hash-ubdist.txt
-    cat "$scriptLocal"/_hash-ubdist-rootfs.txt > "$scriptLocal"/_hash-ubdist.txt
-    cat "$scriptLocal"/_hash-ubdist-live.txt > "$scriptLocal"/_hash-ubdist.txt
+    cat "$scriptLocal"/_hash-ubdist-rootfs.txt >> "$scriptLocal"/_hash-ubdist.txt
+    cat "$scriptLocal"/_hash-ubdist-live.txt >> "$scriptLocal"/_hash-ubdist.txt
     
     echo
     
