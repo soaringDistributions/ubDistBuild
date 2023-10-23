@@ -105,7 +105,7 @@ tee >(wc -c /dev/stdin | cut -f1 -d\ | tr -dc '0-9' > "$safeTmp"/.tmp-currentFil
 tee >(openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpool) | \
 tee >(openssl dgst -sha3-512 -binary | xxd -p -c 256 > "$safeTmp"/.tmp-sha3) > /dev/null
 
-
+    wait
     
     
     echo 'dd if=./'"$currentFileName"' bs=1048576 count=$(bc <<< '"'"$(cat "$safeTmp"/.tmp-currentFileBytes)' / 1048576'"'"' ) status=progress | openssl dgst -whirlpool -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-whirlpool.txt
@@ -148,7 +148,7 @@ tee >(wc -c /dev/stdin | cut -f1 -d\ | tr -dc '0-9' > "$safeTmp"/.tmp-currentFil
 tee >(openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpool) | \
 tee >(openssl dgst -sha3-512 -binary | xxd -p -c 256 > "$safeTmp"/.tmp-sha3) > /dev/null
 
-
+    wait
     
     
     echo 'dd if=./'"$currentFileName"' bs=1048576 count=$(bc <<< '"'"$(cat "$safeTmp"/.tmp-currentFileBytes)' / 1048576'"'"' ) status=progress | openssl dgst -whirlpool -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-whirlpool.txt
@@ -191,7 +191,7 @@ tee >(wc -c /dev/stdin | cut -f1 -d\ | tr -dc '0-9' > "$safeTmp"/.tmp-currentFil
 tee >(openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpool) | \
 tee >(openssl dgst -sha3-512 -binary | xxd -p -c 256 > "$safeTmp"/.tmp-sha3) > /dev/null
 
-
+    wait
     
     
     echo 'dd if=./'"$currentFileName"' bs=2048 count=$(bc <<< '"'"$(cat "$safeTmp"/.tmp-currentFileBytes)' / 2048'"'"' ) status=progress | openssl dgst -whirlpool -binary | xxd -p -c 256' >> "$safeTmp"/_hash-"$currentListName"-whirlpool.txt
