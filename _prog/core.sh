@@ -296,7 +296,7 @@ CZXWXcRMTo8EmM8i4d
 		cat << CZXWXcRMTo8EmM8i4d | sudo -n tee "$globalVirtFS"/etc/apt/sources.list.azure > /dev/null
 deb http://debian-archive.trafficmanager.net/debian/  bookworm           main contrib non-free non-free-firmware
 deb http://debian-archive.trafficmanager.net/debian/  bookworm-updates   main contrib non-free non-free-firmware
-deb http://debian-archive.trafficmanager.net/debian/  bookworm-security  main contrib non-free non-free-firmware
+#deb http://debian-archive.trafficmanager.net/debian/  bookworm-security  main contrib non-free non-free-firmware
 
 deb http://debian-archive.trafficmanager.net/debian-security bookworm-security main contrib non-free non-free-firmware
 
