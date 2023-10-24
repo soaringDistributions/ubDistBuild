@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='368905108'
+export ub_setScriptChecksum_contents='3489525135'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -43430,9 +43430,9 @@ CZXWXcRMTo8EmM8i4d
 	
 	# https://docs.hetzner.com/robot/dedicated-server/operating-systems/hetzner-aptitude-mirror/
 	# ATTENTION: Disabled by default (ie. 'if false').
-	if false && wget -qO- --dns-timeout=15 --connect-timeout=15 --read-timeout=15 --timeout=15 https://mirror.hetzner.com > /dev/null
+	if wget -qO- --dns-timeout=15 --connect-timeout=15 --read-timeout=15 --timeout=15 https://mirror.hetzner.com > /dev/null
 	then
-		cat << CZXWXcRMTo8EmM8i4d | sudo -n tee -a "$globalVirtFS"/etc/apt/sources.list > /dev/null
+		cat << CZXWXcRMTo8EmM8i4d | sudo -n tee -a "$globalVirtFS"/etc/apt/sources.list.hetzner > /dev/null
 deb https://mirror.hetzner.com/debian/packages  bookworm           main contrib non-free non-free-firmware
 deb https://mirror.hetzner.com/debian/packages  bookworm-updates   main contrib non-free non-free-firmware
 deb https://mirror.hetzner.com/debian/security  bookworm-security  main contrib non-free non-free-firmware
@@ -43443,8 +43443,21 @@ deb https://mirror.hetzner.com/debian/security  bookworm-security  main contrib 
 CZXWXcRMTo8EmM8i4d
 	fi
 	
+	# https://www.reddit.com/r/debian/comments/zm6o86/why_does_debian_uses_azure_mirrors/
+	# https://www.debian.org/mirror/list
+	# http://debian-archive.trafficmanager.net/debian/
+	if wget -qO- --dns-timeout=15 --connect-timeout=15 --read-timeout=15 --timeout=15 https://mirror.hetzner.com > /dev/null
+	then
+		cat << CZXWXcRMTo8EmM8i4d | sudo -n tee -a "$globalVirtFS"/etc/apt/sources.list.azure > /dev/null
+deb http://debian-archive.trafficmanager.net/debian/  bookworm           main contrib non-free non-free-firmware
+deb http://debian-archive.trafficmanager.net/debian/  bookworm-updates   main contrib non-free non-free-firmware
+deb http://debian-archive.trafficmanager.net/debian/  bookworm-security  main contrib non-free non-free-firmware
+
+CZXWXcRMTo8EmM8i4d
+	fi
 	
-	cat << CZXWXcRMTo8EmM8i4d | sudo -n tee -a "$globalVirtFS"/etc/apt/sources.list > /dev/null
+	
+	cat << CZXWXcRMTo8EmM8i4d | sudo -n tee -a "$globalVirtFS"/etc/apt/sources.list.default > /dev/null
 #https://wiki.debian.org/AptCacherNg
 deb http://ftp.us.debian.org/debian/ bookworm main contrib non-free non-free-firmware
 deb-src http://ftp.us.debian.org/debian/ bookworm main contrib non-free non-free-firmware
@@ -43461,6 +43474,18 @@ deb-src https://deb.debian.org/debian/ bookworm-updates main contrib non-free no
 
 
 CZXWXcRMTo8EmM8i4d
+	
+	if false && sudo ls "$globalVirtFS"/etc/apt/sources.list.hetzner > /dev/null 2>&1 && wget -qO- --dns-timeout=15 --connect-timeout=15 --read-timeout=15 --timeout=15 https://mirror.hetzner.com > /dev/null
+	then
+		sudo -n cat "$globalVirtFS"/etc/apt/sources.list.hetzner | _getMost_backend tee -a "$globalVirtFS"/etc/apt/sources.list > /dev/null 2>&1
+	fi
+	
+	if [[ "$RUNNER_OS" != "" ]] && sudo ls "$globalVirtFS"/etc/apt/sources.list.azure > /dev/null 2>&1
+	then
+		sudo -n cat "$globalVirtFS"/etc/apt/sources.list.azure | _getMost_backend tee -a "$globalVirtFS"/etc/apt/sources.list > /dev/null 2>&1
+	fi
+	
+	sudo -n cat "$globalVirtFS"/etc/apt/sources.list.default | _getMost_backend tee -a "$globalVirtFS"/etc/apt/sources.list > /dev/null 2>&1
 	
 	echo 'deb http://deb.debian.org/debian bookworm-backports main contrib' | _getMost_backend tee /etc/apt/sources.list.d/ub_backports.list > /dev/null 2>&1
 
@@ -44280,7 +44305,7 @@ CZXWXcRMTo8EmM8i4d
 
 
 
-
+	sudo -n cat "$globalVirtFS"/etc/apt/sources.list.default | _getMost_backend tee "$globalVirtFS"/etc/apt/sources.list > /dev/null 2>&1
 
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0
