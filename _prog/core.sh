@@ -848,6 +848,19 @@ _create_ubDistBuild-rotten_install-core() {
 	_getMost_backend apt-get update
 
 	_getMost_backend_aptGetInstall w3m
+
+	
+
+	# WARNING: May be obsolete versions.
+	# WARNING: If these system installed 3DPrinting utilities cause conflicts with standalone versions, they will then be removed.
+	_getMost_backend_aptGetInstall prusa-slicer
+	_getMost_backend_aptGetInstall slic3r
+	_getMost_backend_aptGetInstall cura
+	
+	_getMost_backend_aptGetInstall pronterface
+
+
+
 	
 	#_getMost_backend_aptGetInstall fldigi
 	#_getMost_backend_aptGetInstall psk31lx
