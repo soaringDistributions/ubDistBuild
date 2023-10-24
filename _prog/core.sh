@@ -345,6 +345,8 @@ CZXWXcRMTo8EmM8i4d
 	_getMost_backend_aptGetInstall ca-certificates
 	
 	
+	_getMost_backend_aptGetInstall apt-utils
+	
 	
 	# ATTENTION: WARNING: tasksel
 	_chroot tasksel install standard
