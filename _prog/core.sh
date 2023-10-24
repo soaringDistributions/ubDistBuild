@@ -859,6 +859,9 @@ _create_ubDistBuild-rotten_install-core() {
 	
 	_getMost_backend_aptGetInstall pronterface
 
+	# https://pycam.sourceforge.net/requirements/
+	_getMost_backend_aptGetInstall python3-gi python3-opengl gir1.2-gtk-3.0
+
 
 
 	
