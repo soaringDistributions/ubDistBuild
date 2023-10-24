@@ -298,6 +298,10 @@ deb http://debian-archive.trafficmanager.net/debian/  bookworm           main co
 deb http://debian-archive.trafficmanager.net/debian/  bookworm-updates   main contrib non-free non-free-firmware
 deb http://debian-archive.trafficmanager.net/debian/  bookworm-security  main contrib non-free non-free-firmware
 
+deb http://debian-archive.trafficmanager.net/debian-security bookworm-security main contrib non-free non-free-firmware
+
+deb http://debian-archive.trafficmanager.net/debian bookworm-backports main contrib
+
 CZXWXcRMTo8EmM8i4d
 	fi
 	
