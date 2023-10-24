@@ -277,7 +277,7 @@ CZXWXcRMTo8EmM8i4d
 	# ATTENTION: Disabled by default (ie. 'if false').
 	if wget -qO- --dns-timeout=15 --connect-timeout=15 --read-timeout=15 --timeout=15 https://mirror.hetzner.com > /dev/null
 	then
-		cat << CZXWXcRMTo8EmM8i4d | sudo -n tee -a "$globalVirtFS"/etc/apt/sources.list.hetzner > /dev/null
+		cat << CZXWXcRMTo8EmM8i4d | sudo -n tee "$globalVirtFS"/etc/apt/sources.list.hetzner > /dev/null
 deb https://mirror.hetzner.com/debian/packages  bookworm           main contrib non-free non-free-firmware
 deb https://mirror.hetzner.com/debian/packages  bookworm-updates   main contrib non-free non-free-firmware
 deb https://mirror.hetzner.com/debian/security  bookworm-security  main contrib non-free non-free-firmware
@@ -293,7 +293,7 @@ CZXWXcRMTo8EmM8i4d
 	# http://debian-archive.trafficmanager.net/debian/
 	if wget -qO- --dns-timeout=15 --connect-timeout=15 --read-timeout=15 --timeout=15 https://mirror.hetzner.com > /dev/null
 	then
-		cat << CZXWXcRMTo8EmM8i4d | sudo -n tee -a "$globalVirtFS"/etc/apt/sources.list.azure > /dev/null
+		cat << CZXWXcRMTo8EmM8i4d | sudo -n tee "$globalVirtFS"/etc/apt/sources.list.azure > /dev/null
 deb http://debian-archive.trafficmanager.net/debian/  bookworm           main contrib non-free non-free-firmware
 deb http://debian-archive.trafficmanager.net/debian/  bookworm-updates   main contrib non-free non-free-firmware
 deb http://debian-archive.trafficmanager.net/debian/  bookworm-security  main contrib non-free non-free-firmware
@@ -302,7 +302,7 @@ CZXWXcRMTo8EmM8i4d
 	fi
 	
 	
-	cat << CZXWXcRMTo8EmM8i4d | sudo -n tee -a "$globalVirtFS"/etc/apt/sources.list.default > /dev/null
+	cat << CZXWXcRMTo8EmM8i4d | sudo -n tee "$globalVirtFS"/etc/apt/sources.list.default > /dev/null
 #https://wiki.debian.org/AptCacherNg
 deb http://ftp.us.debian.org/debian/ bookworm main contrib non-free non-free-firmware
 deb-src http://ftp.us.debian.org/debian/ bookworm main contrib non-free non-free-firmware
@@ -322,15 +322,15 @@ CZXWXcRMTo8EmM8i4d
 	
 	if false && sudo ls "$globalVirtFS"/etc/apt/sources.list.hetzner > /dev/null 2>&1 && wget -qO- --dns-timeout=15 --connect-timeout=15 --read-timeout=15 --timeout=15 https://mirror.hetzner.com > /dev/null
 	then
-		sudo -n cat "$globalVirtFS"/etc/apt/sources.list.hetzner | _getMost_backend tee -a "$globalVirtFS"/etc/apt/sources.list > /dev/null 2>&1
+		sudo -n cat "$globalVirtFS"/etc/apt/sources.list.hetzner | _getMost_backend tee -a /etc/apt/sources.list > /dev/null 2>&1
 	fi
 	
 	if [[ "$RUNNER_OS" != "" ]] && sudo ls "$globalVirtFS"/etc/apt/sources.list.azure > /dev/null 2>&1
 	then
-		sudo -n cat "$globalVirtFS"/etc/apt/sources.list.azure | _getMost_backend tee -a "$globalVirtFS"/etc/apt/sources.list > /dev/null 2>&1
+		sudo -n cat "$globalVirtFS"/etc/apt/sources.list.azure | _getMost_backend tee -a /etc/apt/sources.list > /dev/null 2>&1
 	fi
 	
-	sudo -n cat "$globalVirtFS"/etc/apt/sources.list.default | _getMost_backend tee -a "$globalVirtFS"/etc/apt/sources.list > /dev/null 2>&1
+	sudo -n cat "$globalVirtFS"/etc/apt/sources.list.default | _getMost_backend tee -a /etc/apt/sources.list > /dev/null 2>&1
 	
 	echo 'deb http://deb.debian.org/debian bookworm-backports main contrib' | _getMost_backend tee /etc/apt/sources.list.d/ub_backports.list > /dev/null 2>&1
 
@@ -1150,7 +1150,7 @@ CZXWXcRMTo8EmM8i4d
 
 
 
-	sudo -n cat "$globalVirtFS"/etc/apt/sources.list.default | _getMost_backend tee "$globalVirtFS"/etc/apt/sources.list > /dev/null 2>&1
+	sudo -n cat "$globalVirtFS"/etc/apt/sources.list.default | _getMost_backend tee /etc/apt/sources.list > /dev/null 2>&1
 
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0
