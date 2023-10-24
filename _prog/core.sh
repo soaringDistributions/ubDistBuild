@@ -291,7 +291,7 @@ CZXWXcRMTo8EmM8i4d
 	# https://www.reddit.com/r/debian/comments/zm6o86/why_does_debian_uses_azure_mirrors/
 	# https://www.debian.org/mirror/list
 	# http://debian-archive.trafficmanager.net/debian/
-	if wget -qO- --dns-timeout=15 --connect-timeout=15 --read-timeout=15 --timeout=15 https://mirror.hetzner.com > /dev/null
+	if true
 	then
 		cat << CZXWXcRMTo8EmM8i4d | sudo -n tee "$globalVirtFS"/etc/apt/sources.list.azure > /dev/null
 deb http://debian-archive.trafficmanager.net/debian/  bookworm           main contrib non-free non-free-firmware
@@ -347,6 +347,7 @@ CZXWXcRMTo8EmM8i4d
 	
 	
 	_getMost_backend_aptGetInstall hostnamectl
+	#_getMost_backend_aptGetInstall systemd
 	_chroot hostnamectl set-hostname default
 	
 	
