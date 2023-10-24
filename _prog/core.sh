@@ -295,15 +295,37 @@ CZXWXcRMTo8EmM8i4d
 	then
 		cat << CZXWXcRMTo8EmM8i4d | sudo -n tee "$globalVirtFS"/etc/apt/sources.list.azure > /dev/null
 deb http://debian-archive.trafficmanager.net/debian/  bookworm           main contrib non-free non-free-firmware
-deb http://debian-archive.trafficmanager.net/debian/  bookworm-updates   main contrib non-free non-free-firmware
-#deb http://debian-archive.trafficmanager.net/debian/  bookworm-security  main contrib non-free non-free-firmware
+deb-src http://debian-archive.trafficmanager.net/debian/  bookworm           main contrib non-free non-free-firmware
 
 deb http://debian-archive.trafficmanager.net/debian-security bookworm-security main contrib non-free non-free-firmware
+deb-src http://debian-archive.trafficmanager.net/debian-security bookworm-security main contrib non-free non-free-firmware
+#deb http://debian-archive.trafficmanager.net/debian/  bookworm-security  main contrib non-free non-free-firmware
+
+deb http://debian-archive.trafficmanager.net/debian/  bookworm-updates   main contrib non-free non-free-firmware
+deb-src http://debian-archive.trafficmanager.net/debian/  bookworm-updates   main contrib non-free non-free-firmware
 
 deb http://debian-archive.trafficmanager.net/debian bookworm-backports main contrib
 
 CZXWXcRMTo8EmM8i4d
 	fi
+
+
+		cat << CZXWXcRMTo8EmM8i4d | sudo -n tee "$globalVirtFS"/etc/apt/sources.list.modern > /dev/null
+deb https://deb.debian.org/debian/ bookworm main contrib non-free non-free-firmware
+deb-src https://deb.debian.org/debian/ bookworm main contrib non-free non-free-firmware
+
+deb https://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware
+deb-src https://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware
+
+deb https://deb.debian.org/debian/ bookworm-updates main contrib non-free non-free-firmware
+deb-src https://deb.debian.org/debian/ bookworm-updates main contrib non-free non-free-firmware
+
+#deb http://deb.debian.org/debian bookworm-backports main contrib non-free non-free-firmware
+#deb-src http://deb.debian.org/debian bookworm-backports main contrib non-free non-free-firmware
+
+
+
+CZXWXcRMTo8EmM8i4d
 	
 	
 	cat << CZXWXcRMTo8EmM8i4d | sudo -n tee "$globalVirtFS"/etc/apt/sources.list.default > /dev/null
@@ -324,17 +346,24 @@ deb-src https://deb.debian.org/debian/ bookworm-updates main contrib non-free no
 
 CZXWXcRMTo8EmM8i4d
 	
+	# APT sources here may not provide all packages, and thus are not exclusive of other lists.
 	if false && sudo ls "$globalVirtFS"/etc/apt/sources.list.hetzner > /dev/null 2>&1 && wget -qO- --dns-timeout=15 --connect-timeout=15 --read-timeout=15 --timeout=15 https://mirror.hetzner.com > /dev/null
 	then
-		sudo -n cat "$globalVirtFS"/etc/apt/sources.list.hetzner | _getMost_backend tee -a /etc/apt/sources.list > /dev/null 2>&1
+		sudo -n cat "$globalVirtFS"/etc/apt/sources.list.hetzner | _getMost_backend tee -a /etc/apt/sources.list > /dev/null
 	fi
 	
+	# APT sources here provide all packages, and thus can be exclusive of other lists.
 	if [[ "$RUNNER_OS" != "" ]] && sudo ls "$globalVirtFS"/etc/apt/sources.list.azure > /dev/null 2>&1
 	then
-		sudo -n cat "$globalVirtFS"/etc/apt/sources.list.azure | _getMost_backend tee -a /etc/apt/sources.list > /dev/null 2>&1
+		sudo -n cat "$globalVirtFS"/etc/apt/sources.list.azure | _getMost_backend tee -a /etc/apt/sources.list > /dev/null
+	elif false
+	then
+		false
+	else
+		#sudo -n cat "$globalVirtFS"/etc/apt/sources.list.default | _getMost_backend tee -a /etc/apt/sources.list > /dev/null
+		sudo -n cat "$globalVirtFS"/etc/apt/sources.list.modern | _getMost_backend tee -a /etc/apt/sources.list > /dev/null
 	fi
 	
-	sudo -n cat "$globalVirtFS"/etc/apt/sources.list.default | _getMost_backend tee -a /etc/apt/sources.list > /dev/null 2>&1
 	
 	echo 'deb http://deb.debian.org/debian bookworm-backports main contrib' | _getMost_backend tee /etc/apt/sources.list.d/ub_backports.list > /dev/null 2>&1
 
@@ -1157,7 +1186,9 @@ CZXWXcRMTo8EmM8i4d
 
 
 
-	sudo -n cat "$globalVirtFS"/etc/apt/sources.list.default | _getMost_backend tee /etc/apt/sources.list > /dev/null 2>&1
+	sudo -n cat "$globalVirtFS"/etc/apt/sources.list.default | _getMost_backend tee /etc/apt/sources.list > /dev/null
+
+	_getMost_backend apt-get update
 
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0
