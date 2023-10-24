@@ -774,7 +774,7 @@ jobs:
           export skimfast=${{ inputs.skimfast }}
           echo $skimfast
           #./ubiquitous_bash.sh _hash_img
-          cat hash-download.txt
+          cat _local/hash-download.txt
 
 
       - name: _convert-rootfs
@@ -968,8 +968,8 @@ jobs:
         run: |
           export skimfast=${{ inputs.skimfast }}
           echo $skimfast
-          ./ubiquitous_bash.sh _hash_img
-          cat hash-download.txt
+          #./ubiquitous_bash.sh _hash_img
+          cat _local/hash-download.txt
 
 
 
