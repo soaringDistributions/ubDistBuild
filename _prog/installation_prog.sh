@@ -1,6 +1,10 @@
 
 _test_prog() {
 	_getDep pv
+
+	_wantGetDep lsblk
+
+	_wantGetDep unsquashfs
 }
 
 
