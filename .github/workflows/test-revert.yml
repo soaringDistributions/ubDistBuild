@@ -588,7 +588,7 @@ jobs:
       - name: mount
         shell: bash
         run: |
-          [[ ! mountpoint ./_local/cache.img ]] && sudo -n mount -t btrfs ./_local/cache.img ./_local/cache_fs || true
+          ! mountpoint ./_local/cache_fs && sudo -n mount -t btrfs ./_local/cache.img ./_local/cache_fs || true
           
       - name: artifacts
         uses: actions/upload-artifact@v3
@@ -600,7 +600,7 @@ jobs:
       - name: ______________________________ _revert-fromLive.log
         shell: bash
         run: |
-          [[ ! mountpoint ./_local/cache.img ]] && sudo -n mount -t btrfs ./_local/cache.img ./_local/cache_fs || true
+          ! mountpoint ./_local/cache_fs && sudo -n mount -t btrfs ./_local/cache.img ./_local/cache_fs || true
           cat ./_local/cache_fs/_revert-fromLive.log || true
 
       - name: _export-fromLive
@@ -608,7 +608,7 @@ jobs:
         run: |
           lsmod | grep loop || true
           mkdir -p ./_local/cache_fs
-          [[ ! mountpoint ./_local/cache.img ]] && sudo -n mount -t btrfs ./_local/cache.img ./_local/cache_fs || true
+          ! mountpoint ./_local/cache_fs && sudo -n mount -t btrfs ./_local/cache.img ./_local/cache_fs || true
           ls ./_local/cache_fs
           sudo -n dd if=./_local/cache_fs/ubDistBuild/_local/vm.img bs=1M | dd of=./_local/vm.img bs=1M
 
