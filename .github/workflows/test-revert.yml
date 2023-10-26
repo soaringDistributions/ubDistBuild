@@ -440,7 +440,9 @@ jobs:
           ##fallocate -l 30333206528 ./_local/cache.img
           #28620
           #30.25 GiB
-          fallocate -l 32480690176 ./_local/cache.img
+          #fallocate -l 32480690176 ./_local/cache.img
+          #36 GiB
+          fallocate -l 38654705664 ./_local/cache.img
           fallocate --dig-holes ./_local/cache.img
           mkfs.btrfs -L Y2FjaGUK --checksum xxhash -M -d single ./_local/cache.img
 
