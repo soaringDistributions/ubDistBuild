@@ -262,6 +262,7 @@ _get_vmImg_ubDistBuild-live_sequence() {
 	_messagePlain_probe_var currentHash_bytes
 	_messagePlain_probe_var currentHash
 	_messagePlain_probe_var currentHashLocal
+	[[ "$3" != "" ]] && _messagePlain_request 'dd if='"$3"' bs=2048 count=$(bc <<< '"'""$currentHash_bytes"' / 2048'"'"' ) status=progress | openssl dgst -whirlpool -binary | xxd -p -c 256'
 	[[ "$currentHash" != "$currentHashLocal" ]] && _messageFAIL
 	
 	rm -f "$scriptLocal"/hash-download.txt
