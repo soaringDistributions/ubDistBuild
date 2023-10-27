@@ -18,7 +18,7 @@
 #-->   mount/umount -t btrfs ./_local/cache.img ./_local/cache_fs
 #-->   PASS/FAIL (from logs)
 
-name: test-revert
+name: test-revert-squashfs
 
 
 # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#permissions
@@ -520,8 +520,9 @@ jobs:
 
           mkdir -p ./_local/analysis/screenshots
           currentIterationWait=0
-          currentIterationMax=2600
-          ! ./ubiquitous_bash.sh _testQEMU_hostArch_x64_hardwarevt && currentIterationMax=18000 || true
+          #currentIterationMax=2600
+          #! ./ubiquitous_bash.sh _testQEMU_hostArch_x64_hardwarevt && currentIterationMax=18000 || true
+          currentIterationMax=14400
           while [[ "$currentIterationWait" -lt "$currentIterationMax" ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
           do
             sleep 1
