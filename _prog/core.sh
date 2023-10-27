@@ -953,6 +953,18 @@ _create_ubDistBuild-rotten_install-core() {
 	
 
 	_getMost_backend_aptGetInstall gpsbabel
+	
+	
+	_getMost_backend_aptGetInstall lirc
+	_getMost_backend_aptGetInstall lirc-x
+	_getMost_backend_aptGetInstall lirc-compat-remotes
+	_getMost_backend_aptGetInstall lirc-drv-irman
+	_getMost_backend_aptGetInstall lirc-doc
+	_getMost_backend_aptGetInstall ir-keytable
+	
+	_getMost_backend_aptGetInstall setserial
+	
+	_getMost_backend_aptGetInstall statserial
 
 
 

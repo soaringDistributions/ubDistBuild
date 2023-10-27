@@ -48,38 +48,42 @@ _revert-fromLive() {
 	#_mountChRoot_image_x64_prog
 
 
-
-    #sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/root "$globalVirtFS"/
-    #sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/VBoxGuestAdditions "$globalVirtFS"/
-    #sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/opt "$globalVirtFS"/
-    #sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/run "$globalVirtFS"/
-    #sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/srv "$globalVirtFS"/
-    #sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/var "$globalVirtFS"/
-    #sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/opt "$globalVirtFS"/
-    #sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/bin "$globalVirtFS"/
-    #sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/sbin "$globalVirtFS"/
-    #sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/etc "$globalVirtFS"/
+	if [[ "$FORCE_RSYNC" == "true" ]]
+	then
+    sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/root "$globalVirtFS"/
+    sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/VBoxGuestAdditions "$globalVirtFS"/
+    sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/opt "$globalVirtFS"/
+    sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/run "$globalVirtFS"/
+    sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/srv "$globalVirtFS"/
+    sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/var "$globalVirtFS"/
+    sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/opt "$globalVirtFS"/
+    sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/bin "$globalVirtFS"/
+    sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/sbin "$globalVirtFS"/
+    sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/etc "$globalVirtFS"/
 	
-	#sudo -n mkdir -p "$globalVirtFS"/usr/lib/modules
-    #sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/usr/lib/modules/. "$globalVirtFS"/usr/lib/modules/
+	sudo -n mkdir -p "$globalVirtFS"/usr/lib/modules
+    sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/usr/lib/modules/. "$globalVirtFS"/usr/lib/modules/
 
-	#sudo -n mkdir -p "$globalVirtFS"/usr/lib/systemd
-    #sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/usr/lib/systemd/. "$globalVirtFS"/usr/lib/systemd/
+	sudo -n mkdir -p "$globalVirtFS"/usr/lib/systemd
+    sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/usr/lib/systemd/. "$globalVirtFS"/usr/lib/systemd/
 
-    #sudo -n mkdir -p "$globalVirtFS"/usr/lib
-    #sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/usr/lib/. "$globalVirtFS"/usr/lib/
+    sudo -n mkdir -p "$globalVirtFS"/usr/lib
+    sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/usr/lib/. "$globalVirtFS"/usr/lib/
 
-	#sudo -n mkdir -p "$globalVirtFS"/usr/bin
-    #sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/usr/bin/. "$globalVirtFS"/usr/bin/
+	sudo -n mkdir -p "$globalVirtFS"/usr/bin
+    sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/usr/bin/. "$globalVirtFS"/usr/bin/
 
-	#sudo -n mkdir -p "$globalVirtFS"/usr/sbin
-    #sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/usr/sbin/. "$globalVirtFS"/usr/sbin/
-
-
-
-    #sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/. "$globalVirtFS"/
+	sudo -n mkdir -p "$globalVirtFS"/usr/sbin
+    sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/usr/sbin/. "$globalVirtFS"/usr/sbin/
     
-	sudo -n unsquashfs -f -d "$globalVirtFS" /run/live/medium/live/filesystem.squashfs
+		    sudo -n rsync -ax --progress --exclude /vm.img --exclude /package_rootfs.tar /run/live/rootfs/filesystem.squashfs/. "$globalVirtFS"/
+	else
+		sudo -n unsquashfs -f -d "$globalVirtFS" /run/live/medium/live/filesystem.squashfs
+	fi
+
+
+
+
     
     
 	# https://unix.stackexchange.com/questions/703887/update-initramfs-is-disabled-live-system-is-running-without-media-mounted-on-r

@@ -347,7 +347,7 @@ jobs:
         run: |
           ./ubiquitous_bash.sh _openChRoot
           #echo '/root/ubiquitous_bash.sh _wait_rootLock_OTHER'
-          ( ./ubiquitous_bash.sh _chroot crontab -l ; echo '@reboot /bin/true uk4uPhB6 ; /usr/bin/mkdir -p /media/tmp ; /usr/bin/mount -o compress=zstd:2 -L Y2FjaGUK /media/tmp ; cp -a /home/user/ubDistBuild /media/tmp/ ; /bin/bash -c "export skimfast=${{ inputs.skimfast }} ; export devfast=${{ inputs.devfast }} ; export FORCE_RSYNC=true ; cd /home/user ;  /bin/sudo -n --preserve-env=skimfast,devfast,FORCE_RSYNC -u user /media/tmp/ubDistBuild/ubiquitous_bash.sh _revert-fromLive > /media/tmp/_revert-fromLive.log 2>&1 ; /bin/true > /media/tmp/_run-crontab.log ; wait ; /bin/true > /var/log/_run-crontab.log ; sudo -n umount /media/tmp ; sync ; sudo -n /usr/sbin/poweroff ; sudo -n /sbin/poweroff ; sudo -n poweroff"' ) | ./ubiquitous_bash.sh _chroot crontab '-'
+          ( ./ubiquitous_bash.sh _chroot crontab -l ; echo '@reboot /bin/true uk4uPhB6 ; /usr/bin/mkdir -p /media/tmp ; /usr/bin/mount -o compress=zstd:2 -L Y2FjaGUK /media/tmp ; cp -a /home/user/ubDistBuild /media/tmp/ ; /bin/bash -c "export skimfast=${{ inputs.skimfast }} ; export devfast=${{ inputs.devfast }} ; export FORCE_RSYNC=false ; cd /home/user ;  /bin/sudo -n --preserve-env=skimfast,devfast,FORCE_RSYNC -u user /media/tmp/ubDistBuild/ubiquitous_bash.sh _revert-fromLive > /media/tmp/_revert-fromLive.log 2>&1 ; /bin/true > /media/tmp/_run-crontab.log ; wait ; /bin/true > /var/log/_run-crontab.log ; sudo -n umount /media/tmp ; sync ; sudo -n /usr/sbin/poweroff ; sudo -n /sbin/poweroff ; sudo -n poweroff"' ) | ./ubiquitous_bash.sh _chroot crontab '-'
           
           ./ubiquitous_bash.sh _chroot crontab -l
           ./ubiquitous_bash.sh _closeChRoot
