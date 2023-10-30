@@ -881,6 +881,7 @@ _create_ubDistBuild-rotten_install-core() {
 
 	
 	#_getMost_backend_aptGetInstall fldigi
+	#_getMost_backend_aptGetInstall flamp
 	#_getMost_backend_aptGetInstall psk31lx
 	
 	_getMost_backend_aptGetInstall gnucash

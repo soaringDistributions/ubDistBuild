@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2652564418'
+export ub_setScriptChecksum_contents='1504518741'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -5853,6 +5853,8 @@ _init_deps() {
 	export enUb_dev=""
 	export enUb_dev_heavy=""
 	
+	export enUb_generic=""
+	
 	export enUb_cloud_heavy=""
 	
 	export enUb_mount=""
@@ -5919,7 +5921,13 @@ _init_deps() {
 	export enUb_calculators=""
 }
 
+_deps_generic() {
+	export enUb_generic="true"
+}
+
 _deps_dev() {
+	_deps_generic
+	
 	export enUb_dev="true"
 }
 
@@ -6236,13 +6244,19 @@ _deps_linux() {
 }
 
 _deps_python() {
+	_deps_generic
+	
 	export enUb_python="true"
 }
 _deps_haskell() {
+	_deps_generic
+	
 	export enUb_haskell="true"
 }
 
 _deps_calculators() {
+	_deps_generic
+	
 	export enUb_calculators="true"
 }
 
@@ -6781,6 +6795,8 @@ _compile_bash_deps() {
 		_deps_getVeracrypt
 		_deps_linux
 		
+		_deps_generic
+		
 		_deps_python
 		_deps_haskell
 		
@@ -6835,6 +6851,8 @@ _compile_bash_deps() {
 	if [[ "$1" == "processor" ]]
 	then
 		_deps_dev
+		
+		_deps_generic
 		
 		_deps_python
 		_deps_haskell
@@ -6931,6 +6949,8 @@ _compile_bash_deps() {
 		_deps_fakehome
 		_deps_abstractfs
 		
+		_deps_generic
+		
 		_deps_python
 		_deps_haskell
 		
@@ -7026,6 +7046,8 @@ _compile_bash_deps() {
 		_deps_fakehome
 		_deps_abstractfs
 		
+		_deps_generic
+		
 		_deps_python
 		_deps_haskell
 		
@@ -7120,6 +7142,8 @@ _compile_bash_deps() {
 		_deps_msw
 		_deps_fakehome
 		_deps_abstractfs
+		
+		_deps_generic
 		
 		_deps_python
 		_deps_haskell
@@ -7333,6 +7357,8 @@ _compile_bash_utilities() {
 	
 	[[ "$enUb_dev_heavy" == "true" ]] && includeScriptList+=( "instrumentation"/bashdb/bashdb.sh )
 	( [[ "$enUb_notLean" == "true" ]] || [[ "$enUb_stopwatch" == "true" ]] ) && includeScriptList+=( "instrumentation"/profiling/stopwatch.sh )
+	
+	[[ "$enUb_generic" == "true" ]] && includeScriptList+=( "generic"/generic.sh )
 }
 
 # Specifically intended to support Eclipse as necessary for building existing software .

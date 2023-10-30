@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1580093390'
+export ub_setScriptChecksum_contents='3591294593'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -11193,6 +11193,12 @@ _getMost_debian11_install() {
 	
 	
 	
+	_getMost_backend_aptGetInstall php
+	
+	
+	
+	
+	
 	_getMost_backend_aptGetInstall synaptic
 	
 	_getMost_backend_aptGetInstall cifs-utils
@@ -11319,6 +11325,7 @@ _getMost_debian11_install() {
 
 
 	_getMost_backend_aptGetInstall fldigi
+	_getMost_backend_aptGetInstall flamp
 	_getMost_backend_aptGetInstall psk31lx
 	
 	
@@ -11335,6 +11342,25 @@ _getMost_debian11_install() {
 	_getMost_backend_aptGetInstall trousers
 	_getMost_backend_aptGetInstall tpm-tools
 	_getMost_backend_aptGetInstall trousers-dbg
+	
+	
+	
+	_getMost_backend_aptGetInstall scdaemon
+	
+	_getMost_backend_aptGetInstall tpm2-openssl
+	_getMost_backend_aptGetInstall tpm2-openssl tpm2-tools tpm2-abrmd libtss2-tcti-tabrmd0
+	
+	_getMost_backend_aptGetInstall tpm2-abrmd
+	
+	
+	
+	_getMost_backend_aptGetInstall qrencode
+	
+	_getMost_backend_aptGetInstall qtqr
+	
+	_getMost_backend_aptGetInstall zbar-tools
+	_getMost_backend_aptGetInstall zbarcam-gtk
+	_getMost_backend_aptGetInstall zbarcam-qt
 	
 	
 	
@@ -11954,6 +11980,11 @@ _getMinimal_cloud() {
 	
 	_getMost_backend_aptGetInstall mkisofs
 	_getMost_backend_aptGetInstall genisoimage
+	
+	
+	
+	_getMost_backend_aptGetInstall php
+	
 	
 	
 	# purge-old-kernels
@@ -12647,6 +12678,19 @@ _stopwatch() {
 
 	bc <<< "$measureDateB - $measureDateA"
 }
+
+
+
+_binToHex() {
+	xxd -p | tr -d '\n'
+}
+
+_hexToBin() {
+	xxd -r -p
+}
+
+
+
 
 
 
@@ -31841,6 +31885,37 @@ CZXWXcRMTo8EmM8i4d
 
 
 
+_setupUbiquitous_accessories_here-user_bashrc() {
+	
+	# Calls   "$HOME"/_bashrc   as a place for user defined functions, environment varialbes, etc, which should NOT follow dist/OS updates (eg. extendedInterface reinstallation) and should be copied after dist/OS reinstallation (ie. placed on an SDCard or similar before '_revert-fromLive /dev/sda' .
+	#  WARNING: Nevertheless, bashrc is very bad practice . Instead, functionality should be pushed upstream (eg. to 'ubiquitous bash', etc) .
+	#   The exception may be very specialized infrastructure (ie. conveniently calling specialized Virtual Machines).
+	
+	cat << CZXWXcRMTo8EmM8i4d
+
+if [[ -e "$HOME"/_bashrc ]]
+then
+	. "$HOME"/_bashrc
+fi
+
+CZXWXcRMTo8EmM8i4d
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 _setupUbiquitous_accessories-plasma() {
@@ -31964,6 +32039,9 @@ _setupUbiquitous_accessories_bashrc() {
 	
 	# WARNING: Python must remain last. Failure to hook python is a failure that must show as an error exit status from the users profile (a red "1" on the first line of first visual prompt command prompt).
 	_setupUbiquitous_accessories_here-python_bashrc "$@"
+	
+	
+	_setupUbiquitous_accessories_here-user_bashrc "$@"
 	
 	#echo true
 }
@@ -44221,6 +44299,7 @@ _create_ubDistBuild-rotten_install-core() {
 
 	
 	#_getMost_backend_aptGetInstall fldigi
+	#_getMost_backend_aptGetInstall flamp
 	#_getMost_backend_aptGetInstall psk31lx
 	
 	_getMost_backend_aptGetInstall gnucash
@@ -49314,6 +49393,8 @@ _init_deps() {
 	export enUb_dev=""
 	export enUb_dev_heavy=""
 	
+	export enUb_generic=""
+	
 	export enUb_cloud_heavy=""
 	
 	export enUb_mount=""
@@ -49380,7 +49461,13 @@ _init_deps() {
 	export enUb_calculators=""
 }
 
+_deps_generic() {
+	export enUb_generic="true"
+}
+
 _deps_dev() {
+	_deps_generic
+	
 	export enUb_dev="true"
 }
 
@@ -49697,13 +49784,19 @@ _deps_linux() {
 }
 
 _deps_python() {
+	_deps_generic
+	
 	export enUb_python="true"
 }
 _deps_haskell() {
+	_deps_generic
+	
 	export enUb_haskell="true"
 }
 
 _deps_calculators() {
+	_deps_generic
+	
 	export enUb_calculators="true"
 }
 
@@ -50242,6 +50335,8 @@ _compile_bash_deps() {
 		_deps_getVeracrypt
 		_deps_linux
 		
+		_deps_generic
+		
 		_deps_python
 		_deps_haskell
 		
@@ -50296,6 +50391,8 @@ _compile_bash_deps() {
 	if [[ "$1" == "processor" ]]
 	then
 		_deps_dev
+		
+		_deps_generic
 		
 		_deps_python
 		_deps_haskell
@@ -50392,6 +50489,8 @@ _compile_bash_deps() {
 		_deps_fakehome
 		_deps_abstractfs
 		
+		_deps_generic
+		
 		_deps_python
 		_deps_haskell
 		
@@ -50487,6 +50586,8 @@ _compile_bash_deps() {
 		_deps_fakehome
 		_deps_abstractfs
 		
+		_deps_generic
+		
 		_deps_python
 		_deps_haskell
 		
@@ -50581,6 +50682,8 @@ _compile_bash_deps() {
 		_deps_msw
 		_deps_fakehome
 		_deps_abstractfs
+		
+		_deps_generic
 		
 		_deps_python
 		_deps_haskell
@@ -50794,6 +50897,8 @@ _compile_bash_utilities() {
 	
 	[[ "$enUb_dev_heavy" == "true" ]] && includeScriptList+=( "instrumentation"/bashdb/bashdb.sh )
 	( [[ "$enUb_notLean" == "true" ]] || [[ "$enUb_stopwatch" == "true" ]] ) && includeScriptList+=( "instrumentation"/profiling/stopwatch.sh )
+	
+	[[ "$enUb_generic" == "true" ]] && includeScriptList+=( "generic"/generic.sh )
 }
 
 # Specifically intended to support Eclipse as necessary for building existing software .
