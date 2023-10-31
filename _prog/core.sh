@@ -854,7 +854,13 @@ _create_ubDistBuild-rotten_install-core() {
 
 	_messageNormal 'chroot: rotten_install: core: extra'
 
-
+	
+	
+	_chroot rm -f /etc/modprobe.d/thinkfan.conf
+	echo "options thinkpad_acpi fan_control=1" | sudo -n tee -a "$globalVirtFS"/etc/modprobe.d/thinkfan.conf
+	
+	
+	
 	export getMost_backend="chroot"
 	_set_getMost_backend "$@"
 	_set_getMost_backend_debian "$@"
