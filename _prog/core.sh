@@ -612,6 +612,12 @@ CZXWXcRMTo8EmM8i4d
 	_getMost_backend_aptGetInstall tpm-tools
 	_getMost_backend_aptGetInstall trousers-dbg
 	
+	
+	
+	_getMost_backend apt-get -y clean
+	
+	
+	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
 	
@@ -1233,6 +1239,8 @@ CZXWXcRMTo8EmM8i4d
 	sudo -n cat "$globalVirtFS"/etc/apt/sources.list.default | _getMost_backend tee /etc/apt/sources.list > /dev/null
 
 	_getMost_backend apt-get update
+	
+	_getMost_backend apt-get -y clean
 
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0

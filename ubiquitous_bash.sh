@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3591294593'
+export ub_setScriptChecksum_contents='989953259'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -19059,9 +19059,19 @@ _live_sequence_in() {
 
 
 	_chroot update-initramfs -u -k all
-
-
-
+	
+	
+	
+	
+	
+	
+	_chroot apt-get -y clean
+	
+	
+	
+	
+	
+	
 	# WARNING: Now also provides essential information about intel-acm .
 	# Solely to provide more information to convert 'vm-live.iso' back to 'vm.img' offline from only a Live BD-ROM disc .
 	mkdir -p "$safeTmp"/root002
@@ -33774,6 +33784,61 @@ _x220_vgaTablet() {
 	_x220_tablet_S180
 }
 
+
+_w540_fan_cfg-write() {
+	echo "options thinkpad_acpi fan_control=1" | sudo -n tee /etc/modprobe.d/thinkfan.conf
+}
+
+_w540_fan_cfg-modprobe() {
+	sudo -n modprobe -rv thinkpad_acpi
+	sudo -n modprobe -v thinkpad_acpi
+}
+
+_w540_fan_cfg() {
+	echo watchdog 120 | sudo -n tee /proc/acpi/ibm/fan
+}
+
+# cron recommended
+#*/1 * * * * sleep 0.1 ; /home/user/.ubcore/ubcore.sh _w540_hardware_cron > /dev/null 2>&1
+_w540_hardware_cron() {
+	! sudo -n dmidecode -s system-family | grep 'ThinkPad W540' && return 0
+	
+	_w540_fan
+	
+	return 0
+}
+
+# cron recommended
+#*/1 * * * * sleep 0.1 ; /home/user/.ubcore/ubiquitous_bash/ubcore.sh _w540_fan > /dev/null 2>&1
+_w540_fan() {
+	_w540_fan_cfg
+	
+	local currentTemp_coretemp0
+	read currentTemp_coretemp0 < /sys/devices/platform/coretemp.0/hwmon/hwmon4/temp1_input
+	
+	#[[ "$currentTemp_coretemp0" -lt 48000 ]] && echo level 1 | sudo tee /proc/acpi/ibm/fan && return 0
+	#[[ "$currentTemp_coretemp0" -lt 68000 ]] && echo level 1 | sudo tee /proc/acpi/ibm/fan && return 0
+	
+	[[ "$currentTemp_coretemp0" -lt 68000 ]] && echo level 1 | sudo -n tee /proc/acpi/ibm/fan && return 0
+}
+
+_w540_idle() {
+	_w540_fan_cfg
+	
+	while true
+	do
+		echo powersave | sudo -n tee /sys/devices/system/cpu/cpufreq/*/scaling_governor
+		
+		echo level 1 | sudo tee /proc/acpi/ibm/fan
+		
+		sleep 45
+	done
+}
+
+_w540_normal() {
+	echo schedutil | sudo -n tee /sys/devices/system/cpu/cpufreq/*/scaling_governor
+}
+
 _h1060p_xorg_here() {
 	cat << CZXWXcRMTo8EmM8i4d
 
@@ -44030,6 +44095,12 @@ CZXWXcRMTo8EmM8i4d
 	_getMost_backend_aptGetInstall tpm-tools
 	_getMost_backend_aptGetInstall trousers-dbg
 	
+	
+	
+	_getMost_backend apt-get -y clean
+	
+	
+	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
 	
@@ -44651,6 +44722,8 @@ CZXWXcRMTo8EmM8i4d
 	sudo -n cat "$globalVirtFS"/etc/apt/sources.list.default | _getMost_backend tee /etc/apt/sources.list > /dev/null
 
 	_getMost_backend apt-get update
+	
+	_getMost_backend apt-get -y clean
 
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0
@@ -49443,6 +49516,7 @@ _init_deps() {
 	
 	export enUb_hardware=""
 	export enUb_enUb_x220t=""
+	export enUb_enUb_w540=""
 	export enUb_enUb_peripherial=""
 	
 	export enUb_user=""
@@ -49755,6 +49829,12 @@ _deps_x220t() {
 	_deps_notLean
 	_deps_hardware
 	export enUb_x220t="true"
+}
+
+_deps_w540() {
+	_deps_notLean
+	_deps_hardware
+	export enUb_w540="true"
 }
 
 _deps_peripherial() {
@@ -50335,6 +50415,10 @@ _compile_bash_deps() {
 		_deps_getVeracrypt
 		_deps_linux
 		
+		_deps_hardware
+		_deps_x220t
+		_deps_w540
+		
 		_deps_generic
 		
 		_deps_python
@@ -50524,6 +50608,7 @@ _compile_bash_deps() {
 		
 		#_deps_hardware
 		#_deps_x220t
+		#_deps_w540
 		#_deps_peripherial
 		
 		#_deps_user
@@ -50621,6 +50706,7 @@ _compile_bash_deps() {
 		
 		#_deps_hardware
 		#_deps_x220t
+		#_deps_w540
 		#_deps_peripherial
 		
 		#_deps_user
@@ -50718,6 +50804,7 @@ _compile_bash_deps() {
 		
 		_deps_hardware
 		_deps_x220t
+		_deps_w540
 		_deps_peripherial
 		
 		_deps_user
@@ -51185,6 +51272,7 @@ _compile_bash_user() {
 
 _compile_bash_hardware() {
 	[[ "$enUb_hardware" == "true" ]] && [[ "$enUb_x220t" == "true" ]] && includeScriptList+=( "hardware/x220t"/x220_display.sh )
+	[[ "$enUb_hardware" == "true" ]] && [[ "$enUb_w540" == "true" ]] && includeScriptList+=( "hardware/w540"/w540_fan.sh )
 	
 	[[ "$enUb_hardware" == "true" ]] && [[ "$enUb_peripherial" == "true" ]] && includeScriptList+=( "hardware/peripherial/h1060p"/h1060p.sh )
 }
