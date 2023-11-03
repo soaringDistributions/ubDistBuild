@@ -558,20 +558,20 @@ cd "$workingDir"/"$netName"
 mkdir ./_lib
 mkdir ./_prog
 
-git init
+_gitBest init
 
-git submodule add --depth 1 git@github.com:mirage335/ubDistBuild.git ./_lib/ubDistBuild
+_gitBest submodule add --depth 1 git@github.com:soaringDistributions/ubDistBuild.git ./_lib/ubDistBuild
 
-git config -f .gitmodules submodule._lib/ubDistBuild.shallow true
+_gitBest config -f .gitmodules submodule._lib/ubDistBuild.shallow true
 
 
 #Parent derivative of ubiquitous_bash.
 cd ./_lib/ubDistBuild
-git submodule update --depth 1 --init ./_lib/ubiquitous_bash
-cd ./_lib/ubiquitous_bash ; git fetch --shallow-exclude=v3.112 ; git reset --hard
+_gitBest submodule update --depth 1 --init ./_lib/ubiquitous_bash
+cd ./_lib/ubiquitous_bash ; _gitBest fetch --shallow-exclude=v3.112 ; _gitBest reset --hard
 cd "$workingDir"/"$netName"
 
-#git submodule update --depth 1 --init --recursive
+#_gitBest submodule update --depth 1 --init --recursive
 
 cp ./_lib/ubDistBuild/ubiquitous_bash.sh ./
 
@@ -588,7 +588,11 @@ cp -a ./_lib/ubDistBuild/_config/. ./_config
 
 ##### Parent Derivative Scripts
 mkdir -p ./_prog
+mkdir -p ./_prog-ops
 cp -a ./_lib/ubDistBuild/_prog/. ./_prog
+cp -a ./_lib/ubDistBuild/_prog-ops/. ./_prog-ops
+
+mkdir -p ./.github
 cp -a ./_lib/ubDistBuild/_prog-ops/. ./_prog-ops
 
 ##### Runtime Configuration
