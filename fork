@@ -593,7 +593,7 @@ cp -a ./_lib/ubDistBuild/_prog/. ./_prog
 cp -a ./_lib/ubDistBuild/_prog-ops/. ./_prog-ops
 
 mkdir -p ./.github
-cp -a ./_lib/ubDistBuild/_prog-ops/. ./_prog-ops
+cp -a ./_lib/ubDistBuild/.github/zCustom.yml ./.github/
 
 ##### Runtime Configuration
 mkdir -p ./_local
