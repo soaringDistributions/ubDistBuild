@@ -574,6 +574,9 @@ _upgrade_derive() {
 	
 	cd "$scriptAbsoluteFolder"
 	cp -a ./_lib/ubDistBuild/_prog ./
+	
+	
+	cp -a ./_lib/ubDistBuild/.github/workflows/zCustom.yml ./_lib/ubDistBuild/.github/workflows/zCustom.yml
 
 	#cp -d --preserve=all ./_lib/ubDistBuild/ubiquitous_bash.sh ./
 	cp -d --preserve=all ./_lib/ubDistBuild/compile.sh ./
