@@ -557,6 +557,13 @@ cd "$workingDir"/"$netName"
 
 mkdir ./_lib
 mkdir ./_prog
+mkdir ./_prog-ops
+
+mkdir ./_local
+
+mkdir ./_bin
+
+mkdir ./.github/workflows
 
 _gitBest init
 
@@ -591,6 +598,10 @@ mkdir -p ./_prog
 mkdir -p ./_prog-ops
 cp -a ./_lib/ubDistBuild/_prog/. ./_prog
 cp -a ./_lib/ubDistBuild/_prog-ops/. ./_prog-ops
+
+##### Binaries
+mkdir -p ./_bin
+cp -a ./_lib/ubDistBuild/_bin/. ./_bin
 
 mkdir -p ./.github/workflows
 cp -a ./_lib/ubDistBuild/.github/workflows/zCustom.yml ./.github/workflows/
