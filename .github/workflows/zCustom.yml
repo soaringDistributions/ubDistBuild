@@ -330,7 +330,7 @@ jobs:
         run: |
           export skimfast=${{ inputs.skimfast }}
           echo $skimfast
-          ./_package_ubDistBuild_image | sudo -n tee ./_local/_package_ubDistBuild_image.log && exit ${PIPESTATUS[0]}
+          ./ubiquitous_bash.sh _package_ubDistBuild_image | sudo -n tee ./_local/_package_ubDistBuild_image.log && exit ${PIPESTATUS[0]}
       - name: _ubDistBuild_split
         shell: bash
         run: |
