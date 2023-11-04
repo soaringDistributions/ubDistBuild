@@ -110,8 +110,8 @@ jobs:
     #  '7 GB of RAM memory'
     #  '14 GB of SSD disk space'
     # ATTRIBUTION: Github Copilot Chat 2023-08-10 .
-    #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
+    #runs-on: ubuntu-latest
     #runs-on: ubuntu-22.04
     #runs-on: ubuntu-20.04
     #runs-on: ubuntu-18.04
@@ -307,7 +307,11 @@ jobs:
       - name: _custom
         shell: bash
         run: |
-          #./ubiquitous_bash.sh _custom
+          ./ubiquitous_bash.sh _custom || true
+          
+      - name: _rotten_install-kde
+        shell: bash
+        run: |
           ./ubiquitous_bash.sh _create_ubDistBuild-rotten_install-kde
 
 
