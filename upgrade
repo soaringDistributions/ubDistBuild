@@ -588,7 +588,7 @@ _upgrade_ubDistBuild() {
 		echo 'CONFLICT'
 		exit 1
 	fi
-	_gitBest pull
+	git pull
 
 	_upgrade_ub "$@"
 
