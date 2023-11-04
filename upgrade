@@ -569,6 +569,7 @@ _upgrade_ubDistBuild-lib() {
 	! [[ -e "$scriptAbsoluteFolder"/_lib/ubiquitous_bash ]] && return 1
 	
 	cd "$scriptAbsoluteFolder"/_lib/ubiquitous_bash
+	_gitBest pull
 	_gitBest submodule update
 	
 	#_gitBest submodule update --recursive
