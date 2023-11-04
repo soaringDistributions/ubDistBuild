@@ -581,6 +581,7 @@ _upgrade_derive() {
 	cp -d --preserve=all ./_lib/ubDistBuild/compile.sh ./
 
 	cp -d --preserve=all ./_lib/ubDistBuild/upgrade ./
+	cp -d --preserve=all ./_lib/ubDistBuild/fork ./
 }
 
 _upgrade_ubDistBuild() {

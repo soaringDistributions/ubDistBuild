@@ -568,6 +568,7 @@ mkdir ./.github/workflows
 _gitBest init
 
 _gitBest submodule add --depth 1 git@github.com:soaringDistributions/ubDistBuild.git ./_lib/ubDistBuild
+_gitBest submodule add --depth 1 git@github.com:mirage335-colossus/ubiquitous_bash.git ./_lib/ubiquitous_bash
 
 _gitBest config -f .gitmodules submodule._lib/ubDistBuild.shallow true
 

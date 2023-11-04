@@ -727,9 +727,9 @@ _create_ubDistBuild-rotten_install-kde() {
 	imagedev=$(cat "$scriptLocal"/imagedev)
 	
 	[[ ! -e "$scriptLib"/custom/package_kde.tar.xz ]] && [[ ! -e "$scriptLocal"/custom/package_kde.tar.xz ]] && [[ ! -e "$scriptLocal"/package_kde.tar.xz ]] && _messageFAIL
-	sudo -n cp -f "$scriptLib"/custom/package_kde.tar.xz "$globalVirtFS"/package_kde.tar.xz
-	sudo -n cp -f "$scriptLocal"/custom/package_kde.tar.xz "$globalVirtFS"/package_kde.tar.xz
-	sudo -n cp -f "$scriptLocal"/package_kde.tar.xz "$globalVirtFS"/package_kde.tar.xz
+	[[ -e "$scriptLib"/custom/package_kde.tar.xz ]] && sudo -n cp -f "$scriptLib"/custom/package_kde.tar.xz "$globalVirtFS"/package_kde.tar.xz
+	[[ -e "$scriptLocal"/custom/package_kde.tar.xz ]] && sudo -n cp -f "$scriptLocal"/custom/package_kde.tar.xz "$globalVirtFS"/package_kde.tar.xz
+	[[ -e "$scriptLocal"/package_kde.tar.xz ]] && sudo -n cp -f "$scriptLocal"/package_kde.tar.xz "$globalVirtFS"/package_kde.tar.xz
 	[[ ! -e "$globalVirtFS"/package_kde.tar.xz ]] && _messageFAIL
 	sudo -n chmod 644 "$globalVirtFS"/package_kde.tar.xz
 	
