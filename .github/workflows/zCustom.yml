@@ -932,15 +932,15 @@ jobs:
           fi
       
       
-      - name: txt-stat/tboot
-        shell: bash
-        run: |
-          cat /proc/cpuinfo | grep 'model name'
-          echo
+      #- name: txt-stat/tboot
+        #shell: bash
+        #run: |
+          #cat /proc/cpuinfo | grep 'model name'
+          #echo
           
-          sudo -n txt-stat || true
+          #sudo -n txt-stat || true
 
-          true
+          #true
       
       - name: sev/AMD
         shell: bash

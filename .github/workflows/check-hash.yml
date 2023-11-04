@@ -121,15 +121,17 @@ jobs:
           fi
       
       
-      - name: txt-stat/tboot
-        shell: bash
-        run: |
-          cat /proc/cpuinfo | grep 'model name'
-          echo
+      #- name: txt-stat/tboot
+        #shell: bash
+        #run: |
+          #cat /proc/cpuinfo | grep 'model name'
+          #echo
           
-          sudo -n txt-stat || true
+          #sudo -n apt-get install -y tboot
+          
+          #sudo -n txt-stat || true
 
-          true
+          #true
       
       - name: sev/AMD
         shell: bash
@@ -323,14 +325,16 @@ jobs:
           fi
       
       
-      - name: txt-stat/tboot
-        shell: bash
-        run: |
-          cat /proc/cpuinfo | grep 'model name'
-          echo
+      #- name: txt-stat/tboot
+        #shell: bash
+        #run: |
+          #cat /proc/cpuinfo | grep 'model name'
+          #echo
           
-          sudo -n txt-stat || true
-          true
+          #sudo -n apt-get install -y tboot
+          
+          #sudo -n txt-stat || true
+          #true
       
       - name: sev/AMD
         shell: bash
