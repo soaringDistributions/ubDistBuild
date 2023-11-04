@@ -7,6 +7,8 @@
 
 [[ -e "$scriptAbsoluteFolder"/_prog-ops/get-custom.sh ]] && . "$scriptAbsoluteFolder"/_prog-ops/get-custom.sh
 
+[[ -e "$scriptAbsoluteFolder"/_prog-ops/hash-custom.sh ]] && . "$scriptAbsoluteFolder"/_prog-ops/hash-custom.sh
+
 
 
 
