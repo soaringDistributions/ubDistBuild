@@ -587,6 +587,11 @@ cp ./_lib/ubDistBuild/compile.sh ./
 cp ./_lib/ubDistBuild/license.txt ./
 cp ./_lib/ubDistBuild/README.md ./
 
+cp ./_lib/ubDistBuild/README-installer.odt ./
+cp ./_lib/ubDistBuild/README-installer.pdf ./
+cp ./_lib/ubDistBuild/README-live.odt ./
+cp ./_lib/ubDistBuild/README-live.pdf ./
+
 cp ./_lib/ubDistBuild/_lib/ubiquitous_bash/agpl-3.0.txt ./
 
 ##### Hardcoded Configuration

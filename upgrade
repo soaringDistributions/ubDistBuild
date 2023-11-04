@@ -588,6 +588,11 @@ _upgrade_derive() {
 
 	cp -d --preserve=all ./_lib/ubDistBuild/upgrade ./
 	cp -d --preserve=all ./_lib/ubDistBuild/fork ./
+
+	cp ./_lib/ubDistBuild/README-installer.odt ./
+	cp ./_lib/ubDistBuild/README-installer.pdf ./
+	cp ./_lib/ubDistBuild/README-live.odt ./
+	cp ./_lib/ubDistBuild/README-live.pdf ./
 }
 
 _upgrade_ubDistBuild() {
