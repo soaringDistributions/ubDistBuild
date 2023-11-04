@@ -547,32 +547,32 @@ true
 
 
 _upgrade_ub() {
-	! [[ -e "$scriptAbsoluteLocation"/_lib/ubiquitous_bash ]] && return 1
+	! [[ -e "$scriptAbsoluteFolder"/_lib/ubiquitous_bash ]] && return 1
 	
-	cd "$scriptAbsoluteLocation"/_lib/ubiquitous_bash
+	cd "$scriptAbsoluteFolder"/_lib/ubiquitous_bash
 	_gitBest pull
 	_gitBest submodule update
 }
 
 _upgrade_ubDistBuild-lib() {
-	! [[ -e "$scriptAbsoluteLocation"/_lib/ubDistBuild ]] && return 1
+	! [[ -e "$scriptAbsoluteFolder"/_lib/ubDistBuild ]] && return 1
 	
-	cd "$scriptAbsoluteLocation"/_lib/ubDistBuild
+	cd "$scriptAbsoluteFolder"/_lib/ubDistBuild
 	_gitBest pull
 	_gitBest submodule update
 	
-	! [[ -e "$scriptAbsoluteLocation"/_lib/ubDistBuild/_lib/ubiquitous_bash ]] && return 1
+	! [[ -e "$scriptAbsoluteFolder"/_lib/ubDistBuild/_lib/ubiquitous_bash ]] && return 1
 	
-	cd "$scriptAbsoluteLocation"/_lib/ubDistBuild/_lib/ubiquitous_bash
+	cd "$scriptAbsoluteFolder"/_lib/ubDistBuild/_lib/ubiquitous_bash
 	_gitBest submodule update
 	
 	#_gitBest submodule update --recursive
 }
 
 _upgrade_derive() {
-	! [[ -e "$scriptAbsoluteLocation"/_lib/ubDistBuild ]] && return 1
+	! [[ -e "$scriptAbsoluteFolder"/_lib/ubDistBuild ]] && return 1
 	
-	cd "$scriptAbsoluteLocation"
+	cd "$scriptAbsoluteFolder"
 	cp -a ./_lib/ubDistBuild/_prog ./
 
 	#cp -d --preserve=all ./_lib/ubDistBuild/ubiquitous_bash.sh ./
@@ -582,7 +582,7 @@ _upgrade_derive() {
 }
 
 _upgrade_ubDistBuild() {
-	cd "$scriptAbsoluteLocation"
+	cd "$scriptAbsoluteFolder"
 	if ! git diff-index --quiet HEAD --
 	then
 		echo 'CONFLICT'
@@ -596,7 +596,7 @@ _upgrade_ubDistBuild() {
 
 	_upgrade_derive "$@"
 
-	cd "$scriptAbsoluteLocation"
+	cd "$scriptAbsoluteFolder"
 	./compile.sh
 }
 
