@@ -10,7 +10,7 @@
 
 # ATTENTION: NOTICE: Consider replacing the current directory with a symlink to a larger filesystem, before checkout of repository.
 
-name: build
+name: zCustom
 
 
 # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#permissions
