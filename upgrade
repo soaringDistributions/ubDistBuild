@@ -550,23 +550,23 @@ _upgrade_ub() {
 	! [[ -e "$scriptLocation"/_lib/ubiquitous_bash ]] && return 1
 	
 	cd "$scriptLocation"/_lib/ubiquitous_bash
-	git pull
-	git submodule update
+	_gitBest pull
+	_gitBest submodule update
 }
 
-_upgrade_ubDistBuild() {
+_upgrade_ubDistBuild-lib() {
 	! [[ -e "$scriptLocation"/_lib/ubDistBuild ]] && return 1
 	
 	cd "$scriptLocation"/_lib/ubDistBuild
-	git pull
-	git submodule update
+	_gitBest pull
+	_gitBest submodule update
 	
 	! [[ -e "$scriptLocation"/_lib/ubDistBuild/_lib/ubiquitous_bash ]] && return 1
 	
 	cd "$scriptLocation"/_lib/ubDistBuild/_lib/ubiquitous_bash
-	git submodule update
+	_gitBest submodule update
 	
-	#git submodule update --recursive
+	#_gitBest submodule update --recursive
 }
 
 _upgrade_derive() {
@@ -588,11 +588,11 @@ _upgrade_ubDistBuild() {
 		echo 'CONFLICT'
 		exit 1
 	fi
-	git pull
+	_gitBest pull
 
 	_upgrade_ub "$@"
 
-	_upgrade_ubDistBuild "$@"
+	_upgrade_ubDistBuild-lib "$@"
 
 	_upgrade_derive "$@"
 
