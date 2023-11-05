@@ -1003,6 +1003,9 @@ _create_ubDistBuild-rotten_install-core() {
 	_getMost_backend_aptGetInstall sloccount
 
 
+	_getMost_backend_aptGetInstall virt-manager
+	_getMost_backend_aptGetInstall virt-viewer
+	_getMost_backend_aptGetInstall virtinst
 
 
 	_getMost_backend apt-get remove -y avahi-daemon
