@@ -1001,6 +1001,11 @@ _create_ubDistBuild-rotten_install-core() {
 	
 	
 	_getMost_backend_aptGetInstall sloccount
+	
+	
+	# May not be usable with VirtualBox compatible kernel .
+	_getMost_backend_aptGetInstall xen-system-amd64
+	_getMost_backend_aptGetInstall xen-tools
 
 
 	_getMost_backend_aptGetInstall virt-manager
