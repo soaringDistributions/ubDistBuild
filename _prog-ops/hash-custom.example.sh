@@ -236,8 +236,8 @@ tee >( openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpo
 
 
 _hash_ubdist-fast() {
-    export FORCE_AXEL=6
-    export MANDATORY_HASH="true"
+    #export FORCE_AXEL=6
+    #export MANDATORY_HASH="true"
     
     rm -f "$scriptLocal"/_hash-ubdist-img.txt
     rm -f "$scriptLocal"/_hash-ubdist-rootfs.txt
