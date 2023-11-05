@@ -297,6 +297,14 @@ jobs:
           ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: _hash_img
+        shell: bash
+        run: |
+          export skimfast=${{ inputs.skimfast }}
+          echo $skimfast
+          #./ubiquitous_bash.sh _hash_img
+          cat _local/hash-download.txt
 
       - name: fallocate --dig-holes
         shell: bash
@@ -486,40 +494,59 @@ jobs:
 
 
 
-      - name: _get_vmImg_ubDistBuild
+          
+      # ###
+          
+      #- name: _get_vmImg_ubDistBuild
+        #shell: bash
+        #run: |
+          ##export FORCE_AXEL=8
+          ##./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
+          ## DANGER: Github Actions (strictly internal) ONLY!
+          ##export FORCE_AXEL=8
+          ##export MANDATORY_HASH="true"
+          #cd ./_local
+          #rm -f hash-download.txt
+          #../ubiquitous_bash.sh _wget_githubRelease_join-stdout "${{ github.repository }}" "" "package_image.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+        #env:
+          #GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      #- name: fallocate --dig-holes
+        #shell: bash
+        #run: |
+          #fallocate --dig-holes ./_local/vm.img
+
+      #- name: _hash_img
+        #shell: bash
+        #run: |
+          #export skimfast=${{ inputs.skimfast }}
+          #echo $skimfast
+          ##./ubiquitous_bash.sh _hash_img
+          #cat _local/hash-download.txt
+
+
+      #- name: _convert-rootfs
+        #shell: bash
+        #run: |
+          #export current_diskConstrained="true"
+          #./ubiquitous_bash.sh _convert_rm
+          #./ubiquitous_bash.sh _convert-rootfs | sudo -n tee ./_convert-rootfs.log && exit ${PIPESTATUS[0]}
+
+      # ###
+      
+          
+          
+
+      - name: DUMMY-rootfs
         shell: bash
         run: |
-          #export FORCE_AXEL=8
-          #./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
-          # DANGER: Github Actions (strictly internal) ONLY!
-          #export FORCE_AXEL=8
-          #export MANDATORY_HASH="true"
-          cd ./_local
-          rm -f hash-download.txt
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "${{ github.repository }}" "" "package_image.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: fallocate --dig-holes
-        shell: bash
-        run: |
-          fallocate --dig-holes ./_local/vm.img
-
-      - name: _hash_img
-        shell: bash
-        run: |
-          export skimfast=${{ inputs.skimfast }}
-          echo $skimfast
-          #./ubiquitous_bash.sh _hash_img
-          cat _local/hash-download.txt
-
-
-      - name: _convert-rootfs
-        shell: bash
-        run: |
-          export current_diskConstrained="true"
-          ./ubiquitous_bash.sh _convert_rm
-          ./ubiquitous_bash.sh _convert-rootfs | sudo -n tee ./_convert-rootfs.log && exit ${PIPESTATUS[0]}
+          rm -f ./_local/package_rootfs.tar || true
+          rm -f ./_local/package_rootfs.tar.flx || true
+          #echo > ./_local/package_rootfs.tar
+          #echo > ./_local/package_rootfs.tar.flx
+          tar -cf - /dev/null > ./_local/package_rootfs.tar
+          tar -cf - /dev/null | lz4 -z --fast=1 - ./_local/package_rootfs.tar.flx
+          
 
       - name: _hash_rootfs
         shell: bash
@@ -710,58 +737,6 @@ jobs:
 
 
 
-
-      - name: _fetchAccessories extendedInterface
-        shell: bash
-        run: |
-          cd _local
-          git clone https://github.com/mirage335-colossus/extendedInterface.git
-          cd extendedInterface
-          mkdir -p ../extendedInterface-accessories/integrations/ubcp
-          curl -L -o ../extendedInterface-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
-          ./ubiquitous_bash.sh _build_extendedInterface-fetch | sudo -n tee ../../_lib/_extendedInterface.log && exit ${PIPESTATUS[0]}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: _fetchAccessories ubDistBuild
-        shell: bash
-        run: |
-          cd _local
-          git clone https://github.com/soaringDistributions/ubDistBuild.git
-          cd ubDistBuild
-          mkdir -p ../ubDistBuild-accessories/integrations/ubcp
-          curl -L -o ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
-          ./ubiquitous_bash.sh _build_ubDistBuild-fetch | sudo -n tee ../../_lib/_ubDistBuild.log && exit ${PIPESTATUS[0]}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: _convert-live _create_ubDistBuild_feedAccessories
-        shell: bash
-        run: |
-          export current_diskConstrained="true"
-          ./ubiquitous_bash.sh _convert_rm
-          ./ubiquitous_bash.sh _create_ubDistBuild_feedAccessories | sudo -n tee ./_create_ubDistBuild_feedAccessories.log && exit ${PIPESTATUS[0]}
-          ./ubiquitous_bash.sh _safeRMR ./_local/livefs
-          true
-      
-      # DANGER: GitHub Actions ONLY!
-      - name: _create_ubDistBuild_feedAccessories rm
-        shell: bash
-        run: |
-          rm -rf ../extendedInterface-accessories
-          [[ -e ../extendedInterface-accessories ]] && exit 1 || true
-          rm -rf ../ubDistBuild-accessories
-          [[ -e ../ubDistBuild-accessories ]] && exit 1 || true
-      
-      # DANGER: GitHub Actions ONLY!
-      - name: _fetchAccessories rm
-        shell: bash
-        run: |
-          cd _local
-          rm -rf extendedInterface
-          [[ -e extendedInterface ]] && exit 1 || true
-          rm -rf ubDistBuild
-          [[ -e ubDistBuild ]] && exit 1 || true
-      
       - name: _convert-live _convert-live_ISO
         shell: bash
         run: |
@@ -774,7 +749,8 @@ jobs:
       - name: _convert-live log
         shell: bash
         run: |
-          cat ./_create_ubDistBuild_feedAccessories.log ./_convert-live_ISO.log | sudo -n tee ./_convert-live.log && exit ${PIPESTATUS[0]}
+          #./_create_ubDistBuild_feedAccessories.log
+          cat ./_convert-live_ISO.log | sudo -n tee ./_convert-live.log && exit ${PIPESTATUS[0]}
 
       - name: _hash_live
         shell: bash
