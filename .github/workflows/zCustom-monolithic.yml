@@ -567,8 +567,8 @@ jobs:
         run: |
           export skimfast=${{ inputs.skimfast }}
           echo $skimfast
-          export FORCE_AXEL=8
-          export MANDATORY_HASH="true"
+          #export FORCE_AXEL=8
+          #export MANDATORY_HASH="true"
           ./ubiquitous_bash.sh _hash_ubdist-fast
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
