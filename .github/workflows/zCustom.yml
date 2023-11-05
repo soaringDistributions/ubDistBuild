@@ -48,14 +48,14 @@ on:
         - ubuntu-latest
         - ubuntu-latest-m
   # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
-  schedule:
+  #schedule:
     #- cron: '5 7 * * 6'
     #- cron: '5 1 * * 6'
     #- cron: '5 1 * * 2,4'
     #- cron: '5 1 * * 2'
     #- cron: '5 1 * * 4'
     #- cron: '5 1 * * 5'
-    - cron: '5 7 15 * *'
+    #- cron: '5 7 15 * *'
 
 # https://docs.github.com/en/actions/using-jobs/using-concurrency
 concurrency:

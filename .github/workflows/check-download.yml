@@ -1,0 +1,122 @@
+
+
+name: check-download
+
+
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#permissions
+permissions:
+  actions: none
+  checks: none
+  contents: read
+  deployments: none
+  issues: none
+  packages: none
+  pull-requests: none
+  repository-projects: none
+  security-events: none
+  statuses: none
+
+
+on:
+  #push:
+  workflow_dispatch:
+    inputs:
+      #releaseLabel:
+        #required: false
+        #default: base
+        #default: latest
+        #type: choice
+        #options:
+        #- base
+        #- latest
+        #- internal
+      #skimfast:
+        #type: boolean
+        #default: false
+      runnerName:
+        required: false
+        default: ubuntu-latest
+        type: choice
+        options:
+        - ubuntu-latest
+        - ubuntu-latest-m
+      #debug_enabled:
+        #type: boolean
+        #default: false
+
+# https://docs.github.com/en/actions/using-jobs/using-concurrency
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+
+
+
+
+jobs:
+
+  check-download:
+    runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
+    continue-on-error: true
+    steps:
+    
+    
+      - name: report! API Rate Limit
+        shell: bash
+        run: |
+          curl -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ""${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28"  https://api.github.com/rate_limit
+          #curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/rate_limit | jq -r ".rate"
+      
+      - name: mirage335-special/m335_stand
+        shell: bash
+        run: |
+          current_releaseLabel="${{ inputs.releaseLabel }}"
+          #[[ "$current_releaseLabel" == "" ]] && current_releaseLabel="base"
+          [[ "$current_releaseLabel" == "" ]] && current_releaseLabel="latest"
+          [[ "$current_releaseLabel" == "latest" ]] && current_releaseLabel=""
+          curl -4 -H "Authorization: Bearer $GH_TOKEN" -s "https://api.github.com/repos/""mirage335-special/m335_stand""/releases/latest"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: "${{ github.repository }}"
+        shell: bash
+        run: |
+          current_releaseLabel="${{ inputs.releaseLabel }}"
+          #[[ "$current_releaseLabel" == "" ]] && current_releaseLabel="base"
+          [[ "$current_releaseLabel" == "" ]] && current_releaseLabel="latest"
+          [[ "$current_releaseLabel" == "latest" ]] && current_releaseLabel=""
+          curl -4 -H "Authorization: Bearer $GH_TOKEN" -s "https://api.github.com/repos/""${{ github.repository }}""/releases/latest"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: soaringDistributions/ubDistBuild
+        shell: bash
+        run: |
+          current_releaseLabel="${{ inputs.releaseLabel }}"
+          #[[ "$current_releaseLabel" == "" ]] && current_releaseLabel="base"
+          [[ "$current_releaseLabel" == "" ]] && current_releaseLabel="latest"
+          [[ "$current_releaseLabel" == "latest" ]] && current_releaseLabel=""
+          curl -4 -H "Authorization: Bearer $GH_TOKEN" -s "https://api.github.com/repos/""soaringDistributions/ubDistBuild""/releases/latest"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
