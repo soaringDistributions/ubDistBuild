@@ -719,6 +719,17 @@ _set_nvidia() {
 
 	#[[ $(lspci -nn -d ':11fc' | wc -l) -ge "1" ]] && export currentVersion="$currentVersion_legacy470"
 	#lspci | grep -i 'Quadro K2100M' > /dev/null 2>&1 && export currentVersion="$currentVersion_legacy470"
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	[[ -e /nv_legacy470 ]] && export currentVersion="$currentVersion_legacy470"
 }
 _write_nvidia-series535p() {
 	_set_nvidia
