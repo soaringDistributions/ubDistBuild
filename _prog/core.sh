@@ -772,7 +772,7 @@ _create_ubDistBuild-install-ubDistBuild() {
 	sudo -n rsync -ax "$scriptAbsoluteFolder"/_local/.gitignore "$globalVirtFS"/home/user/ubDistBuild/_local/
 	sudo -n rsync -ax "$scriptAbsoluteFolder"/_local/ubcp "$globalVirtFS"/home/user/ubDistBuild/_local/
 	
-	sudo -n rsync -ax --exclude "_local/vm.img" --exclude "_local/vm-live.iso" --exclude "_local/package_rootfs.tar" --exclude "_local/vm.img.*" --exclude "_local/vm-live.iso.*" --exclude "_local/package_rootfs.tar.*" "$scriptAbsoluteFolder"/_local/. "$globalVirtFS"/home/user/ubDistBuild/_local/
+	sudo -n rsync -ax --exclude "vm.img" --exclude "vm-live.iso" --exclude "package_rootfs.tar" --exclude "vm.img.*" --exclude "vm-live.iso.*" --exclude "package_rootfs.tar.*" "$scriptAbsoluteFolder"/_local/. "$globalVirtFS"/home/user/ubDistBuild/_local/
 	
 	_chroot chown -R user:user /home/user/ubDistBuild
 	_chroot chmod 700 /home/user/ubDistBuild
