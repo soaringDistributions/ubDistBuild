@@ -750,6 +750,73 @@ jobs:
 
 
 
+
+
+
+
+
+
+      - name: _fetchAccessories extendedInterface
+        shell: bash
+        run: |
+          cd _local
+          git clone https://github.com/mirage335-colossus/extendedInterface.git
+          cd extendedInterface
+          mkdir -p ../extendedInterface-accessories/integrations/ubcp
+          curl -L -o ../extendedInterface-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
+          ./ubiquitous_bash.sh _build_extendedInterface-fetch | sudo -n tee ../../_lib/_extendedInterface.log && exit ${PIPESTATUS[0]}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: _fetchAccessories ubDistBuild
+        shell: bash
+        run: |
+          cd _local
+          git clone https://github.com/soaringDistributions/ubDistBuild.git
+          cd ubDistBuild
+          mkdir -p ../ubDistBuild-accessories/integrations/ubcp
+          curl -L -o ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
+          ./ubiquitous_bash.sh _build_ubDistBuild-fetch | sudo -n tee ../../_lib/_ubDistBuild.log && exit ${PIPESTATUS[0]}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: _convert-live _create_ubDistBuild_feedAccessories
+        shell: bash
+        run: |
+          export current_diskConstrained="true"
+          ./ubiquitous_bash.sh _convert_rm
+          ./ubiquitous_bash.sh _create_ubDistBuild_feedAccessories | sudo -n tee ./_create_ubDistBuild_feedAccessories.log && exit ${PIPESTATUS[0]}
+          ./ubiquitous_bash.sh _safeRMR ./_local/livefs
+          true
+      
+      # DANGER: GitHub Actions ONLY!
+      - name: _create_ubDistBuild_feedAccessories rm
+        shell: bash
+        run: |
+          rm -rf ../extendedInterface-accessories
+          [[ -e ../extendedInterface-accessories ]] && exit 1 || true
+          rm -rf ../ubDistBuild-accessories
+          [[ -e ../ubDistBuild-accessories ]] && exit 1 || true
+      
+      # DANGER: GitHub Actions ONLY!
+      - name: _fetchAccessories rm
+        shell: bash
+        run: |
+          cd _local
+          rm -rf extendedInterface
+          [[ -e extendedInterface ]] && exit 1 || true
+          rm -rf ubDistBuild
+          [[ -e ubDistBuild ]] && exit 1 || true
+      
+
+
+
+
+
+
+
+
+
+
       - name: _convert-live _convert-live_ISO
         shell: bash
         run: |
