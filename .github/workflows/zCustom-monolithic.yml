@@ -327,6 +327,18 @@ jobs:
         shell: bash
         run: |
           fallocate --dig-holes ./_local/vm.img
+          
+          
+          
+
+      
+      - name: _create_ubDistBuild-install-ubDistBuild
+        shell: bash
+        run: |
+          ./_create_ubDistBuild-install-ubDistBuild | sudo -n tee ./_create_ubDistBuild-install-ubDistBuild.log && exit ${PIPESTATUS[0]}
+
+
+
       
       
       - name: _custom

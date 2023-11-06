@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='435450222'
+export ub_setScriptChecksum_contents='3059448846'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -44834,11 +44834,13 @@ _create_ubDistBuild-install-ubDistBuild() {
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	imagedev=$(cat "$scriptLocal"/imagedev)
 	
+	
 	sudo -n mkdir -p "$globalVirtFS"/home/user/ubDistBuild/
 	[[ ! -e "$scriptAbsoluteFolder"/.git ]] && _messageFAIL
 	#sudo -n cp -r "$scriptAbsoluteFolder"/.git "$globalVirtFS"/home/user/ubDistBuild/
 	#sudo -n cp -a "$scriptAbsoluteFolder"/. "$globalVirtFS"/home/user/ubDistBuild/
 	#--delete
+	
 	sudo -n rsync -ax --exclude "_local" "$scriptAbsoluteFolder"/. "$globalVirtFS"/home/user/ubDistBuild/
 	sudo -n rsync -ax "$scriptAbsoluteFolder"/_lib/. "$globalVirtFS"/home/user/ubDistBuild/_lib/
 	sudo -n rsync -ax "$scriptAbsoluteFolder"/_local/ops.sh "$globalVirtFS"/home/user/ubDistBuild/_local/
@@ -44846,11 +44848,15 @@ _create_ubDistBuild-install-ubDistBuild() {
 	sudo -n rsync -ax "$scriptAbsoluteFolder"/_local/TODO-example.txt "$globalVirtFS"/home/user/ubDistBuild/_local/
 	sudo -n rsync -ax "$scriptAbsoluteFolder"/_local/.gitignore "$globalVirtFS"/home/user/ubDistBuild/_local/
 	sudo -n rsync -ax "$scriptAbsoluteFolder"/_local/ubcp "$globalVirtFS"/home/user/ubDistBuild/_local/
+	
+	sudo -n rsync -ax --exclude "_local/vm.img" --exclude "_local/vm-live.iso" --exclude "_local/package_rootfs.tar" --exclude "_local/vm.img.*" --exclude "_local/vm-live.iso.*" --exclude "_local/package_rootfs.tar.*" "$scriptAbsoluteFolder"/_local/. "$globalVirtFS"/home/user/ubDistBuild/_local/
+	
 	_chroot chown -R user:user /home/user/ubDistBuild
 	_chroot chmod 700 /home/user/ubDistBuild
 	#--quiet
 	_chroot sudo -n -u user bash -c 'cd /home/user/ubDistBuild ; git reset --hard ; git submodule update --force --no-fetch --recursive'
 
+	
 	_chroot find /home/user/ubDistBuild/.git -name config -exec sed -i 's/.*extraheader.*//g' {} \;
 
 	_messageNormal 'chroot: install: ubDistBuild: report: df'
