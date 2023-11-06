@@ -1010,6 +1010,14 @@ _create_ubDistBuild-rotten_install-core() {
 	
 	
 	# May not be usable with VirtualBox compatible kernel .
+	# May break:
+#ccp
+#irqbypass
+#kvm
+#kvm_amd
+#vboxdrv
+#vboxnetadp
+#vboxnetflt
 	#_getMost_backend_aptGetInstall xen-system-amd64
 	#_getMost_backend_aptGetInstall xen-tools
 
