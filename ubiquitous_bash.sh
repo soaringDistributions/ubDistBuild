@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2297417889'
+export ub_setScriptChecksum_contents='1955930681'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -46360,6 +46360,10 @@ _nvidia_force_install() {
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
+	sudo -n mkdir -p "$globalVirtFS"/root
+	sudo -n cp -f "$scriptLib"/setup/nvidia/_get_nvidia.sh "$globalVirtFS"/root/
+	sudo -n cp -f "$scriptLib"/ubDistBuild/_lib/setup/nvidia/_get_nvidia.sh "$globalVirtFS"/root/ > /dev/null 2>&1
+	sudo -n chmod 755 "$globalVirtFS"/root/_get_nvidia.sh
 	
 	_chroot /root/_get_nvidia.sh _force_install
 	
@@ -46380,6 +46384,10 @@ _nvidia_fetch_nvidia() {
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
+	sudo -n mkdir -p "$globalVirtFS"/root
+	sudo -n cp -f "$scriptLib"/setup/nvidia/_get_nvidia.sh "$globalVirtFS"/root/
+	sudo -n cp -f "$scriptLib"/ubDistBuild/_lib/setup/nvidia/_get_nvidia.sh "$globalVirtFS"/root/ > /dev/null 2>&1
+	sudo -n chmod 755 "$globalVirtFS"/root/_get_nvidia.sh
 	
 	chmod u+x "$scriptLocal"/NVIDIA-Linux-*.run
 	ls -1 -A "$scriptLocal"/NVIDIA-Linux-*.run > /dev/null 2>&1 && sudo -n cp "$scriptLocal"/NVIDIA-Linux-*.run "$globalVirtFS"/root/

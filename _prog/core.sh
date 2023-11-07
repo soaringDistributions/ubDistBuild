@@ -2272,6 +2272,10 @@ _nvidia_force_install() {
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
+	sudo -n mkdir -p "$globalVirtFS"/root
+	sudo -n cp -f "$scriptLib"/setup/nvidia/_get_nvidia.sh "$globalVirtFS"/root/
+	sudo -n cp -f "$scriptLib"/ubDistBuild/_lib/setup/nvidia/_get_nvidia.sh "$globalVirtFS"/root/ > /dev/null 2>&1
+	sudo -n chmod 755 "$globalVirtFS"/root/_get_nvidia.sh
 	
 	_chroot /root/_get_nvidia.sh _force_install
 	
@@ -2292,6 +2296,10 @@ _nvidia_fetch_nvidia() {
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
+	sudo -n mkdir -p "$globalVirtFS"/root
+	sudo -n cp -f "$scriptLib"/setup/nvidia/_get_nvidia.sh "$globalVirtFS"/root/
+	sudo -n cp -f "$scriptLib"/ubDistBuild/_lib/setup/nvidia/_get_nvidia.sh "$globalVirtFS"/root/ > /dev/null 2>&1
+	sudo -n chmod 755 "$globalVirtFS"/root/_get_nvidia.sh
 	
 	chmod u+x "$scriptLocal"/NVIDIA-Linux-*.run
 	ls -1 -A "$scriptLocal"/NVIDIA-Linux-*.run > /dev/null 2>&1 && sudo -n cp "$scriptLocal"/NVIDIA-Linux-*.run "$globalVirtFS"/root/
