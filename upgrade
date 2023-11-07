@@ -550,6 +550,7 @@ _upgrade_ub() {
 	! [[ -e "$scriptAbsoluteFolder"/_lib/ubiquitous_bash ]] && return 1
 	
 	cd "$scriptAbsoluteFolder"/_lib/ubiquitous_bash
+	git checkout master
 	_gitBest pull
 	_gitBest submodule update
 }
@@ -558,6 +559,7 @@ _upgrade_ubDistBuild-lib() {
 	! [[ -e "$scriptAbsoluteFolder"/_lib/ubDistBuild ]] && return 1
 	
 	cd "$scriptAbsoluteFolder"/_lib/ubDistBuild
+	git checkout main
 	_gitBest pull
 	_gitBest submodule update
 	
@@ -567,10 +569,6 @@ _upgrade_ubDistBuild-lib() {
 	_gitBest submodule update
 	
 	! [[ -e "$scriptAbsoluteFolder"/_lib/ubiquitous_bash ]] && return 1
-	
-	cd "$scriptAbsoluteFolder"/_lib/ubiquitous_bash
-	_gitBest pull
-	_gitBest submodule update
 	
 	#_gitBest submodule update --recursive
 }
