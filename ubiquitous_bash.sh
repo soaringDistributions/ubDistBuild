@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='4052107695'
+export ub_setScriptChecksum_contents='2484205746'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -44813,6 +44813,8 @@ _create_ubDistBuild-rotten_install-kde() {
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	imagedev=$(cat "$scriptLocal"/imagedev)
+	
+	sudo -n mv -f "$globalVirtFS"/home/user/package_kde.tar.xz "$globalVirtFS"/home/user/package_kde.tar.xz.$(_uid)
 	
 	[[ ! -e "$scriptLib"/custom/package_kde.tar.xz ]] && [[ ! -e "$scriptLocal"/custom/package_kde.tar.xz ]] && [[ ! -e "$scriptLocal"/package_kde.tar.xz ]] && _messageFAIL
 	[[ -e "$scriptLib"/custom/package_kde.tar.xz ]] && sudo -n cp -f "$scriptLib"/custom/package_kde.tar.xz "$globalVirtFS"/package_kde.tar.xz
