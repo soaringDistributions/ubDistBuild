@@ -624,17 +624,21 @@ jobs:
 
 
   build-convert-live:
-    needs: [build, build_release]
-    #runs-on: ubuntu-latest
+    needs: [build_release]
+    # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
+    #  '7 GB of RAM memory'
+    #  '14 GB of SSD disk space'
+    # ATTRIBUTION: Github Copilot Chat 2023-08-10 .
     runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
-    # WARNING: Must also enable/disable 'Maximize build space' as appropriate .
-    #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
+    #runs-on: ubuntu-latest
+    #runs-on: ubuntu-22.04
+    #runs-on: ubuntu-20.04
+    #runs-on: ubuntu-18.04
+    # Apparently both 'buildjet-2vcpu-ubuntu-2004' and 'buildjet-16vcpu-ubuntu-2004' have 61GB .
+    #runs-on: buildjet-2vcpu-ubuntu-2004
+    #runs-on: buildjet-16vcpu-ubuntu-2004
+    # https://github.com/easimon/maximize-build-space
     steps:
-      - name: report! API Rate Limit
-        shell: bash
-        run: |
-          curl -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ""${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28"  https://api.github.com/rate_limit
-          #curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/rate_limit | jq -r ".rate"
       - name: users
         shell: bash
         run: |
@@ -648,9 +652,21 @@ jobs:
         if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
         uses: easimon/maximize-build-space@master
         with:
+          ##root-reserve-mb: 512
+          ##root-reserve-mb: 1450
+          ##root-reserve-mb: 950
+          #root-reserve-mb: 1750
           root-reserve-mb: 1625
+          ##temp-reserve-mb: 100
+          ##temp-reserve-mb: 300
+          ##temp-reserve-mb: 300
+          #temp-reserve-mb: 700
           temp-reserve-mb: 50
+          ##swap-size-mb: 128
+          ##swap-size-mb: 192
+          #swap-size-mb: 8
           swap-size-mb: 2
+          #swap-size-mb: 384
           #remove-dotnet: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
           remove-dotnet: 'true'
           #remove-android: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
@@ -661,22 +677,81 @@ jobs:
           remove-codeql: 'true'
           #remove-docker-images: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
           remove-docker-images: 'true'
-          
+      # https://github.com/orgs/community/discussions/8305
+      # https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/
+      # https://github.com/actions/runner-images/discussions/7191
+      - name: Enable KVM group perms
+        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
+        shell: bash
+        run: |
+          #echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo -n tee /etc/udev/rules.d/99-kvm4all.rules
+          echo 'KERNEL=="kvm", GROUP="docker", MODE="0664", OPTIONS+="static_node=kvm"' | sudo -n tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo -n udevadm control --reload-rules
+          sudo -n udevadm trigger --name-match=kvm
+          sudo -n apt-get update
+          sudo -n apt-get install -y libvirt-clients libvirt-daemon-system libvirt-daemon virtinst bridge-utils qemu qemu-system-x86
+          sudo -n usermod -a -G kvm $USER
+          sudo -n usermod -a -G libvirt $USER
+          sudo -n usermod -a -G docker $USER
+          sudo -n adduser $USER kvm
+          #sudo -n chown -R $USER:kvm /dev/kvm
+          sudo -n chown -R $USER:docker /dev/kvm
+          ls -l /dev/kvm
+          ls -l /dev/kvm*
+          echo $USER
+          groups
+          sudo -n lsmod | grep kvm
+          sudo -n modprobe -r kvm_intel
+          sudo -n modprobe -r kvm_amd
+          sudo -n modprobe -r kvm
+          ( grep --color vmx /proc/cpuinfo && sudo -n modprobe kvm_intel ) || ( grep --color svm /proc/cpuinfo && sudo -n modprobe kvm_amd )
+          sudo -n modprobe kvm
+          sudo -n lsmod | grep kvm
+          #sudo -n chown -R $USER:kvm /dev/kvm
+          sudo -n chown -R $USER:docker /dev/kvm
+          ls -l /dev/kvm
+          ls -l /dev/kvm*
+      - name: Check KVM group perms
+        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
+        shell: bash
+        run: |
+          grep --color svm /proc/cpuinfo || true
+          grep --color vmx /proc/cpuinfo || true
+          sudo -n lsmod | grep kvm
+          ls -l /dev/kvm
+          ls -l /dev/kvm*
+          echo $USER
+          groups
+      - name: Check Network Services
+        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
+        shell: bash
+        run: |
+          sudo -n netstat -l -p
       - name: _getCore_ub
         shell: bash
+        timeout-minutes: 90
         run: |
           mkdir -p ~/core/infrastructure
           cd ~/core/infrastructure
           git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
           cd ubiquitous_bash
           ./_setupUbiquitous.bat
-          ./ubiquitous_bash.sh _custom_splice_opensslConfig
-
+      - name: _getMinimal_cloud
+        shell: bash
+        run: |
+          ! ~/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _getMinimal_cloud && exit 1
+          true
+          #! sudo -n apt-get -y clean && exit 1
+          df -h
+          df -h /
+        timeout-minutes: 90
+      #- name: changeDisk
+        #shell: bash
+        #run: |
+          #false
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 1
-          submodules: 'recursive'
-
+          submodules: recursive
       - name: _getMinimal_cloud
         shell: bash
         run: |
@@ -686,15 +761,6 @@ jobs:
           df -h
           df -h /
         timeout-minutes: 355
-      
-      - name: _getMost-aria2
-        shell: bash
-        run: |
-          sudo -n apt-get -y clean
-          sudo -n apt-get update
-          sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y aria2
-        timeout-minutes: 355
-
       ## For VBoxManage for _convert . Otherwise historically not apparently necessary.
       #- name: _getMost_ubuntu22-VBoxManage
         #shell: bash
@@ -709,20 +775,20 @@ jobs:
           #df -h
           #df -h /
         #timeout-minutes: 355
-      #- name: _getMost-xvfb
-        #shell: bash
-        #run: |
-          ##! ./ubiquitous_bash.sh _getMost && exit 1
-          ##true
-          ##! sudo -n apt-get -y clean && exit 1
-          ##! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
-          ##sudo -n apt-get update
-          ##! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
-          ##! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
-          #sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y xvfb
-          #df -h
-          #df -h /
-        #timeout-minutes: 355
+      - name: _getMost-xvfb
+        shell: bash
+        run: |
+          #! ./ubiquitous_bash.sh _getMost && exit 1
+          #true
+          #! sudo -n apt-get -y clean && exit 1
+          #! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
+          #sudo -n apt-get update
+          #! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
+          #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
+          sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y xvfb
+          df -h
+          df -h /
+        timeout-minutes: 355
       
       - name: _test_hash_legacy
         shell: bash
@@ -735,28 +801,26 @@ jobs:
               echo -n | openssl dgst -whirlpool -binary | xxd -p -c 256
               exit ${PIPESTATUS[0]}
           fi
-
-
-
+      
+      
       - name: _get_vmImg_ubDistBuild
         shell: bash
         run: |
+          current_releaseLabel="${{ inputs.releaseLabel }}"
+          #[[ "$current_releaseLabel" == "" ]] && current_releaseLabel="base"
+          [[ "$current_releaseLabel" == "" ]] && current_releaseLabel="latest"
+          [[ "$current_releaseLabel" == "latest" ]] && current_releaseLabel=""
           #export FORCE_AXEL=8
           #./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
           # DANGER: Github Actions (strictly internal) ONLY!
-          #export FORCE_AXEL=8
-          #export MANDATORY_HASH="true"
+          export FORCE_AXEL=8
+          export MANDATORY_HASH="true"
           cd ./_local
           rm -f hash-download.txt
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "${{ github.repository }}" "" "package_image.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$current_releaseLabel" "package_image.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: fallocate --dig-holes
-        shell: bash
-        run: |
-          fallocate --dig-holes ./_local/vm.img
-
+      
       - name: _hash_img
         shell: bash
         run: |
@@ -764,6 +828,39 @@ jobs:
           echo $skimfast
           #./ubiquitous_bash.sh _hash_img
           cat _local/hash-download.txt
+
+      - name: fallocate --dig-holes
+        shell: bash
+        run: |
+          fallocate --dig-holes ./_local/vm.img
+          
+          
+          
+          
+          
+          
+
+      
+      - name: _create_ubDistBuild-install-ubDistBuild
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _create_ubDistBuild-install-ubDistBuild | sudo -n tee ./_create_ubDistBuild-install-ubDistBuild.log && exit ${PIPESTATUS[0]}
+          
+          
+          
+          
+          
+      
+      
+      - name: _custom
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _custom || true
+          
+      - name: _rotten_install-kde
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _create_ubDistBuild-rotten_install-kde
 
 
 
