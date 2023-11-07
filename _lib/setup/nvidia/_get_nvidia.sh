@@ -852,6 +852,8 @@ _fetch_nvidia() {
 
 
 _install_nvidia() {
+	local functionEntryPWD="$PWD"
+	
 	_messageNormal 'init: _install_nvidia'
 	_set_nvidia
 
@@ -928,21 +930,46 @@ _install_nvidia() {
 	#--run-nvidia-xconfig   ...   # " default response is 'no' "
 	if [[ "$current_nvidia_installAllKernels" == "true" ]]
 	then
+		sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --ui=none --no-questions --no-kernel-module
+		[[ "$?" != "0" ]] && currentExitStatus=1
+		
+		sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --ui=none --no-questions --extract-only
+		[[ "$?" != "0" ]] && currentExitStatus=1
+		
 		# If headers for more than 12 kernels are installed, that is an issue.
 		ls -A -1 -d /usr/src/linux-headers-* | sort -r -V | head -n 12 | sed -s 's/.*linux-headers-//' | while read -r currentLine
 		do
+			_messagePlain_probe 'nvidia: make: '"$currentLine"
+			
+			export SYSSRC=/usr/src/linux-headers-"$currentLine"
+			export IGNORE_CC_MISMATCH=1
+			
+			export IGNORE_MISSING_MODULE_SYMVERS=1
+			
+			
+			cd "$safeTmp"/NVIDIA-Linux-x86_64-"$currentVersion"/kernel
+			
+			make clean
+			
+			_messagePlain_probe 'nvidia: make -j $(nproc)'
+			make -j $(nproc)
+			currentExitStatus="$?"
+			
+			
 			#--systemd
 			#--expert
-			_messagePlain_probe nvidia "$currentLine"
-			sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --ui=none --no-questions -j "$currentParallel" --no-cc-version-check -k "$currentLine" --dkms -m=kernel
-			[[ "$?" != "0" ]] && currentExitStatus=1
+			#_messagePlain_probe nvidia "$currentLine"
+			#sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --ui=none --no-questions -j "$currentParallel" --no-cc-version-check -k "$currentLine" --dkms -m=kernel
+			#[[ "$?" != "0" ]] && currentExitStatus=1
 			
 			# TODO
 			# http://download.nvidia.com/XFree86/Linux-x86_64/515.43.04/README/kernel_open.html
 			# https://github.com/NVIDIA/open-gpu-kernel-modules
 			# https://github.com/NVIDIA/open-gpu-kernel-modules/blob/main/README.md
-			#--no-kernel-modules
+			#--no-kernel-module
 		done
+		
+		cd "$functionEntryPWD"
 	else
 		#--no-recursion
 		local currentKernel=$(uname -r)
@@ -986,6 +1013,7 @@ Type=Application
 	sleep 6
 	systemctl status sddm
 	
+	cd "$functionEntryPWD"
 	[[ "$currentExitStatus" != "0" ]] && _messageFAIL
 	return "$currentExitStatus"
 }
