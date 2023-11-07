@@ -933,14 +933,14 @@ _install_nvidia() {
 		do
 			#--systemd
 			_messagePlain_probe nvidia "$currentLine"
-			sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s -j "$currentParallel" --no-cc-version-check -k "$currentLine" --dkms -m=kernel
+			sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --ui=none --no-questions --expert -j "$currentParallel" --no-cc-version-check -k "$currentLine" --dkms -m=kernel
 			[[ "$?" != "0" ]] && currentExitStatus=1
 		done
 	else
 		#--no-recursion
 		local currentKernel=$(uname -r)
 		_messagePlain_probe nvidia uname -r "$currentKernel"
-		sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run -s -j "$currentParallel" --no-cc-version-check -k "$currentKernel" -m=kernel
+		sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --ui=none --no-questions -j "$currentParallel" --no-cc-version-check -k "$currentKernel" -m=kernel
 	fi
 	
 	
