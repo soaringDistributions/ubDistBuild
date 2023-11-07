@@ -655,7 +655,7 @@ _create_ubDistBuild-rotten_install() {
 	[[ ! -e "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh ]] && _messageFAIL
 	sudo -n cp -f "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
 	[[ ! -e "$globalVirtFS"/rotten_install.sh ]] && _messageFAIL
-	sudo -n chmod 755 "$globalVirtFS"/rotten_install.sh
+	sudo -n chmod 700 "$globalVirtFS"/rotten_install.sh
 	
 	
 	[[ ! -e "$scriptLib"/custom/package_kde.tar.xz ]] && _messageFAIL
@@ -706,7 +706,7 @@ _create_ubDistBuild-rotten_install-bootOnce() {
 	[[ ! -e "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh ]] && _messageFAIL
 	sudo -n cp -f "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
 	[[ ! -e "$globalVirtFS"/rotten_install.sh ]] && _messageFAIL
-	sudo -n chmod 755 "$globalVirtFS"/rotten_install.sh
+	sudo -n chmod 700 "$globalVirtFS"/rotten_install.sh
 	
 	
 	#echo | sudo -n tee "$globalVirtFS"/in_chroot
@@ -737,7 +737,7 @@ _create_ubDistBuild-rotten_install-kde() {
 	[[ ! -e "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh ]] && _messageFAIL
 	sudo -n cp -f "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
 	[[ ! -e "$globalVirtFS"/rotten_install.sh ]] && _messageFAIL
-	sudo -n chmod 755 "$globalVirtFS"/rotten_install.sh
+	sudo -n chmod 700 "$globalVirtFS"/rotten_install.sh
 	
 	
 	#echo | sudo -n tee "$globalVirtFS"/in_chroot
@@ -843,7 +843,7 @@ _create_ubDistBuild-rotten_install-core() {
 	[[ ! -e "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh ]] && _messageFAIL
 	sudo -n cp -f "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
 	[[ ! -e "$globalVirtFS"/rotten_install.sh ]] && _messageFAIL
-	sudo -n chmod 755 "$globalVirtFS"/rotten_install.sh
+	sudo -n chmod 700 "$globalVirtFS"/rotten_install.sh
 	
 	
 	if ! [[ -e "$scriptLocal"/core.tar.xz ]] && ! [[ -e "$scriptLocal"/ubDistFetch/_lib/core ]]
