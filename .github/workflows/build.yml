@@ -395,6 +395,7 @@ jobs:
         run: |
           export devfast=${{ inputs.devfast }}
           echo $devfast
+          [[ "$devfast" == "" ]] && export devfast=true
           ./_chroot_test | sudo -n tee ./_local/_chroot_test.log && exit ${PIPESTATUS[0]}
 
       #- name: Force KVM group perms
@@ -493,6 +494,7 @@ jobs:
         run: |
           export skimfast=${{ inputs.skimfast }}
           echo skimfast $skimfast
+          [[ "$skimfast" == "" ]] && export skimfast=true
           export qemuNoKVM=${{ inputs.qemuNoKVM }}
           echo qemuNoKVM $qemuNoKVM
           echo
