@@ -932,8 +932,9 @@ _install_nvidia() {
 		ls -A -1 -d /usr/src/linux-headers-* | sort -r -V | head -n 12 | sed -s 's/.*linux-headers-//' | while read -r currentLine
 		do
 			#--systemd
+			# --expert
 			_messagePlain_probe nvidia "$currentLine"
-			sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --ui=none --no-questions --expert -j "$currentParallel" --no-cc-version-check -k "$currentLine" --dkms -m=kernel
+			sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --ui=none --no-questions -j "$currentParallel" --no-cc-version-check -k "$currentLine" --dkms -m=kernel
 			[[ "$?" != "0" ]] && currentExitStatus=1
 		done
 	else
