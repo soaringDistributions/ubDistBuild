@@ -930,10 +930,14 @@ _install_nvidia() {
 	#--run-nvidia-xconfig   ...   # " default response is 'no' "
 	if [[ "$current_nvidia_installAllKernels" == "true" ]]
 	then
-		sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --ui=none --no-questions --no-kernel-module
+		sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --ui=none --no-questions --extract-only
 		[[ "$?" != "0" ]] && currentExitStatus=1
 		
-		sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --ui=none --no-questions --extract-only
+		# TODO
+		# https://github.com/nvidia/nvidia-installer
+		
+		cd "$safeTmp"/NVIDIA-Linux-x86_64-"$currentVersion"
+		sh "$safeTmp"/NVIDIA-Linux-x86_64-"$currentVersion"/nvidia-installer --ui=none --no-questions --no-kernel-module
 		[[ "$?" != "0" ]] && currentExitStatus=1
 		
 		# If headers for more than 12 kernels are installed, that is an issue.
@@ -954,6 +958,10 @@ _install_nvidia() {
 			_messagePlain_probe 'nvidia: make -j $(nproc)'
 			make -j $(nproc)
 			currentExitStatus="$?"
+			
+			mkdir -p /lib/modules/"$currentLine"/kernel/drivers/video
+			cp -f ./*.ko /lib/modules/"$currentLine"/kernel/drivers/video/
+			
 			
 			
 			#--systemd
