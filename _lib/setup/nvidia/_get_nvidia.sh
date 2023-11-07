@@ -930,14 +930,14 @@ _install_nvidia() {
 	#--run-nvidia-xconfig   ...   # " default response is 'no' "
 	if [[ "$current_nvidia_installAllKernels" == "true" ]]
 	then
-		sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --ui=none --no-questions --extract-only
+		sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --extract-only
 		[[ "$?" != "0" ]] && currentExitStatus=1
 		
 		# TODO
 		# https://github.com/nvidia/nvidia-installer
 		
 		cd "$safeTmp"/NVIDIA-Linux-x86_64-"$currentVersion"
-		sh "$safeTmp"/NVIDIA-Linux-x86_64-"$currentVersion"/nvidia-installer --ui=none --no-questions --no-kernel-module
+		sh "$safeTmp"/NVIDIA-Linux-x86_64-"$currentVersion"/nvidia-installer --no-kernel-module --ui=none --no-questions
 		[[ "$?" != "0" ]] && currentExitStatus=1
 		
 		# If headers for more than 12 kernels are installed, that is an issue.
