@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='68563319'
+export ub_setScriptChecksum_contents='4052107695'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -44435,13 +44435,13 @@ deb-src https://deb.debian.org/debian/ bookworm-updates main contrib non-free no
 CZXWXcRMTo8EmM8i4d
 	
 	# APT sources here may not provide all packages, and thus are not exclusive of other lists.
-	if false && sudo ls "$globalVirtFS"/etc/apt/sources.list.hetzner > /dev/null 2>&1 && wget -qO- --dns-timeout=15 --connect-timeout=15 --read-timeout=15 --timeout=15 https://mirror.hetzner.com > /dev/null
+	if false && sudo -n ls "$globalVirtFS"/etc/apt/sources.list.hetzner > /dev/null 2>&1 && wget -qO- --dns-timeout=15 --connect-timeout=15 --read-timeout=15 --timeout=15 https://mirror.hetzner.com > /dev/null
 	then
 		sudo -n cat "$globalVirtFS"/etc/apt/sources.list.hetzner | _getMost_backend tee -a /etc/apt/sources.list > /dev/null
 	fi
 	
 	# APT sources here provide all packages, and thus can be exclusive of other lists.
-	if [[ "$RUNNER_OS" != "" ]] && sudo ls "$globalVirtFS"/etc/apt/sources.list.azure > /dev/null 2>&1
+	if [[ "$RUNNER_OS" != "" ]] && sudo -n ls "$globalVirtFS"/etc/apt/sources.list.azure > /dev/null 2>&1
 	then
 		sudo -n cat "$globalVirtFS"/etc/apt/sources.list.azure | _getMost_backend tee -a /etc/apt/sources.list > /dev/null
 	elif false

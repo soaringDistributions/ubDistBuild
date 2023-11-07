@@ -347,13 +347,13 @@ deb-src https://deb.debian.org/debian/ bookworm-updates main contrib non-free no
 CZXWXcRMTo8EmM8i4d
 	
 	# APT sources here may not provide all packages, and thus are not exclusive of other lists.
-	if false && sudo ls "$globalVirtFS"/etc/apt/sources.list.hetzner > /dev/null 2>&1 && wget -qO- --dns-timeout=15 --connect-timeout=15 --read-timeout=15 --timeout=15 https://mirror.hetzner.com > /dev/null
+	if false && sudo -n ls "$globalVirtFS"/etc/apt/sources.list.hetzner > /dev/null 2>&1 && wget -qO- --dns-timeout=15 --connect-timeout=15 --read-timeout=15 --timeout=15 https://mirror.hetzner.com > /dev/null
 	then
 		sudo -n cat "$globalVirtFS"/etc/apt/sources.list.hetzner | _getMost_backend tee -a /etc/apt/sources.list > /dev/null
 	fi
 	
 	# APT sources here provide all packages, and thus can be exclusive of other lists.
-	if [[ "$RUNNER_OS" != "" ]] && sudo ls "$globalVirtFS"/etc/apt/sources.list.azure > /dev/null 2>&1
+	if [[ "$RUNNER_OS" != "" ]] && sudo -n ls "$globalVirtFS"/etc/apt/sources.list.azure > /dev/null 2>&1
 	then
 		sudo -n cat "$globalVirtFS"/etc/apt/sources.list.azure | _getMost_backend tee -a /etc/apt/sources.list > /dev/null
 	elif false
