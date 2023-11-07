@@ -936,8 +936,8 @@ _install_nvidia() {
 		# TODO
 		# https://github.com/nvidia/nvidia-installer
 		
-		cd "$safeTmp"/NVIDIA-Linux-x86_64-"$currentVersion"
-		sh "$safeTmp"/NVIDIA-Linux-x86_64-"$currentVersion"/nvidia-installer --no-kernel-module --ui=none --no-questions
+		cd "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"
+		sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"/nvidia-installer --no-kernel-module --ui=none --no-questions
 		[[ "$?" != "0" ]] && currentExitStatus=1
 		
 		# If headers for more than 12 kernels are installed, that is an issue.
@@ -951,7 +951,7 @@ _install_nvidia() {
 			export IGNORE_MISSING_MODULE_SYMVERS=1
 			
 			
-			cd "$safeTmp"/NVIDIA-Linux-x86_64-"$currentVersion"/kernel
+			cd "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"/kernel
 			
 			make clean
 			
