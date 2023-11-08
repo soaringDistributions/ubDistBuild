@@ -338,7 +338,15 @@ jobs:
           ./ubiquitous_bash.sh _create_ubDistBuild-install-ubDistBuild | sudo -n tee ./_create_ubDistBuild-install-ubDistBuild.log && exit ${PIPESTATUS[0]}
 
 
-
+      - name: scribe! info! github! custom
+        shell: bash
+        run: |
+          ! ./ubiquitous_bash.sh _openChRoot && exit 1
+          ! echo ${{ github.repository }} | ./ubiquitous_bash.sh _chroot tee /info-github-custom && exit 1
+          ! echo build-${{ github.run_id }}-${{ github.run_attempt }} | ./ubiquitous_bash.sh _chroot tee -a /info-github-custom && exit 1
+          ! date +"%Y-%m-%d" | ./ubiquitous_bash.sh _chroot tee -a /info-github-custom && exit 1
+          ! ./ubiquitous_bash.sh _closeChRoot && exit 1
+          true
       
       
       - name: _custom
