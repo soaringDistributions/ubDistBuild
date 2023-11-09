@@ -875,6 +875,14 @@ jobs:
           true
       
       
+      - name: _custom-repo
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _custom-repo || true
+        env:
+          GH_TOKEN: ${{ github.token }}
+      
+      
       - name: _custom
         shell: bash
         run: |
