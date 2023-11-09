@@ -349,18 +349,18 @@ jobs:
           ! ./ubiquitous_bash.sh _closeChRoot && exit 1
           true
       
-      
-      - name: _custom
-        shell: bash
-        run: |
-          ./ubiquitous_bash.sh _custom || true
-      
       - name: _custom-repo
         shell: bash
         run: |
           ./ubiquitous_bash.sh _custom-repo || true
         env:
           GH_TOKEN: ${{ github.token }}
+      
+      
+      - name: _custom
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _custom || true
           
       - name: _rotten_install-kde
         shell: bash
