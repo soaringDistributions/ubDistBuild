@@ -367,12 +367,12 @@ jobs:
           ./ubiquitous_bash.sh _create_ubDistBuild-rotten_install-kde
 
 
-      #- name: _hash_img
-        #shell: bash
-        #run: |
-          #export skimfast=${{ inputs.skimfast }}
-          #echo $skimfast
-          #./ubiquitous_bash.sh _hash_img
+      - name: _hash_img
+        shell: bash
+        run: |
+          export skimfast=${{ inputs.skimfast }}
+          echo $skimfast
+          ./ubiquitous_bash.sh _hash_img
       
       
       
@@ -462,13 +462,6 @@ jobs:
           #export current_diskConstrained="true"
           #./ubiquitous_bash.sh _convert_rm
           #./ubiquitous_bash.sh _convert-rootfs | sudo -n tee ./_convert-rootfs.log && exit ${PIPESTATUS[0]}
-
-      ##- name: _hash_rootfs
-        ##shell: bash
-        ##run: |
-          ##export skimfast=${{ inputs.skimfast }}
-          ##echo $skimfast
-          ##./ubiquitous_bash.sh _hash_rootfs
           
       - name: DUMMY-rootfs
         shell: bash
@@ -479,6 +472,13 @@ jobs:
           #echo > ./_local/package_rootfs.tar.flx
           tar -cf - /dev/null > ./_local/package_rootfs.tar
           tar -cf - /dev/null | lz4 -z --fast=1 - ./_local/package_rootfs.tar.flx
+
+      - name: _hash_rootfs
+        shell: bash
+        run: |
+          export skimfast=${{ inputs.skimfast }}
+          echo $skimfast
+          ./ubiquitous_bash.sh _hash_rootfs
       
       - name: _ubDistBuild_split-rootfs
         shell: bash
@@ -615,12 +615,12 @@ jobs:
           #./_create_ubDistBuild_feedAccessories.log
           cat ./_convert-live_ISO.log | sudo -n tee ./_convert-live.log && exit ${PIPESTATUS[0]}
 
-      #- name: _hash_live
-        #shell: bash
-        #run: |
-          #export skimfast=${{ inputs.skimfast }}
-          #echo $skimfast
-          #./ubiquitous_bash.sh _hash_live
+      - name: _hash_live
+        shell: bash
+        run: |
+          export skimfast=${{ inputs.skimfast }}
+          echo $skimfast
+          ./ubiquitous_bash.sh _hash_live
       
       - name: _ubDistBuild_split-live
         shell: bash
@@ -663,16 +663,16 @@ jobs:
 
 
 
-      - name: _hash_ubdist-fast
-        shell: bash
-        run: |
-          export skimfast=${{ inputs.skimfast }}
-          echo $skimfast
-          #export FORCE_AXEL=8
-          #export MANDATORY_HASH="true"
-          ./ubiquitous_bash.sh _hash_ubdist-fast
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #- name: _hash_ubdist-fast
+        #shell: bash
+        #run: |
+          #export skimfast=${{ inputs.skimfast }}
+          #echo $skimfast
+          ##export FORCE_AXEL=8
+          ##export MANDATORY_HASH="true"
+          #./ubiquitous_bash.sh _hash_ubdist-fast
+        #env:
+          #GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
 
