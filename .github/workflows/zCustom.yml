@@ -352,7 +352,7 @@ jobs:
       - name: _custom-expand
         shell: bash
         run: |
-          ./ubiquitous_bash.sh _custom-expand || true
+          ./ubiquitous_bash.sh _custom-expand
       
       - name: _custom-repo
         shell: bash
@@ -882,7 +882,7 @@ jobs:
       - name: _custom-expand
         shell: bash
         run: |
-          ./ubiquitous_bash.sh _custom-expand || true
+          ./ubiquitous_bash.sh _custom-expand
       
       
       - name: _custom-repo
