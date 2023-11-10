@@ -349,6 +349,11 @@ jobs:
           ! ./ubiquitous_bash.sh _closeChRoot && exit 1
           true
       
+      - name: _custom-expand
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _custom-expand || true
+      
       - name: _custom-repo
         shell: bash
         run: |
@@ -873,6 +878,11 @@ jobs:
           ! date +"%Y-%m-%d" | ./ubiquitous_bash.sh _chroot tee -a /info-github-custom && exit 1
           ! ./ubiquitous_bash.sh _closeChRoot && exit 1
           true
+      
+      - name: _custom-expand
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _custom-expand || true
       
       
       - name: _custom-repo
