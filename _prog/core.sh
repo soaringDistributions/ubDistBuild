@@ -885,6 +885,10 @@ _create_ubDistBuild-rotten_install-core() {
 	_getMost_backend apt-get update
 
 	_getMost_backend_aptGetInstall w3m
+	
+	
+	
+	_getMost_backend_aptGetInstall adb
 
 	
 
@@ -905,6 +909,12 @@ _create_ubDistBuild-rotten_install-core() {
 	#_getMost_backend_aptGetInstall fldigi
 	#_getMost_backend_aptGetInstall flamp
 	#_getMost_backend_aptGetInstall psk31lx
+	
+	# Seems capable for rx .
+	#_getMost_backend_aptGetInstall multimon-ng
+	
+	
+	#_getMost_backend_aptGetInstall minimodem
 	
 	_getMost_backend_aptGetInstall gnucash
 
