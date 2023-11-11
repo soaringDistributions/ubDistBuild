@@ -970,7 +970,7 @@ _install_nvidia() {
 			
 			# https://forums.developer.nvidia.com/t/error-nvidia-settings-could-not-find-the-registry-key-file/50142/2
 			cd /usr/share/nvidia
-			sudo ln -s $(ls -1 nvidia-application-profiles-*-key-documentation | sort -r -V) nvidia-application-profiles-key-documentation
+			sudo ln -sf $(ls -1 nvidia-application-profiles-*-key-documentation | sort -r -V) nvidia-application-profiles-key-documentation
 			
 			
 			#--systemd
