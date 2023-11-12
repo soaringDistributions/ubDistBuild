@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='52073715'
+export ub_setScriptChecksum_contents='1872969390'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -46532,20 +46532,25 @@ _create_kde() {
 	cd "$HOME"
 	
 	
-	cp -r "$scriptLib"/custom/license_package_kde "$HOME"/.license_package_kde
+	mkdir -p "$HOME"/.license_package_kde
+	cp -a "$scriptLib"/custom/license_package_kde/. "$HOME"/.license_package_kde/
 	
 	rm -f "$scriptLocal"/package_kde.tar.xz > /dev/null 2>&1
 	#-T0
-	env XZ_OPT="-e9" tar --exclude='./.ubtmp' --exclude='./.config/chromium' --exclude='./.config/systemd/user/bootdiscStartup.service' --exclude='./.config/startup.sh' --exclude='./.config/autostart/startup.desktop' --exclude='./.config/plasma-workspace/env/startup.sh' --exclude='./.config/qt5ct' --exclude='./.local/state' --exclude='./.local/share/virtualenv' --exclude='./.config/VirtualBox' --exclude='./.config/gcloud' --exclude='./.config/qalculate' --exclude='./.config/pulse' --exclude='./.config/systemd' --exclude='./.local/share/RecentDocuments' --exclude='./.local/share/recently-used.xbel' --exclude='./.local/share/kwalletd' --exclude='./.local/share/keyrings' -cJvf "$scriptLocal"/package_kde.tar.xz ./.config ./.kde ./.local ./.xournal/config ./.license_package_kde
+	tar --exclude='./.ubtmp' --exclude='./.config/chromium' --exclude='./.config/systemd/user/bootdiscStartup.service' --exclude='./.config/startup.sh' --exclude='./.config/autostart/startup.desktop' --exclude='./.config/plasma-workspace/env/startup.sh' --exclude='./.config/qt5ct' --exclude='./.local/state' --exclude='./.local/share/virtualenv' --exclude='./.config/VirtualBox' --exclude='./.config/gcloud' --exclude='./.config/qalculate' --exclude='./.config/pulse' --exclude='./.config/systemd' --exclude='./.local/share/RecentDocuments' --exclude='./.local/share/recently-used.xbel' --exclude='./.local/share/kwalletd' --exclude='./.local/share/keyrings' -cvf "$scriptLocal"/package_kde.tar ./.config ./.kde ./.local ./.xournal/config ./.license_package_kde
 	
 	# WARNING: May be untested.
 	cd "$scriptLib"/custom/special_package_kde
-	env XZ_OPT="-e9" tar -rJvf "$scriptLocal"/package_kde.tar.xz './' 
+	tar -rvf "$scriptLocal"/package_kde.tar './' 
 	
+	env XZ_OPT="-e9" cat "$scriptLocal"/package_kde.tar | xz -z - > "$scriptLocal"/package_kde.tar.xz
+	rm -f "$scriptLocal"/package_kde.tar
 	
 	rm -f "$HOME"/.license_package_kde/license.txt
 	rm -f "$HOME"/.license_package_kde/CC0_license.txt
 	rmdir "$HOME"/.license_package_kde
+	
+	return 0
 }
 
 
