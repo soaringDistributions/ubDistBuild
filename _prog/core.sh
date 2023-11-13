@@ -2410,8 +2410,16 @@ _create_kde() {
 	tar --exclude='./.ubtmp' --exclude='./.config/chromium' --exclude='./.config/systemd/user/bootdiscStartup.service' --exclude='./.config/startup.sh' --exclude='./.config/autostart/startup.desktop' --exclude='./.config/plasma-workspace/env/startup.sh' --exclude='./.config/plasma-workspace/env/profile.sh' --exclude='./.config/plasma-workspace/env/w540_display_start.sh' --exclude='./.config/qt5ct' --exclude='./.local/state' --exclude='./.local/share/virtualenv' --exclude='./.config/VirtualBox' --exclude='./.config/gcloud' --exclude='./.config/qalculate' --exclude='./.config/pulse' --exclude='./.config/systemd' --exclude='./.local/share/RecentDocuments' --exclude='./.local/share/recently-used.xbel' --exclude='./.local/share/kwalletd' --exclude='./.local/share/keyrings' -cvf "$scriptLocal"/package_kde.tar ./.config ./.kde ./.local ./.xournal/config ./.license_package_kde
 	
 	# WARNING: May be untested.
-	cd "$scriptLib"/custom/special_package_kde
-	tar -rvf "$scriptLocal"/package_kde.tar './' 
+	if [[ -e "$scriptLib"/custom/special_package_kde ]] && cd "$scriptLib"/custom/special_package_kde
+	then
+		tar -rvf "$scriptLocal"/package_kde.tar './' 
+	elif [[ -e "$scriptLib"/ubDistBuild/_lib/custom/special_package_kde ]] && cd "$scriptLib"/ubDistBuild/_lib/custom/special_package_kde
+	then
+		tar -rvf "$scriptLocal"/package_kde.tar './' 
+	else
+		_messagePlain_bad 'bad: fail: missing: 'custom/special_package_kde
+		_messageFAIL
+	fi
 	
 	env XZ_OPT="-e9" cat "$scriptLocal"/package_kde.tar | xz -z - > "$scriptLocal"/package_kde.tar.xz
 	rm -f "$scriptLocal"/package_kde.tar
