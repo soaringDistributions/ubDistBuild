@@ -965,7 +965,7 @@ _install_nvidia() {
 			cp -f ./*.ko /lib/modules/"$currentLine"/kernel/drivers/video/
 			
 			# https://stackoverflow.com/questions/34800731/module-not-found-when-i-do-a-modprobe
-			sudo -n depmod
+			sudo -n depmod "$currentLine"
 			
 			
 			# https://forums.developer.nvidia.com/t/error-nvidia-settings-could-not-find-the-registry-key-file/50142/2
