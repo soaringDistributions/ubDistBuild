@@ -90,6 +90,14 @@ jobs:
           echo devfast ${{ github.event.inputs.devfast }}
           echo skimfast ${{ github.event.inputs.skimfast }}
           echo qemuNoKVM ${{ github.event.inputs.qemuNoKVM }}
+          echo runnerName ${{ github.event.inputs.runnerName }}
+      - name: report! options
+        shell: bash
+        run: |
+          echo devfast ${{ inputs.devfast }}
+          echo skimfast ${{ inputs.skimfast }}
+          echo qemuNoKVM ${{ inputs.qemuNoKVM }}
+          echo runnerName ${{ inputs.runnerName }}
       - name: report! API Rate Limit
         shell: bash
         run: |
