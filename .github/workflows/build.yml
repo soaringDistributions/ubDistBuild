@@ -32,16 +32,19 @@ on:
   workflow_dispatch:
     inputs:
       devfast:
+        required: true
         type: boolean
         default: true
       skimfast:
+        required: true
         type: boolean
         default: false
       qemuNoKVM:
+        required: true
         type: boolean
         default: true
       runnerName:
-        required: false
+        required: true
         default: ubuntu-latest-m
         type: choice
         options:
@@ -81,6 +84,12 @@ jobs:
   build_release:
     runs-on: ubuntu-latest
     steps:
+      - name: report! options
+        shell: bash
+        run: |
+          echo devfast ${{ github.event.inputs.devfast }}
+          echo skimfast ${{ github.event.inputs.skimfast }}
+          echo qemuNoKVM ${{ github.event.inputs.qemuNoKVM }}
       - name: report! API Rate Limit
         shell: bash
         run: |
@@ -377,23 +386,23 @@ jobs:
       - name: _create_ubDistBuild-create
         shell: bash
         run: |
-          export skimfast=${{ inputs.skimfast }}
+          export skimfast=${{ github.event.inputs.skimfast }}
           echo $skimfast
-          export devfast=${{ inputs.devfast }}
+          export devfast=${{ github.event.inputs.devfast }}
           echo $devfast
           ./_create_ubDistBuild-create | sudo -n tee ./_local/_create_ubDistBuild-create.log && exit ${PIPESTATUS[0]}
       - name: _create_ubDistBuild-rotten_install
         shell: bash
         run: |
-          export skimfast=${{ inputs.skimfast }}
+          export skimfast=${{ github.event.inputs.skimfast }}
           echo $skimfast
-          export devfast=${{ inputs.devfast }}
+          export devfast=${{ github.event.inputs.devfast }}
           echo $devfast
           ./_create_ubDistBuild-rotten_install | sudo -n tee ./_local/_create_ubDistBuild-rotten_install.log && exit ${PIPESTATUS[0]}
       - name: _chroot_test
         shell: bash
         run: |
-          export devfast=${{ inputs.devfast }}
+          export devfast=${{ github.event.inputs.devfast }}
           echo $devfast
           [[ "$devfast" == "" ]] && export devfast=true
           ./_chroot_test | sudo -n tee ./_local/_chroot_test.log && exit ${PIPESTATUS[0]}
@@ -418,9 +427,9 @@ jobs:
       #- name: _create_ubDistBuild-bootOnce
         #shell: bash
         #run: |
-          #export skimfast=${{ inputs.skimfast }}
+          #export skimfast=${{ github.event.inputs.skimfast }}
           #echo skimfast $skimfast
-          #export qemuNoKVM=${{ inputs.qemuNoKVM }}
+          #export qemuNoKVM=${{ github.event.inputs.qemuNoKVM }}
           #echo qemuNoKVM $qemuNoKVM
           #echo
           #./_create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log && exit ${PIPESTATUS[0]}
@@ -492,10 +501,11 @@ jobs:
       - name: _create_ubDistBuild-bootOnce
         shell: bash
         run: |
-          export skimfast=${{ inputs.skimfast }}
+          export skimfast=${{ github.event.inputs.skimfast }}
           echo skimfast $skimfast
           [[ "$skimfast" == "" ]] && export skimfast=true
-          export qemuNoKVM=${{ inputs.qemuNoKVM }}
+          echo skimfast $skimfast
+          export qemuNoKVM=${{ github.event.inputs.qemuNoKVM }}
           #[[ "$qemuNoKVM" == "" ]] && export qemuNoKVM=true
           echo qemuNoKVM $qemuNoKVM
           echo
@@ -505,7 +515,7 @@ jobs:
       - name: _hash_img
         shell: bash
         run: |
-          export skimfast=${{ inputs.skimfast }}
+          export skimfast=${{ github.event.inputs.skimfast }}
           echo $skimfast
           ./ubiquitous_bash.sh _hash_img
 
@@ -589,7 +599,7 @@ jobs:
       - name: _package_ubDistBuild_image
         shell: bash
         run: |
-          export skimfast=${{ inputs.skimfast }}
+          export skimfast=${{ github.event.inputs.skimfast }}
           echo $skimfast
           ./ubiquitous_bash.sh _package_ubDistBuild_image | sudo -n tee ./_local/_package_ubDistBuild_image.log && exit ${PIPESTATUS[0]}
       - name: _ubDistBuild_split
@@ -774,7 +784,7 @@ jobs:
       - name: _hash_img
         shell: bash
         run: |
-          export skimfast=${{ inputs.skimfast }}
+          export skimfast=${{ github.event.inputs.skimfast }}
           echo $skimfast
           #./ubiquitous_bash.sh _hash_img
           cat _local/hash-download.txt
@@ -790,7 +800,7 @@ jobs:
       - name: _hash_rootfs
         shell: bash
         run: |
-          export skimfast=${{ inputs.skimfast }}
+          export skimfast=${{ github.event.inputs.skimfast }}
           echo $skimfast
           ./ubiquitous_bash.sh _hash_rootfs
       
@@ -969,7 +979,7 @@ jobs:
       - name: _hash_img
         shell: bash
         run: |
-          export skimfast=${{ inputs.skimfast }}
+          export skimfast=${{ github.event.inputs.skimfast }}
           echo $skimfast
           #./ubiquitous_bash.sh _hash_img
           cat _local/hash-download.txt
@@ -1045,7 +1055,7 @@ jobs:
       - name: _hash_live
         shell: bash
         run: |
-          export skimfast=${{ inputs.skimfast }}
+          export skimfast=${{ github.event.inputs.skimfast }}
           echo $skimfast
           ./ubiquitous_bash.sh _hash_live
       
@@ -1260,7 +1270,7 @@ jobs:
       #- name: _hash_img
         #shell: bash
         #run: |
-          #export skimfast=${{ inputs.skimfast }}
+          #export skimfast=${{ github.event.inputs.skimfast }}
           #echo $skimfast
           #./ubiquitous_bash.sh _hash_img
           #rm -f ./_local/vm.img
@@ -1284,7 +1294,7 @@ jobs:
       #- name: _hash_rootfs
         #shell: bash
         #run: |
-          #export skimfast=${{ inputs.skimfast }}
+          #export skimfast=${{ github.event.inputs.skimfast }}
           #echo $skimfast
           #./ubiquitous_bash.sh _hash_rootfs
           #rm -f ./_local/package_rootfs.tar.flx
@@ -1308,7 +1318,7 @@ jobs:
       #- name: _hash_live
         #shell: bash
         #run: |
-          #export skimfast=${{ inputs.skimfast }}
+          #export skimfast=${{ github.event.inputs.skimfast }}
           #echo $skimfast
           #./ubiquitous_bash.sh _hash_live
           #rm -f ./_local/vm-live.iso
@@ -1321,7 +1331,7 @@ jobs:
       - name: _hash_ubdist-fast
         shell: bash
         run: |
-          export skimfast=${{ inputs.skimfast }}
+          export skimfast=${{ github.event.inputs.skimfast }}
           echo $skimfast
           export FORCE_AXEL=8
           export MANDATORY_HASH="true"
