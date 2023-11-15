@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1237566009'
+export ub_setScriptChecksum_contents='1370767067'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -45887,7 +45887,9 @@ CZXWXcRMTo8EmM8i4d
 	
 	local currentIteration
 	local currentIterationTotal
-	currentIterationTotal=3
+	currentIterationTotal=2
+	# May need 3 iterations, especially if "package_kde" is from a previous version of Debian Stable (ie. if KDE upgrade must happen automatically).
+	#currentIterationTotal=3
 	[[ "$skimfast" == "true" ]] && currentIterationTotal=1
 
 	#for currentIteration in $(seq 1 3)
@@ -46350,13 +46352,16 @@ _zSpecial_qemu_sequence_prog() {
 	echo '! sudo -n lsmod | grep -i vboxdrv && sudo -n /sbin/vboxconfig' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sleep 75' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sudo -n lsmod | cut -f1 -d\  | sudo -n tee /lsmodReport' >> "$hostToGuestFiles"/cmd.sh
-	echo 'kded5 --check' >> "$hostToGuestFiles"/cmd.sh
-	echo 'sleep 90' >> "$hostToGuestFiles"/cmd.sh
+	echo '[[ ! -e /kded5-done ]] && kded5 --check' >> "$hostToGuestFiles"/cmd.sh
+	echo '[[ ! -e /kded5-done ]] && sleep 90' >> "$hostToGuestFiles"/cmd.sh
 
-	echo 'cd /home/user/.ubcore/ubiquitous_bash ; ./ubiquitous_bash.sh _cfgFW-desktop | sudo -n tee /cfgFW.log ; cd' >> "$hostToGuestFiles"/cmd.sh
+	echo '[[ ! -e /FW-done ]] && cd /home/user/.ubcore/ubiquitous_bash ; ./ubiquitous_bash.sh _cfgFW-desktop | sudo -n tee /cfgFW.log ; cd' >> "$hostToGuestFiles"/cmd.sh
+	echo '[[ ! -e /FW-done ]] && cd /home/user/.ubcore/ubiquitous_bash ; ./ubiquitous_bash.sh _cfgFW-desktop | sudo -n tee /cfgFW.log ; cd' >> "$hostToGuestFiles"/cmd.sh
 
-	echo 'kded5 --check' >> "$hostToGuestFiles"/cmd.sh
-	echo 'sleep 420' >> "$hostToGuestFiles"/cmd.sh
+	echo '[[ ! -e /kded5-done ]] && kded5 --check' >> "$hostToGuestFiles"/cmd.sh
+	echo '[[ ! -e /kded5-done ]] && sleep 420' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo | sudo -n tee /kded5-done' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo | sudo -n tee /FW-done' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sudo -n poweroff' >> "$hostToGuestFiles"/cmd.sh
 }
 
