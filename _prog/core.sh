@@ -1017,6 +1017,8 @@ _create_ubDistBuild-rotten_install-core() {
 	
 	_getMost_backend_aptGetInstall stellarium
 	
+	_getMost_backend_aptGetInstall gpredict
+	
 	_getMost_backend_aptGetInstall audacious
 	
 	
