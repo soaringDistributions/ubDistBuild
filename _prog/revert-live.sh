@@ -36,6 +36,11 @@ _revert-fromLive() {
 	_set_ubDistBuild
 	
 	
+	#rm -f "$scriptLocal"/l_o
+	#rm -f "$scriptLocal"/l_o-chrt
+	#rm -f "$scriptLocal"/imagedev
+	#rm -f "$scriptLocal"/WARNING
+	
 	
 	_createVMimage
 
