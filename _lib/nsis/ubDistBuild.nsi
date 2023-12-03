@@ -93,18 +93,18 @@ Section "Install"
   SetOutPath "$TEMP\ubDistBuild_bundle\usbip-win"
   File /r "..\..\..\ubDistBuild-accessories\parts\ubDistBuild_bundle\usbip-win\*"
   IfSilent +2
-  ExecWait '"msiexec" /i "$TEMP\ubDistBuild_bundle\usbip-win\usbipd-win_3.1.0.msi"'
+  ExecWait '"msiexec" /i "$TEMP\ubDistBuild_bundle\usbip-win\usbipd-win_3.2.0.msi"'
   IfSilent 0 +2
-  ExecWait '"msiexec" /i "$TEMP\ubDistBuild_bundle\usbip-win\usbipd-win_3.1.0.msi" /passive /norestart'
+  ExecWait '"msiexec" /i "$TEMP\ubDistBuild_bundle\usbip-win\usbipd-win_3.2.0.msi" /passive /norestart'
 
 
   ;start /wait
   SetOutPath "$TEMP\ubDistBuild_bundle\wsl-usb-gui"
   File /r "..\..\..\ubDistBuild-accessories\parts\ubDistBuild_bundle\wsl-usb-gui\*"
   IfSilent +2
-  ExecWait '"msiexec" /i "$TEMP\ubDistBuild_bundle\wsl-usb-gui\WSL-USB-4.0.0.msi"'
+  ExecWait '"msiexec" /i "$TEMP\ubDistBuild_bundle\wsl-usb-gui\WSL-USB-4.1.0.msi"'
   IfSilent 0 +2
-  ExecWait '"msiexec" /i "$TEMP\ubDistBuild_bundle\wsl-usb-gui\WSL-USB-4.0.0.msi" /passive /norestart'
+  ExecWait '"msiexec" /i "$TEMP\ubDistBuild_bundle\wsl-usb-gui\WSL-USB-4.1.0.msi" /passive /norestart'
 
 
   ;start /wait
