@@ -366,6 +366,15 @@ jobs:
         shell: bash
         run: |
           ./ubiquitous_bash.sh _custom || true
+      
+      
+      - name: _custom-bundle
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _custom-bundle || true
+        env:
+          GH_TOKEN: ${{ github.token }}
+
           
       - name: _rotten_install-kde
         shell: bash
