@@ -921,6 +921,8 @@ _create_ubDistBuild-rotten_install-core() {
 	
 	_getMost_backend_aptGetInstall libslvs1
 	_getMost_backend_aptGetInstall libslvs1-dev
+	
+	_getMost_backend_aptGetInstall wsjtx
 
 	_getMost_backend_aptGetInstall gnuradio
 	_getMost_backend_aptGetInstall gnuradio-doc
