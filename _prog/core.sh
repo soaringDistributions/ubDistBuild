@@ -981,6 +981,12 @@ _create_ubDistBuild-rotten_install-core() {
 	_getMost_backend_aptGetInstall soapysdr-module-all
 	_getMost_backend_aptGetInstall soapysdr-module xtrx
 	_getMost_backend_aptGetInstall uhd-soapysdr
+	
+	_getMost_backend_aptGetInstall hackrf-firmware
+	_getMost_backend_aptGetInstall libhackrf-dev
+	_getMost_backend_aptGetInstall hackrf-doc
+	_getMost_backend_aptGetInstall librtlsdr-dev
+	
 
 	_getMost_backend apt-get remove -y xtrx-dkms
 	_getMost_backend apt-get remove -y xtrx-fft
