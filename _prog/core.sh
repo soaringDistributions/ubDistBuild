@@ -1069,6 +1069,12 @@ _create_ubDistBuild-rotten_install-core() {
 	_getMost_backend_aptGetInstall yubico-piv-tool
 	
 	
+	_getMost_backend_aptGetInstall tftpd-hpa
+	_getMost_backend_aptGetInstall nginx
+	_getMost_backend_aptGetInstall vsftpd
+	_getMost_backend_aptGetInstall vsftpd-dbg
+	
+	_getMost_backend_aptGetInstall filezilla
 	
 	
 	_getMost_backend apt-get -y clean
@@ -1165,6 +1171,116 @@ _create_ubDistBuild-rotten_install-core() {
 
 
 	_chroot systemctl disable man-db
+	
+	
+	
+	
+	
+	
+	_chroot sudo -n systemctl disable gpsd
+	_chroot systemctl disable gpsd.service
+	_chroot sudo -n systemctl mask gpsd
+	_chroot systemctl mask gpsd.service
+	_chroot sudo -n systemctl stop gpsd
+	_chroot systemctl stop gpsd.service
+	
+	_chroot sudo -n systemctl disable lircd
+	_chroot systemctl disable lircd.service
+	_chroot sudo -n systemctl mask lircd
+	_chroot systemctl mask lircd.service
+	_chroot sudo -n systemctl stop lircd
+	_chroot systemctl stop lircd.service
+	
+	
+	_chroot sudo -n systemctl disable nfs-blkmap
+	_chroot systemctl disable nfs-blkmap.service
+	_chroot sudo -n systemctl stop nfs-blkmap
+	_chroot systemctl stop nfs-blkmap.service
+	
+	_chroot sudo -n systemctl disable nfs-idmapd
+	_chroot systemctl disable nfs-idmapd.service
+	_chroot sudo -n systemctl stop nfs-idmapd
+	_chroot systemctl stop nfs-idmapd.service
+	
+	_chroot sudo -n systemctl disable nfs-mountd
+	_chroot systemctl disable nfs-mountd.service
+	_chroot sudo -n systemctl stop nfs-mountd
+	_chroot systemctl stop nfs-mountd.service
+	
+	_chroot sudo -n systemctl disable nfsdcld
+	_chroot systemctl disable nfsdcld.service
+	_chroot sudo -n systemctl stop nfsdcld
+	_chroot systemctl stop nfsdcld.service
+	
+	
+	_chroot sudo -n systemctl disable apache2
+	_chroot systemctl disable apache2.service
+	_chroot sudo -n systemctl mask apache2
+	_chroot systemctl mask apache2.service
+	_chroot sudo -n systemctl stop apache2
+	_chroot systemctl stop apache2.service
+	
+	
+	# DANGER: Also provides MS netbios .
+	#  DANGER: Will only enable if, which should not be, strictly necessary for _userQemu/etc , etc .
+	_chroot sudo -n systemctl disable rpc-statd
+	_chroot systemctl disable rpc-statd.service
+	_chroot sudo -n systemctl stop rpc-statd
+	_chroot systemctl stop rpc-statd.service
+	
+	_chroot sudo -n systemctl disable rpcbind
+	_chroot systemctl disable rpcbind.service
+	_chroot sudo -n systemctl stop rpcbind
+	_chroot systemctl stop rpcbind.service
+	
+	_chroot sudo -n systemctl disable nmbd
+	_chroot systemctl disable nmbd.service
+	_chroot sudo -n systemctl stop nmbd
+	_chroot systemctl stop nmbd.service
+	
+	_chroot sudo -n systemctl disable smbd
+	_chroot systemctl disable smbd.service
+	_chroot sudo -n systemctl stop smbd
+	_chroot systemctl stop smbd.service
+	
+	
+	
+	
+	_chroot sudo -n systemctl disable tftpd-hpa
+	_chroot systemctl disable tftpd-hpa.service
+	_chroot sudo -n systemctl mask tftpd-hpa
+	_chroot systemctl mask tftpd-hpa.service
+	_chroot sudo -n systemctl stop tftpd-hpa
+	_chroot systemctl stop tftpd-hpa.service
+	
+	_chroot sudo -n systemctl disable tftpd
+	_chroot systemctl disable tftpd.service
+	_chroot sudo -n systemctl mask tftpd
+	_chroot systemctl mask tftpd.service
+	_chroot sudo -n systemctl stop tftpd
+	_chroot systemctl stop tftpd.service
+	
+	_chroot sudo -n systemctl disable tftp
+	_chroot systemctl disable tftp.service
+	_chroot sudo -n systemctl mask tftp
+	_chroot systemctl mask tftp.service
+	_chroot sudo -n systemctl stop tftp
+	_chroot systemctl stop tftp.service
+
+	_chroot sudo -n systemctl disable nginx
+	_chroot systemctl disable nginx.service
+	_chroot sudo -n systemctl mask nginx
+	_chroot systemctl mask nginx.service
+	_chroot sudo -n systemctl stop nginx
+	_chroot systemctl stop nginx.service
+	
+	_chroot sudo -n systemctl disable vsftpd
+	_chroot systemctl disable vsftpd.service
+	_chroot sudo -n systemctl stop vsftpd
+	_chroot systemctl stop vsftpd.service
+	
+	
+	
 
 
 

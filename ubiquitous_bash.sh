@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3648004636'
+export ub_setScriptChecksum_contents='2725138874'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -8062,7 +8062,35 @@ _cfgFW_procedure() {
     fi
 
 	echo y | ufw --force enable
+
+
+	# NOTICE: DANGER: STATELESS FILTERED is the ONLY SAFE way to interact with NETWORK SERVICES. If this is available, then these services may be used, but the dist/OS firewall should DENY ALL traffic, and all networking interfaces should be STRICTLY disabled.
+	# Think of these as the networking equivalent of a TPM . Instead of doing your networking directly on a malware infectable OS with malware infectable apps and services, you should instead exchange encoded serial messages with an FPGA by USB3 GPIO that then decodes and exchanges those messages over a variety of QRSSS sub-9kHz, narrowband radio, ultrawideband radio, optical, etc, as well conventional TCP/IP and UDP Ethernet, WiFi, etc, peer discovery and transfer services.
+	# WARNING: Ports 39900-39920 RESERVED for STATELESS FILTERED laboratory network experimentation with pipes , both TCP and UDP.
+	# WARNING: Ports 39900-39920 RESERVED for STATELESS FILTERED laboratory network experimentation with pipes , both TCP and UDP.
+	# WARNING: Ports 39800-39899 RESERVED for STATELESS FILTERED decentralized replacements for HTTP/HTTPS , peer discovery, etc, both TCP and UDP.
+	# WARNING: Ports 39980-39999 RESERVED for STATELESS FILTERED gizmos , both TCP and UDP.
+	ufw deny 39000:39999/tcp
+	ufw deny 39000:39999/udp
 	
+	# Ports 45000-45999 RESERVED for ALTERNATIVE AUTOMATIC PORTS for STATELESS FILTERED gizmos , both TCP and UDP.
+	ufw deny 45000:45999/tcp
+	ufw deny 45000:45999/udp
+	
+	# Ports 46000-46999 RESERVED for ALTERNATIVE AUTOMATIC PORTS for STATELESS FILTERED gizmos , both TCP and UDP.
+	ufw deny 46000:46999/tcp
+	ufw deny 46000:46999/udp
+	
+	# DANGER: Strongly discouraged. Network services are inherently dangerous. For ephemeral laboratory experimentation or expendable gaming computers ONLY.
+	#  DANGER: Preferably do NOT use these at all, ever.
+	# WARNING: Ports 38900-38920 RESERVED for laboratory network experimentation with pipes , both TCP and UDP.
+	# WARNING: Ports 38900-38920 RESERVED for laboratory network experimentation with pipes , both TCP and UDP.
+	# WARNING: Ports 38800-38899 RESERVED for decentralized replacements for HTTP/HTTPS , peer discovery, etc, both TCP and UDP.
+	# WARNING: Ports 38980-38999 RESERVED for gizmos , both TCP and UDP.
+	ufw allow 38000:38999/tcp
+	ufw allow 38000:38999/udp
+
+
     if [[ "$ub_cfgFW" == "desktop" ]] || [[ "$ub_cfgFW" == "terminal" ]]
     then
         _ufw_portDisable 67
@@ -45402,6 +45430,12 @@ _create_ubDistBuild-rotten_install-core() {
 	_getMost_backend_aptGetInstall yubico-piv-tool
 	
 	
+	_getMost_backend_aptGetInstall tftpd-hpa
+	_getMost_backend_aptGetInstall nginx
+	_getMost_backend_aptGetInstall vsftpd
+	_getMost_backend_aptGetInstall vsftpd-dbg
+	
+	_getMost_backend_aptGetInstall filezilla
 	
 	
 	_getMost_backend apt-get -y clean
@@ -45498,6 +45532,116 @@ _create_ubDistBuild-rotten_install-core() {
 
 
 	_chroot systemctl disable man-db
+	
+	
+	
+	
+	
+	
+	_chroot sudo -n systemctl disable gpsd
+	_chroot systemctl disable gpsd.service
+	_chroot sudo -n systemctl mask gpsd
+	_chroot systemctl mask gpsd.service
+	_chroot sudo -n systemctl stop gpsd
+	_chroot systemctl stop gpsd.service
+	
+	_chroot sudo -n systemctl disable lircd
+	_chroot systemctl disable lircd.service
+	_chroot sudo -n systemctl mask lircd
+	_chroot systemctl mask lircd.service
+	_chroot sudo -n systemctl stop lircd
+	_chroot systemctl stop lircd.service
+	
+	
+	_chroot sudo -n systemctl disable nfs-blkmap
+	_chroot systemctl disable nfs-blkmap.service
+	_chroot sudo -n systemctl stop nfs-blkmap
+	_chroot systemctl stop nfs-blkmap.service
+	
+	_chroot sudo -n systemctl disable nfs-idmapd
+	_chroot systemctl disable nfs-idmapd.service
+	_chroot sudo -n systemctl stop nfs-idmapd
+	_chroot systemctl stop nfs-idmapd.service
+	
+	_chroot sudo -n systemctl disable nfs-mountd
+	_chroot systemctl disable nfs-mountd.service
+	_chroot sudo -n systemctl stop nfs-mountd
+	_chroot systemctl stop nfs-mountd.service
+	
+	_chroot sudo -n systemctl disable nfsdcld
+	_chroot systemctl disable nfsdcld.service
+	_chroot sudo -n systemctl stop nfsdcld
+	_chroot systemctl stop nfsdcld.service
+	
+	
+	_chroot sudo -n systemctl disable apache2
+	_chroot systemctl disable apache2.service
+	_chroot sudo -n systemctl mask apache2
+	_chroot systemctl mask apache2.service
+	_chroot sudo -n systemctl stop apache2
+	_chroot systemctl stop apache2.service
+	
+	
+	# DANGER: Also provides MS netbios .
+	#  DANGER: Will only enable if, which should not be, strictly necessary for _userQemu/etc , etc .
+	_chroot sudo -n systemctl disable rpc-statd
+	_chroot systemctl disable rpc-statd.service
+	_chroot sudo -n systemctl stop rpc-statd
+	_chroot systemctl stop rpc-statd.service
+	
+	_chroot sudo -n systemctl disable rpcbind
+	_chroot systemctl disable rpcbind.service
+	_chroot sudo -n systemctl stop rpcbind
+	_chroot systemctl stop rpcbind.service
+	
+	_chroot sudo -n systemctl disable nmbd
+	_chroot systemctl disable nmbd.service
+	_chroot sudo -n systemctl stop nmbd
+	_chroot systemctl stop nmbd.service
+	
+	_chroot sudo -n systemctl disable smbd
+	_chroot systemctl disable smbd.service
+	_chroot sudo -n systemctl stop smbd
+	_chroot systemctl stop smbd.service
+	
+	
+	
+	
+	_chroot sudo -n systemctl disable tftpd-hpa
+	_chroot systemctl disable tftpd-hpa.service
+	_chroot sudo -n systemctl mask tftpd-hpa
+	_chroot systemctl mask tftpd-hpa.service
+	_chroot sudo -n systemctl stop tftpd-hpa
+	_chroot systemctl stop tftpd-hpa.service
+	
+	_chroot sudo -n systemctl disable tftpd
+	_chroot systemctl disable tftpd.service
+	_chroot sudo -n systemctl mask tftpd
+	_chroot systemctl mask tftpd.service
+	_chroot sudo -n systemctl stop tftpd
+	_chroot systemctl stop tftpd.service
+	
+	_chroot sudo -n systemctl disable tftp
+	_chroot systemctl disable tftp.service
+	_chroot sudo -n systemctl mask tftp
+	_chroot systemctl mask tftp.service
+	_chroot sudo -n systemctl stop tftp
+	_chroot systemctl stop tftp.service
+
+	_chroot sudo -n systemctl disable nginx
+	_chroot systemctl disable nginx.service
+	_chroot sudo -n systemctl mask nginx
+	_chroot systemctl mask nginx.service
+	_chroot sudo -n systemctl stop nginx
+	_chroot systemctl stop nginx.service
+	
+	_chroot sudo -n systemctl disable vsftpd
+	_chroot systemctl disable vsftpd.service
+	_chroot sudo -n systemctl stop vsftpd
+	_chroot systemctl stop vsftpd.service
+	
+	
+	
 
 
 
