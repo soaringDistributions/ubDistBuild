@@ -1,6 +1,10 @@
 
 #export ssh="" ; wget -qO- https://bit.ly/ubdist | bash
 
+#export ssh="" ; wget -qO- https://raw.githubusercontent.com/soaringDistributions/ubDistBuild/main/_lib/install/ubdist.sh
+
+#export ssh="" ; export GH_TOKEN="" ; export owner="" ; export repo="" ; wget -qO- https://raw.githubusercontent.com/soaringDistributions/ubDistBuild/main/_lib/install/ubdist.sh
+
 
 [[ "$owner" == "" ]] && export owner=soaringDistributions
 [[ "$repo" == "" ]] && export repo=ubDistBuild
@@ -41,10 +45,15 @@ fi
 
 ./ubiquitous_bash.sh _openChRoot
 
+_chroot mkdir -p /root/.ssh
 echo "$ssh" | _chroot tee /root/.ssh/authorized_keys
-echo "$ssh" | _chroot tee /home/user/.ssh/authorized_keys
 
-_chroot systemctl enable ssh
+_chroot sudo -n -u user bash -c 'cd ; mkdir -p /home/user/.ssh/authorized_keys'
+echo "$ssh" | _chroot tee /home/user/.ssh/authorized_keys
+_chroot chown user:user /home/user/.ssh/authorized_keys
+
+_chroot sudo -n systemctl enable ssh
+_chroot systemctl enable ssh.service
 
 ./ubiquitous_bash.sh _closeChRoot
 
