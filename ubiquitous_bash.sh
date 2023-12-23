@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1062111403'
+export ub_setScriptChecksum_contents='176172599'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -44929,9 +44929,15 @@ CZXWXcRMTo8EmM8i4d
 	
 	
 	
+	# Significant issues with 'user.max_user_namespaces' affecting KDE , etc .
+	#_getMost_backend_aptGetInstall hardening-runtime
 	
-	_getMost_backend_aptGetInstall hardening-runtime
 	
+	sudo -n cp -f "$scriptLib"/custom/ubdist_hardening/grub/01_hardening_ubdist.cfg "$globalVirtFS"/etc/default/grub.d/
+	sudo -n chmod 644 "$globalVirtFS"/etc/default/grub.d/01_hardening_ubdist.cfg
+	
+	sudo -n cp -f "$scriptLib"/custom/ubdist_hardening/sysctl/10-hardening_ubdist.conf "$globalVirtFS"/usr/lib/sysctl.d/10-hardening.conf
+	sudo -n chmod 644 "$globalVirtFS"/usr/lib/sysctl.d/10-hardening_ubdist.conf.conf
 	
 	
 	
