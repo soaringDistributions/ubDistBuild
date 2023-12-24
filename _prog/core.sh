@@ -554,6 +554,10 @@ CZXWXcRMTo8EmM8i4d
 	sudo -n cp -f "$scriptLib"/custom/ubdist_hardening/grub/01_hardening_ubdist.cfg "$globalVirtFS"/etc/default/grub.d/
 	sudo -n chmod 644 "$globalVirtFS"/etc/default/grub.d/01_hardening_ubdist.cfg
 	
+	sudo -n cp -f "$scriptLib"/custom/ubdist_hardening/grub/01_hardening_ubdist-moduleSig.cfg "$globalVirtFS"/etc/default/grub.d/
+	sudo -n chmod 644 "$globalVirtFS"/etc/default/grub.d/01_hardening_ubdist-moduleSig.cfg
+	
+	
 	sudo -n cp -f "$scriptLib"/custom/ubdist_hardening/sysctl/10-hardening_ubdist.conf "$globalVirtFS"/usr/lib/sysctl.d/10-hardening.conf
 	sudo -n chmod 644 "$globalVirtFS"/usr/lib/sysctl.d/10-hardening_ubdist.conf.conf
 	
