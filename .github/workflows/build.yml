@@ -125,6 +125,15 @@ jobs:
     #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
     runs-on: 'ubuntu-latest'
     steps:
+      - name: RAND_SEED
+        shell: bash
+        run: |
+          echo "$RAND_SEED" | tee /dev/urandom > /dev/null
+          echo "$RAND_SEED" | tee /dev/random > /dev/null
+          echo "$RAND_SEED" | sudo -n tee /dev/urandom > /dev/null
+          echo "$RAND_SEED" | sudo -n tee /dev/random > /dev/null
+        env:
+          RAND_SEED: ${{ secrets.RAND_SEED }}
       - name: report! API Rate Limit
         shell: bash
         run: |
@@ -200,6 +209,15 @@ jobs:
     #runs-on: buildjet-16vcpu-ubuntu-2004
     # https://github.com/easimon/maximize-build-space
     steps:
+      - name: RAND_SEED
+        shell: bash
+        run: |
+          echo "$RAND_SEED" | tee /dev/urandom > /dev/null
+          echo "$RAND_SEED" | tee /dev/random > /dev/null
+          echo "$RAND_SEED" | sudo -n tee /dev/urandom > /dev/null
+          echo "$RAND_SEED" | sudo -n tee /dev/random > /dev/null
+        env:
+          RAND_SEED: ${{ secrets.RAND_SEED }}
       - name: users
         shell: bash
         run: |
