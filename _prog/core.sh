@@ -1,15 +1,19 @@
 ##### Core
 
 
-_custom_disable_nvidia_mainlineONLY() {
+# WARNING: May be untested.
+_custom_uninstall_nvidia_mainlineONLY() {
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
-	_chroot find /lib/modules -iname '*nvidia*' -path '*-mainline/kernel/drivers/video*' -exec sudo -n truncate -s 0 {} \;
+	#_chroot find /lib/modules -iname '*nvidia*' -path '*-mainline/kernel/drivers/video*' -exec sudo -n truncate -s 0 {} \;
+	_chroot /root/_get_nvidia.sh _uninstall
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 }
 
-_custom_disable_vbox_mainlineONLY() {
+_custom_uninstall_vbox_mainlineONLY() {
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
-	find /lib/modules -iname '*vbox*' -path '*-mainline/misc*' -exec sudo -n truncate -s 0 {} \;
+	#_chroot find /lib/modules -iname '*vbox*' -path '*-mainline/misc*' -exec sudo -n truncate -s 0 {} \;
+	_chroot apt-get remove -y 'virtualbox*'
+	_chroot /sbin/vbox-uninstall-guest-additions
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 }
 
@@ -2605,7 +2609,12 @@ _write_modprobe_nvidia_nouveau() {
 	#echo 'GRUB_CMDLINE_LINUX="nouveau.modeset=0"' | sudo -n tee -a "$globalVirtFS"/etc/default/grub
 	rm -f "$globalVirtFS"/modprobe-disable_nouveau--blacklist-nvidia-nouveau.conf
 	echo 'blacklist nouveau' | sudo -n tee "$globalVirtFS"/modprobe-disable_nouveau--blacklist-nvidia-nouveau.conf
+	echo 'blacklist lbm-nouveau' | sudo -n tee -a "$globalVirtFS"/modprobe-disable_nouveau--blacklist-nvidia-nouveau.conf
+	echo 'alias nouveau off' | sudo -n tee -a "$globalVirtFS"/modprobe-disable_nouveau--blacklist-nvidia-nouveau.conf
+	echo 'alias lbm-nouveau off' | sudo -n tee -a "$globalVirtFS"/modprobe-disable_nouveau--blacklist-nvidia-nouveau.conf
 	echo 'options nouveau modeset=0' | sudo -n tee -a "$globalVirtFS"/modprobe-disable_nouveau--blacklist-nvidia-nouveau.conf
+	echo '#nouveau.modeset=0' | sudo -n tee -a "$globalVirtFS"/modprobe-disable_nouveau--blacklist-nvidia-nouveau.conf
+	echo '#modprobe.blacklist=nouveau' | sudo -n tee -a "$globalVirtFS"/modprobe-disable_nouveau--blacklist-nvidia-nouveau.conf
 	
 	
 	

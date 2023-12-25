@@ -1050,6 +1050,14 @@ _install() {
 	_install_nvidia "$@"
 }
 
+_uninstall() {
+	_mustBeRoot
+	
+	_fetch_nvidia "$@"
+	
+	"$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_fetch".run --uninstall
+}
+
 
 
 
