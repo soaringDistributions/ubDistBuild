@@ -1158,6 +1158,13 @@ _autoinstall_procedure() {
 	_install "$@"
 }
 _autoinstall() {
+	if grep -r 'blacklist nvidia' /etc/modprobe.d/*
+	then
+		# ie. Do NOT stop sddm to install drivers if the drivers should be disabled anyway.
+		echo 'stop: disabled by modprobe config'
+		return 1
+	fi
+	
 	rm -f /lock_nvidia_autoinstall > /dev/null 2>&1
 	echo > /lock_nvidia_autoinstall
 	#_stop_prog() {

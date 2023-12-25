@@ -1,5 +1,21 @@
 ##### Core
 
+
+_custom_disable_nvidia_mainlineONLY() {
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	_chroot find /lib/modules -iname '*nvidia*' -path '*-mainline/kernel/drivers/video*' -exec sudo -n truncate -s 0 {} \;
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+}
+
+_custom_disable_vbox_mainlineONLY() {
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	find /lib/modules -iname '*vbox*' -path '*-mainline/misc*' -exec sudo -n truncate -s 0 {} \;
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+}
+
+
+
+
 # WARNING: May be untested.
 _custom_kernel_server-sequence() {
 	local functionEntryPWD
@@ -78,6 +94,23 @@ _custom_kernel_lts-sequence() {
 _custom_kernel_lts() {
 	"$scriptAbsoluteLocation" _custom_kernel_lts-sequence "$@"
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1322,11 +1355,15 @@ _create_ubDistBuild-rotten_install-core() {
 	#  DANGER: Will only enable if, which should not be, strictly necessary for _userQemu/etc , etc .
 	_chroot sudo -n systemctl disable rpc-statd
 	_chroot systemctl disable rpc-statd.service
+	_chroot sudo -n systemctl mask rpc-statd
+	_chroot systemctl mask rpc-statd.service
 	_chroot sudo -n systemctl stop rpc-statd
 	_chroot systemctl stop rpc-statd.service
 	
 	_chroot sudo -n systemctl disable rpcbind
 	_chroot systemctl disable rpcbind.service
+	_chroot sudo -n systemctl mask rpcbind
+	_chroot systemctl mask rpcbind.service
 	_chroot sudo -n systemctl stop rpcbind
 	_chroot systemctl stop rpcbind.service
 	
@@ -2558,10 +2595,32 @@ _nvidia_fetch_nvidia() {
 
 
 
+# ATTENTION: Override if necessary (ie. if 'nouveau modeset=1' is necessary for specific hardware).
+_write_modprobe_nvidia_nouveau() {
+	rm -f "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
+	
+	#_nouveau_disable
+	# https://linuxconfig.org/how-to-disable-blacklist-nouveau-nvidia-driver-on-ubuntu-20-04-focal-fossa-linux
+	# https://askubuntu.com/questions/747314/is-nomodeset-still-required
+	#echo 'GRUB_CMDLINE_LINUX="nouveau.modeset=0"' | sudo -n tee -a "$globalVirtFS"/etc/default/grub
+	rm -f "$globalVirtFS"/modprobe-disable_nouveau--blacklist-nvidia-nouveau.conf
+	echo 'blacklist nouveau' | sudo -n tee "$globalVirtFS"/modprobe-disable_nouveau--blacklist-nvidia-nouveau.conf
+	echo 'options nouveau modeset=0' | sudo -n tee -a "$globalVirtFS"/modprobe-disable_nouveau--blacklist-nvidia-nouveau.conf
+	
+	
+	
+	#_nouveau_enable (also nvidia disable)
+	rm -f "$globalVirtFS"/modprobe-disable_nvidia--blacklist-nvidia-nouveau.conf
+	echo 'blacklist nvidia' | sudo -n tee "$globalVirtFS"/modprobe-disable_nvidia--blacklist-nvidia-nouveau.conf
+	echo 'blacklist nvidia_modeset' | sudo -n tee -a "$globalVirtFS"/modprobe-disable_nvidia--blacklist-nvidia-nouveau.conf
+	echo 'blacklist nvidia_drm' | sudo -n tee -a "$globalVirtFS"/modprobe-disable_nvidia--blacklist-nvidia-nouveau.conf
+	echo 'options nouveau modeset=0' | sudo -n tee -a "$globalVirtFS"/modprobe-disable_nvidia--blacklist-nvidia-nouveau.conf
+}
+
 # Minimal NVIDIA compatibility.
 _nouveau_enable_procedure() {
-	_chroot rm -f /etc/modprobe.d/blacklist-nvidia-nouveau.conf
-	echo 'options nouveau modeset=0' | sudo -n tee -a "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
+	_write_modprobe_nvidia_nouveau
+	cp -f "$globalVirtFS"/modprobe-disable_nvidia--blacklist-nvidia-nouveau.conf "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
 	
 	#_chroot chmod 644 /root/_get_nvidia.sh
 	_chroot chmod 755 /root/_get_nvidia.sh
@@ -2581,11 +2640,8 @@ _nouveau_enable() {
 
 # No NVIDIA compatibility (at least not immediate compatibility). No NVIDIA compatibility may be a reasonable default until unambigious usability.
 _nouveau_disable_procedure() {
-	# https://linuxconfig.org/how-to-disable-blacklist-nouveau-nvidia-driver-on-ubuntu-20-04-focal-fossa-linux
-	# https://askubuntu.com/questions/747314/is-nomodeset-still-required
-	#echo 'GRUB_CMDLINE_LINUX="nouveau.modeset=0"' | sudo -n tee -a "$globalVirtFS"/etc/default/grub
-	echo 'blacklist nouveau' | sudo -n tee "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
-	echo 'options nouveau modeset=0' | sudo -n tee -a "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
+	_write_modprobe_nvidia_nouveau
+	cp -f "$globalVirtFS"/modprobe-disable_nouveau--blacklist-nvidia-nouveau.conf "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
 	
 	_chroot chmod 755 /root/_get_nvidia.sh
 	
