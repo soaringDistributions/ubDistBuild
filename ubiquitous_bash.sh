@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2806102836'
+export ub_setScriptChecksum_contents='4080904429'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -44572,6 +44572,77 @@ _setup_uninstall() {
 
 ##### Core
 
+# WARNING: May be untested.
+_custom_kernel_server-sequence() {
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+	_start
+	
+	
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	
+	cd "$safeTmp"
+	if [[ -e "$scriptLocal"/"linux-mainline-server-amd64-debian.tar.gz" ]]
+	then
+		sudo -n cp -f "$scriptLocal"/"linux-mainline-server-amd64-debian.tar.gz" "$globalVirtFS"/
+	elif _wget_githubRelease_internal "soaringDistributions/mirage335KernelBuild" "linux-mainline-server-amd64-debian.tar.gz" && [[ -e "$safeTmp"/"linux-mainline-server-amd64-debian.tar.gz" ]]
+	then
+		sudo -n cp -f "$safeTmp"/"linux-mainline-server-amd64-debian.tar.gz" "$globalVirtFS"/
+	else
+		sudo -n cp -f "$globalVirtFS"/home/user/core/installations/kernel_linux/linux-mainline-server-amd64-debian.tar.gz "$globalVirtFS"/
+	fi
+	_chroot tar xf /linux-mainline-server-amd64-debian.tar.gz
+	_chroot dpkg -i '/mainline-server/*.deb'
+	_chroot rm -f ./mainline-server/.config './mainline-server/linux-*' ./mainline-server/statement.sh.out.txt
+	_chroot rm -f ./mainline-server/linux-mainline-server-amd64-debian.tar.gz
+	_chroot rm -f /linux-mainline-server-amd64-debian.tar.gz
+	
+	
+	
+	# Formal naming convention is [-distllc,][-lts,-mainline,][-desktop,-server,] . ONLY requirement is dotglob removal of all except server OR all purpose lts .
+	
+	_chroot sudo -n apt-get -y remove 'linux-image*desktop' 'linux-headers*desktop'
+	_chroot sudo -n apt-get -y remove 'linux-image*mainline' 'linux-headers*mainline'
+	_chroot sudo -n apt-get -y remove 'linux-image*lts' 'linux-headers*lts'
+	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	
+	
+	cd "$functionEntryPWD"
+	_stop 0
+}
+_custom_kernel_server() {
+	"$scriptAbsoluteLocation" _custom_kernel_server-sequence "$@"
+}
+
+# WARNING: May be untested.
+# NOTICE: May be necessary for VirtualBox Guest Additions .
+_custom_kernel_lts-sequence() {
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+	_start
+	
+	
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	
+	
+	
+	# Formal naming convention is [-distllc,][-lts,-mainline,][-desktop,-server,] . ONLY requirement is dotglob removal of all except server OR all purpose lts .
+	
+	_chroot sudo -n apt-get -y remove 'linux-image*server' 'linux-headers*server'
+	_chroot sudo -n apt-get -y remove 'linux-image*mainline' 'linux-headers*mainline'
+	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	
+	
+	cd "$functionEntryPWD"
+	_stop 0
+}
+_custom_kernel_lts() {
+	"$scriptAbsoluteLocation" _custom_kernel_lts-sequence "$@"
+}
+
+
 
 # WARNING: Defaults for 'ops.sh'. Do NOT expect function overrides to persist if set elsewhere, due to "$scriptAbsoluteLocation" calls, such functions as '_editVBox' and '_editQemu' will ONLY use the function definitions that are always redefined by the script itself.
 _set_ubDistBuild() {
@@ -45255,7 +45326,7 @@ _create_ubDistBuild-rotten_install() {
 	sudo -n chmod 755 "$globalVirtFS"/ubiquitous_bash.sh
 	
 	
-	
+	_chroot sudo -n apt-get -y remove 'linux-image*' 'linux-headers*'
 	! _chroot /rotten_install.sh _custom_kernel && _messageFAIL
 	
 	#echo | sudo -n tee "$globalVirtFS"/in_chroot
