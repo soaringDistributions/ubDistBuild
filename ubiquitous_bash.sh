@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='4080904429'
+export ub_setScriptChecksum_contents='4053385894'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -44601,9 +44601,12 @@ _custom_kernel_server-sequence() {
 	
 	# Formal naming convention is [-distllc,][-lts,-mainline,][-desktop,-server,] . ONLY requirement is dotglob removal of all except server OR all purpose lts .
 	
-	_chroot sudo -n apt-get -y remove 'linux-image*desktop' 'linux-headers*desktop'
-	_chroot sudo -n apt-get -y remove 'linux-image*mainline' 'linux-headers*mainline'
-	_chroot sudo -n apt-get -y remove 'linux-image*lts' 'linux-headers*lts'
+	#'linux-headers*desktop'
+	_chroot apt-get -y remove 'linux-image*desktop'
+	#'linux-headers*mainline'
+	_chroot apt-get -y remove 'linux-image*mainline'
+	#'linux-headers*lts'
+	_chroot apt-get -y remove 'linux-image*lts'
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
@@ -44629,8 +44632,10 @@ _custom_kernel_lts-sequence() {
 	
 	# Formal naming convention is [-distllc,][-lts,-mainline,][-desktop,-server,] . ONLY requirement is dotglob removal of all except server OR all purpose lts .
 	
-	_chroot sudo -n apt-get -y remove 'linux-image*server' 'linux-headers*server'
-	_chroot sudo -n apt-get -y remove 'linux-image*mainline' 'linux-headers*mainline'
+	#'linux-headers*server'
+	_chroot apt-get -y remove 'linux-image*server'
+	#'linux-headers*mainline'
+	_chroot apt-get -y remove 'linux-image*mainline'
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
@@ -45326,7 +45331,8 @@ _create_ubDistBuild-rotten_install() {
 	sudo -n chmod 755 "$globalVirtFS"/ubiquitous_bash.sh
 	
 	
-	_chroot sudo -n apt-get -y remove 'linux-image*' 'linux-headers*'
+	#'linux-headers*'
+	_chroot apt-get -y remove 'linux-image*'
 	! _chroot /rotten_install.sh _custom_kernel && _messageFAIL
 	
 	#echo | sudo -n tee "$globalVirtFS"/in_chroot
