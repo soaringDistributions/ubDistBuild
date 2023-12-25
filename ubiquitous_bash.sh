@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='4053385894'
+export ub_setScriptChecksum_contents='1071696637'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -44608,6 +44608,8 @@ _custom_kernel_server-sequence() {
 	#'linux-headers*lts'
 	_chroot apt-get -y remove 'linux-image*lts'
 	
+	_chroot apt-get -y install 'linux-headers-amd64'
+	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
 	
@@ -44636,6 +44638,8 @@ _custom_kernel_lts-sequence() {
 	_chroot apt-get -y remove 'linux-image*server'
 	#'linux-headers*mainline'
 	_chroot apt-get -y remove 'linux-image*mainline'
+	
+	_chroot apt-get -y install 'linux-headers-amd64'
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
@@ -45334,6 +45338,7 @@ _create_ubDistBuild-rotten_install() {
 	#'linux-headers*'
 	_chroot apt-get -y remove 'linux-image*'
 	! _chroot /rotten_install.sh _custom_kernel && _messageFAIL
+	_chroot apt-get -y install 'linux-headers-amd64'
 	
 	#echo | sudo -n tee "$globalVirtFS"/in_chroot
 	! _chroot /rotten_install.sh _install && _messageFAIL

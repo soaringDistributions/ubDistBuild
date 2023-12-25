@@ -36,6 +36,8 @@ _custom_kernel_server-sequence() {
 	#'linux-headers*lts'
 	_chroot apt-get -y remove 'linux-image*lts'
 	
+	_chroot apt-get -y install 'linux-headers-amd64'
+	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
 	
@@ -64,6 +66,8 @@ _custom_kernel_lts-sequence() {
 	_chroot apt-get -y remove 'linux-image*server'
 	#'linux-headers*mainline'
 	_chroot apt-get -y remove 'linux-image*mainline'
+	
+	_chroot apt-get -y install 'linux-headers-amd64'
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
@@ -762,6 +766,7 @@ _create_ubDistBuild-rotten_install() {
 	#'linux-headers*'
 	_chroot apt-get -y remove 'linux-image*'
 	! _chroot /rotten_install.sh _custom_kernel && _messageFAIL
+	_chroot apt-get -y install 'linux-headers-amd64'
 	
 	#echo | sudo -n tee "$globalVirtFS"/in_chroot
 	! _chroot /rotten_install.sh _install && _messageFAIL
