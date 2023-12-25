@@ -3,6 +3,8 @@ Any third party works included, or other subdirectories, may have a different co
 
 In particular, the included 'ubcp' installation has many programs under a 'GNU GPLv2' or similar 'copyleft' license. Cygwin itself has a 'GNU GPLv3' license. Prominent notices of these licenses remain unchanged.
 
+Although installers for third-party software may be provided by Soaring Distributions LLC, mostly to ensure availability, it is the end user's responsibility to accept these licenses separately when prompted.
+
 ubDistBuild
 Copyright (C) 2022  Soaring Distributions LLC
 
@@ -2262,4 +2264,20 @@ This limitation applies to (a) anything related to the software, services, conte
 It also applies even if Microsoft knew or should have known about the possibility of the damages. The above limitation or exclusion may not apply to you because your country may not allow the exclusion or limitation of incidental, consequential or other damages.
 
 EULA ID: Cpp_2015-2022_ENU.1033
+
+--------------------------------------------------
+
+There is sufficient evidence that vc_redist.x64.exe is in fact redistributable. License text included here is as will be agreed to by end user during installation when prompted.
+
+# https://learn.microsoft.com/en-us/cpp/windows/redistributing-visual-cpp-files?view=msvc-170
+# https://visualstudio.microsoft.com/license-terms/
+# https://visualstudio.microsoft.com/license-terms/vs2022-ga-community/
+#  'Distributable Code'
+# https://learn.microsoft.com/en-us/cpp/windows/redistributing-visual-cpp-files?view=msvc-170
+
+'Redistributing Visual C++ Files article on the Microsoft Learn website. This article contains the “REDIST list” that specifies the files that you are allowed to copy and distribute as part of your program’s installation package, subject to the license terms. One of the files listed is vc_redist.x64.exe, which means you can redistribute it as long as you follow the guidelines in the article.' -Bing Chat, 2023-12-25
+
+
+
+
 

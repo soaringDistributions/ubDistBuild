@@ -117,14 +117,14 @@ Section "Install"
   ;ExecWait "$TEMP\ubDistBuild_bundle\vc_redist\vc_redist.x64.exe /Q"
 
 
-  ;https://silentinstallhq.com/oracle-vm-virtualbox-6-1-silent-install-how-to-guide/
-  ;start /wait
-  SetOutPath "$TEMP\ubDistBuild_bundle-adhoc\virtualbox"
-  File /r "..\..\..\ubDistBuild-accessories\parts\ubDistBuild_bundle-adhoc\virtualbox\*"
-  IfSilent +2
-  ExecWait "$TEMP\ubDistBuild_bundle-adhoc\virtualbox\VirtualBox-7.0.10-158379-Win.exe"
-  IfSilent 0 +2
-  ExecWait "$TEMP\ubDistBuild_bundle-adhoc\virtualbox\VirtualBox-7.0.10-158379-Win.exe --silent --ignore-reboot"
+  ;;https://silentinstallhq.com/oracle-vm-virtualbox-6-1-silent-install-how-to-guide/
+  ;;start /wait
+  ;SetOutPath "$TEMP\ubDistBuild_bundle-adhoc\virtualbox"
+  ;File /r "..\..\..\ubDistBuild-accessories\parts\ubDistBuild_bundle-adhoc\virtualbox\*"
+  ;IfSilent +2
+  ;ExecWait "$TEMP\ubDistBuild_bundle-adhoc\virtualbox\VirtualBox-7.0.10-158379-Win.exe"
+  ;IfSilent 0 +2
+  ;ExecWait "$TEMP\ubDistBuild_bundle-adhoc\virtualbox\VirtualBox-7.0.10-158379-Win.exe --silent --ignore-reboot"
 
 
   ;start /wait
