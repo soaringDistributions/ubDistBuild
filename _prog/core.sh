@@ -2,14 +2,14 @@
 
 
 # WARNING: May be untested.
-_custom_uninstall_nvidia_mainlineONLY() {
+_custom_uninstall_nvidia() {
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	#_chroot find /lib/modules -iname '*nvidia*' -path '*-mainline/kernel/drivers/video*' -exec sudo -n truncate -s 0 {} \;
 	_chroot /root/_get_nvidia.sh _uninstall
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 }
 
-_custom_uninstall_vbox_mainlineONLY() {
+_custom_uninstall_vbox() {
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	#_chroot find /lib/modules -iname '*vbox*' -path '*-mainline/misc*' -exec sudo -n truncate -s 0 {} \;
 	_chroot apt-get remove -y 'virtualbox*'
@@ -623,6 +623,18 @@ CZXWXcRMTo8EmM8i4d
 		_chroot dpkg -i ./firmware-misc-nonfree_20230210-5_all.deb
 	fi
 	
+	#sudo -n cp "$scriptLib"/setup/debian/firmware-misc-nonfree_20230625-2_all.deb "$globalVirtFS"/
+	#if _chroot ls -A -1 /firmware-misc-nonfree_20230625-2_all.deb > /dev/null
+	#then
+		#_chroot dpkg -i /firmware-misc-nonfree_20230625-2_all.deb
+	#else
+		## WARNING: HTTP (as opposed to HTTPS) strongly discouraged.
+		##_chroot wget http://ftp.us.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-misc-nonfree_20230625-2_all.deb
+		##_chroot wget https://mirrorservice.org/sites/ftp.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-misc-nonfree_20230625-2_all.deb
+		
+		#_chroot dpkg -i ./firmware-misc-nonfree_20230625-2_all.deb
+	#fi
+	
 	#sudo -n cp "$scriptLib"/setup/debian/firmware-amd-graphics_20210818-1_all.deb "$globalVirtFS"/
 	#if _chroot ls -A -1 /firmware-amd-graphics_20210818-1_all.deb > /dev/null
 	#then
@@ -800,9 +812,16 @@ _create_ubDistBuild-rotten_install() {
 	sudo -n chmod 755 "$globalVirtFS"/ubiquitous_bash.sh
 	
 	
+	
+	
 	#'linux-headers*'
 	_chroot apt-get -y remove 'linux-image*'
 	! _chroot /rotten_install.sh _custom_kernel && _messageFAIL
+	
+	# Mainline kernel will be available from usual "core/installations" folders , however, is no longer booted by default, due to apparently frequent regressions (not just out-of-tree module compatibility issues but in-tree issues) with mainline kernels acceptably recent (ie. latest stable branch still apparently has too many regressions) .
+	#'linux-headers*mainline'
+	_chroot apt-get -y remove 'linux-image*mainline'
+	
 	_chroot apt-get -y install 'linux-headers-amd64'
 	
 	#echo | sudo -n tee "$globalVirtFS"/in_chroot
