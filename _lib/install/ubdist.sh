@@ -1,9 +1,9 @@
 
 #export ssh="" ; wget -qO- https://bit.ly/ubdist | bash
 
-#export ssh="" ; wget -qO- https://raw.githubusercontent.com/soaringDistributions/ubDistBuild/main/_lib/install/ubdist.sh
+#export ssh="" ; wget -qO- https://raw.githubusercontent.com/soaringDistributions/ubDistBuild/main/_lib/install/ubdist.sh | bash
 
-#export ssh="" ; export GH_TOKEN="" ; export owner="" ; export repo="" ; wget -qO- https://raw.githubusercontent.com/soaringDistributions/ubDistBuild/main/_lib/install/ubdist.sh
+#export ssh="" ; export GH_TOKEN="" ; export owner="" ; export repo="" ; wget -qO- https://raw.githubusercontent.com/soaringDistributions/ubDistBuild/main/_lib/install/ubdist.sh | bash
 
 
 [[ "$owner" == "" ]] && export owner=soaringDistributions
@@ -15,7 +15,8 @@
 cd
 
 sudo -n apt-get update
-sudo -n apt-get install -y wget curl aria2 axel openssl jq git gh lz4 bc xxd;
+sudo -n apt-get install -y wget curl aria2 axel openssl jq git lz4 bc xxd;
+sudo -n apt-get install -y gh;
 
 wget https://raw.githubusercontent.com/mirage335-colossus/ubiquitous_bash/master/ubiquitous_bash.sh
 chmod 755 ./ubiquitous_bash.sh
@@ -45,15 +46,15 @@ fi
 
 ./ubiquitous_bash.sh _openChRoot
 
-_chroot mkdir -p /root/.ssh
-echo "$ssh" | _chroot tee /root/.ssh/authorized_keys
+./_chroot mkdir -p /root/.ssh
+echo "$ssh" | ./_chroot tee /root/.ssh/authorized_keys
 
-_chroot sudo -n -u user bash -c 'cd ; mkdir -p /home/user/.ssh/authorized_keys'
-echo "$ssh" | _chroot tee /home/user/.ssh/authorized_keys
-_chroot chown user:user /home/user/.ssh/authorized_keys
+./_chroot sudo -n -u user bash -c 'cd ; mkdir -p /home/user/.ssh'
+echo "$ssh" | ./_chroot tee /home/user/.ssh/authorized_keys
+./_chroot chown user:user /home/user/.ssh/authorized_keys
 
-_chroot sudo -n systemctl enable ssh
-_chroot systemctl enable ssh.service
+./_chroot sudo -n systemctl enable ssh
+./_chroot systemctl enable ssh.service
 
 ./ubiquitous_bash.sh _closeChRoot
 
