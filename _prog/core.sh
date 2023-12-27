@@ -676,19 +676,7 @@ CZXWXcRMTo8EmM8i4d
 	
 	
 	
-	# Significant issues with 'user.max_user_namespaces' affecting KDE , etc .
-	#_getMost_backend_aptGetInstall hardening-runtime
 	
-	
-	sudo -n cp -f "$scriptLib"/custom/ubdist_hardening/grub/01_hardening_ubdist.cfg "$globalVirtFS"/etc/default/grub.d/
-	sudo -n chmod 644 "$globalVirtFS"/etc/default/grub.d/01_hardening_ubdist.cfg
-	
-	sudo -n cp -f "$scriptLib"/custom/ubdist_hardening/grub/01_hardening_ubdist-moduleSig.cfg "$globalVirtFS"/etc/default/grub.d/
-	sudo -n chmod 644 "$globalVirtFS"/etc/default/grub.d/01_hardening_ubdist-moduleSig.cfg
-	
-	
-	sudo -n cp -f "$scriptLib"/custom/ubdist_hardening/sysctl/10-hardening_ubdist.conf "$globalVirtFS"/usr/lib/sysctl.d/10-hardening.conf
-	sudo -n chmod 644 "$globalVirtFS"/usr/lib/sysctl.d/10-hardening_ubdist.conf.conf
 	
 	
 	
@@ -814,6 +802,16 @@ _create_ubDistBuild-rotten_install() {
 	
 	
 	
+	
+	
+	
+	
+	#echo | sudo -n tee "$globalVirtFS"/in_chroot
+	! _chroot /rotten_install.sh _install && _messageFAIL
+	#sudo rm -f "$globalVirtFS"/in_chroot
+	
+	
+	
 	#'linux-headers*'
 	_chroot apt-get -y remove 'linux-image*'
 	! _chroot /rotten_install.sh _custom_kernel && _messageFAIL
@@ -824,9 +822,25 @@ _create_ubDistBuild-rotten_install() {
 	
 	_chroot apt-get -y install 'linux-headers-amd64'
 	
-	#echo | sudo -n tee "$globalVirtFS"/in_chroot
-	! _chroot /rotten_install.sh _install && _messageFAIL
-	#sudo rm -f "$globalVirtFS"/in_chroot
+	
+	
+	# Significant issues with 'user.max_user_namespaces' affecting KDE , etc .
+	#_getMost_backend_aptGetInstall hardening-runtime
+	
+	_chroot mkdir -p /etc/default/grub.d/
+	sudo -n cp -f "$scriptLib"/custom/ubdist_hardening/grub/01_hardening_ubdist.cfg "$globalVirtFS"/etc/default/grub.d/
+	sudo -n chmod 644 "$globalVirtFS"/etc/default/grub.d/01_hardening_ubdist.cfg
+	
+	sudo -n cp -f "$scriptLib"/custom/ubdist_hardening/grub/01_hardening_ubdist-moduleSig.cfg "$globalVirtFS"/etc/default/grub.d/
+	sudo -n chmod 644 "$globalVirtFS"/etc/default/grub.d/01_hardening_ubdist-moduleSig.cfg
+	
+	_chroot mkdir -p /usr/lib/sysctl.d/
+	sudo -n cp -f "$scriptLib"/custom/ubdist_hardening/sysctl/10-hardening_ubdist.conf "$globalVirtFS"/usr/lib/sysctl.d/10-hardening.conf
+	sudo -n chmod 644 "$globalVirtFS"/usr/lib/sysctl.d/10-hardening_ubdist.conf.conf
+	
+	
+	
+	
 	
 	
 	
