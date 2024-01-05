@@ -1051,12 +1051,29 @@ _create_ubDistBuild-rotten_install-core() {
 	_test_getMost_backend "$@"
 	
 	_getMost_backend apt-get update
+	
+	
+	
+	_getMost_backend_aptGetInstall par2
+	
+	
 
 	_getMost_backend_aptGetInstall w3m
 	
 	
 	
 	_getMost_backend_aptGetInstall adb
+	
+	
+	
+	
+	_getMost_backend_aptGetInstall okteta
+	
+	
+	
+	
+	_getMost_backend_aptGetInstall kruler
+	
 
 	
 
