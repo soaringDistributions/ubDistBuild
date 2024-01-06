@@ -82,10 +82,10 @@ fi
 ./ubiquitous_bash.sh _openChRoot
 
 ./ubiquitous_bash.sh _chroot mkdir -p /root/.ssh
-echo "$ssh" | ./_chroot tee /root/.ssh/authorized_keys
+echo "$ssh" | ./ubiquitous_bash.sh _chroot tee /root/.ssh/authorized_keys
 
 ./ubiquitous_bash.sh _chroot sudo -n -u user bash -c 'cd ; mkdir -p /home/user/.ssh'
-echo "$ssh" | ./_chroot tee /home/user/.ssh/authorized_keys
+echo "$ssh" | ./ubiquitous_bash.sh _chroot tee /home/user/.ssh/authorized_keys
 ./ubiquitous_bash.sh _chroot chown user:user /home/user/.ssh/authorized_keys
 
 ./ubiquitous_bash.sh _chroot sudo -n systemctl enable ssh
