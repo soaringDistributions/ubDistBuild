@@ -6,7 +6,7 @@
 
 #_messagePlain_warn 'WARNING: will ERASE DATA on your disk!'
 echo -e -n '\E[1;33m '
-echo 'WARNING: will ERASE DATA on your disk!'
+echo ' ''WARNING: will ERASE DATA on your disk!'
 echo -e -n ' \E[0m'
 echo 'NOT for computers with existing dist/OS!'
 echo 'Ctrl+c repeatedly to cancel!'
@@ -17,9 +17,10 @@ for currentIteration in $(seq 1 15)
 do
 	sleep 1
 done
-_messagePlain_warn 'NOT cancelled!'
-
-
+#_messagePlain_warn 'NOT cancelled!'
+echo -e -n '\E[1;33m '
+echo ' ''NOT cancelled!'
+echo -e -n ' \E[0m'
 
 
 # NOTICE
