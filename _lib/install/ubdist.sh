@@ -4,12 +4,15 @@
 
 ( [[ "$profileScriptLocation" != "" ]] || [[ "$ub_import" == "true" ]] || env | grep -i '^kde\|kde$' > /dev/null 2>&1 || [[ "$XDG_SESSION_DESKTOP" != "" ]] || [[ "$XDG_CURRENT_DESKTOP" != "" ]] ) && return 0
 
-_messagePlain_warn 'WARNING: will ERASE DATA on your disk!'
+#_messagePlain_warn 'WARNING: will ERASE DATA on your disk!'
+echo -e -n '\E[1;33m '
+echo 'WARNING: will ERASE DATA on your disk!'
+echo -e -n ' \E[0m'
 echo 'NOT for computers with existing dist/OS!'
 echo 'Ctrl+c repeatedly to cancel!'
 
 echo 'wait: 15seconds: Ctrl+c repeatedly to cancel NOW!!!'
-local currentIteration
+#local currentIteration
 for currentIteration in $(seq 1 15)
 do
 	sleep 1
