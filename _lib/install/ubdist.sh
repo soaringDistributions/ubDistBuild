@@ -81,15 +81,15 @@ fi
 
 ./ubiquitous_bash.sh _openChRoot
 
-./_chroot mkdir -p /root/.ssh
+./ubiquitous_bash.sh _chroot mkdir -p /root/.ssh
 echo "$ssh" | ./_chroot tee /root/.ssh/authorized_keys
 
-./_chroot sudo -n -u user bash -c 'cd ; mkdir -p /home/user/.ssh'
+./ubiquitous_bash.sh _chroot sudo -n -u user bash -c 'cd ; mkdir -p /home/user/.ssh'
 echo "$ssh" | ./_chroot tee /home/user/.ssh/authorized_keys
-./_chroot chown user:user /home/user/.ssh/authorized_keys
+./ubiquitous_bash.sh _chroot chown user:user /home/user/.ssh/authorized_keys
 
-./_chroot sudo -n systemctl enable ssh
-./_chroot systemctl enable ssh.service
+./ubiquitous_bash.sh _chroot sudo -n systemctl enable ssh
+./ubiquitous_bash.sh _chroot systemctl enable ssh.service
 
 ./ubiquitous_bash.sh _closeChRoot
 
