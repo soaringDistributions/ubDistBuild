@@ -22,13 +22,23 @@ _messagePlain_warn 'NOT cancelled!'
 
 
 
-
+# NOTICE
 
 #export ssh="" ; wget -qO- https://bit.ly/ubdist | bash
 
 #export ssh="" ; wget -qO- https://raw.githubusercontent.com/soaringDistributions/ubDistBuild/main/_lib/install/ubdist.sh | bash
 
-#export ssh="" ; export GH_TOKEN="" ; export owner="" ; export repo="" ; wget -qO- https://raw.githubusercontent.com/soaringDistributions/ubDistBuild/main/_lib/install/ubdist.sh | bash
+#export ssh="" ; export GH_TOKEN="" ; export owner="" ; export repo="" ; export INPUT_GITHUB_TOKEN="$GH_TOKEN" ; wget -qO- https://raw.githubusercontent.com/soaringDistributions/ubDistBuild/main/_lib/install/ubdist.sh | bash
+
+
+
+
+
+
+
+
+
+
 
 
 [[ "$owner" == "" ]] && export owner=soaringDistributions
