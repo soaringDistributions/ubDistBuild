@@ -29,23 +29,6 @@ _custom_kernel_server-sequence() {
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
-	cd "$safeTmp"
-	if [[ -e "$scriptLocal"/"linux-mainline-server-amd64-debian.tar.gz" ]]
-	then
-		sudo -n cp -f "$scriptLocal"/"linux-mainline-server-amd64-debian.tar.gz" "$globalVirtFS"/
-	elif _wget_githubRelease_internal "soaringDistributions/mirage335KernelBuild" "linux-mainline-server-amd64-debian.tar.gz" && [[ -e "$safeTmp"/"linux-mainline-server-amd64-debian.tar.gz" ]]
-	then
-		sudo -n cp -f "$safeTmp"/"linux-mainline-server-amd64-debian.tar.gz" "$globalVirtFS"/
-	else
-		sudo -n cp -f "$globalVirtFS"/home/user/core/installations/kernel_linux/linux-mainline-server-amd64-debian.tar.gz "$globalVirtFS"/
-	fi
-	_chroot tar xf /linux-mainline-server-amd64-debian.tar.gz
-	_chroot dpkg -i '/mainline-server/*.deb'
-	_chroot rm -f ./mainline-server/.config './mainline-server/linux-*' ./mainline-server/statement.sh.out.txt
-	_chroot rm -f ./mainline-server/linux-mainline-server-amd64-debian.tar.gz
-	_chroot rm -f /linux-mainline-server-amd64-debian.tar.gz
-	
-	
 	
 	# Formal naming convention is [-distllc,][-lts,-mainline,][-desktop,-server,] . ONLY requirement is dotglob removal of all except server OR all purpose lts .
 	
@@ -57,6 +40,29 @@ _custom_kernel_server-sequence() {
 	_chroot apt-get -y remove 'linux-image*lts'
 	
 	_chroot apt-get -y install 'linux-headers-amd64'
+	
+	
+	
+	
+	cd "$safeTmp"
+	if [[ -e "$scriptLocal"/"linux-lts-server-amd64-debian.tar.gz" ]]
+	then
+		sudo -n cp -f "$scriptLocal"/"linux-lts-server-amd64-debian.tar.gz" "$globalVirtFS"/
+	elif _wget_githubRelease_internal "soaringDistributions/mirage335KernelBuild" "linux-lts-server-amd64-debian.tar.gz" && [[ -e "$safeTmp"/"linux-lts-server-amd64-debian.tar.gz" ]]
+	then
+		sudo -n cp -f "$safeTmp"/"linux-lts-server-amd64-debian.tar.gz" "$globalVirtFS"/
+	else
+		sudo -n cp -f "$globalVirtFS"/home/user/core/installations/kernel_linux/linux-lts-server-amd64-debian.tar.gz "$globalVirtFS"/
+	fi
+	_chroot tar xf /linux-lts-server-amd64-debian.tar.gz
+	_chroot dpkg -i '/lts-server/*.deb'
+	_chroot rm -f ./lts-server/.config './lts-server/linux-*' ./lts-server/statement.sh.out.txt
+	_chroot rm -f ./lts-server/linux-lts-server-amd64-debian.tar.gz
+	_chroot rm -f /linux-lts-server-amd64-debian.tar.gz
+	
+	
+	
+	
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
