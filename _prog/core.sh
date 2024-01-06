@@ -55,7 +55,7 @@ _custom_kernel_server-sequence() {
 		sudo -n cp -f "$globalVirtFS"/home/user/core/installations/kernel_linux/linux-lts-server-amd64-debian.tar.gz "$globalVirtFS"/
 	fi
 	_chroot tar xf /linux-lts-server-amd64-debian.tar.gz
-	_chroot dpkg -i '/lts-server/*.deb'
+	_chroot dpkg -i './lts-server/*.deb'
 	_chroot rm -f ./lts-server/.config './lts-server/linux-*' ./lts-server/statement.sh.out.txt
 	_chroot rm -f ./lts-server/linux-lts-server-amd64-debian.tar.gz
 	_chroot rm -f /linux-lts-server-amd64-debian.tar.gz
