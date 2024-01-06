@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3216344091'
+export ub_setScriptChecksum_contents='4192463741'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -47389,13 +47389,13 @@ _nvidia_fetch_nvidia() {
 
 # ATTENTION: Override if necessary (ie. if 'nouveau modeset=1' is necessary for specific hardware).
 _write_modprobe_nvidia_nouveau() {
-	rm -f "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
+	sudo -n rm -f "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
 	
 	#_nouveau_disable
 	# https://linuxconfig.org/how-to-disable-blacklist-nouveau-nvidia-driver-on-ubuntu-20-04-focal-fossa-linux
 	# https://askubuntu.com/questions/747314/is-nomodeset-still-required
 	#echo 'GRUB_CMDLINE_LINUX="nouveau.modeset=0"' | sudo -n tee -a "$globalVirtFS"/etc/default/grub
-	rm -f "$globalVirtFS"/modprobe-disable_nouveau--blacklist-nvidia-nouveau.conf
+	sudo -n rm -f "$globalVirtFS"/modprobe-disable_nouveau--blacklist-nvidia-nouveau.conf
 	echo 'blacklist nouveau' | sudo -n tee "$globalVirtFS"/modprobe-disable_nouveau--blacklist-nvidia-nouveau.conf
 	echo 'blacklist lbm-nouveau' | sudo -n tee -a "$globalVirtFS"/modprobe-disable_nouveau--blacklist-nvidia-nouveau.conf
 	echo 'alias nouveau off' | sudo -n tee -a "$globalVirtFS"/modprobe-disable_nouveau--blacklist-nvidia-nouveau.conf
@@ -47407,7 +47407,7 @@ _write_modprobe_nvidia_nouveau() {
 	
 	
 	#_nouveau_enable (also nvidia disable)
-	rm -f "$globalVirtFS"/modprobe-disable_nvidia--blacklist-nvidia-nouveau.conf
+	sudo -n rm -f "$globalVirtFS"/modprobe-disable_nvidia--blacklist-nvidia-nouveau.conf
 	echo 'blacklist nvidia' | sudo -n tee "$globalVirtFS"/modprobe-disable_nvidia--blacklist-nvidia-nouveau.conf
 	echo 'blacklist nvidia_modeset' | sudo -n tee -a "$globalVirtFS"/modprobe-disable_nvidia--blacklist-nvidia-nouveau.conf
 	echo 'blacklist nvidia_drm' | sudo -n tee -a "$globalVirtFS"/modprobe-disable_nvidia--blacklist-nvidia-nouveau.conf
@@ -47417,7 +47417,7 @@ _write_modprobe_nvidia_nouveau() {
 # Minimal NVIDIA compatibility.
 _nouveau_enable_procedure() {
 	_write_modprobe_nvidia_nouveau
-	cp -f "$globalVirtFS"/modprobe-disable_nvidia--blacklist-nvidia-nouveau.conf "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
+	sudo -n cp -f "$globalVirtFS"/modprobe-disable_nvidia--blacklist-nvidia-nouveau.conf "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
 	
 	#_chroot chmod 644 /root/_get_nvidia.sh
 	_chroot chmod 755 /root/_get_nvidia.sh
@@ -47438,7 +47438,7 @@ _nouveau_enable() {
 # No NVIDIA compatibility (at least not immediate compatibility). No NVIDIA compatibility may be a reasonable default until unambigious usability.
 _nouveau_disable_procedure() {
 	_write_modprobe_nvidia_nouveau
-	cp -f "$globalVirtFS"/modprobe-disable_nouveau--blacklist-nvidia-nouveau.conf "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
+	sudo -n cp -f "$globalVirtFS"/modprobe-disable_nouveau--blacklist-nvidia-nouveau.conf "$globalVirtFS"/etc/modprobe.d/blacklist-nvidia-nouveau.conf
 	
 	_chroot chmod 755 /root/_get_nvidia.sh
 	
