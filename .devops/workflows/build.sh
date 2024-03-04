@@ -248,13 +248,13 @@ _devops_experiment() {
 
     #export skimfast="false"
     export devfast="true"
-	#export qemuNoKVM="false"
-	export qemuNoKVM="true"
+	export qemuNoKVM="false"
+	#export qemuNoKVM="true"
 
-	#export qemuHeadless="false"
-	export qemuHeadless="true"
+	export qemuHeadless="false"
+	#export qemuHeadless="true"
 	
-	export qemuXvfb="true"
+	#export qemuXvfb="false"
 
 	_dof _create_ubDistBuild-bootOnce
 
