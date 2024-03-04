@@ -611,7 +611,7 @@ jobs:
 
 
 build:
-    needs: [build_release]
+    needs: [build_beforeBoot,build_release]
     # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
     #  '7 GB of RAM memory'
     #  '14 GB of SSD disk space'
