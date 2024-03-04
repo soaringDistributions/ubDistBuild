@@ -551,6 +551,16 @@ jobs:
           export skimfast=${{ github.event.inputs.skimfast }}
           echo $skimfast
           ./ubiquitous_bash.sh _hash_img
+
+
+
+      - name: release! hash! beforeBoot
+        shell: bash
+        run: |
+          mv -f ./_local/_hash-ubdist.txt ./_local/_hash-ubdist_beforeBoot.txt
+          gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/_hash-ubdist_beforeBoot.txt
+        env:
+          GH_TOKEN: ${{ github.token }}
           
 
       - name: _package_ubDistBuild_image
