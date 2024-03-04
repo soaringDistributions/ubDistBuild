@@ -256,7 +256,12 @@ _devops_experiment() {
 	
 	#export qemuXvfb="false"
 
-	_dof _create_ubDistBuild-bootOnce
+	#_dof _create_ubDistBuild-bootOnce
+	
+	
+	export qemuBootOnce="true"
+	_zSpecial_qemu
+	
 
     _devops_sep end ${FUNCNAME[0]}
 }

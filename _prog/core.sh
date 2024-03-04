@@ -1632,11 +1632,14 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	
 	[[ "$qemuXvfb" == "true" ]] && export qemuHeadless="false"
 	
-	local currentPID_xvfb
-	Xvfb :30 > /dev/null 2>&1 &
-	currentPID_xvfb="$!"
-	sleep 1
-	export DISPLAY=":30"
+	if [[ "$qemuXvfb" == "true" ]]
+	then
+		local currentPID_xvfb
+		Xvfb :30 > /dev/null 2>&1 &
+		currentPID_xvfb="$!"
+		sleep 1
+		export DISPLAY=":30"
+	fi
 	
 	
 	export qemuBootOnce="true"

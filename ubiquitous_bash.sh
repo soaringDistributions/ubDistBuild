@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1436454687'
+export ub_setScriptChecksum_contents='3682190465'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -46380,11 +46380,14 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	
 	[[ "$qemuXvfb" == "true" ]] && export qemuHeadless="false"
 	
-	local currentPID_xvfb
-	Xvfb :30 > /dev/null 2>&1 &
-	currentPID_xvfb="$!"
-	sleep 1
-	export DISPLAY=":30"
+	if [[ "$qemuXvfb" == "true" ]]
+	then
+		local currentPID_xvfb
+		Xvfb :30 > /dev/null 2>&1 &
+		currentPID_xvfb="$!"
+		sleep 1
+		export DISPLAY=":30"
+	fi
 	
 	
 	export qemuBootOnce="true"
@@ -47077,11 +47080,7 @@ _zSpecial_qemu_memory() {
 	qemuUserArgs+=(-m "1664")
 }
 
-# ATTENTION: Override with 'ops.sh' or similar.
-_zSpecial_qemu_chroot() {
-	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
-	
-	
+_zSpecial_report_procedure() {
 	if [[ ! -e "$globalVirtFS"/dpkg ]]
 	then
 		#_chroot dpkg -l | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
@@ -47124,6 +47123,22 @@ _zSpecial_qemu_chroot() {
 	
 	sudo -n cp -f "$globalVirtFS"/boot/grub/grubenv "$scriptLocal"/grubenv
 	sudo -n chown "$USER":"$USER" "$scriptLocal"/grubenv
+}
+_zSpecial_report() {
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	
+	_zSpecial_report_procedure "$@"
+	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	return 0
+}
+
+# ATTENTION: Override with 'ops.sh' or similar.
+_zSpecial_qemu_chroot() {
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	
+	
+	_zSpecial_report_procedure "$@"
 
 
 	_chroot rmdir /var/lib/docker/runtimes
