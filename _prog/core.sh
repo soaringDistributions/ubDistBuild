@@ -2329,11 +2329,7 @@ _zSpecial_qemu_memory() {
 	qemuUserArgs+=(-m "1664")
 }
 
-# ATTENTION: Override with 'ops.sh' or similar.
-_zSpecial_qemu_chroot() {
-	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
-	
-	
+_zSpecial_report_procedure() {
 	if [[ ! -e "$globalVirtFS"/dpkg ]]
 	then
 		#_chroot dpkg -l | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
@@ -2376,6 +2372,22 @@ _zSpecial_qemu_chroot() {
 	
 	sudo -n cp -f "$globalVirtFS"/boot/grub/grubenv "$scriptLocal"/grubenv
 	sudo -n chown "$USER":"$USER" "$scriptLocal"/grubenv
+}
+_zSpecial_report() {
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	
+	_zSpecial_report_procedure "$@"
+	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	return 0
+}
+
+# ATTENTION: Override with 'ops.sh' or similar.
+_zSpecial_qemu_chroot() {
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	
+	
+	_zSpecial_report_procedure "$@"
 
 
 	_chroot rmdir /var/lib/docker/runtimes

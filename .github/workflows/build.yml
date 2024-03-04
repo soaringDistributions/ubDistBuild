@@ -936,6 +936,11 @@ jobs:
           mkdir -p ./_local/analysis/screenshots
           ./_create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log && exit ${PIPESTATUS[0]}
 
+      - name: _create_ubDistBuild-bootOnce
+        shell: bash
+        continue-on-error: true
+        run: |
+          ./ubiquitous_bash.sh _zSpecial_report
 
       - name: artifacts
         uses: actions/upload-artifact@v3
@@ -955,6 +960,7 @@ jobs:
             ./_local/lsmodReport
             ./_local/binReport
             ./_local/coreReport
+            ./_local/cfgFW.log
 
       - name: check! FAIL_bootOnce
         shell: bash
