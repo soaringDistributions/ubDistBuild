@@ -1117,7 +1117,7 @@ build:
 
 
   build-convert-rootfs:
-    needs: [build, build_beforeBoot, build_release]
+    needs: [build_release]
     runs-on: ubuntu-latest
     # WARNING: Must also enable/disable 'Maximize build space' as appropriate .
     #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
