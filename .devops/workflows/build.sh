@@ -253,6 +253,8 @@ _devops_experiment() {
 
 	#export qemuHeadless="false"
 	export qemuHeadless="true"
+	
+	export qemuXvfb="true"
 
 	_dof _create_ubDistBuild-bootOnce
 

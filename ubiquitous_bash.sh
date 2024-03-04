@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1435656650'
+export ub_setScriptChecksum_contents='595938496'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -46378,6 +46378,15 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	
 	( [[ "$qemuHeadless" != "false" ]] || [[ "$DISPLAY" == "" ]] ) && export qemuHeadless="true"
 	
+	[[ "$qemuXvfb" == "true" ]] && export qemuHeadless="false"
+	
+	local currentPID_xvfb
+	Xvfb :30 > /dev/null 2>&1 &
+	currentPID_xvfb="$!"
+	sleep 1
+	export DISPLAY=":30"
+	
+	
 	export qemuBootOnce="true"
 	
 	local currentPID
@@ -46403,6 +46412,16 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	ps -p "$currentPID"
 	while [[ "$currentIterationWait" -lt 5200 ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
 	do
+		if ( [[ "$qemuXvfb" == "true" ]] && ( [[ "$currentIterationWait" -le 320 ]] && [[ $(bc <<< "$currentIterationWait % 5") == 0 ]] ) || [[ $(bc <<< "$currentIterationWait % 30") == 0 ]] )
+		then
+			mkdir -p "$scriptLocal"/analysis/screenshots
+			#xwd -root -silent | convert xwd:- png:"$scriptLocal"/analysis/screenshots/qemu-01-"$currentIterationWait".png
+			xwd -root -silent | convert xwd:- -quality 35 jpg:"$scriptLocal"/analysis/screenshots/qemu-01-"$currentIterationWait".jpg
+			#jp2a --background=dark --colors --width=280 "$scriptLocal"/analysis/screenshots/qemu-01-"$currentIterationWait".jpg
+		fi
+		
+		
+		
 		sleep 1
 		let currentIterationWait=currentIterationWait+1
 	done
@@ -46439,8 +46458,23 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 		sleep 3
 	fi
 	
+	
 	echo
-	[[ "$currentExitStatus" == "1" ]] && return 1
+	
+	if [[ "$qemuXvfb" == "true" ]]
+	then
+		kill "$currentPID_xvfb"
+		sleep 3
+		kill -KILL "$currentPID_xvfb"
+		pkill Xvfb
+	fi
+	
+	rm -f "$scriptLocal"/FAIL_bootOnce
+	if [[ "$currentExitStatus" == "1" ]]
+	then
+		echo ${FUNCNAME[0]} > "$scriptLocal"/FAIL_bootOnce
+		return 1
+	fi
 	return 0
 }
 _create_ubDistBuild-bootOnce-fsck_sequence() {
@@ -46861,6 +46895,25 @@ _ubDistBuild_split() {
 
 	cd "$functionEntryPWD"
 }
+_ubDistBuild_split_beforeBoot() {
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+
+
+	cd "$scriptLocal"
+	#split -b 1856000000 -d package_image_beforeBoot.tar.flx package_image_beforeBoot.tar.flx.part
+
+	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
+	local currentIteration
+	for currentIteration in $(seq -w 0 24)
+	do
+		[[ -s ./package_image_beforeBoot.tar.flx ]] && [[ -e ./package_image_beforeBoot.tar.flx ]] && tail -c 1856000000 package_image_beforeBoot.tar.flx > package_image_beforeBoot.tar.flx.part"$currentIteration" && truncate -s -1856000000 package_image_beforeBoot.tar.flx
+	done
+
+	rm -f ./package_image_beforeBoot.tar.flx
+
+	cd "$functionEntryPWD"
+}
 
 _ubDistBuild_split-live() {
 	local functionEntryPWD
@@ -47043,6 +47096,13 @@ _zSpecial_qemu_chroot() {
 		_chroot find /home/user/.ebcli-virtual-env/executables | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null 2>&1
 		sudo -n cp -f "$globalVirtFS"/binReport "$scriptLocal"/binReport
 		sudo -n chown "$USER":"$USER" "$scriptLocal"/binReport
+	#fi
+	
+	#if [[ ! -e "$globalVirtFS"/coreReport ]]
+	#then
+		_chroot find /home/user/core/installations /home/user/core/infrastructure -not \( -path \*.git\* -prune \) | sudo -n tee "$globalVirtFS"/coreReport > /dev/null
+		sudo -n cp -f "$globalVirtFS"/coreReport "$scriptLocal"/coreReport
+		sudo -n chown "$USER":"$USER" "$scriptLocal"/coreReport
 	#fi
 
 	if [[ -e "$globalVirtFS"/lsmodReport ]]
@@ -48362,6 +48422,167 @@ _get_vmImg_ubDistBuild_sequence() {
 _get_vmImg_ubDistBuild() {
 	"$scriptAbsoluteLocation" _get_vmImg_ubDistBuild_sequence "$@"
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# DANGER: This is NOT an end user product! No production use!
+# NOTICE: Such discrepancies as mismatch between kernels available during ChRoot and boot cause unusual fragility sometimes necessitating analysis when the resulting image is unbootable.
+_get_vmImg_beforeBoot_ubDistBuild_sequence() {
+	_messageNormal 'init: _get_vmImg_beforeBoot'
+
+	local releaseLabel
+	releaseLabel="internal"
+	[[ "$1" != "" ]] && releaseLabel="$1"
+	[[ "$1" == "latest" ]] && releaseLabel=
+	
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+	
+	
+	mkdir -p "$scriptLocal"
+	
+	# Only extracted vm img.
+	rm -f "$scriptLocal"/package_image_beforeBoot.tar.flx
+	rm -f "$scriptLocal"/package_image_beforeBoot.tar.flx.part*
+	rm -f "$scriptLocal"/_get/package_image_beforeBoot.tar.flx
+	rm -f "$scriptLocal"/_get/package_image_beforeBoot.tar.flx.part*
+	
+	if [[ -e "$scriptLocal"/vm.img ]]
+	then
+		_messagePlain_good 'good: exists: vm.img'
+		return 0
+	fi
+	
+	if [[ -e "$scriptLocal"/ops.sh ]]
+	then
+		mv -n "$scriptLocal"/ops.sh "$scriptLocal"/ops.sh.bak
+	fi
+	
+	cd "$scriptLocal"
+	mkdir -p "$scriptLocal"/_get
+	cd "$scriptLocal"/_get
+	rm -f "$scriptLocal"/_get/ops.sh
+	export MANDATORY_HASH="true"
+	local currentExitStatus
+	if [[ "$3" == "" ]] # || [[ "$FORCE_AXEL" != "" ]]
+	then
+		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image_beforeBoot.tar.flx" | _get_extract_ubDistBuild-tar xv --overwrite
+		currentExitStatus="$?"
+	else
+		#_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image_beforeBoot.tar.flx" | _get_extract_ubDistBuild-tar --extract vm.img --to-stdout | _dd of="$3" bs=1M
+		_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "package_image_beforeBoot.tar.flx" | _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | sudo -n dd of="$3" bs=1M status=progress
+		currentExitStatus="$?"
+	fi
+	if [[ "$currentExitStatus" != "0" ]]
+	then
+		rm -f "$scriptLocal"/_get/ops.sh
+		_messageFAIL
+	fi
+	export MANDATORY_HASH=
+	unset MANDATORY_HASH
+
+	#if [[ "$3" == "" ]] || [[ "$FORCE_AXEL" != "" ]]
+	#then
+		#true
+	#else
+		#_messagePlain_good 'done: dd: '"$3"
+		#_stop 0
+		#return 0
+	#fi
+	
+	
+	_messagePlain_nominal '_get_vmImg_beforeBoot: hash'
+	
+	if [[ "$FORCE_AXEL" != "" ]] && [[ -e "$scriptLocal"/ops.sh ]]
+	then
+		mv -f "$scriptLocal"/_get/ops.sh "$scriptLocal"/_get/ops.sh.ref
+		rm -f "$scriptLocal"/_get/ops.sh
+	fi
+	
+	local currentHash
+	local currentHash_bytes
+	export MANDATORY_HASH=
+	unset MANDATORY_HASH
+	if [[ "$2" != "" ]]
+	then
+		currentHash="$2"
+		currentHash_bytes=$( [[ "$currentFilePath" != "/dev"* ]] && wc -c "$currentFilePath" )
+	fi
+	if [[ "$currentHash" == "" ]] || [[ "$currentHash_bytes" == "" ]]
+	then
+		currentHash=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist_beforeBoot.txt" | head -n 3 | tail -n 1)
+		currentHash_bytes=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist_beforeBoot.txt" | head -n 2 | tail -n 1 | sed 's/^.*count=$(bc <<< '"'"'//' | cut -f1 -d\  )
+	fi
+	( [[ "$currentHash" == "" ]] || [[ "$currentHash_bytes" == "" ]] ) && _messageFAIL
+	export MANDATORY_HASH=
+	unset MANDATORY_HASH
+
+	local currentFilePath
+	currentFilePath="$scriptLocal"/_get/vm.img
+	[[ "$3" != "" ]] && currentFilePath="$3"
+	local currentHashLocal
+	if [[ -e "/etc/ssl/openssl_legacy.cnf" ]]
+	then
+		#currentHashLocal=$(cat "$currentFilePath" | cat | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256)
+		currentHashLocal=$(dd if="$currentFilePath" bs=1M count=$(bc <<< "$currentHash_bytes"' / 1048576') status=progress | cat | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256)
+	else
+		#currentHashLocal=$(cat "$currentFilePath" | cat | openssl dgst -whirlpool -binary | xxd -p -c 256)
+		currentHashLocal=$(dd if="$currentFilePath" bs=1M count=$(bc <<< "$currentHash_bytes"' / 1048576') status=progress | cat | openssl dgst -whirlpool -binary | xxd -p -c 256)
+	fi
+	
+	_messagePlain_probe_var currentHash_bytes
+	_messagePlain_probe_var currentHash
+	_messagePlain_probe_var currentHashLocal
+	[[ "$currentHash" != "$currentHashLocal" ]] && _messageFAIL
+	
+	_messagePlain_good 'done: hash'
+	
+	[[ "$3" == "" ]] && mv -f "$scriptLocal"/_get/vm.img "$scriptLocal"/vm.img
+	#mv -f "$scriptLocal"/_get/* "$scriptLocal"/
+	rmdir "$scriptLocal"/_get
+	#_safeRMR "$scriptLocal"/_get
+	
+	cd "$functionEntryPWD"
+}
+_get_vmImg_beforeBoot_ubDistBuild() {
+	"$scriptAbsoluteLocation" _get_vmImg_beforeBoot_ubDistBuild_sequence "$@"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 _get_vmImg_ubDistBuild-live_sequence() {
 	_messageNormal 'init: _get_vmImg-live'

@@ -1630,6 +1630,15 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	
 	( [[ "$qemuHeadless" != "false" ]] || [[ "$DISPLAY" == "" ]] ) && export qemuHeadless="true"
 	
+	[[ "$qemuXvfb" == "true" ]] && export qemuHeadless="false"
+	
+	local currentPID_xvfb
+	Xvfb :30 > /dev/null 2>&1 &
+	currentPID_xvfb="$!"
+	sleep 1
+	export DISPLAY=":30"
+	
+	
 	export qemuBootOnce="true"
 	
 	local currentPID
@@ -1655,6 +1664,16 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	ps -p "$currentPID"
 	while [[ "$currentIterationWait" -lt 5200 ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
 	do
+		if ( [[ "$qemuXvfb" == "true" ]] && ( [[ "$currentIterationWait" -le 320 ]] && [[ $(bc <<< "$currentIterationWait % 5") == 0 ]] ) || [[ $(bc <<< "$currentIterationWait % 30") == 0 ]] )
+		then
+			mkdir -p "$scriptLocal"/analysis/screenshots
+			#xwd -root -silent | convert xwd:- png:"$scriptLocal"/analysis/screenshots/qemu-01-"$currentIterationWait".png
+			xwd -root -silent | convert xwd:- -quality 35 jpg:"$scriptLocal"/analysis/screenshots/qemu-01-"$currentIterationWait".jpg
+			#jp2a --background=dark --colors --width=280 "$scriptLocal"/analysis/screenshots/qemu-01-"$currentIterationWait".jpg
+		fi
+		
+		
+		
 		sleep 1
 		let currentIterationWait=currentIterationWait+1
 	done
@@ -1691,8 +1710,23 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 		sleep 3
 	fi
 	
+	
 	echo
-	[[ "$currentExitStatus" == "1" ]] && return 1
+	
+	if [[ "$qemuXvfb" == "true" ]]
+	then
+		kill "$currentPID_xvfb"
+		sleep 3
+		kill -KILL "$currentPID_xvfb"
+		pkill Xvfb
+	fi
+	
+	rm -f "$scriptLocal"/FAIL_bootOnce
+	if [[ "$currentExitStatus" == "1" ]]
+	then
+		echo ${FUNCNAME[0]} > "$scriptLocal"/FAIL_bootOnce
+		return 1
+	fi
 	return 0
 }
 _create_ubDistBuild-bootOnce-fsck_sequence() {
@@ -2314,6 +2348,13 @@ _zSpecial_qemu_chroot() {
 		_chroot find /home/user/.ebcli-virtual-env/executables | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null 2>&1
 		sudo -n cp -f "$globalVirtFS"/binReport "$scriptLocal"/binReport
 		sudo -n chown "$USER":"$USER" "$scriptLocal"/binReport
+	#fi
+	
+	#if [[ ! -e "$globalVirtFS"/coreReport ]]
+	#then
+		_chroot find /home/user/core/installations /home/user/core/infrastructure -not \( -path \*.git\* -prune \) | sudo -n tee "$globalVirtFS"/coreReport > /dev/null
+		sudo -n cp -f "$globalVirtFS"/coreReport "$scriptLocal"/coreReport
+		sudo -n chown "$USER":"$USER" "$scriptLocal"/coreReport
 	#fi
 
 	if [[ -e "$globalVirtFS"/lsmodReport ]]

@@ -910,6 +910,7 @@ jobs:
           echo
       - name: _create_ubDistBuild-bootOnce
         shell: bash
+        continue-on-error: true
         run: |
           export skimfast=${{ github.event.inputs.skimfast }}
           echo skimfast $skimfast
@@ -919,10 +920,35 @@ jobs:
           #[[ "$qemuNoKVM" == "" ]] && export qemuNoKVM=true
           echo qemuNoKVM $qemuNoKVM
           echo
+          export qemuXvfb="true"
+          echo qemuXvfb "$qemuXvfb"
+          mkdir -p ./_local/analysis/screenshots
           ./_create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log && exit ${PIPESTATUS[0]}
 
 
+      - name: artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: convert-live-exhaustive---analysis-screenshots-10-fromImg
+          path: |
+            ./_local/analysis/screenshots/*
+          
+      - name: artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: convert-live-exhaustive---analysis-log-10-fromImg
+          path: |
+            ./_local/grub.cfg
+            ./_local/grubenv
+            ./_local/dpkg
+            ./_local/lsmodReport
+            ./_local/binReport
+            ./_local/coreReport
 
+      - name: check! FAIL_bootOnce
+        shell: bash
+        run: |
+          ! [[ -e /FAIL_bootOnce ]]
           
           
 
