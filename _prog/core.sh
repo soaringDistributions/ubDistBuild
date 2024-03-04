@@ -2148,6 +2148,8 @@ _ubDistBuild_split() {
 	cd "$functionEntryPWD"
 }
 _ubDistBuild_split_beforeBoot() {
+	mv -f "$scriptLocal"/package_image.tar.flx "$scriptLocal"/package_image_beforeBoot.tar.flx
+	
 	local functionEntryPWD
 	functionEntryPWD="$PWD"
 
