@@ -1106,25 +1106,3 @@ build:
       
 
 
-
-
-
-
-
-
-    
-
-
-
-  build_convert_rootfs:
-    needs: [build_release]
-    runs-on: 'ubuntu-latest'
-    # WARNING: Must also enable/disable 'Maximize build space' as appropriate .
-    #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
-    steps:
-      - name: report! API Rate Limit
-        shell: bash
-        run: |
-          curl -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ""${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28"  https://api.github.com/rate_limit
-          #curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/rate_limit | jq -r ".rate"
-
