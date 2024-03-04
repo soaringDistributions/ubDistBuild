@@ -610,33 +610,6 @@ jobs:
 
 
 
-build:
-    needs: [build_beforeBoot, build_release]
-    # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
-    #  '7 GB of RAM memory'
-    #  '14 GB of SSD disk space'
-    # ATTRIBUTION: Github Copilot Chat 2023-08-10 .
-    runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
-    #runs-on: ubuntu-latest
-    #runs-on: ubuntu-22.04
-    #runs-on: ubuntu-20.04
-    #runs-on: ubuntu-18.04
-    # Apparently both 'buildjet-2vcpu-ubuntu-2004' and 'buildjet-16vcpu-ubuntu-2004' have 61GB .
-    #runs-on: buildjet-2vcpu-ubuntu-2004
-    #runs-on: buildjet-16vcpu-ubuntu-2004
-    # https://github.com/easimon/maximize-build-space
-    steps:
-      - name: RAND_SEED
-        shell: bash
-        run: |
-          echo "$RAND_SEED" | tee /dev/urandom > /dev/null
-          echo "$RAND_SEED" | tee /dev/random > /dev/null
-          echo "$RAND_SEED" | sudo -n tee /dev/urandom > /dev/null
-          echo "$RAND_SEED" | sudo -n tee /dev/random > /dev/null
-        env:
-          RAND_SEED: ${{ secrets.RAND_SEED }}
-
-
 
 
 
