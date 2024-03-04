@@ -199,22 +199,62 @@ _dof() {
 
 
 
+_devops_beforeBoot_experiment() {
+    clear
+    _devops_sep begin ${FUNCNAME[0]}
+
+	local functionEntryPWD="$PWD"
+
+    export skimfast="true"
+    export devfast="true"
+	export qemuNoKVM="false"
+	
+	sudo -n rm -f "$scriptLocal"/vm.img
+	[[ -e "$scriptLocal"/vm.img ]] && _messagePlain_bad 'bad: fail: rm: vm.img' && return 0
+	sudo -n rm -f "$scriptLocal"/vm-live.iso
+	[[ -e "$scriptLocal"/vm-live.iso ]] && _messagePlain_bad 'bad: fail: rm: vm-live.iso' && return 0
+	sudo -n rm -f "$scriptLocal"/package_rootfs.tar
+	[[ -e "$scriptLocal"/package_rootfs.tar ]] && _messagePlain_bad 'bad: fail: rm: package_rootfs.tar' && return 0
+
+	sudo -n rm -f "$scriptLocal"/package_rootfs.tar.flx
+	[[ -e "$scriptLocal"/package_rootfs.tar.flx ]] && _messagePlain_bad 'bad: fail: rm: package_rootfs.tar.flx' && return 0
+
+	# Notable, due to usability of '_userVBox' through Cygwin/MSW.
+	#sudo -n rm -f "$scriptLocal"/vm.vdi
+
+	_hash_rm
+    
+    #_devops_install
+
+
+
+    _dof _create_ubDistBuild-create
+
+    _dof _create_ubDistBuild-rotten_install
+
+	_dof _chroot_test
+
+	#_dof _create_ubDistBuild-bootOnce
+
+    _devops_sep end ${FUNCNAME[0]}
+}
 
 
 _devops_experiment() {
     clear
     _devops_sep begin ${FUNCNAME[0]}
 
+	local functionEntryPWD="$PWD"
 
-    ! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
-	
+    #export skimfast="false"
+    export devfast="true"
+	#export qemuNoKVM="false"
+	export qemuNoKVM="true"
 
-	_messagePlain_probe /sbin/rcvboxdrv setup all
-	_chroot /sbin/rcvboxdrv setup all
+	#export qemuHeadless="false"
+	export qemuHeadless="true"
 
-
-	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
-	
+	_dof _create_ubDistBuild-bootOnce
 
     _devops_sep end ${FUNCNAME[0]}
 }

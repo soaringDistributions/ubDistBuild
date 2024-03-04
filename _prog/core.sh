@@ -2113,6 +2113,25 @@ _ubDistBuild_split() {
 
 	cd "$functionEntryPWD"
 }
+_ubDistBuild_split_beforeBoot() {
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+
+
+	cd "$scriptLocal"
+	#split -b 1856000000 -d package_image_beforeBoot.tar.flx package_image_beforeBoot.tar.flx.part
+
+	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
+	local currentIteration
+	for currentIteration in $(seq -w 0 24)
+	do
+		[[ -s ./package_image_beforeBoot.tar.flx ]] && [[ -e ./package_image_beforeBoot.tar.flx ]] && tail -c 1856000000 package_image_beforeBoot.tar.flx > package_image_beforeBoot.tar.flx.part"$currentIteration" && truncate -s -1856000000 package_image_beforeBoot.tar.flx
+	done
+
+	rm -f ./package_image_beforeBoot.tar.flx
+
+	cd "$functionEntryPWD"
+}
 
 _ubDistBuild_split-live() {
 	local functionEntryPWD
