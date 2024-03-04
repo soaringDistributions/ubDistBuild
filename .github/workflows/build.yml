@@ -199,6 +199,902 @@ jobs:
 
 
         
+  build_beforeBoot:
+    needs: [build_release]
+    # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
+    #  '7 GB of RAM memory'
+    #  '14 GB of SSD disk space'
+    # ATTRIBUTION: Github Copilot Chat 2023-08-10 .
+    runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
+    #runs-on: ubuntu-latest
+    #runs-on: ubuntu-22.04
+    #runs-on: ubuntu-20.04
+    #runs-on: ubuntu-18.04
+    # Apparently both 'buildjet-2vcpu-ubuntu-2004' and 'buildjet-16vcpu-ubuntu-2004' have 61GB .
+    #runs-on: buildjet-2vcpu-ubuntu-2004
+    #runs-on: buildjet-16vcpu-ubuntu-2004
+    # https://github.com/easimon/maximize-build-space
+    steps:
+      - name: RAND_SEED
+        shell: bash
+        run: |
+          echo "$RAND_SEED" | tee /dev/urandom > /dev/null
+          echo "$RAND_SEED" | tee /dev/random > /dev/null
+          echo "$RAND_SEED" | sudo -n tee /dev/urandom > /dev/null
+          echo "$RAND_SEED" | sudo -n tee /dev/random > /dev/null
+        env:
+          RAND_SEED: ${{ secrets.RAND_SEED }}
+      - name: users
+        shell: bash
+        run: |
+          sudo -u ubuntu -n bash -c 'sudo -n useradd runner --non-unique -u $UID -g $UID' || true
+          sudo -u ubuntu -n bash -c 'sudo -n groupadd runner --non-unique -g $UID' || true
+          sudo -u runner -n bash -c 'sudo -n echo $USER $UID' || true
+          true
+      # Apparently may increase buildJet 'runner' to 77GB (instead of 61GB).
+      # Apparently may increase Github Actions 'runner' to 59GB (instead of 31GB) .
+      - name: Maximize build space
+        if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+        uses: easimon/maximize-build-space@master
+        with:
+          ##root-reserve-mb: 512
+          ##root-reserve-mb: 1450
+          ##root-reserve-mb: 950
+          #root-reserve-mb: 1750
+          root-reserve-mb: 1625
+          ##temp-reserve-mb: 100
+          ##temp-reserve-mb: 300
+          ##temp-reserve-mb: 300
+          #temp-reserve-mb: 700
+          temp-reserve-mb: 50
+          ##swap-size-mb: 128
+          ##swap-size-mb: 192
+          #swap-size-mb: 8
+          swap-size-mb: 2
+          #swap-size-mb: 384
+          #remove-dotnet: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-dotnet: 'true'
+          #remove-android: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-android: 'true'
+          #remove-haskell: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-haskell: 'true'
+          #remove-codeql: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-codeql: 'true'
+          #remove-docker-images: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-docker-images: 'true'
+      # https://github.com/orgs/community/discussions/8305
+      # https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/
+      # https://github.com/actions/runner-images/discussions/7191
+      - name: Enable KVM group perms
+        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
+        shell: bash
+        run: |
+          #echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo -n tee /etc/udev/rules.d/99-kvm4all.rules
+          echo 'KERNEL=="kvm", GROUP="docker", MODE="0664", OPTIONS+="static_node=kvm"' | sudo -n tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo -n udevadm control --reload-rules
+          sudo -n udevadm trigger --name-match=kvm
+          sudo -n apt-get update
+          sudo -n apt-get install -y libvirt-clients libvirt-daemon-system libvirt-daemon virtinst bridge-utils qemu qemu-system-x86
+          sudo -n usermod -a -G kvm $USER
+          sudo -n usermod -a -G libvirt $USER
+          sudo -n usermod -a -G docker $USER
+          sudo -n adduser $USER kvm
+          #sudo -n chown -R $USER:kvm /dev/kvm
+          sudo -n chown -R $USER:docker /dev/kvm
+          ls -l /dev/kvm
+          ls -l /dev/kvm*
+          echo $USER
+          groups
+          sudo -n lsmod | grep kvm
+          sudo -n modprobe -r kvm_intel
+          sudo -n modprobe -r kvm_amd
+          sudo -n modprobe -r kvm
+          ( grep --color vmx /proc/cpuinfo && sudo -n modprobe kvm_intel ) || ( grep --color svm /proc/cpuinfo && sudo -n modprobe kvm_amd )
+          sudo -n modprobe kvm
+          sudo -n lsmod | grep kvm
+          #sudo -n chown -R $USER:kvm /dev/kvm
+          sudo -n chown -R $USER:docker /dev/kvm
+          ls -l /dev/kvm
+          ls -l /dev/kvm*
+      - name: Check KVM group perms
+        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
+        shell: bash
+        run: |
+          grep --color svm /proc/cpuinfo || true
+          grep --color vmx /proc/cpuinfo || true
+          sudo -n lsmod | grep kvm
+          ls -l /dev/kvm
+          ls -l /dev/kvm*
+          echo $USER
+          groups
+      - name: Check Network Services
+        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
+        shell: bash
+        run: |
+          sudo -n netstat -l -p
+      - name: _getCore_ub
+        shell: bash
+        timeout-minutes: 90
+        run: |
+          mkdir -p ~/core/infrastructure
+          cd ~/core/infrastructure
+          git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
+          cd ubiquitous_bash
+          ./_setupUbiquitous.bat
+      - name: _getMinimal_cloud
+        shell: bash
+        run: |
+          ! ~/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _getMinimal_cloud && exit 1
+          true
+          #! sudo -n apt-get -y clean && exit 1
+          df -h
+          df -h /
+        timeout-minutes: 90
+      #- name: changeDisk
+        #shell: bash
+        #run: |
+          #false
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: _getMinimal_cloud
+        shell: bash
+        run: |
+          ! ./ubiquitous_bash.sh _getMinimal_cloud && exit 1
+          true
+          #! sudo -n apt-get -y clean && exit 1
+          df -h
+          df -h /
+        timeout-minutes: 355
+      ## For VBoxManage for _convert . Otherwise historically not apparently necessary.
+      #- name: _getMost_ubuntu22-VBoxManage
+        #shell: bash
+        #run: |
+          ##! ./ubiquitous_bash.sh _getMost && exit 1
+          ##true
+          ##! sudo -n apt-get -y clean && exit 1
+          ##! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
+          ##sudo -n apt-get update
+          ##! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
+          #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
+          #df -h
+          #df -h /
+        #timeout-minutes: 355
+      - name: _getMost-xvfb
+        shell: bash
+        run: |
+          #! ./ubiquitous_bash.sh _getMost && exit 1
+          #true
+          #! sudo -n apt-get -y clean && exit 1
+          #! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
+          #sudo -n apt-get update
+          #! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
+          #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
+          sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y xvfb
+          df -h
+          df -h /
+        timeout-minutes: 355
+      
+      - name: _test_hash_legacy
+        shell: bash
+        run: |
+          if [[ -e "/etc/ssl/openssl_legacy.cnf" ]]
+          then
+              echo -n | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256
+              exit ${PIPESTATUS[0]}
+          else
+              echo -n | openssl dgst -whirlpool -binary | xxd -p -c 256
+              exit ${PIPESTATUS[0]}
+          fi
+      
+      #- name: _create_ubDistBuild
+        #shell: bash
+        #run: |
+          #./_create_ubDistBuild | sudo -n tee ./_local/_create_ubDistBuild.log
+      - name: mkdir _local
+        shell: bash
+        run: |
+          mkdir -p ./_local
+      - name: _true
+        if: ${{ github.event.inputs.skimfast != 'true' }}
+        shell: bash
+        run: |
+          ./_true | sudo -n tee ./_local/_true.log && exit ${PIPESTATUS[0]}
+      - name: _false
+        if: ${{ github.event.inputs.skimfast != 'true' }}
+        shell: bash
+        run: |
+          ( ! ./_false ) | sudo -n tee ./_local/_false.log && exit ${PIPESTATUS[0]}
+      - name: lscpu
+        #if: ${{ github.event.inputs.skimfast != 'true' }}
+        shell: bash
+        run: |
+          lscpu
+      - name: cpuinfo
+        if: ${{ github.event.inputs.skimfast != 'true' }}
+        shell: bash
+        run: |
+          cat /proc/cpuinfo
+      - name: _create_ubDistBuild-create
+        shell: bash
+        run: |
+          export skimfast=${{ github.event.inputs.skimfast }}
+          echo $skimfast
+          export devfast=${{ github.event.inputs.devfast }}
+          echo $devfast
+          ./_create_ubDistBuild-create | sudo -n tee ./_local/_create_ubDistBuild-create.log && exit ${PIPESTATUS[0]}
+      - name: _create_ubDistBuild-rotten_install
+        shell: bash
+        run: |
+          export skimfast=${{ github.event.inputs.skimfast }}
+          echo $skimfast
+          export devfast=${{ github.event.inputs.devfast }}
+          echo $devfast
+          ./_create_ubDistBuild-rotten_install | sudo -n tee ./_local/_create_ubDistBuild-rotten_install.log && exit ${PIPESTATUS[0]}
+      - name: _chroot_test
+        shell: bash
+        run: |
+          export devfast=${{ github.event.inputs.devfast }}
+          echo $devfast
+          [[ "$devfast" == "" ]] && export devfast=true
+          ./_chroot_test | sudo -n tee ./_local/_chroot_test.log && exit ${PIPESTATUS[0]}
+
+      #- name: Force KVM group perms
+        #if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
+        #shell: bash
+        #run: |
+          #sudo -n ls -l /dev/kvm
+          #sudo -n ls -l /dev/kvm*
+          #sudo -n chown -R $USER:docker /dev/kvm
+          #sudo -n chmod 664 /dev/kvm
+          #echo
+          ##grep --color svm /proc/cpuinfo || true
+          ##grep --color vmx /proc/cpuinfo || true
+          #sudo -n lsmod | grep kvm
+          #ls -l /dev/kvm
+          #ls -l /dev/kvm*
+          #echo $USER
+          #groups
+          #echo
+      #- name: _create_ubDistBuild-bootOnce
+        #shell: bash
+        #run: |
+          #export skimfast=${{ github.event.inputs.skimfast }}
+          #echo skimfast $skimfast
+          #export qemuNoKVM=${{ github.event.inputs.qemuNoKVM }}
+          #echo qemuNoKVM $qemuNoKVM
+          #echo
+          #./_create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log && exit ${PIPESTATUS[0]}
+
+      - name: _fetchCore
+        shell: bash
+        run: |
+          cd _local
+          git clone https://github.com/soaringDistributions/ubDistFetch.git
+          cd ubDistFetch
+          ./_ubDistFetch.bat | sudo -n tee ../../_lib/_ubDistFetch.log && exit ${PIPESTATUS[0]}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      #- name: _fetchCore package
+        #shell: bash
+        #run: |
+          #cd _local/ubDistFetch
+          #export current_XZ_OPT_core="-0 -T0"
+          #./_ubDistFetch_package.bat | sudo -n tee ../_ubDistFetch_package.log && exit ${PIPESTATUS[0]}
+      
+      - name: _create_ubDistBuild-rotten_install-core
+        shell: bash
+        run: |
+          ./_create_ubDistBuild-rotten_install-core | sudo -n tee ./_create_ubDistBuild-rotten_install-core.log && exit ${PIPESTATUS[0]}
+        #env:
+          #GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      # DANGER: GitHub Actions ONLY!
+      - name: _fetchCore! rm
+        shell: bash
+        run: |
+          cd _local
+          rm -rf ubDistFetch
+      
+      - name: _create_ubDistBuild-install-ubDistBuild
+        shell: bash
+        run: |
+          ./_create_ubDistBuild-install-ubDistBuild | sudo -n tee ./_create_ubDistBuild-install-ubDistBuild.log && exit ${PIPESTATUS[0]}
+
+      - name: scribe! info! github
+        shell: bash
+        run: |
+          ! ./ubiquitous_bash.sh _openChRoot && exit 1
+          ! echo ${{ github.repository }} | ./ubiquitous_bash.sh _chroot tee /info-github && exit 1
+          ! echo build-${{ github.run_id }}-${{ github.run_attempt }} | ./ubiquitous_bash.sh _chroot tee -a /info-github && exit 1
+          ! date +"%Y-%m-%d" | ./ubiquitous_bash.sh _chroot tee -a /info-github && exit 1
+          ! ./ubiquitous_bash.sh _closeChRoot && exit 1
+          true
+
+
+      - name: Force KVM group perms
+        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
+        shell: bash
+        run: |
+          sudo -n ls -l /dev/kvm
+          sudo -n ls -l /dev/kvm*
+          sudo -n chown -R $USER:docker /dev/kvm
+          sudo -n chmod 664 /dev/kvm
+          echo
+          #grep --color svm /proc/cpuinfo || true
+          #grep --color vmx /proc/cpuinfo || true
+          sudo -n lsmod | grep kvm
+          ls -l /dev/kvm
+          ls -l /dev/kvm*
+          echo $USER
+          groups
+          echo
+      #- name: _create_ubDistBuild-bootOnce
+        #shell: bash
+        #run: |
+          #export skimfast=${{ github.event.inputs.skimfast }}
+          #echo skimfast $skimfast
+          #[[ "$skimfast" == "" ]] && export skimfast=true
+          #echo skimfast $skimfast
+          #export qemuNoKVM=${{ github.event.inputs.qemuNoKVM }}
+          ##[[ "$qemuNoKVM" == "" ]] && export qemuNoKVM=true
+          #echo qemuNoKVM $qemuNoKVM
+          #echo
+          #./_create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log && exit ${PIPESTATUS[0]}
+
+          
+          
+      - name: _hash_img
+        shell: bash
+        run: |
+          export skimfast=${{ github.event.inputs.skimfast }}
+          echo $skimfast
+          ./ubiquitous_bash.sh _hash_img
+          
+
+      - name: _package_ubDistBuild_image
+        shell: bash
+        run: |
+          export skimfast=${{ github.event.inputs.skimfast }}
+          echo $skimfast
+          ./ubiquitous_bash.sh _package_ubDistBuild_image | sudo -n tee ./_local/_package_ubDistBuild_image.log && exit ${PIPESTATUS[0]}
+      - name: _ubDistBuild_split_beforeBoot
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _ubDistBuild_split_beforeBoot | sudo -n tee ./_lib/_ubDistBuild_split.log && exit ${PIPESTATUS[0]}
+        timeout-minutes: 355
+      - name: df
+        shell: bash
+        run: |
+          df -h
+          df -h /
+
+          
+      - name: release! package_image_beforeBoot
+        shell: bash
+        run: |
+          #gh release create build-${{ github.run_id }}-${{ github.run_attempt }} --title build --notes ""
+          bash -c '
+          for currentFile in ./_local/package_image_beforeBoot.tar.flx.part*
+          do
+            ./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
+            while [[ $(jobs | wc -l) -ge 12 ]]
+            do
+              sleep 2
+            done
+          done
+          wait
+          '
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+
+      #- name: _croc_ubDistBuild_image_out
+        #shell: bash
+        #run: |
+          #./ubiquitous_bash.sh _croc_ubDistBuild_image_out | sudo -n tee ./_lib/_croc_ubDistBuild_image_out.log
+        #timeout-minutes: 355
+      #- name: _package_rm
+        #shell: bash
+        #run: |
+          #./ubiquitous_bash.sh _package_rm
+
+
+
+
+
+
+
+
+
+
+
+build:
+    needs: [build_beforeBoot, build_release]
+    # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
+    #  '7 GB of RAM memory'
+    #  '14 GB of SSD disk space'
+    # ATTRIBUTION: Github Copilot Chat 2023-08-10 .
+    runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
+    #runs-on: ubuntu-latest
+    #runs-on: ubuntu-22.04
+    #runs-on: ubuntu-20.04
+    #runs-on: ubuntu-18.04
+    # Apparently both 'buildjet-2vcpu-ubuntu-2004' and 'buildjet-16vcpu-ubuntu-2004' have 61GB .
+    #runs-on: buildjet-2vcpu-ubuntu-2004
+    #runs-on: buildjet-16vcpu-ubuntu-2004
+    # https://github.com/easimon/maximize-build-space
+    steps:
+      - name: RAND_SEED
+        shell: bash
+        run: |
+          echo "$RAND_SEED" | tee /dev/urandom > /dev/null
+          echo "$RAND_SEED" | tee /dev/random > /dev/null
+          echo "$RAND_SEED" | sudo -n tee /dev/urandom > /dev/null
+          echo "$RAND_SEED" | sudo -n tee /dev/random > /dev/null
+        env:
+          RAND_SEED: ${{ secrets.RAND_SEED }}
+      - name: users
+        shell: bash
+        run: |
+          sudo -u ubuntu -n bash -c 'sudo -n useradd runner --non-unique -u $UID -g $UID' || true
+          sudo -u ubuntu -n bash -c 'sudo -n groupadd runner --non-unique -g $UID' || true
+          sudo -u runner -n bash -c 'sudo -n echo $USER $UID' || true
+          true
+      # Apparently may increase buildJet 'runner' to 77GB (instead of 61GB).
+      # Apparently may increase Github Actions 'runner' to 59GB (instead of 31GB) .
+      - name: Maximize build space
+        if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+        uses: easimon/maximize-build-space@master
+        with:
+          ##root-reserve-mb: 512
+          ##root-reserve-mb: 1450
+          ##root-reserve-mb: 950
+          #root-reserve-mb: 1750
+          root-reserve-mb: 1625
+          ##temp-reserve-mb: 100
+          ##temp-reserve-mb: 300
+          ##temp-reserve-mb: 300
+          #temp-reserve-mb: 700
+          temp-reserve-mb: 50
+          ##swap-size-mb: 128
+          ##swap-size-mb: 192
+          #swap-size-mb: 8
+          swap-size-mb: 2
+          #swap-size-mb: 384
+          #remove-dotnet: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-dotnet: 'true'
+          #remove-android: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-android: 'true'
+          #remove-haskell: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-haskell: 'true'
+          #remove-codeql: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-codeql: 'true'
+          #remove-docker-images: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-docker-images: 'true'
+      # https://github.com/orgs/community/discussions/8305
+      # https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/
+      # https://github.com/actions/runner-images/discussions/7191
+      - name: Enable KVM group perms
+        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
+        shell: bash
+        run: |
+          #echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo -n tee /etc/udev/rules.d/99-kvm4all.rules
+          echo 'KERNEL=="kvm", GROUP="docker", MODE="0664", OPTIONS+="static_node=kvm"' | sudo -n tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo -n udevadm control --reload-rules
+          sudo -n udevadm trigger --name-match=kvm
+          sudo -n apt-get update
+          sudo -n apt-get install -y libvirt-clients libvirt-daemon-system libvirt-daemon virtinst bridge-utils qemu qemu-system-x86
+          sudo -n usermod -a -G kvm $USER
+          sudo -n usermod -a -G libvirt $USER
+          sudo -n usermod -a -G docker $USER
+          sudo -n adduser $USER kvm
+          #sudo -n chown -R $USER:kvm /dev/kvm
+          sudo -n chown -R $USER:docker /dev/kvm
+          ls -l /dev/kvm
+          ls -l /dev/kvm*
+          echo $USER
+          groups
+          sudo -n lsmod | grep kvm
+          sudo -n modprobe -r kvm_intel
+          sudo -n modprobe -r kvm_amd
+          sudo -n modprobe -r kvm
+          ( grep --color vmx /proc/cpuinfo && sudo -n modprobe kvm_intel ) || ( grep --color svm /proc/cpuinfo && sudo -n modprobe kvm_amd )
+          sudo -n modprobe kvm
+          sudo -n lsmod | grep kvm
+          #sudo -n chown -R $USER:kvm /dev/kvm
+          sudo -n chown -R $USER:docker /dev/kvm
+          ls -l /dev/kvm
+          ls -l /dev/kvm*
+      - name: Check KVM group perms
+        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
+        shell: bash
+        run: |
+          grep --color svm /proc/cpuinfo || true
+          grep --color vmx /proc/cpuinfo || true
+          sudo -n lsmod | grep kvm
+          ls -l /dev/kvm
+          ls -l /dev/kvm*
+          echo $USER
+          groups
+      - name: Check Network Services
+        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
+        shell: bash
+        run: |
+          sudo -n netstat -l -p
+      - name: _getCore_ub
+        shell: bash
+        timeout-minutes: 90
+        run: |
+          mkdir -p ~/core/infrastructure
+          cd ~/core/infrastructure
+          git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
+          cd ubiquitous_bash
+          ./_setupUbiquitous.bat
+      - name: _getMinimal_cloud
+        shell: bash
+        run: |
+          ! ~/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _getMinimal_cloud && exit 1
+          true
+          #! sudo -n apt-get -y clean && exit 1
+          df -h
+          df -h /
+        timeout-minutes: 90
+      #- name: changeDisk
+        #shell: bash
+        #run: |
+          #false
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: _getMinimal_cloud
+        shell: bash
+        run: |
+          ! ./ubiquitous_bash.sh _getMinimal_cloud && exit 1
+          true
+          #! sudo -n apt-get -y clean && exit 1
+          df -h
+          df -h /
+        timeout-minutes: 355
+      ## For VBoxManage for _convert . Otherwise historically not apparently necessary.
+      #- name: _getMost_ubuntu22-VBoxManage
+        #shell: bash
+        #run: |
+          ##! ./ubiquitous_bash.sh _getMost && exit 1
+          ##true
+          ##! sudo -n apt-get -y clean && exit 1
+          ##! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
+          ##sudo -n apt-get update
+          ##! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
+          #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
+          #df -h
+          #df -h /
+        #timeout-minutes: 355
+      - name: _getMost-xvfb
+        shell: bash
+        run: |
+          #! ./ubiquitous_bash.sh _getMost && exit 1
+          #true
+          #! sudo -n apt-get -y clean && exit 1
+          #! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
+          #sudo -n apt-get update
+          #! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
+          #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
+          sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y xvfb
+          df -h
+          df -h /
+        timeout-minutes: 355
+      
+      - name: _test_hash_legacy
+        shell: bash
+        run: |
+          if [[ -e "/etc/ssl/openssl_legacy.cnf" ]]
+          then
+              echo -n | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256
+              exit ${PIPESTATUS[0]}
+          else
+              echo -n | openssl dgst -whirlpool -binary | xxd -p -c 256
+              exit ${PIPESTATUS[0]}
+          fi
+      
+      #- name: _create_ubDistBuild
+        #shell: bash
+        #run: |
+          #./_create_ubDistBuild | sudo -n tee ./_local/_create_ubDistBuild.log
+      - name: mkdir _local
+        shell: bash
+        run: |
+          mkdir -p ./_local
+      - name: _true
+        if: ${{ github.event.inputs.skimfast != 'true' }}
+        shell: bash
+        run: |
+          ./_true | sudo -n tee ./_local/_true.log && exit ${PIPESTATUS[0]}
+      - name: _false
+        if: ${{ github.event.inputs.skimfast != 'true' }}
+        shell: bash
+        run: |
+          ( ! ./_false ) | sudo -n tee ./_local/_false.log && exit ${PIPESTATUS[0]}
+      - name: lscpu
+        #if: ${{ github.event.inputs.skimfast != 'true' }}
+        shell: bash
+        run: |
+          lscpu
+      - name: cpuinfo
+        if: ${{ github.event.inputs.skimfast != 'true' }}
+        shell: bash
+        run: |
+          cat /proc/cpuinfo
+
+
+      
+      - name: sev/AMD
+        shell: bash
+        run: |
+          cat /proc/cpuinfo | grep 'model name'
+          echo
+
+          echo 'cat /sys/module/kvm_amd/parameters/sev'
+          cat /sys/module/kvm_amd/parameters/sev || true
+          
+          echo 'dmesg | grep -i sev'
+          sudo -n dmesg | grep -i sev || true
+
+          true
+      
+      - name: sgx/Intel
+        shell: bash
+        run: |
+          cat /proc/cpuinfo | grep 'model name'
+          echo
+          
+          echo 'grep sgx /proc/cpuinfo'
+          grep sgx /proc/cpuinfo || true
+
+          echo 'dmesg | grep sgx'
+          sudo -n dmesg | grep -i sgx || true
+          # Apparently normal: ' sgx: [Firmware Bug]: Unable to map EPC section to online node. Fallback to the NUMA node 0. '
+
+          true
+
+          
+          
+
+      - name: _get_vmImg_beforeBoot_ubDistBuild
+        shell: bash
+        run: |
+          #export FORCE_AXEL=8
+          #./ubiquitous_bash.sh _get_vmImg_beforeBoot_ubDistBuild "latest"
+          # DANGER: Github Actions (strictly internal) ONLY!
+          export FORCE_AXEL=8
+          export MANDATORY_HASH="true"
+          cd ./_local
+          rm -f hash-download.txt
+          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image_beforeBoot.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: fallocate --dig-holes
+        shell: bash
+        run: |
+          fallocate --dig-holes ./_local/vm.img
+
+      - name: _hash_img
+        shell: bash
+        run: |
+          export skimfast=${{ github.event.inputs.skimfast }}
+          echo $skimfast
+          #./ubiquitous_bash.sh _hash_img
+          cat _local/hash-download.txt
+
+
+
+
+      - name: Force KVM group perms
+        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
+        shell: bash
+        run: |
+          sudo -n ls -l /dev/kvm
+          sudo -n ls -l /dev/kvm*
+          sudo -n chown -R $USER:docker /dev/kvm
+          sudo -n chmod 664 /dev/kvm
+          echo
+          #grep --color svm /proc/cpuinfo || true
+          #grep --color vmx /proc/cpuinfo || true
+          sudo -n lsmod | grep kvm
+          ls -l /dev/kvm
+          ls -l /dev/kvm*
+          echo $USER
+          groups
+          echo
+      - name: _create_ubDistBuild-bootOnce
+        shell: bash
+        run: |
+          export skimfast=${{ github.event.inputs.skimfast }}
+          echo skimfast $skimfast
+          [[ "$skimfast" == "" ]] && export skimfast=true
+          echo skimfast $skimfast
+          export qemuNoKVM=${{ github.event.inputs.qemuNoKVM }}
+          #[[ "$qemuNoKVM" == "" ]] && export qemuNoKVM=true
+          echo qemuNoKVM $qemuNoKVM
+          echo
+          ./_create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log && exit ${PIPESTATUS[0]}
+
+
+
+          
+          
+
+      - name: _hash_img
+        shell: bash
+        run: |
+          export skimfast=${{ github.event.inputs.skimfast }}
+          echo $skimfast
+          ./ubiquitous_bash.sh _hash_img
+
+      - name: report! cfgFW
+        shell: bash
+        run: |
+          cat ./_local/cfgFW.log
+      
+      - name: release! report! internal
+        shell: bash
+        run: |
+            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/grub.cfg
+            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/grubenv
+            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/dpkg
+            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/lsmodReport
+            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/binReport
+            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/coreReport
+            cat /proc/cpuinfo > ./_local/cpuinfo
+            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/cpuinfo
+        env:
+          GH_TOKEN: ${{ github.token }}
+            
+      - name: analysis! missing-binaries
+        shell: bash
+        run: |
+          mkdir -p ./_local/analysis
+
+          cp ./_local/lsmodReport ./_local/analysis/lsmodReport
+          cp ./_local/binReport ./_local/analysis/binReport
+          cp ./_local/coreReport ./_local/analysis/coreReport
+          cp ./_local/dpkg ./_local/analysis/dpkg
+
+          cd ./_local/analysis
+
+          # Get the list of releases
+          RELEASES=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/soaringDistributions/ubDistBuild/releases)
+
+          # Loop through each release
+          for RELEASE in $(echo "$RELEASES" | jq -r '.[].tag_name' | sort --reverse); do
+            # Download the binReport file for this release
+            curl -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/lsmodReport"
+            curl -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/binReport"
+            curl -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/coreReport"
+            curl -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/dpkg"
+
+            # Compare the list of binaries in this release to the current release
+            if [ "$RELEASE" != "$currentReleaseTag" ]; then
+              echo | tee -a ./missing-lsmodReport
+              echo "Binaries (lsmod) loaded in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-lsmodReport
+              comm -23 <(sort "lsmodReport-$RELEASE") <(sort "lsmodReport-$currentReleaseTag") | tee -a ./missing-lsmodReport
+              echo | tee -a ./missing-binReport
+              echo "Binaries (filesystem) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-binReport
+              comm -23 <(sort "binReport-$RELEASE") <(sort "binReport-$currentReleaseTag") | tee -a ./missing-binReport
+              echo | tee -a ./missing-coreReport
+              echo "Binaries (core) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-coreReport
+              comm -23 <(sort "coreReport-$RELEASE") <(sort "coreReport-$currentReleaseTag") | tee -a ./missing-coreReport
+              echo | tee -a ./missing-dpkg
+              echo "Binaries (dpkg) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-dpkg
+              comm -23 <(sort "dpkg-$RELEASE") <(sort "dpkg-$currentReleaseTag") | tee -a ./missing-dpkg
+            fi
+          done
+        env:
+          currentReleaseTag: build-${{ github.run_id }}-${{ github.run_attempt }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: release! analysis! missing-binaries
+        shell: bash
+        run: |
+            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-lsmodReport
+            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-binReport
+            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-coreReport
+            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-dpkg
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: fallocate --dig-holes
+        shell: bash
+        run: |
+          fallocate --dig-holes ./_local/vm.img
+
+
+
+
+
+      - name: _package_ubDistBuild_image
+        shell: bash
+        run: |
+          export skimfast=${{ github.event.inputs.skimfast }}
+          echo $skimfast
+          ./ubiquitous_bash.sh _package_ubDistBuild_image | sudo -n tee ./_local/_package_ubDistBuild_image.log && exit ${PIPESTATUS[0]}
+      - name: _ubDistBuild_split
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _ubDistBuild_split | sudo -n tee ./_lib/_ubDistBuild_split.log && exit ${PIPESTATUS[0]}
+        timeout-minutes: 355
+      - name: df
+        shell: bash
+        run: |
+          df -h
+          df -h /
+
+
+
+    
+
+          
+      - name: release! package_image
+        shell: bash
+        run: |
+          #gh release create build-${{ github.run_id }}-${{ github.run_attempt }} --title build --notes ""
+          bash -c '
+          for currentFile in ./_local/package_image.tar.flx.part*
+          do
+            ./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
+            while [[ $(jobs | wc -l) -ge 12 ]]
+            do
+              sleep 2
+            done
+          done
+          wait
+          '
+        env:
+          GH_TOKEN: ${{ github.token }}
+          
+          
+          
+
+      - name: release! delete! package_image_beforeBoot
+        shell: bash
+        run: |
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part00 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part01 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part02 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part03 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part04 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part05 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part06 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part07 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part08 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part09 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part10 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part11 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part12 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part13 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part14 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part15 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part16 --yes
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+
+
+
+
+      #- name: _croc_ubDistBuild_image_out
+        #shell: bash
+        #run: |
+          #./ubiquitous_bash.sh _croc_ubDistBuild_image_out | sudo -n tee ./_lib/_croc_ubDistBuild_image_out.log
+        #timeout-minutes: 355
+      #- name: _package_rm
+        #shell: bash
+        #run: |
+          #./ubiquitous_bash.sh _package_rm
+
+
 
 
 
