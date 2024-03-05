@@ -1406,6 +1406,11 @@ _create_ubDistBuild-rotten_install-core() {
 	_chroot sudo -n systemctl stop nfsdcld
 	_chroot systemctl stop nfsdcld.service
 	
+	_chroot sudo -n systemctl disable nfs-server
+	_chroot systemctl disable nfs-server.service
+	_chroot sudo -n systemctl stop nfs-server
+	_chroot systemctl stop nfs-server.service
+	
 	
 	_chroot sudo -n systemctl disable apache2
 	_chroot systemctl disable apache2.service
@@ -1617,6 +1622,8 @@ CZXWXcRMTo8EmM8i4d
 	_getMost_backend apt-get update
 	
 	_getMost_backend apt-get -y clean
+	
+	_chroot systemctl set-default graphical.target
 
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0
@@ -1917,6 +1924,9 @@ CZXWXcRMTo8EmM8i4d
 
 
 
+	
+	_chroot systemctl set-default graphical.target
+	
 
 
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
