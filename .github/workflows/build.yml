@@ -1119,23 +1119,23 @@ jobs:
         shell: bash
         continue-on-error: true
         run: |
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part00 --yes
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part01 --yes
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part02 --yes
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part03 --yes
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part04 --yes
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part05 --yes
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part06 --yes
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part07 --yes
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part08 --yes
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part09 --yes
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part10 --yes
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part11 --yes
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part12 --yes
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part13 --yes
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part14 --yes
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part15 --yes
           gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part16 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part15 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part14 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part13 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part12 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part11 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part10 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part09 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part08 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part07 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part06 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part05 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part04 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part03 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part02 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part01 --yes
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part00 --yes
         env:
           GH_TOKEN: ${{ github.token }}
 
