@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2278542709'
+export ub_setScriptChecksum_contents='3827788812'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -47602,6 +47602,46 @@ _nouveau_disable() {
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	return 0
 }
+
+
+
+_unattended_enable() {
+	_messagePlain_nominal 'init: _unattended_enable'
+	
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	
+	
+	
+	export getMost_backend="chroot"
+	_set_getMost_backend "$@"
+	_set_getMost_backend_debian "$@"
+	_test_getMost_backend "$@"
+	
+	_getMost_backend apt-get update
+	
+	
+	
+	_getMost_backend_aptGetInstall unattended-upgrades
+	_getMost_backend_aptGetInstall apt-listchanges
+	#_getMost_backend_aptGetInstall bsd-mailx
+	
+	_chroot cp -f "$scriptLib"/custom/ubdist_unattended/20auto-upgrades "$globalVirtFS"/etc/apt/apt.conf.d/20auto-upgrades
+	_chroot chmod 644 "$globalVirtFS"/etc/apt/apt.conf.d/20auto-upgrades
+	
+	_chroot cp -f "$scriptLib"/custom/ubdist_unattended/50unattended-upgrades "$globalVirtFS"/etc/apt/apt.conf.d/50unattended-upgrades
+	_chroot chmod 644 "$globalVirtFS"/etc/apt/apt.conf.d/50unattended-upgrades
+	
+	#--dry-run --debug
+	_messagePlain_probe unattended-upgrades
+	_chroot unattended-upgrades
+	
+	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	return 0
+}
+
+
+
 
 
 

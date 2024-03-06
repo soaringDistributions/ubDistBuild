@@ -2816,6 +2816,46 @@ _nouveau_disable() {
 
 
 
+_unattended_enable() {
+	_messagePlain_nominal 'init: _unattended_enable'
+	
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	
+	
+	
+	export getMost_backend="chroot"
+	_set_getMost_backend "$@"
+	_set_getMost_backend_debian "$@"
+	_test_getMost_backend "$@"
+	
+	_getMost_backend apt-get update
+	
+	
+	
+	_getMost_backend_aptGetInstall unattended-upgrades
+	_getMost_backend_aptGetInstall apt-listchanges
+	#_getMost_backend_aptGetInstall bsd-mailx
+	
+	_chroot cp -f "$scriptLib"/custom/ubdist_unattended/20auto-upgrades "$globalVirtFS"/etc/apt/apt.conf.d/20auto-upgrades
+	_chroot chmod 644 "$globalVirtFS"/etc/apt/apt.conf.d/20auto-upgrades
+	
+	_chroot cp -f "$scriptLib"/custom/ubdist_unattended/50unattended-upgrades "$globalVirtFS"/etc/apt/apt.conf.d/50unattended-upgrades
+	_chroot chmod 644 "$globalVirtFS"/etc/apt/apt.conf.d/50unattended-upgrades
+	
+	#--dry-run --debug
+	_messagePlain_probe unattended-upgrades
+	_chroot unattended-upgrades
+	
+	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	return 0
+}
+
+
+
+
+
+
 _ubDistBuild() {
 	
 	_create_ubDistBuild

@@ -502,6 +502,14 @@ jobs:
         run: |
           ./_create_ubDistBuild-install-ubDistBuild | sudo -n tee ./_create_ubDistBuild-install-ubDistBuild.log && exit ${PIPESTATUS[0]}
 
+      - name: _unattended_enable
+        shell: bash
+        run: |
+          #! ./ubiquitous_bash.sh _openChRoot && exit 1
+          ! ./ubiquitous_bash.sh _unattended_enable && exit 1
+          #! ./ubiquitous_bash.sh _closeChRoot && exit 1
+          true
+
       - name: scribe! info! github
         shell: bash
         run: |
