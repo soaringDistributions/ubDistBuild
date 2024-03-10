@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1883228288'
+export ub_setScriptChecksum_contents='2737890107'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -46069,6 +46069,9 @@ _create_ubDistBuild-rotten_install-core() {
 	_getMost_backend_aptGetInstall filezilla
 	
 	
+	_getMost_backend_aptGetInstall busybox
+	
+	
 	_getMost_backend apt-get -y clean
 
 	
@@ -46093,6 +46096,24 @@ _create_ubDistBuild-rotten_install-core() {
 
 	_chroot sudo -n -u user bash -c 'cd /home/user/core/installations/kiauh-automatic ; chmod 755 ./magic.sh ; ./magic.sh'
 	#_chroot sudo -n -u user bash -c 'cd /home/user/core/installations/kiauh-automatic ; chmod 755 ./auto.sh ; ./auto.sh'
+	
+	
+	
+	
+	# WARNING: Do NOT install 'Assembly3' workbench here , as that may be untested.
+	
+	_chroot sudo -n -u user bash -c 'mkdir -p /home/user/.FreeCAD/Mod ; cd /home/user/.FreeCAD/Mod ; wget "https://github.com/kbwbe/A2plus/archive/refs/tags/v0.4.60.zip" -O /dev/stdout | busybox unzip /dev/stdin ; mv -f A2plus-0.4.60 A2Plus'
+	
+	_chroot sudo -n -u user bash -c 'mkdir -p /home/user/.FreeCAD/Mod ; cd /home/user/.FreeCAD/Mod ; wget "https://github.com/shaise/FreeCAD_SheetMetal/archive/refs/tags/V0.4.02-beta.zip" -O /dev/stdout | busybox unzip /dev/stdin ; mv -f FreeCAD_SheetMetal-0.4.02-beta SheetMetal'
+	
+	_chroot sudo -n -u user bash -c 'mkdir -p /home/user/.FreeCAD/Mod ; cd /home/user/.FreeCAD/Mod ; wget "https://github.com/shaise/FreeCAD_FastenersWB/archive/refs/tags/V0.5.13-beta.zip" -O /dev/stdout | busybox unzip /dev/stdin ; mv -f FreeCAD_FastenersWB-0.5.13-beta FastenersWB'
+	
+	_chroot sudo -n -u user bash -c 'mkdir -p /home/user/.FreeCAD/Mod ; cd /home/user/.FreeCAD/Mod ; wget "https://github.com/easyw/Manipulator/archive/471787b8d47504665d350960f9fb507052154edb.zip" -O /dev/stdout | busybox unzip /dev/stdin ; mv -f Manipulator-471787b8d47504665d350960f9fb507052154edb Manipulator'
+	#_chroot sudo -n -u user bash -c 'mkdir -p /home/user/.FreeCAD/Mod ; cd /home/user/.FreeCAD/Mod ; git config --global checkout.workers -1 ; git clone --recursive --depth 1 "https://github.com/easyw/Manipulator.git"'
+	
+	_chroot sudo -n -u user bash -c 'mkdir -p /home/user/.FreeCAD/Mod ; cd /home/user/.FreeCAD/Mod ; wget "https://github.com/DanMiel/QuickMeasure/archive/7735801eb174e1527ee94ae532139a47d50694ff.zip" -O /dev/stdout | busybox unzip /dev/stdin ; mv -f QuickMeasure-7735801eb174e1527ee94ae532139a47d50694ff QuickMeasure'
+	#_chroot sudo -n -u user bash -c 'mkdir -p /home/user/.FreeCAD/Mod ; cd /home/user/.FreeCAD/Mod ; git config --global checkout.workers -1 ; git clone --recursive --depth 1 "https://github.com/DanMiel/QuickMeasure.git"'
+	
 	
 
 	# DANGER: Klipper services should be started by a script, possibly called by cron, automatically detecting relevant CAN bus attached hardware, if any, and installing appropriate configuration files. Thus, Klipper services are disabled by default.
