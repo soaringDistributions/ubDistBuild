@@ -1274,6 +1274,12 @@ _create_ubDistBuild-rotten_install-core() {
 	_getMost_backend_aptGetInstall filezilla
 	
 	
+	# Responsible and technical use ONLY .
+	_getMost_backend_aptGetInstall pcsxr
+	_getMost_backend_aptGetInstall mupen64plus-qt
+	_getMost_backend_aptGetInstall libmupen64plus-dev
+	
+	
 	_getMost_backend_aptGetInstall busybox
 	
 	
