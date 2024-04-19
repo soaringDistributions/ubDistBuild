@@ -1083,6 +1083,19 @@ _create_ubDistBuild-rotten_install-core() {
 	
 	_getMost_backend_aptGetInstall kruler
 	
+	
+	
+	
+	_getMost_backend_aptGetInstall git-lfs
+	
+	_getMost_backend_aptGetInstall libtorch-dev
+	_getMost_backend_aptGetInstall libtorch-test
+
+	_getMost_backend_aptGetInstall python3-torch
+	_getMost_backend_aptGetInstall python3-torchaudio
+	_getMost_backend_aptGetInstall python3-torchtext
+	_getMost_backend_aptGetInstall python3-torchvision
+	
 
 	
 
