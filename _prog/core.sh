@@ -2256,6 +2256,9 @@ _ubDistBuild_join() {
 		rm -f "$scriptLocal"/_hash-ubdist-join.txt > /dev/null 2>&1
 	fi
 }
+_join() {
+	_ubDistBuild_join "$@"
+}
 
 
 _ubDistBuild_split() {
@@ -3392,6 +3395,9 @@ _refresh_anchors() {
 	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_bin.bat
 
 	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_revert-fromLive.bat
+
+
+	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_join.bat
 
 	
 	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_get_vmImg_ubDistBuild.bat
