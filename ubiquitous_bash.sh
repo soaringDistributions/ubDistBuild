@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='318555785'
+export ub_setScriptChecksum_contents='1963607452'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -46872,6 +46872,80 @@ _package_ubDistBuild_rootfs() {
 }
 _convert-rootfs() {
 	_package_ubDistBuild_rootfs "$@"
+}
+
+
+_ubDistBuild_join() {
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+	_messageNormal 'init: _ubDistBuild_join'
+
+	cd "$scriptLocal"
+
+	rm -f "$scriptLocal"/_hash-ubdist-join.txt > /dev/null 2>&1
+
+	local currentIteration
+
+	if [[ -e "$scriptLocal"/package_image.tar.flx.part00 ]]
+	then
+		_messagePlain_nominal '_ubDistBuild_join: package_image.tar.flx'
+		rm -f "$scriptLocal"/package_image.tar.flx > /dev/null 2>&1
+		currentIteration=""
+		for currentIteration in $(seq -w 0 24 | sort -r)
+		do
+			_messagePlain_probe_var currentIteration
+			[[ -e "$scriptLocal"/package_image.tar.flx.part"$currentIteration" ]] && dd if="$scriptLocal"/package_image.tar.flx.part"$currentIteration" bs=1M status=progress >> "$scriptLocal"/package_image.tar.flx
+		done
+		_messagePlain_probe 'extract: package_image.tar.flx'
+		dd if="$scriptLocal"/package_image.tar.flx bs=1M status=progress | _get_extract_ubDistBuild
+		rm -f "$scriptLocal"/package_image.tar.flx.part* > /dev/null 2>&1
+		rm -f "$scriptLocal"/package_image.tar.flx* > /dev/null 2>&1
+		
+		_messagePlain_probe 'hash: vm.img'
+		#_hash_img
+		_hash_file ubdist-join vm.img "$scriptLocal"/vm.img dd bs=1M status=progress
+		rm -f "$scriptLocal"/_hash-ubdist-join.txt > /dev/null 2>&1
+	fi
+
+	if [[ -e "$scriptLocal"/vm-live.iso.part00 ]]
+	then
+		_messagePlain_nominal '_ubDistBuild_join: vm-live.iso'
+		rm -f "$scriptLocal"/vm-live.iso > /dev/null 2>&1
+		currentIteration=""
+		for currentIteration in $(seq -w 0 24 | sort -r)
+		do
+			_messagePlain_probe_var currentIteration
+			[[ -e "$scriptLocal"/vm-live.iso.part"$currentIteration" ]] && dd if="$scriptLocal"/vm-live.iso.part"$currentIteration" bs=1M status=progress >> "$scriptLocal"/vm-live.iso
+		done
+		rm -f "$scriptLocal"/vm-live.iso.part* > /dev/null 2>&1
+
+		_messagePlain_probe 'hash: vm-live.iso'
+		#_hash_live
+		_hash_file ubdist-join vm-live.iso "$scriptLocal"/vm-live.iso dd bs=1M status=progress
+		rm -f "$scriptLocal"/_hash-ubdist-join.txt > /dev/null 2>&1
+	fi
+
+	if [[ -e "$scriptLocal"/package_rootfs.tar.flx.part00 ]]
+	then
+		_messagePlain_nominal '_ubDistBuild_join: package_rootfs.tar.flx'
+		rm -f "$scriptLocal"/package_rootfs.tar.flx > /dev/null 2>&1
+		currentIteration=""
+		for currentIteration in $(seq -w 0 24 | sort -r)
+		do
+			_messagePlain_probe_var currentIteration
+			[[ -e "$scriptLocal"/package_rootfs.tar.flx.part"$currentIteration" ]] && dd if="$scriptLocal"/package_rootfs.tar.flx.part"$currentIteration" bs=1M status=progress >> "$scriptLocal"/package_rootfs.tar.flx
+		done
+		_messagePlain_probe 'extract: package_rootfs.tar.flx'
+		dd if="$scriptLocal"/package_rootfs.tar.flx bs=1M status=progress | lz4 -d -c > "$scriptLocal"/package_rootfs.tar
+		rm -f "$scriptLocal"/package_rootfs.tar.flx.part* > /dev/null 2>&1
+		rm -f "$scriptLocal"/package_rootfs.tar.flx > /dev/null 2>&1
+
+		_messagePlain_probe 'hash: package_rootfs.tar'
+		#_hash_rootfs
+		#_hash_file ubdist package_rootfs.tar "$scriptLocal"/package_rootfs.tar cat
+		_hash_file ubdist-join package_rootfs.tar "$scriptLocal"/package_rootfs.tar dd bs=1M status=progress
+		rm -f "$scriptLocal"/_hash-ubdist-join.txt > /dev/null 2>&1
+	fi
 }
 
 
