@@ -1009,59 +1009,6 @@ jobs:
             gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/cpuinfo
         env:
           GH_TOKEN: ${{ github.token }}
-            
-      - name: analysis! missing-binaries
-        shell: bash
-        run: |
-          mkdir -p ./_local/analysis
-
-          cp ./_local/lsmodReport ./_local/analysis/lsmodReport
-          cp ./_local/binReport ./_local/analysis/binReport
-          cp ./_local/coreReport ./_local/analysis/coreReport
-          cp ./_local/dpkg ./_local/analysis/dpkg
-
-          cd ./_local/analysis
-
-          # Get the list of releases
-          RELEASES=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/soaringDistributions/ubDistBuild/releases)
-
-          # Loop through each release
-          for RELEASE in $(echo "$RELEASES" | jq -r '.[].tag_name' | sort --reverse); do
-            # Download the binReport file for this release
-            curl -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/lsmodReport"
-            curl -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/binReport"
-            curl -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/coreReport"
-            curl -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/dpkg"
-
-            # Compare the list of binaries in this release to the current release
-            if [ "$RELEASE" != "$currentReleaseTag" ]; then
-              echo | tee -a ./missing-lsmodReport
-              echo "Binaries (lsmod) loaded in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-lsmodReport
-              comm -23 <(sort "lsmodReport-$RELEASE") <(sort "lsmodReport-$currentReleaseTag") | tee -a ./missing-lsmodReport
-              echo | tee -a ./missing-binReport
-              echo "Binaries (filesystem) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-binReport
-              comm -23 <(sort "binReport-$RELEASE") <(sort "binReport-$currentReleaseTag") | tee -a ./missing-binReport
-              echo | tee -a ./missing-coreReport
-              echo "Binaries (core) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-coreReport
-              comm -23 <(sort "coreReport-$RELEASE") <(sort "coreReport-$currentReleaseTag") | tee -a ./missing-coreReport
-              echo | tee -a ./missing-dpkg
-              echo "Binaries (dpkg) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-dpkg
-              comm -23 <(sort "dpkg-$RELEASE") <(sort "dpkg-$currentReleaseTag") | tee -a ./missing-dpkg
-            fi
-          done
-        env:
-          currentReleaseTag: build-${{ github.run_id }}-${{ github.run_attempt }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: release! analysis! missing-binaries
-        shell: bash
-        run: |
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-lsmodReport
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-binReport
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-coreReport
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-dpkg
-        env:
-          GH_TOKEN: ${{ github.token }}
 
       - name: fallocate --dig-holes
         shell: bash
@@ -1164,6 +1111,164 @@ jobs:
 
 
       
+
+  build-analysis:
+    needs: [build, build_release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: _getCore_ub
+        shell: bash
+        run: |
+          mkdir -p ~/core/infrastructure
+          cd ~/core/infrastructure
+          git clone --depth 1 --recursive
+
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          submodules: 'recursive'
+
+      - name: _getMinimal_cloud
+        shell: bash
+        run: |
+          ! ./ubiquitous_bash.sh _getMinimal_cloud && exit 1
+          true
+          #! sudo -n apt-get -y clean && exit 1
+          df -h
+          df -h /
+        timeout-minutes: 355
+      
+      - name: _getMost-aria2
+        shell: bash
+        run: |
+          sudo -n apt-get -y clean
+          sudo -n apt-get update
+          sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y aria2
+        timeout-minutes: 355
+
+            
+      - name: analysis! missing-binaries
+        shell: bash
+        run: |
+          mkdir -p ./_local/analysis
+
+          #cp ./_local/lsmodReport ./_local/analysis/lsmodReport
+          #cp ./_local/binReport ./_local/analysis/binReport
+          #cp ./_local/coreReport ./_local/analysis/coreReport
+          #cp ./_local/dpkg ./_local/analysis/dpkg
+
+          cd ./_local/analysis
+
+          # Get the list of releases
+          RELEASES=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/soaringDistributions/ubDistBuild/releases)
+
+          # Loop through each release
+          for RELEASE in $(echo "$RELEASES" | jq -r '.[].tag_name' | sort --reverse); do
+            # Download the binReport file for this release
+            curl -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/lsmodReport"
+            curl -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/binReport"
+            curl -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/coreReport"
+            curl -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/dpkg"
+
+            # Compare the list of binaries in this release to the current release
+            if [ "$RELEASE" != "$currentReleaseTag" ]; then
+              echo | tee -a ./missing-lsmodReport
+              echo "Binaries (lsmod) loaded in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-lsmodReport
+              comm -23 <(sort "lsmodReport-$RELEASE") <(sort "lsmodReport-$currentReleaseTag") | tee -a ./missing-lsmodReport
+              echo | tee -a ./missing-binReport
+              echo "Binaries (filesystem) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-binReport
+              comm -23 <(sort "binReport-$RELEASE") <(sort "binReport-$currentReleaseTag") | tee -a ./missing-binReport
+              echo | tee -a ./missing-coreReport
+              echo "Binaries (core) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-coreReport
+              comm -23 <(sort "coreReport-$RELEASE") <(sort "coreReport-$currentReleaseTag") | tee -a ./missing-coreReport
+              echo | tee -a ./missing-dpkg
+              echo "Binaries (dpkg) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-dpkg
+              comm -23 <(sort "dpkg-$RELEASE") <(sort "dpkg-$currentReleaseTag") | tee -a ./missing-dpkg
+            fi
+          done
+        env:
+          currentReleaseTag: build-${{ github.run_id }}-${{ github.run_attempt }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: release! analysis! missing-binaries
+        shell: bash
+        run: |
+            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-lsmodReport
+            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-binReport
+            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-coreReport
+            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-dpkg
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
