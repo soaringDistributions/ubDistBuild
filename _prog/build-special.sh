@@ -91,9 +91,11 @@ _build_ubDistBuild-fetch() {
     cd "$currentAccessoriesDir"/parts
     if [[ "$objectName" == "ubDistBuild" ]]
     then
-        _gitBest clone --recursive git@github.com:soaringDistributions/"$objectName".git
+        #_gitBest clone --recursive git@github.com:soaringDistributions/"$objectName".git
+        _gitBest clone git@github.com:soaringDistributions/"$objectName".git
     else
-        _gitBest clone --recursive git@github.com:mirage335/"$objectName".git
+        #_gitBest clone --recursive git@github.com:mirage335/"$objectName".git
+        _gitBest clone git@github.com:mirage335/"$objectName".git
     fi
 
     mkdir -p "$currentAccessoriesDir"/parts/"$objectName"
@@ -107,10 +109,21 @@ _build_ubDistBuild-fetch() {
     #git config gc.pruneExpire now
     #git config gc.reflogExpire now
     #git config gc.reflogExpireUnreachable now
+
     git reset --hard
-    git submodule update
-    git submodule update --force --recursive
-    git gc
+    
+
+    #git submodule update --depth 1
+    #git submodule update --depth 1 --init --recursive
+    #git submodule update --depth 1 --force --recursive
+
+    git checkout HEAD
+    _gitBest pull
+    _gitBest submodule update --depth 1
+    _gitBest submodule update --init --depth 1 --recursive
+    _gitBest submodule update --depth 1 --force --recursive
+
+
     #git gc --aggressive
 
     #git show-ref -s HEAD > $(git rev-parse --git-dir)/shallow

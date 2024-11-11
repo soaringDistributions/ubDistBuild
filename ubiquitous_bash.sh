@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2396312329'
+export ub_setScriptChecksum_contents='3835019225'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -48548,9 +48548,11 @@ _build_ubDistBuild-fetch() {
     cd "$currentAccessoriesDir"/parts
     if [[ "$objectName" == "ubDistBuild" ]]
     then
-        _gitBest clone --recursive git@github.com:soaringDistributions/"$objectName".git
+        #_gitBest clone --recursive git@github.com:soaringDistributions/"$objectName".git
+        _gitBest clone git@github.com:soaringDistributions/"$objectName".git
     else
-        _gitBest clone --recursive git@github.com:mirage335/"$objectName".git
+        #_gitBest clone --recursive git@github.com:mirage335/"$objectName".git
+        _gitBest clone git@github.com:mirage335/"$objectName".git
     fi
 
     mkdir -p "$currentAccessoriesDir"/parts/"$objectName"
@@ -48564,10 +48566,21 @@ _build_ubDistBuild-fetch() {
     #git config gc.pruneExpire now
     #git config gc.reflogExpire now
     #git config gc.reflogExpireUnreachable now
+
     git reset --hard
-    git submodule update
-    git submodule update --force --recursive
-    git gc
+    
+
+    #git submodule update --depth 1
+    #git submodule update --depth 1 --init --recursive
+    #git submodule update --depth 1 --force --recursive
+
+    git checkout HEAD
+    _gitBest pull
+    _gitBest submodule update --depth 1
+    _gitBest submodule update --init --depth 1 --recursive
+    _gitBest submodule update --depth 1 --force --recursive
+
+
     #git gc --aggressive
 
     #git show-ref -s HEAD > $(git rev-parse --git-dir)/shallow
