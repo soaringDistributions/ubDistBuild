@@ -1293,6 +1293,12 @@ _create_ubDistBuild-rotten_install-core() {
 	_getMost_backend_aptGetInstall libmupen64plus-dev
 	
 	
+	
+	# Though not configured as part of the default desktop environment, for the niche constrained use cases, this can be configured very quickly.
+	_getMost_backend_aptGetInstall yakuake
+	
+	
+	
 	_getMost_backend_aptGetInstall busybox
 	
 	
