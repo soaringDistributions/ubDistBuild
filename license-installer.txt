@@ -28,6 +28,27 @@ Any inclusion with other software (eg. an open-source installer exe binary) is n
 
 --------------------------------------------------
 
+Llama 3.1 is licensed under the Llama 3.1 Community License, Copyright © Meta Platforms, Inc. All Rights Reserved.
+
+An AI Large Language Model &#39;Llama-augment&#39; may be included with this dist/OS, and may be accessible using the function &#39;l&#39; at the command line. The license and terms of use are inherited from the &#39;Meta&#39; corporation&#39;s llama3_1 license and use policy.
+https://www.llama.com/llama3_1/license/
+https://www.llama.com/llama3_1/use-policy/
+
+Copies of these license and use policies, to the extent required and/or appropriate, are included in appropriate subdirectories of a proper recursive download of any git repository used to distribute this project. 
+
+--------------------------------------------------
+--------------------------------------------------
+
+The absence of any legal statement here does not negate the validity of any legal statement elsewhere in the ubDistBuild project, any copy of any dist/OS provided, and/or ubdist , etc .
+
+There may be specific legal text in the README files which is not included in this particular README or README-installer file, and additional license text for AI models used in appropriate subdirectories. You must respect all relevant license terms, regardless of whether all of these terms appear specifically in every README file written for any specific purpose.
+
+As an example, this software can also be used to download and install software corresponding to the entire Debian project which includes many software projects therein: it is your responsibility to comply with all license terms.
+
+--------------------------------------------------
+--------------------------------------------------
+
+
 https://github.com/dorssel/usbipd-win
 https://github.com/dorssel/usbipd-win/blob/master/COPYING.md
 
