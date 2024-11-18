@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='653820586'
+export ub_setScriptChecksum_contents='2841796435'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -47841,23 +47841,32 @@ _chroot_test() {
 	#_chroot rmdir /root/temp/test_"$ubiquitiousBashIDnano"/
 	#_chroot rmdir /root/temp/
 	
+
+
 	# https://superuser.com/questions/1559417/how-to-discard-only-mode-changes-with-git
 	cd "$scriptLib"/ubiquitous_bash
+	_messagePlain_probe_cmd ls -ld _lib/kit/app/researchEngine
 	local currentConfig
 	currentConfig=$(git config core.fileMode)
-	git config core.fileMode true
-	find . -type f -exec chmod 644 {} \;
-	find . -type d -exec chmod 755 {} \;
+	_messagePlain_probe_cmd git config core.fileMode true
+	_messagePlain_probe_cmd find . -type f -exec chmod 644 {} \;
+	_messagePlain_probe_cmd find . -type d -exec chmod 755 {} \;
 	#git reset --hard
+	_messagePlain_probe "git diff -p | grep -E '^(diff|old mode|new mode)' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/'"
+	git diff -p | grep -E '^(diff|old mode|new mode)' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/'
 	git diff -p | grep -E '^(diff|old mode|new mode)' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/' | git apply
 	git config core.fileMode "$currentConfig"
 	cd "$functionEntryPWD"
+
+	_messagePlain_probe_cmd ls -l "$scriptLib"/ubiquitous_bash/ubiquitous_bash.sh
 
 	sudo -n mkdir -p "$globalVirtFS"/home/user/temp/test_"$ubiquitiousBashIDnano"
 	sudo -n cp -a "$scriptLib"/ubiquitous_bash "$globalVirtFS"/home/user/temp/test_"$ubiquitousBashIDnano"/
 	
 	_chroot chown -R user:user /home/user/temp/test_"$ubiquitiousBashIDnano"/
 	#_chroot sudo -n -u user bash -c 'cd /home/user/temp/test_"'"$ubiquitousBashIDnano"'"/ ; git reset --hard'
+
+	_messagePlain_probe_cmd _chroot ls -l /home/user/temp/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ubiquitous_bash.sh
 
 	if ! _chroot sudo -n --preserve-env=devfast -u user bash -c 'cd /home/user/temp/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ ; /home/user/temp/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ubiquitous_bash.sh _test'
 	then
