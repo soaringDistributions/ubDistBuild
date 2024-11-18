@@ -2798,6 +2798,7 @@ _chroot_test() {
 	_messagePlain_probe "git diff -p | grep -E '^(diff|old mode|new mode)' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/'"
 	git diff -p | grep -E '^(diff|old mode|new mode)' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/'
 	git diff -p | grep -E '^(diff|old mode|new mode)' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/' | git apply
+	sleep 9
 	git config core.fileMode "$currentConfig"
 	cd "$functionEntryPWD"
 
@@ -2809,7 +2810,7 @@ _chroot_test() {
 	_chroot chown -R user:user /home/user/temp/test_"$ubiquitiousBashIDnano"/
 	#_chroot sudo -n -u user bash -c 'cd /home/user/temp/test_"'"$ubiquitousBashIDnano"'"/ ; git reset --hard'
 
-	_messagePlain_probe_cmd _chroot ls -l /home/user/temp/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ubiquitous_bash.sh
+	_messagePlain_probe_cmd _chroot ls -l /home/user/temp/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/ubiquitous_bash.sh
 
 	if ! _chroot sudo -n --preserve-env=devfast -u user bash -c 'cd /home/user/temp/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ ; /home/user/temp/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ubiquitous_bash.sh _test'
 	then
