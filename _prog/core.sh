@@ -2796,8 +2796,19 @@ _chroot_test() {
 	_messagePlain_probe_cmd find . -type d -exec chmod 755 {} \;
 	#git reset --hard
 	_messagePlain_probe "git diff -p | grep -E '^(diff|old mode|new mode)' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/'"
-	git diff -p | grep -E '^(diff|old mode|new mode)' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/'
-	git diff -p | grep -E '^(diff|old mode|new mode)' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/' | git apply
+	#git diff -p | grep -E '^(diff|old mode|new mode)' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/'
+	#git diff -p | grep -E '^(diff|old mode|new mode)' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/' | git apply
+
+	# ATTRIBUTION: ChatGPT o1-preview 2024-11-18
+	git diff -p | awk '
+	  /^diff --git/ { diff = $0; next }
+	  /^old mode/   { old_mode = $0; next }
+	  /^new mode/   { new_mode = $0;
+	                  print diff;
+	                  print old_mode;
+	                  print new_mode;
+	                }' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/' | tee /dev/sdtout | git apply
+
 	sleep 9
 	git config core.fileMode "$currentConfig"
 	cd "$functionEntryPWD"
