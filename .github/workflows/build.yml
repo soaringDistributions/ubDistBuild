@@ -415,6 +415,11 @@ jobs:
         shell: bash
         run: |
           cat /proc/cpuinfo
+      - name: mem
+        if: ${{ github.event.inputs.skimfast != 'true' }}
+        shell: bash
+        run: |
+          free -m
       - name: _create_ubDistBuild-create
         shell: bash
         run: |
