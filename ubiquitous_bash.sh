@@ -33,7 +33,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 }
 ##### CHECKSUM BOUNDARY - 30 lines
 
-#export ub_setScriptChecksum_disable='true'
+export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
 export ub_setScriptChecksum_contents='3413894016'
@@ -22023,33 +22023,35 @@ _test_docker() {
 		echo 'base images cannot be created without mkimage'
 		#_stop 1
 	fi
-	
+	echo test1
 	if ! [[ -e "$scriptBin"/hello ]]
 	then
 		echo
 		echo 'some base images cannot be created without hello'
 	fi
-	
+	echo tes2
 	
 	
 	if _if_cygwin
 	then
 		return 0
 	fi
-	
+	echo test3
 	sudo -n systemctl status docker 2>&1 | head -n 2 | grep -i 'chroot' > /dev/null && return 0
 	systemctl status docker 2>&1 | head -n 2 | grep -i 'chroot' > /dev/null && return 0
-	
+	echo test4
 	_permitDocker docker import "$scriptBin"/"dockerHello".tar "ubdockerhello" --change 'CMD ["/hello"]' > /dev/null 2>&1
+	echo test5
 	if ! _permitDocker docker run "ubdockerhello" 2>&1 | grep 'hello world' > /dev/null 2>&1
 	then
+		echo test6
 		echo 'failed ubdockerhello'
 		echo 'request: may require iptables legacy'
 		echo 'sudo -n update-alternatives --set iptables /usr/sbin/iptables-legacy'
 		echo 'sudo -n update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy'
 		_stop 1
 	fi
-	
+	echo test7
 }
 
 
@@ -44514,19 +44516,19 @@ _test() {
 	_tryExec "_test_dosbox"
 	
 	_tryExec "_testWINE"
-	
+	echo test0
 	_tryExec "_test_docker"
-	
+	echo test8
 	_tryExec "_test_docker_mkimage"
-	
+	echo test9
 	_tryExec "_testVirtBootdisc"
-	
+	echo test10
 	_tryExec "_test_live"
-	
+	echo test11
 	_tryExec "_testExtra"
-	
+	echo test12
 	_tryExec "_testGit"
-	
+	echo test13
 	_tryExec "_test_bup"
 	
 	_tryExec "_testX11"
