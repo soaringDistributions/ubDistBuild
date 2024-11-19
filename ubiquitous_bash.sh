@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1166422500'
+export ub_setScriptChecksum_contents='1696987366'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -22888,22 +22888,27 @@ PARAMETER num_ctx 6144' > Llama-augment.Modelfile
 	_stop
 }
 _setup_ollama() {
-	_user_ollama
+	#_wantGetDep sudo
+	#_mustGetSudo
+	#export currentUser_ollama=$(_user_ollama)
 	
 	if ! _if_cygwin
 	then
+		echo 'setup: ollama: https://ollama.com/install.sh'
+		
 		# DANGER: This upstream script, as with many, has been known to use 'rm' recursively without the safety checks of '_safeRMR' .
 		# CAUTION: This upstream script may not catch error conditions upon failure, which may increase the size of dist/OS images built after such failures.
 		curl -fsSL https://ollama.com/install.sh | sh
 	fi
 	
-	type ollama > /dev/null 2>&1 && "$scriptAbsoluteLocation" _setup_ollama_model_augment_sequence
+	type -p ollama > /dev/null 2>&1 && "$scriptAbsoluteLocation" _setup_ollama_model_augment_sequence
 }
 
 _test_ollama() {
-	_user_ollama
+	#_mustGetSudo
+	#export currentUser_ollama=$(_user_ollama)
 
-	if ! type ollama > /dev/null 2>&1
+	if ! type -p ollama > /dev/null 2>&1
 	then
 		_setup_ollama
 	fi
@@ -22911,9 +22916,9 @@ _test_ollama() {
 	
 	if ! _if_cygwin
 	then
-		! type ollama > /dev/null 2>&1 && _messageFAIL && _stop 1
+		! type -p ollama > /dev/null 2>&1 && _messageFAIL && _stop 1
 	else
-		! type ollama > /dev/null 2>&1 && echo 'warn: acepted: cygwin: missing: ollama'
+		! type -p ollama > /dev/null 2>&1 && echo 'warn: acepted: cygwin: missing: ollama'
 		# Accepted. Do NOT return with error status (ie. do NOT 'return 1') .
 	fi
 	
@@ -22930,14 +22935,15 @@ _vector_ollama_procedure() {
 	return 0
 }
 _vector_ollama() {
-	_user_ollama
+	#_mustGetSudo
+	#export currentUser_ollama=$(_user_ollama)
 
 	_service_ollama
 	
-	if _if_cygwin && ! type ollama > /dev/null 2>&1
+	if _if_cygwin && ! type -p ollama > /dev/null 2>&1
 	then
 		echo 'warn: accepted: cygwin: missing: ollama'
-	elif type ollama > /dev/null 2>&1
+	elif type -p ollama > /dev/null 2>&1
 	then
 		if [[ "$hostMemoryQuantity" -lt 28000000 ]]
 		then
@@ -22969,11 +22975,14 @@ _vector_ollama() {
 
 
 _user_ollama() {
-	_mustGetSudo
-	local currentUser
-	[[ "$USER" != "root" ]] && currentUser="$USER"
-	[[ "$currentUser_researchEngine" != "" ]] && currentUser="$currentUser_researchEngine"
-	[[ "$currentUser" == "" ]] && currentUser="user"
+	#_mustGetSudo
+	local currentUser_temp
+	[[ "$currentUser_researchEngine" != "" ]] && currentUser_temp="$currentUser_researchEngine"
+	[[ "$currentUser_temp" == "" ]] && currentUser_temp="$currentUser"
+	[[ "$currentUser_temp" == "" ]] && [[ "$USER" != "root" ]] && currentUser_temp="$USER"
+	[[ "$currentUser_temp" == "" ]] && currentUser_temp="user"
+
+	echo "$currentUser_temp"
 	return 0
 }
 
