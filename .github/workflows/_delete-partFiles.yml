@@ -10,10 +10,10 @@ on:
           required: true
 
 jobs:
-  delete_part_files_dry_run:
+  delete_part_files:
     runs-on: ubuntu-latest
     steps:
-      - name: List .part* Files from Release (Dry Run)
+      - name: Delete .part* Files from Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ github.event.inputs.release_tag }}
@@ -33,5 +33,29 @@ jobs:
             exit 1
           fi
 
-          echo "Listing .part* files that would be deleted:"
-          echo "${RESPONSE}" | jq -r '.assets[] | select(.name | test("\\.part.*$")) | "- \(.name) (ID: \(.id))"'
+          echo "Deleting .part* files from release: ${RELEASE_TAG}"
+
+          echo "${RESPONSE}" | jq -r '.assets[] | select(.name | test("\\.part.*$")) | .id' | while read ASSET_ID; do
+            ASSET_INFO=$(curl -sSL \
+              -H "Authorization: token ${GH_TOKEN}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/repos/${OWNER}/${REPO}/releases/assets/${ASSET_ID}")
+
+            ASSET_NAME=$(echo "${ASSET_INFO}" | jq -r '.name')
+
+            echo "Deleting asset: ${ASSET_NAME} (ID: ${ASSET_ID})"
+
+            DELETE_RESPONSE=$(curl -sSL -o /dev/null -w "%{http_code}" \
+              -X DELETE \
+              -H "Authorization: token ${GH_TOKEN}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/repos/${OWNER}/${REPO}/releases/assets/${ASSET_ID}")
+
+            if [ "${DELETE_RESPONSE}" -eq 204 ]; then
+              echo "Successfully deleted asset: ${ASSET_NAME}"
+            else
+              echo "Failed to delete asset: ${ASSET_NAME}"
+              echo "HTTP Response Code: ${DELETE_RESPONSE}"
+              exit 1
+            fi
+          done
