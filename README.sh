@@ -108,6 +108,30 @@ _t 'Attempts to achieve non-inclusive technology use outcomes by legal interpret
 This text is intended to effectively PROHIBIT attempts to reintroduce liability through reinterpretation of this text or interpretation within any societal context. The intended outcome is to allow all inclusive use of this technology, and any legal interpretation based on working backwards from a desired outcome would only be respecting the plain meaning, reasonableness, or lack of situational absurdity, if the outcome was conclusive and consistent with, as stated above, prior legal best practice.'
 _heading1 'Usage'
 _o _messagePlain_probe '_gitBest clone --recursive --depth 1 git@github.com:soaringDistributions/ubDistBuild.git'
+_heading1 'Usage - In-Place - Cloud'
+_t 'Please use the script at &#39;_lib/install/ubdist.sh&#39; to install to a 'cloud' computer from a 'rescue' or 'live' boot.
+
+Some documentation is included with the script, showing how to run the script, as well as how to input some common configuration settings, such as an authorized SSH login key.
+
+# CAUTION: DANGER: This script and these commands WILL erase data on your disk!
+You must remove the comment characters for this command to work.
+
+#export ssh="" ; #wget -qO https://raw.githubusercontent.com/soaringDistributions/ubDistBuild/main/_lib/install/ubdist.sh | bash'
+_heading1 'Usage - In-Place - dist/OS'
+_t 'Most of the build process for the ubdist dist/OS can run automatically from within a minimal Debian or Ubuntu installation, installing and configuring software automatically as needed.
+
+Documented by the relevant kit README at &#39;_lib\kit\install\cloud\cloud-init\zRotten\zMinimal\README.md&#39;.
+
+# WARNING: This WILL drastically configure your dist/OS, take at least 40 minutes to complete, involve multiple automatic reboots, and may omit configuring some software (ie. VBoxGuest). The intended use case is cloud providers or unusual hardware which strictly must run their own custom kernel, etc.
+
+#wget https://raw.githubusercontent.com/mirage335/ubiquitous_bash/master/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install_compressed.sh
+#mv rotten_install_compressed.sh rotInsSh
+#chmod u+x rotInsSh
+##./rotInSSh _custom_kernel
+#./rotInsSh _install_and_run
+
+## optional
+#./rotInsSh _custom_core_drop'
 _heading1 'Contributions'
 _t 'Due to the small scope of this project, contributors with pull requests are politely asked, but not necessarily required, to consider unambigiously assigning copyright to Soaring Distributions LLC. GPLv3 relicensing is expected most likely, though other scenarios are possibile if adequate flexibility to workaround MSW is essentially ensured.'
 _ _page

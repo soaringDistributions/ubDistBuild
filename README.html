@@ -137,6 +137,44 @@ if false; then true; # -->
 <!-- # --></pre>
 <!--
 fi
+ '_heading1' 'Usage - In-Place - Cloud'
+if false; then true; # -->
+<!-- # --><h1>Usage - In-Place - Cloud</h1>
+<!--
+fi
+_t '
+scriptedIllustrator_markup_uk4uPhB663kVcygT0q --><!-- # --><pre style="margin-top: 0px;margin-bottom: 0px;white-space: pre-wrap;">Please use the script at &#39;_lib/install/ubdist.sh&#39; to install to a cloud computer from a rescue or live boot.
+
+Some documentation is included with the script, showing how to run the script, as well as how to input some common configuration settings, such as an authorized SSH login key.
+
+# CAUTION: DANGER: This script and these commands WILL erase data on your disk!
+You must remove the comment characters for this command to work.
+
+#export ssh="" ; #wget -qO https://raw.githubusercontent.com/soaringDistributions/ubDistBuild/main/_lib/install/ubdist.sh | bash
+<!-- # --></pre><!-- scriptedIllustrator_markup_uk4uPhB663kVcygT0q
+'
+ '_heading1' 'Usage - In-Place - dist/OS'
+if false; then true; # -->
+<!-- # --><h1>Usage - In-Place - dist/OS</h1>
+<!--
+fi
+_t '
+scriptedIllustrator_markup_uk4uPhB663kVcygT0q --><!-- # --><pre style="margin-top: 0px;margin-bottom: 0px;white-space: pre-wrap;">Most of the build process for the ubdist dist/OS can run automatically from within a minimal Debian or Ubuntu installation, installing and configuring software automatically as needed.
+
+Documented by the relevant kit README at &#39;_lib\kit\install\cloud\cloud-init\zRotten\zMinimal\README.md&#39;.
+
+# WARNING: This WILL drastically configure your dist/OS, take at least 40 minutes to complete, involve multiple automatic reboots, and may omit configuring some software (ie. VBoxGuest). The intended use case is cloud providers or unusual hardware which strictly must run their own custom kernel, etc.
+
+#wget https://raw.githubusercontent.com/mirage335/ubiquitous_bash/master/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install_compressed.sh
+#mv rotten_install_compressed.sh rotInsSh
+#chmod u+x rotInsSh
+##./rotInSSh _custom_kernel
+#./rotInsSh _install_and_run
+
+## optional
+#./rotInsSh _custom_core_drop
+<!-- # --></pre><!-- scriptedIllustrator_markup_uk4uPhB663kVcygT0q
+'
  '_heading1' 'Contributions'
 if false; then true; # -->
 <!-- # --><h1>Contributions</h1>
