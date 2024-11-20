@@ -3,47 +3,35 @@
 name: _delete-partFiles (Dry Run)
 
 on:
-  workflow_dispatch:
-    inputs:
-      release_tag:
-        description: 'Release tag or name (e.g., build-10889308814-1)'
-        required: true
+    workflow_dispatch:
+      inputs:
+        release_tag:
+          description: 'Release tag (e.g., build-10889308814-1)'
+          required: true
 
 jobs:
-  list_part_files:
+  delete_part_files_dry_run:
     runs-on: ubuntu-latest
     steps:
-      - name: List .part* files from release (Dry Run)
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const release_tag = github.event.inputs.release_tag;
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
+      - name: List .part* Files from Release (Dry Run)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ github.event.inputs.release_tag }}
+        run: |
+          OWNER=$(echo "${GITHUB_REPOSITORY}" | cut -d'/' -f1)
+          REPO=$(echo "${GITHUB_REPOSITORY}" | cut -d'/' -f2)
+          
+          echo "Fetching release information for tag: ${RELEASE_TAG}"
 
-            try {
-              const release = await github.rest.repos.getReleaseByTag({
-                owner,
-                repo,
-                tag: release_tag
-              });
+          RESPONSE=$(curl -sSL \
+            -H "Authorization: token ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${OWNER}/${REPO}/releases/tags/${RELEASE_TAG}")
 
-              const assets = release.data.assets;
-              const partPattern = /\.part\d+$/;
-              let foundAssets = false;
+          if echo "${RESPONSE}" | grep -q '"message": "Not Found"'; then
+            echo "Error: Release '${RELEASE_TAG}' not found."
+            exit 1
+          fi
 
-              for (const asset of assets) {
-                if (partPattern.test(asset.name)) {
-                  console.log(`Asset to delete: ${asset.name}`);
-                  foundAssets = true;
-                }
-              }
-
-              if (!foundAssets) {
-                console.log('No assets matching the pattern were found.');
-              }
-            } catch (error) {
-              console.error(`Error: ${error.message}`);
-              throw error;
-            }
+          echo "Listing .part* files that would be deleted:"
+          echo "${RESPONSE}" | jq -r '.assets[] | select(.name | test("\\.part.*$")) | "- \(.name) (ID: \(.id))"'
