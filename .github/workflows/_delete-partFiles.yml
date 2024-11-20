@@ -1,0 +1,49 @@
+# ATTRIBUTION-AI: Largely attributable to ChatGPT o1-preview 2024-11-20 .
+
+name: _delete-partFiles (Dry Run)
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag or name (e.g., build-10889308814-1)'
+        required: true
+
+jobs:
+  list_part_files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: List .part* files from release (Dry Run)
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const release_tag = github.event.inputs.release_tag;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            try {
+              const release = await github.rest.repos.getReleaseByTag({
+                owner,
+                repo,
+                tag: release_tag
+              });
+
+              const assets = release.data.assets;
+              const partPattern = /\.part\d+$/;
+              let foundAssets = false;
+
+              for (const asset of assets) {
+                if (partPattern.test(asset.name)) {
+                  console.log(`Asset to delete: ${asset.name}`);
+                  foundAssets = true;
+                }
+              }
+
+              if (!foundAssets) {
+                console.log('No assets matching the pattern were found.');
+              }
+            } catch (error) {
+              console.error(`Error: ${error.message}`);
+              throw error;
+            }
