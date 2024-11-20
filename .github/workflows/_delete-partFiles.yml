@@ -1,6 +1,6 @@
 # ATTRIBUTION-AI: Largely attributable to ChatGPT o1-preview 2024-11-20 .
 
-name: _delete-partFiles (Dry Run)
+name: _delete-partFiles
 
 on:
     workflow_dispatch:
