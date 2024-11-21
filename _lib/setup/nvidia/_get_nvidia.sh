@@ -556,7 +556,11 @@ _set_nvidia() {
 
 
 
-	export currentVersion_series535p="550.107.02"
+	#export currentVersion_series535p="550.107.02"
+	#export currentVersion_legacy470="470.256.02"
+
+
+	export currentVersion_series535p="550.135"
 	export currentVersion_legacy470="470.256.02"
 
 
