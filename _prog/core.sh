@@ -1240,6 +1240,8 @@ _create_ubDistBuild-rotten_install-core() {
 
 	_getMost_backend_aptGetInstall marble
 	_getMost_backend_aptGetInstall marble-qt
+	
+	_getMost_backend_aptGetInstall qgis
 
 	
 	_getMost_backend_aptGetInstall stellarium
