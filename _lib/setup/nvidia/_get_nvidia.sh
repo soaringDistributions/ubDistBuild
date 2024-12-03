@@ -887,11 +887,11 @@ _patch_nvidia() {
 
 
 		# ATTRIBUTION-AI ChatGPT o1-preview 2024-12-02
-		env TERM=dumb sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run -s --ui=none --no-questions --apply-patch "$scriptAbsoluteFolder"/gcc14-k6.10-k6.12.patch.txt < /dev/null > "$scriptAbsoluteFolder"/nv_patch.log 2>&1
+		#env TERM=dumb sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run -s --ui=none --no-questions --apply-patch "$scriptAbsoluteFolder"/gcc14-k6.10-k6.12.patch.txt < /dev/null > "$scriptAbsoluteFolder"/nv_patch.log 2>&1
+		env TERM=dumb sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run -s --ui=none --no-questions --apply-patch "$scriptAbsoluteFolder"/gcc14-k6.10-k6.12.patch.txt < /dev/null 2>&1
 		#env TERM=dumb sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run -s --ui=none --no-questions --apply-patch "$scriptAbsoluteFolder"/gcc14-k6.10-k6.12.patch.txt < /dev/null > /dev/null 2>&1
 		#env TERM=dumb sh ./NVIDIA-Linux-x86_64-470.256.02.run -s --ui=none --no-questions --apply-patch ./gcc14-k6.10-k6.12.patch.txt < /dev/null 2>&1
-
-		_messagePlain_probe_cmd cat "$scriptAbsoluteFolder"/nv_patch.log
+		#_messagePlain_probe_cmd cat "$scriptAbsoluteFolder"/nv_patch.log
 
 		#mv -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch"-orig.run
 		rm -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run
