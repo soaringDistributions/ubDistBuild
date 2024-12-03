@@ -829,7 +829,31 @@ _detect_nvidia() {
 }
 
 
+# Returns 0 if input parameters or all lines input require a patch.
+_if_patch_nvidia() {
+	if [[ "$1" != "" ]] && [[ "$2" != "" ]]
+	then
+		[[ "$1" == "470.256.02" ]] && [[ "$2" == "6.12.1" ]] && return 0
+		return 1
+	else
+		if [[ "$1" == "470.256.02" ]] && [[ "$3" == "" ]]
+		then
+			grep -v "6.12.1\|NULL"
+			[[ "$?" == "0" ]] && return 1
+			return 0
+		fi
+		if [[ "$1" == "470.256.02" ]] && [[ "$3" == "invert" ]]
+		then
+			grep "6.12.1\|NULL"
+			[[ "$?" == "0" ]] && return 1
+			return 0
+		fi
+	fi
+	cat
+	[[ "$?" == "0" ]] && return 1
 
+	return 0
+}
 _patch_nvidia() {
 	local functionEntryPWD
 	functionEntryPWD="$PWD"
@@ -847,7 +871,7 @@ _patch_nvidia() {
 	# https://www.linuxquestions.org/questions/showthread.php?p=6540525#post6540525
 	# https://www.linuxquestions.org/questions/attachment.php?attachmentid=43873&d=1732026155
 	# https://gist.github.com/joanbm/a6d3f7f873a60dec0aa4a734c0f1d64e
-	if [[ "$currentVersion_patch" == "470.256.02" ]] && [[ "$currentVersion_patch_kernel" == "6.12.1" ]]
+	if [[ "$currentVersion_patch" == "470.256.02" ]] && [[ "$currentVersion_patch_kernel" == "6.12.1" ]] && _if_patch_nvidia "$currentVersion_patch" "$currentVersion_patch_kernel"
 	then
 		_messagePlain_nominal '_patch_nvidia'
 		_messagePlain_probe_var currentVersion_patch
@@ -875,9 +899,10 @@ _patch_nvidia() {
 		chmod 755 "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run
 		_messagePlain_probe_cmd ls -l "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-*
 
-		echo 'GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT nvidia-drm.modeset=1"' | sudo -n tee /etc/default/grub.d/91_nvPatch.cfg
-		sudo -n chmod 644 "/etc/default/grub.d/91_nvPatch.cfg"
-		sudo -n update-grub
+		# In practice, 'nvidia-drm' 'modeset' occurs elsewhere in '_get_nvidia.sh' scripted installation, and is implemented by default through 'modprobe' options .
+		#echo 'GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT nvidia-drm.modeset=1"' | sudo -n tee /etc/default/grub.d/91_nvPatch.cfg
+		#sudo -n chmod 644 "/etc/default/grub.d/91_nvPatch.cfg"
+		#sudo -n update-grub
 	fi
 
 
@@ -1015,7 +1040,7 @@ _install_nvidia() {
 		local currentIteration
 		currentIteration=0
 		# If headers for more than 12 kernels are installed, that is an issue.
-		ls -A -1 -d /usr/src/linux-headers-* | sort -r -V | head -n 12 | sed -s 's/.*linux-headers-//' | while read -r currentLine
+		ls -A -1 -d /usr/src/linux-headers-* | sort -r -V | head -n 12 | sed -s 's/.*linux-headers-//' | _if_patch_nvidia "$currentVersion" | while read -r currentLine
 		do
 			_messagePlain_probe 'nvidia: make: '"$currentLine"
 			
@@ -1059,12 +1084,111 @@ _install_nvidia() {
 			
 			let currentIteration=currentIteration+1
 		done
+
+
+
+
+		# WARNING: May be untested.
+
+		# ATTENTION: Nearly indentical duplicate of previous code which skips over any NVIDIA drivers and/or kernel versions requiring patching.
+		# This otherwise duplicative code works around some issues, which would need to be addressed by any attempt to combine into a more elegant function.
+		# Original installer is deleted by _patch_nvidia to reduce disk space requirements in some situations.
+		# Local variables may be unavailable in a function.
+		# Directory must be extracted from NVIDIA installer separately for each patch (due to at least differing kernel versions).
+		
+		rm -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-orig.run
+		currentIteration=0
+		# If headers for more than 12 kernels are installed, that is an issue.
+		ls -A -1 -d /usr/src/linux-headers-* | sort -r -V | head -n 12 | sed -s 's/.*linux-headers-//' | _if_patch_nvidia "$currentVersion" "" "invert" | while read -r currentLine
+		do
+			_messagePlain_probe 'nvidia: PATCH , EXTRACT'
+
+			[[ -e "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run ]] && cp -n "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-orig.run
+
+			_safeRMR "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"
+			rm -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
+			cp -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-orig.run "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
+			chmod 755 "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
+
+
+			_patch_nvidia "$currentVersion" "$currentLine"
+
+			sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --extract-only
+			[[ "$?" != "0" ]] && currentExitStatus=1
+
+			rm -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
+
+			mv -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"
+
+
+
+			# ###
+			cd "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"
+			"$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"/nvidia-installer --no-kernel-module --ui=none --no-questions
+			[[ "$?" != "0" ]] && currentExitStatus=1
+			
+			
+			
+			_messagePlain_probe 'nvidia: make: '"$currentLine"
+			
+			export SYSSRC=/usr/src/linux-headers-"$currentLine"
+			export IGNORE_CC_MISMATCH=1
+			
+			export IGNORE_MISSING_MODULE_SYMVERS=1
+			
+			
+			cd "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"/kernel
+			
+			make clean
+			
+			_messagePlain_probe 'nvidia: make -j $(nproc)'
+			make -j $(nproc)
+			[[ "$?" != "0" ]] && [[ "$currentIteration" -le "2" ]] && currentExitStatus=1
+			
+			mkdir -p /lib/modules/"$currentLine"/kernel/drivers/video
+			cp -f ./*.ko /lib/modules/"$currentLine"/kernel/drivers/video/
+			
+			# https://stackoverflow.com/questions/34800731/module-not-found-when-i-do-a-modprobe
+			sudo -n depmod "$currentLine"
+			
+			
+			# https://forums.developer.nvidia.com/t/error-nvidia-settings-could-not-find-the-registry-key-file/50142/2
+			cd /usr/share/nvidia
+			sudo ln -sf $(ls -1 nvidia-application-profiles-*-key-documentation | sort -r -V) nvidia-application-profiles-key-documentation
+			
+			
+			#--systemd
+			#--expert
+			#_messagePlain_probe nvidia "$currentLine"
+			#sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --ui=none --no-questions -j "$currentParallel" --no-cc-version-check -k "$currentLine" --dkms -m=kernel
+			#[[ "$?" != "0" ]] && currentExitStatus=1
+			
+			# TODO
+			# http://download.nvidia.com/XFree86/Linux-x86_64/515.43.04/README/kernel_open.html
+			# https://github.com/NVIDIA/open-gpu-kernel-modules
+			# https://github.com/NVIDIA/open-gpu-kernel-modules/blob/main/README.md
+			#--no-kernel-module
+			
+			let currentIteration=currentIteration+1
+
+			# ###
+
+			_safeRMR "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"
+			rm -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
+		done
+
+		
+
+		#_safeRMR "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"
 		
 		cd "$functionEntryPWD"
 	else
 		#--no-recursion
 		local currentKernel=$(uname -r)
 		_messagePlain_probe nvidia uname -r "$currentKernel"
+
+		_patch_nvidia "$currentVersion" "$currentKernel"
+
 		sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --ui=none --no-questions -j "$currentParallel" --no-cc-version-check -k "$currentKernel" -m=kernel
 	fi
 	
