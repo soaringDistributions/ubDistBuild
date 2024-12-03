@@ -855,11 +855,21 @@ _patch_nvidia() {
 
 		# DANGER: Do NOT distribute this (or ANY similar) patch file, as it may be a derived work of NVIDIA drivers, which NVIDIA may be distributing as a derived work of Linux kernel.
 		# ATTRIBUTION-AI ChatGPT 4o Search 2024-12-02 
-		curl -L -A "Mozilla/5.0" 'https://www.linuxquestions.org/questions/attachment.php?attachmentid=43873&d=1732026155' -o "$scriptAbsoluteFolder"/gcc14-k6.10-k6.12.patch.txt
+		#curl -L -A "Mozilla/5.0" 'https://www.linuxquestions.org/questions/attachment.php?attachmentid=43873&d=1732026155' -o "$scriptAbsoluteFolder"/gcc14-k6.10-k6.12.patch.txt
+		wget --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36" 'https://www.linuxquestions.org/questions/attachment.php?attachmentid=43873&d=1732026155' -O "$scriptAbsoluteFolder"/gcc14-k6.10-k6.12.patch.txt
 
-		"$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run  --apply-patch "$scriptAbsoluteFolder"/gcc14-k6.10-k6.12.patch.txt
-		mv -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run  "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch"-orig.run
-		mv -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch"-custom.run  "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run
+
+
+		# ATTRIBUTION-AI ChatGPT o1-preview 2024-12-02
+		env TERM=dumb sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run -s --ui=none --no-questions --apply-patch "$scriptAbsoluteFolder"/gcc14-k6.10-k6.12.patch.txt < /dev/null 2>&1
+		#env TERM=dumb sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run -s --ui=none --no-questions --apply-patch "$scriptAbsoluteFolder"/gcc14-k6.10-k6.12.patch.txt < /dev/null > /dev/null 2>&1
+		#env TERM=dumb sh ./NVIDIA-Linux-x86_64-470.256.02.run -s --ui=none --no-questions --apply-patch ./gcc14-k6.10-k6.12.patch.txt < /dev/null 2>&1
+
+
+		mv -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch"-orig.run
+		mv -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch"-custom.run "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run
+		chmod 755 "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run
+		_messagePlain_probe_cmd ls -l "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-*
 
 		echo 'GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT nvidia-drm.modeset=1"' | sudo -n tee /etc/default/grub.d/91_nvPatch.cfg
 		sudo -n chmod 644 "/etc/default/grub.d/91_nvPatch.cfg"
