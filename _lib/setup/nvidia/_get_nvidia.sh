@@ -867,7 +867,8 @@ _patch_nvidia() {
 
 		_messagePlain_probe_cmd cat "$scriptAbsoluteFolder"/nv_patch.log
 
-		mv -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch"-orig.run
+		#mv -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch"-orig.run
+		rm -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run
 		mv -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch"-custom.run "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run
 		chmod 755 "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run
 		_messagePlain_probe_cmd ls -l "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-*
