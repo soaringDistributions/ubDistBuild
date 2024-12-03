@@ -830,6 +830,48 @@ _detect_nvidia() {
 
 
 
+_patch_nvidia() {
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+
+	cd "$scriptAbsoluteFolder"
+	
+	
+	local currentVersion_patch="$1"
+	[[ "$currentVersion_patch" == "" ]] && currentVersion_patch="$currentVersion"
+
+	local currentVersion_patch_kernel="$2"
+	[[ "$currentVersion_patch_kernel" == "" ]] && currentVersion_patch_kernel=$(uname -r)
+
+	# https://www.linuxquestions.org/questions/showthread.php?p=6535368
+	# https://www.linuxquestions.org/questions/showthread.php?p=6540525#post6540525
+	# https://www.linuxquestions.org/questions/attachment.php?attachmentid=43873&d=1732026155
+	# https://gist.github.com/joanbm/a6d3f7f873a60dec0aa4a734c0f1d64e
+	if [[ "$currentVersion_patch" == "470.256.02" ]] && [[ "$currentVersion_patch_kernel" == "6.12.1" ]]
+	then
+		_messagePlain_nominal '_patch_nvidia'
+		_messagePlain_probe_var currentVersion_patch
+		_messagePlain_probe_var currentVersion_patch_kernel
+
+		# DANGER: Do NOT distribute this (or ANY similar) patch file, as it may be a derived work of NVIDIA drivers, which NVIDIA may be distributing as a derived work of Linux kernel.
+		# ATTRIBUTION-AI ChatGPT 4o Search 2024-12-02 
+		curl -L -A "Mozilla/5.0" 'https://www.linuxquestions.org/questions/attachment.php?attachmentid=43873&d=1732026155' -o "$scriptAbsoluteFolder"/gcc14-k6.10-k6.12.patch.txt
+
+		"$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run  --apply-patch "$scriptAbsoluteFolder"/gcc14-k6.10-k6.12.patch.txt
+		mv -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run  "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch"-orig.run
+		mv -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch"-custom.run  "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run
+
+		echo 'GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT nvidia-drm.modeset=1"' | sudo -n tee /etc/default/grub.d/91_nvPatch.cfg
+		sudo -n chmod 644 "/etc/default/grub.d/91_nvPatch.cfg"
+		sudo -n update-grub
+	fi
+
+
+	cd "$functionEntryPWD"
+	return 0
+}
+
+
 _fetch_nvidia-wget() {
 	local currentVersion_fetch="$1"
 	[[ "$currentVersion_fetch" == "" ]] && currentVersion_fetch="$currentVersion"
