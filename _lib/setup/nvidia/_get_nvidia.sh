@@ -853,6 +853,8 @@ _patch_nvidia() {
 		_messagePlain_probe_var currentVersion_patch
 		_messagePlain_probe_var currentVersion_patch_kernel
 
+		_messagePlain_probe_cmd df -h "$scriptAbsoluteFolder"
+
 		# DANGER: Do NOT distribute this (or ANY similar) patch file, as it may be a derived work of NVIDIA drivers, which NVIDIA may be distributing as a derived work of Linux kernel.
 		# ATTRIBUTION-AI ChatGPT 4o Search 2024-12-02 
 		#curl -L -A "Mozilla/5.0" 'https://www.linuxquestions.org/questions/attachment.php?attachmentid=43873&d=1732026155' -o "$scriptAbsoluteFolder"/gcc14-k6.10-k6.12.patch.txt
