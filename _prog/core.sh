@@ -1335,7 +1335,10 @@ _create_ubDistBuild-rotten_install-core() {
 	#_chroot sudo -n -u user bash -c 'cd /home/user/core/installations/kiauh-automatic ; chmod 755 ./auto.sh ; ./auto.sh'
 	
 	
+
+	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/iconArt ; chmod 755 ./ubiquitous_bash.sh ; ./ubiquitous_bash.sh _fetch_iconArt'
 	
+
 	
 	# WARNING: Do NOT install 'Assembly3' workbench here , as that may be untested.
 	
