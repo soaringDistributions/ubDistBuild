@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1044510709'
+export ub_setScriptChecksum_contents='184349134'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -23829,11 +23829,38 @@ _test_ollama() {
 }
 
 _vector_ollama_procedure() {
-	! _ollama_run_augment "Please output the word true . Any other output accompanying the word true is acceptable but not desirable. The purpose of this prompt is merely to validate that the LLM software is entirely functional, so the word true will be very helpful whereas any output other than the word true will be unhelpful . Please output the word true ." | grep true > /dev/null && echo 'fail: _vector_ollama' && _messageFAIL && _stop 1
-	_ollama_run_augment "Please output the word true . Any other output accompanying the word true is acceptable but not desirable. The purpose of this prompt is merely to validate that the LLM software is entirely functional, so the word true will be very helpful whereas any output other than the word true will be unhelpful . Please output the word true ." | grep false > /dev/null && echo 'fail: _vector_ollama' && _messageFAIL && _stop 1
+	local currentExitStatus
+	currentExitStatus=1
 	
-	! _ollama_run_augment "Please output the word false . Any other output accompanying the word false is acceptable but not desirable. The purpose of this prompt is merely to validate that the LLM software is entirely functional, so the word false will be very helpful whereas any output other than the word false will be unhelpful . Please output the word false ." | grep false > /dev/null && echo 'fail: _vector_ollama' && _messageFAIL && _stop 1
-	_ollama_run_augment "Please output the word false . Any other output accompanying the word false is acceptable but not desirable. The purpose of this prompt is merely to validate that the LLM software is entirely functional, so the word false will be very helpful whereas any output other than the word false will be unhelpful . Please output the word false ." | grep true > /dev/null && echo 'fail: _vector_ollama' && _messageFAIL && _stop 1
+	if ! _ollama_run_augment "Please output the word true . Any other output accompanying the word true is acceptable but not desirable. The purpose of this prompt is merely to validate that the LLM software is entirely functional, so the word true will be very helpful whereas any output other than the word true will be unhelpful . Please output the word true ." | grep -i true > /dev/null
+	then
+		echo 'fail: _vector_ollama' && _messagePlain_bad 'fail: _vector_ollama: prompt for word true did not output word true'
+	else
+		currentExitStatus=0
+	fi
+	if _ollama_run_augment "Please output the word true . Any other output accompanying the word true is acceptable but not desirable. The purpose of this prompt is merely to validate that the LLM software is entirely functional, so the word true will be very helpful whereas any output other than the word true will be unhelpful . Please output the word true ." | grep -i false > /dev/null
+	then
+		echo 'fail: _vector_ollama' && _messagePlain_bad 'fail: _vector_ollama: prompt for word true instead included word false'
+	else
+		currentExitStatus=0
+	fi
+	
+	if ! _ollama_run_augment "Please output the word false . Any other output accompanying the word false is acceptable but not desirable. The purpose of this prompt is merely to validate that the LLM software is entirely functional, so the word false will be very helpful whereas any output other than the word false will be unhelpful . Please output the word false ." | grep -i false > /dev/null
+	then
+		echo 'fail: _vector_ollama' && _messagePlain_bad 'fail: _vector_ollama: prompt for word false did not output word false'
+	else
+		currentExitStatus=0
+	fi
+	if _ollama_run_augment "Please output the word false . Any other output accompanying the word false is acceptable but not desirable. The purpose of this prompt is merely to validate that the LLM software is entirely functional, so the word false will be very helpful whereas any output other than the word false will be unhelpful . Please output the word false ." | grep -i true > /dev/null
+	then
+		echo 'fail: _vector_ollama' && _messagePlain_bad 'fail: _vector_ollama: prompt for word false instead included word true'
+	else
+		currentExitStatus=0
+	fi
+
+
+	# If NONE of the vector tests have succeeded, then FAIL . Normally, with an 'augment' LLM model, this should be so rare as to vastly more often indicate broken ollama installation, very broken/corrupted LLM model, very broken LLM configuration, insufficient disk space for model, etc.
+	[[ "$currentExitStatus" != "0" ]] && _messageFAIL && _stop 1
 
 	return 0
 }
@@ -23848,7 +23875,7 @@ _vector_ollama() {
 		echo 'warn: accepted: cygwin: missing: ollama'
 		return 0
 	fi
-	
+
 	if type -p ollama > /dev/null 2>&1
 	then
 		if [[ "$hostMemoryQuantity" -lt 28000000 ]]
@@ -23970,7 +23997,8 @@ _ollama_set_sequence-augment-lowRAM() {
 	_start
 	cd "$safeTmp"
 
-	ollama show Llama-augment --modelfile | sed 's/PARAMETER num_ctx [0-9]*/PARAMETER num_ctx 512/' > ./Llama-augment-tmp.Modelfile
+	#512
+	ollama show Llama-augment --modelfile | sed 's/PARAMETER num_ctx [0-9]*/PARAMETER num_ctx 640/' > ./Llama-augment-tmp.Modelfile
 	sleep 9
 	ollama create Llama-augment --file ./Llama-augment-tmp.Modelfile
 	sleep 9
@@ -32757,7 +32785,7 @@ _kernelConfig_require-tradeoff-perform() {
 	_messagePlain_nominal 'kernelConfig: tradeoff-perform'
 	_messagePlain_request 'Carefully evaluate '\''tradeoff-perform'\'' for specific use cases.'
 	export kernelConfig_file="$1"
-	
+
 	_kernelConfig__bad-n__ CONFIG_RETPOLINE
 	_kernelConfig__bad-n__ CONFIG_PAGE_TABLE_ISOLATION
 	
@@ -32803,6 +32831,32 @@ _kernelConfig_require-tradeoff-harden() {
 	_messagePlain_request 'Carefully evaluate '\''tradeoff-harden'\'' for specific use cases.'
 	export kernelConfig_file="$1"
 	
+	_kernelConfig__bad-y__ CPU_MITIGATIONS
+	_kernelConfig__bad-y__ MITIGATION_PAGE_TABLE_ISOLATION
+	_kernelConfig__bad-y__ MITIGATION_RETPOLINE
+	_kernelConfig__bad-y__ MITIGATION_RETHUNK
+	_kernelConfig__bad-y__ MITIGATION_UNRET_ENTRY
+	_kernelConfig__bad-y__ MITIGATION_CALL_DEPTH_TRACKING
+	_kernelConfig__bad-y__ MITIGATION_IBPB_ENTRY
+	_kernelConfig__bad-y__ MITIGATION_IBRS_ENTRY
+	_kernelConfig__bad-y__ MITIGATION_SRSO
+	_kernelConfig__bad-y__ MITIGATION_GDS
+	_kernelConfig__bad-y__ MITIGATION_RFDS
+	_kernelConfig__bad-y__ MITIGATION_SPECTRE_BHI
+	_kernelConfig__bad-y__ MITIGATION_MDS
+	_kernelConfig__bad-y__ MITIGATION_TAA
+	_kernelConfig__bad-y__ MITIGATION_MMIO_STALE_DATA
+	_kernelConfig__bad-y__ MITIGATION_L1TF
+	_kernelConfig__bad-y__ MITIGATION_RETBLEED
+	_kernelConfig__bad-y__ MITIGATION_SPECTRE_V1
+	_kernelConfig__bad-y__ MITIGATION_SPECTRE_V2
+	_kernelConfig__bad-y__ MITIGATION_SRBDS
+	_kernelConfig__bad-y__ MITIGATION_SSB
+
+	_kernelConfig__bad-y__ MITIGATION_SLS
+
+	_kernelConfig__bad-y__ CPU_SRSO
+
 	_kernelConfig__bad-y__ CONFIG_RETPOLINE
 	_kernelConfig__bad-y__ CONFIG_PAGE_TABLE_ISOLATION
 	
@@ -32851,7 +32905,7 @@ _kernelConfig_require-tradeoff-harden() {
 	#qemuArgs+=(-cpu host,-sgx-provisionkey,-sgx-tokenkey)
 
 	_kernelConfig__bad-y__ CONFIG_X86_SGX
-	_kernelConfig__bad-y__ CONFIG_X86_SGX_kVM
+	_kernelConfig__bad-y__ CONFIG_X86_SGX_KVM
 	_kernelConfig__bad-y__ CONFIG_INTEL_TDX_GUEST
 	_kernelConfig__bad-y__ TDX_GUEST_DRIVER
 
@@ -32864,10 +32918,16 @@ _kernelConfig_require-tradeoff-harden() {
 	#qemuArgs+=(-machine accel=kvm,confidential-guest-support=sev0 -object sev-guest,id=sev0,cbitpos=47,reduced-phys-bits=1 )
 	# #,policy=0x5
 
+
 	# https://libvirt.org/kbase/launch_security_sev.html
 	_kernelConfig__bad-y__ CONFIG_KVM_AMD_SEV
 	_kernelConfig__bad-y__ AMD_MEM_ENCRYPT
 	_kernelConfig__bad-y__ CONFIG_AMD_MEM_ENCRYPT_ACTIVE_BY_DEFAULT
+
+	_kernelConfig__bad-y__ KVM_SMM
+
+
+	_kernelConfig__bad-y__ RANDOM_KMALLOC_CACHES
 }
 _kernelConfig_require-tradeoff-harden-compatible() {
 	
@@ -32926,6 +32986,8 @@ _kernelConfig_require-tradeoff-harden-compatible() {
 	
 	_kernelConfig__bad-y__ CONFIG_INIT_ON_FREE_DEFAULT_ON
 	_kernelConfig__bad-y__ CONFIG_ZERO_CALL_USED_REGS
+
+	_kernelConfig__bad-y__ CONFIG_INIT_STACK_ALL_ZERO
 	
 	_kernelConfig__bad-n__ CONFIG_DEVMEM
 	_kernelConfig__bad-n__ CONFIG_DEVPORT
@@ -32968,6 +33030,11 @@ _kernelConfig_require-tradeoff-harden-compatible() {
 	
 	#_kernelConfig_warn-any CONFIG_KFENCE_DEFERRABLE
 	_kernelConfig_warn-y__ CONFIG_KFENCE_DEFERRABLE
+
+
+	# DUBIOUS . Seems to require a userspace service setting scheduling attributes for processes, and not supported by default.
+	# WARNING: Definitely much better to disable SMT .
+	#_kernelConfig__bad-y__ CONFIG_SCHED_CORE
 }
 
 # WARNING: ATTENTION: Before moving to tradeoff-harden (compatible), ensure vboxdrv, vboxadd, nvidia, nvidia legacy, kernel modules can be loaded without issues, and also ensure significant performance penalty configuration options are oppositely documented in the tradeoff-perform function .
@@ -33169,11 +33236,18 @@ _kernelConfig_require-tradeoff-harden-NOTcompatible() {
 	
 	
 	_kernelConfig_warn-y__ CONFIG_EFI_DISABLE_PCI_DMA
+
+
+	# ATTENTION: In practice, the 'gather_data_sampling=force' command line parameter has been available, through optional  "$globalVirtFS"/etc/default/grub.d/01_hardening_ubdist.cfg  .
+	_kernelConfig__bad-y__ CONFIG_GDS_FORCE_MITIGATION
 	
 	
 	
 	# WARNING: CAUTION: Now obviously this is really incompatible. Do NOT move this to any other function.
 	_kernelConfig_warn-y__ CONFIG_MODULE_SIG_FORCE
+
+	# WARNING: May be untested. Kernel default apparently 'Y'.
+	_kernelConfig_warn-y__ MODULE_SIG_ALL
 }
 
 # ATTENTION: Override with 'ops.sh' or similar.
@@ -33264,6 +33338,10 @@ _kernelConfig_require-virtualization-accessory() {
 	#_kernelConfig_warn-n__ CONFIG_XEN_SELFBALLOONING
 	#_kernelConfig_warn-n__ CONFIG_IOMMU_DEFAULT_PASSTHROUGH
 	#_kernelConfig_warn-n__ CONFIG_INTEL_IOMMU_DEFAULT_ON
+
+
+	# TODO: Evaluate.
+	_kernelConfig_warn-y__ KVM_HYPERV
 }
 
 # https://wiki.gentoo.org/wiki/VirtualBox
@@ -33478,6 +33556,13 @@ _kernelConfig_require-accessory() {
 	#PCIE_BW
 	#ACRN_GUEST
 	#XILINX SDFEC
+
+	# FB_NVIDIA , FB_RIVA , at best, has not been reccently tested with NOUVEAU or other NVIDIA drivers.
+	_kernelConfig_warn-n__ FB_NVIDIA
+	_kernelConfig_warn-n__ FB_RIVA
+
+
+
 }
 
 _kernelConfig_require-build() {
@@ -33538,6 +33623,14 @@ _kernelConfig_require-latency() {
 	_kernelConfig__bad-y__ CONFIG_CPU_FREQ_GOV_ONDEMAND
 	_kernelConfig__bad-y__ CPU_FREQ_DEFAULT_GOV_SCHEDUTIL
 	_kernelConfig__bad-y__ CONFIG_CPU_FREQ_GOV_SCHEDUTIL
+
+	# WARNING: May be untested.
+	#X86_AMD_PSTATE_DEFAULT_MODE
+	if ! cat "$kernelConfig_file" | _kernelConfig_reject-comments | grep "X86_AMD_PSTATE_DEFAULT_MODE"'\=3' > /dev/null 2>&1
+	then
+		_messagePlain_bad 'bad: not:      3: '"X86_AMD_PSTATE_DEFAULT_MODE"
+		export kernelConfig_bad='true'
+	fi
 	
 	# CRITICAL!
 	# CONFIG_PREEMPT is significantly more stable and compatible with third party (eg. VirtualBox) modules.
@@ -33628,6 +33721,9 @@ _kernelConfig_require-latency() {
 	# CRITICAL!
 	# Lightweight kernel compression theoretically may significantly accelerate startup from slow disks.
 	_kernelConfig__bad-y__ CONFIG_KERNEL_LZ4
+
+	# TODO
+	#PCP_BATCH_SCALE_MAX
 	
 }
 
@@ -33757,8 +33853,110 @@ _kernelConfig_require-special() {
 	_kernelConfig__bad-y__ CONFIG_HW_RANDOM_VIA
 	_kernelConfig__bad-y_m HW_RANDOM_VIRTIO
 	_kernelConfig__bad-y__ CONFIG_HW_RANDOM_TPM
+
+
+	# Somewhat unusually, without known loss of performance.
+	# Discovered during 'make oldconfig' of 'Linux 6.12.1' from then existing 'mainline' config file.
+	_kernelConfig__bad-y__ X86_FRED
+
+	_kernelConfig__bad-y__ SLAB_BUCKETS
 	
 	
+
+	# TODO: Disabled presently (because this feature is in development and does not yet work), but seems like something to enable eventually.
+	# _kernelConfig__bad-y__ KVM_SW_PROTECTED_VM
+
+	
+	# Usually a bad idea, since BTRFS filesystem compression, etc, should take care of this better.
+	_kernelConfig__bad-n__ MODULE_COMPRESS
+
+	# TODO: Expected unhelpful, but worth considering.
+	#ZSWAP_SHRINKER_DEFAULT_ON
+
+
+	# Unusual tradeoff. Theoretically may cause issues for Gentoo doing fsck on read-only root (due to not necessarily having initramfs).
+	_kernelConfig__bad-y__ BLK_DEV_WRITE_MOUNTED
+	_kernelConfig_warn-n__ BLK_DEV_WRITE_MOUNTED
+
+	# If there is no compatibility issue, then the more compressible zswap allocator seems more useful.
+	#_kernelConfig__warn-y__ ZSWAP_ZPOOL_DEFAULT_ZSMALLOC 
+
+
+	# DANGER
+	# If you honestly believe Meta cares about end-user security...
+	# https://studio.youtube.com/video/MeUvSg9zQYc/edit
+	# https://studio.youtube.com/video/kXrLujzPm_4/edit
+	# There is just NO GOOD REASON to use or support Meta hardware. At all.
+	_kernelConfig__bad-n__ NET_VENDOR_META
+
+	# DANGER
+	# Although disabling kernel support is NEVER guaranteed to eliminate a 'BadUSB' style vulnerability, reducing this functionality is still very strongly recommended.
+	#
+	# SDIO . Especially useless, very few very old devices are expected to benefit from SDIO WiFi, etc, peripherials, while SDIO degrades one of the very few otherwise storage exclusive protocols (ie. SD card storage) into a 'BadUSB' input.
+	_kernelConfig__bad-n__ ATH10K_SDIO
+	_kernelConfig__bad-n__ ATH6KL_SDIO
+	_kernelConfig__bad-n__ B43_SDIO
+	_kernelConfig__bad-n__ BRCMFMAC_SDIO
+	_kernelConfig__bad-n__ BT_HCIBTSDIO
+	_kernelConfig__bad-n__ BT_MRVL_SDIO
+	_kernelConfig__bad-n__ BT_MTKSDIO
+	_kernelConfig__bad-n__ CW1200_WLAN_SDIO
+	_kernelConfig__bad-n__ GREYBUS_SDIO
+	_kernelConfig__bad-n__ LIBERTAS_SDIO
+	#
+	_kernelConfig__bad-n__ MMC_MESON_MX_SDIO # Disabled by default apparently.
+	_kernelConfig__bad-n__ MMC_MVSDIO # Disabled by default apparently.
+	#
+	#_kernelConfig__bad-n__ MT7663_USB_SDIO_COMMON
+	#
+	_kernelConfig__bad-n__ MT76_SDIO
+	_kernelConfig__bad-n__ MWIFIEX_SDIO
+	_kernelConfig__bad-n__ RSI_SDIO
+	_kernelConfig__bad-n__ RTW88_SDIO
+	#
+	_kernelConfig__bad-n__ SDIO_UART
+	#
+	_kernelConfig__bad-n__ SMS_SDIO_DRV
+	#
+	_kernelConfig__bad-n__ SSB_SDIOHOST
+	_kernelConfig__bad-n__ SSB_SDIOHOST_POSSIBLE
+	#
+	_kernelConfig__bad-n__ WILC1000_SDIO
+	_kernelConfig__bad-n__ WL1251_SDIO
+	_kernelConfig__bad-n__ WLCORE_SDIO
+	
+	_kernelConfig__bad-n__ RTW88_8822BS
+	_kernelConfig__bad-n__ RTW88_8822CS
+	_kernelConfig__bad-n__ RTW88_8723DS
+	_kernelConfig__bad-n__ RTW88_8723CS
+	_kernelConfig__bad-n__ RTW88_8821CS
+
+
+
+
+	# Requires compiling binaries to support this. Future Debian security updates may use this.
+	_kernelConfig__bad-y__ X86_USER_SHADOW_STACK
+
+
+
+	_kernelConfig__bad-y_m USB_GADGET
+
+	# ATTENTION: Only drivers that are highly likely to cripple the 'out-of-box-experience' to the point of being unable to perform gParted, revert, basic web browsing, etc, for relatively useful laptops/tablets/etc .
+	# Essential drivers (eg. iGPU, or at least basic 'VGA', keyboard, USB, etc) are normally included already Debian's default kernel config, if that is used as a starting point.
+	# WARNING: Delegating which drivers to enable to upstream default Debian (or other distro) config files may be better for reliability, etc.
+	_kernelConfig_warn-y_m ATH12K #WiFi7
+	_kernelConfig_warn-y_m MT7996E #WiFi7 Concurrent Tri-Band
+	_kernelConfig_warn-y_m RTW88_8822BU #WiFi USB
+	_kernelConfig_warn-y_m RTW88_8822CU
+	_kernelConfig_warn-y_m RTW88_8723DU
+	_kernelConfig_warn-y_m RTW88_8821CE
+	_kernelConfig_warn-y_m RTW88_8821CU
+	_kernelConfig_warn-y_m RTW89_8851BE
+	_kernelConfig_warn-y_m RTW89_8852AE
+	_kernelConfig_warn-y_m RTW89_8852BE
+
+
+
 	true
 }
 
@@ -51944,6 +52142,8 @@ _live_procedure_exhaustive-includeConfig() {
     }
     _live_procedure_exhaustive-includeConfig-message extIface.exe
     _live_procedure_exhaustive-includeConfig-message ubDistBuild.exe
+	
+    _live_procedure_exhaustive-includeConfig-message pumpCompanion.exe
 
     # https://ninite.com/7zip-ccleaner-gimp-inkscape-klitecodecs-libreoffice-notepadplusplus-vlc-winamp-zoom/
     #_live_procedure_exhaustive-includeConfig-message 'Ninite 7Zip CCleaner GIMP Inkscape KLite Codecs Installer.exe'
