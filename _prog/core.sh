@@ -1335,8 +1335,8 @@ _create_ubDistBuild-rotten_install-core() {
 	#_chroot sudo -n -u user bash -c 'cd /home/user/core/installations/kiauh-automatic ; chmod 755 ./auto.sh ; ./auto.sh'
 	
 	
-
-	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/iconArt ; chmod 755 ./ubiquitous_bash.sh ; ./ubiquitous_bash.sh _fetch_iconArt'
+	# NOTICE: End-user or scripts modifying the dist/OS may do this. These large files are not very practical to include in ubdist/OS .
+	#_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/iconArt ; chmod 755 ./ubiquitous_bash.sh ; ./ubiquitous_bash.sh _fetch_iconArt'
 	
 
 	
