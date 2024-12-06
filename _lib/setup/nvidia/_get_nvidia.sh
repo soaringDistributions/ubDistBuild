@@ -833,7 +833,7 @@ _detect_nvidia() {
 _if_patch_nvidia() {
 	if [[ "$1" != "" ]] && [[ "$2" != "" ]]
 	then
-		[[ "$1" == "470.256.02" ]] && [[ "$2" == "6.12.1" ]] && return 0
+		[[ "$1" == "470.256.02" ]] && ( [[ "$2" == "6.12.1" ]] || [[ "$2" == "6.12.2" ]] || [[ "$2" == "6.12.3" ]] ) && return 0
 		return 1
 	else
 		if [[ "$1" == "470.256.02" ]] && [[ "$3" == "" ]]
@@ -871,7 +871,7 @@ _patch_nvidia() {
 	# https://www.linuxquestions.org/questions/showthread.php?p=6540525#post6540525
 	# https://www.linuxquestions.org/questions/attachment.php?attachmentid=43873&d=1732026155
 	# https://gist.github.com/joanbm/a6d3f7f873a60dec0aa4a734c0f1d64e
-	if [[ "$currentVersion_patch" == "470.256.02" ]] && [[ "$currentVersion_patch_kernel" == "6.12.1" ]] && _if_patch_nvidia "$currentVersion_patch" "$currentVersion_patch_kernel"
+	if [[ "$currentVersion_patch" == "470.256.02" ]] && ( [[ "$currentVersion_patch_kernel" == "6.12.1" ]] || [[ "$currentVersion_patch_kernel" == "6.12.2" ]] || [[ "$currentVersion_patch_kernel" == "6.12.3" ]] ) && _if_patch_nvidia "$currentVersion_patch" "$currentVersion_patch_kernel"
 	then
 		_messagePlain_nominal '_patch_nvidia'
 		_messagePlain_probe_var currentVersion_patch
