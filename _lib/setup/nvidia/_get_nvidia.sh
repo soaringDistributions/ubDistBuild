@@ -1060,6 +1060,8 @@ _install_nvidia() {
 		"$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"/nvidia-installer --no-kernel-module --ui=none --no-questions
 		[[ "$?" != "0" ]] && currentExitStatus=1
 		
+		local currentIterationsTotal
+		currentIterationsTotal=0
 		local currentIteration
 		currentIteration=0
 		# If headers for more than 12 kernels are installed, that is an issue.
@@ -1079,7 +1081,9 @@ _install_nvidia() {
 			
 			_messagePlain_probe 'nvidia: make -j $(nproc)'
 			make -j $(nproc)
-			[[ "$?" != "0" ]] && [[ "$currentIteration" -le "2" ]] && currentExitStatus=1
+			#[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "2" ]] && currentExitStatus=1
+			#[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "1" ]] && currentExitStatus=1
+			[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "0" ]] && currentExitStatus=1
 			
 			mkdir -p /lib/modules/"$currentLine"/kernel/drivers/video
 			cp -f ./*.ko /lib/modules/"$currentLine"/kernel/drivers/video/
@@ -1106,6 +1110,7 @@ _install_nvidia() {
 			#--no-kernel-module
 			
 			let currentIteration=currentIteration+1
+			let currentIterationsTotal=currentIterationsTotal+1
 		done
 
 
@@ -1159,9 +1164,9 @@ _install_nvidia() {
 			
 			_messagePlain_probe 'nvidia: make -j $(nproc)'
 			make -j $(nproc)
-			#[[ "$?" != "0" ]] && [[ "$currentIteration" -le "2" ]] && currentExitStatus=1
-			#[[ "$?" != "0" ]] && [[ "$currentIteration" -le "1" ]] && currentExitStatus=1
-			[[ "$?" != "0" ]] && [[ "$currentIteration" -le "0" ]] && currentExitStatus=1
+			#[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "2" ]] && currentExitStatus=1
+			#[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "1" ]] && currentExitStatus=1
+			[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "0" ]] && currentExitStatus=1
 			
 			mkdir -p /lib/modules/"$currentLine"/kernel/drivers/video
 			cp -f ./*.ko /lib/modules/"$currentLine"/kernel/drivers/video/
@@ -1188,6 +1193,7 @@ _install_nvidia() {
 			#--no-kernel-module
 			
 			let currentIteration=currentIteration+1
+			let currentIterationsTotal=currentIterationsTotal+1
 		done
 
 		#cp -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-orig.run "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
