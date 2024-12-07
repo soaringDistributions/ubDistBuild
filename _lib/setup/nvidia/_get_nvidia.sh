@@ -837,7 +837,7 @@ _if_patch_nvidia() {
 		return 1
 	fi
 	
-	
+
 	if [[ "$1" == "470.256.02" ]] && [[ "$2" == "" ]] && [[ "$3" == "" ]]
 	then
 		grep -v "6.12.1\|6.12.2\|6.12.3\|NULL"
@@ -1159,7 +1159,9 @@ _install_nvidia() {
 			
 			_messagePlain_probe 'nvidia: make -j $(nproc)'
 			make -j $(nproc)
-			[[ "$?" != "0" ]] && [[ "$currentIteration" -le "2" ]] && currentExitStatus=1
+			#[[ "$?" != "0" ]] && [[ "$currentIteration" -le "2" ]] && currentExitStatus=1
+			#[[ "$?" != "0" ]] && [[ "$currentIteration" -le "1" ]] && currentExitStatus=1
+			[[ "$?" != "0" ]] && [[ "$currentIteration" -le "0" ]] && currentExitStatus=1
 			
 			mkdir -p /lib/modules/"$currentLine"/kernel/drivers/video
 			cp -f ./*.ko /lib/modules/"$currentLine"/kernel/drivers/video/
