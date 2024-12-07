@@ -838,13 +838,13 @@ _if_patch_nvidia() {
 	else
 		if [[ "$1" == "470.256.02" ]] && [[ "$3" == "" ]]
 		then
-			grep -v "6.12.1\|NULL"
+			grep -v "6.12.1\|6.12.2\|6.12.3\|NULL"
 			[[ "$?" == "0" ]] && return 1
 			return 0
 		fi
 		if [[ "$1" == "470.256.02" ]] && [[ "$3" == "invert" ]]
 		then
-			grep "6.12.1\|NULL"
+			grep "6.12.1\|6.12.2\|6.12.3\|NULL"
 			[[ "$?" == "0" ]] && return 1
 			return 0
 		fi
@@ -974,7 +974,7 @@ _install_nvidia() {
 	#  'NVIDIA driver does not provide an fbdev driver for the high-resolution console for the kernel compiled-in vesafb'
 	#   lsmod should show a modsetting driver in use ...
 	#echo 'GRUB_CMDLINE_LINUX="nvidia-drm.modeset=1"' | sudo -n tee -a "$globalVirtFS"/etc/default/grub
-	echo 'options nvidia-drm modeset=1' | sudo -n tee "$globalVirtFS"/etc/modprobe.d/nvidia-kms.conf
+	echo 'options nvidia-drm modeset=1' | sudo -n tee /etc/modprobe.d/nvidia-kms.conf
 	
 	
 	
@@ -1025,8 +1025,11 @@ _install_nvidia() {
 	#-m=kernel
 	#-m=kernel-open
 	#--run-nvidia-xconfig   ...   # " default response is 'no' "
+	#echo | sudo -n tee "$globalVirtFS"/nv_legacy470 > /dev/null 2>&1
+	#echo | sudo -n tee /nv_legacy470 > /dev/null 2>&1
 	if [[ "$current_nvidia_installAllKernels" == "true" ]]
 	then
+		_messagePlain_probe NVIDIA-Linux-x86_64-"$currentVersion".run --extract-only
 		sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --extract-only
 		[[ "$?" != "0" ]] && currentExitStatus=1
 		
@@ -1040,7 +1043,7 @@ _install_nvidia() {
 		local currentIteration
 		currentIteration=0
 		# If headers for more than 12 kernels are installed, that is an issue.
-		ls -A -1 -d /usr/src/linux-headers-* | sort -r -V | head -n 12 | sed -s 's/.*linux-headers-//' | _if_patch_nvidia "$currentVersion" | while read -r currentLine
+		ls -A -1 -d /usr/src/linux-headers-* | sort -r -V | head -n 12 | sed -s 's/.*linux-headers-//' | _if_patch_nvidia "$currentVersion" | grep -v '\-common$' | while read -r currentLine
 		do
 			_messagePlain_probe 'nvidia: make: '"$currentLine"
 			
@@ -1099,7 +1102,7 @@ _install_nvidia() {
 		rm -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-orig.run
 		currentIteration=0
 		# If headers for more than 12 kernels are installed, that is an issue.
-		ls -A -1 -d /usr/src/linux-headers-* | sort -r -V | head -n 12 | sed -s 's/.*linux-headers-//' | _if_patch_nvidia "$currentVersion" "" "invert" | while read -r currentLine
+		ls -A -1 -d /usr/src/linux-headers-* | sort -r -V | head -n 12 | sed -s 's/.*linux-headers-//' | _if_patch_nvidia "$currentVersion" "" "invert" | grep -v '\-common$' | while read -r currentLine
 		do
 			_messagePlain_probe 'nvidia: PATCH , EXTRACT'
 
@@ -1177,7 +1180,8 @@ _install_nvidia() {
 			rm -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
 		done
 
-		
+		cp -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-orig.run "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
+		chmod 755 "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
 
 		#_safeRMR "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"
 		
@@ -1190,6 +1194,9 @@ _install_nvidia() {
 		_patch_nvidia "$currentVersion" "$currentKernel"
 
 		sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --ui=none --no-questions -j "$currentParallel" --no-cc-version-check -k "$currentKernel" -m=kernel
+
+		cp -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-orig.run "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
+		chmod 755 "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
 	fi
 	
 	
@@ -1389,6 +1396,8 @@ _autoinstall() {
 
 
 # WARNING: DANGER: Do NOT distribute!
+#echo | sudo -n tee "$globalVirtFS"/nv_legacy470 > /dev/null 2>&1
+#echo | sudo -n tee /nv_legacy470 > /dev/null 2>&1
 _force_install() {
 	_mustBeRoot
 	
