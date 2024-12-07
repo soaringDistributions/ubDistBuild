@@ -1068,6 +1068,9 @@ _install_nvidia() {
 		ls -A -1 -d /usr/src/linux-headers-* | sort -r -V | head -n 12 | sed -s 's/.*linux-headers-//' | _if_patch_nvidia "$currentVersion" | grep -v '\-common$' | while read -r currentLine
 		do
 			sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --ui=none --no-questions -j "$currentParallel" --no-cc-version-check -k "$currentLine" -m=kernel
+			#[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "2" ]] && _messagePlain_bad 'bad: fail: make: currentIterationsTotal='"$currentIterationsTotal" && currentExitStatus=1
+			#[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "1" ]] && _messagePlain_bad 'bad: fail: make: currentIterationsTotal='"$currentIterationsTotal" && currentExitStatus=1
+			[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "0" ]] && _messagePlain_bad 'bad: fail: make: currentIterationsTotal='"$currentIterationsTotal" && currentExitStatus=1
 			
 			# DISABLED. Has been tested. Hoped may eventually be useful toward open-source drivers.
 			# https://github.com/NVIDIA/open-gpu-kernel-modules
@@ -1148,6 +1151,9 @@ _install_nvidia() {
 			_patch_nvidia "$currentVersion" "$currentLine"
 
 			sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom.run --ui=none --no-questions -j "$currentParallel" --no-cc-version-check -k "$currentLine" -m=kernel
+			#[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "2" ]] && _messagePlain_bad 'bad: fail: make: currentIterationsTotal='"$currentIterationsTotal" && currentExitStatus=1
+			#[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "1" ]] && _messagePlain_bad 'bad: fail: make: currentIterationsTotal='"$currentIterationsTotal" && currentExitStatus=1
+			[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "0" ]] && _messagePlain_bad 'bad: fail: make: currentIterationsTotal='"$currentIterationsTotal" && currentExitStatus=1
 			
 			# DISABLED. Has been tested. Hoped may eventually be useful toward open-source drivers.
 			# https://github.com/NVIDIA/open-gpu-kernel-modules
