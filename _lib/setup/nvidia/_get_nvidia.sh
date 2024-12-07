@@ -1081,9 +1081,9 @@ _install_nvidia() {
 			
 			_messagePlain_probe 'nvidia: make -j $(nproc)'
 			make -j $(nproc)
-			#[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "2" ]] && currentExitStatus=1
-			#[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "1" ]] && currentExitStatus=1
-			[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "0" ]] && currentExitStatus=1
+			#[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "2" ]] && _messagePlain_bad 'bad: fail: make: currentIterationsTotal='"$currentIterationsTotal" && currentExitStatus=1
+			#[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "1" ]] && _messagePlain_bad 'bad: fail: make: currentIterationsTotal='"$currentIterationsTotal" && currentExitStatus=1
+			[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "0" ]] && _messagePlain_bad 'bad: fail: make: currentIterationsTotal='"$currentIterationsTotal" && currentExitStatus=1
 			
 			mkdir -p /lib/modules/"$currentLine"/kernel/drivers/video
 			cp -f ./*.ko /lib/modules/"$currentLine"/kernel/drivers/video/
@@ -1164,9 +1164,9 @@ _install_nvidia() {
 			
 			_messagePlain_probe 'nvidia: make -j $(nproc)'
 			make -j $(nproc)
-			#[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "2" ]] && currentExitStatus=1
-			#[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "1" ]] && currentExitStatus=1
-			[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "0" ]] && currentExitStatus=1
+			#[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "2" ]] && _messagePlain_bad 'bad: fail: make: currentIterationsTotal='"$currentIterationsTotal" && currentExitStatus=1
+			#[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "1" ]] && _messagePlain_bad 'bad: fail: make: currentIterationsTotal='"$currentIterationsTotal" && currentExitStatus=1
+			[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "0" ]] && _messagePlain_bad 'bad: fail: make: currentIterationsTotal='"$currentIterationsTotal" && currentExitStatus=1
 			
 			mkdir -p /lib/modules/"$currentLine"/kernel/drivers/video
 			cp -f ./*.ko /lib/modules/"$currentLine"/kernel/drivers/video/
