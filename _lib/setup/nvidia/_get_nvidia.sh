@@ -1067,47 +1067,54 @@ _install_nvidia() {
 		# If headers for more than 12 kernels are installed, that is an issue.
 		ls -A -1 -d /usr/src/linux-headers-* | sort -r -V | head -n 12 | sed -s 's/.*linux-headers-//' | _if_patch_nvidia "$currentVersion" | grep -v '\-common$' | while read -r currentLine
 		do
-			_messagePlain_probe 'nvidia: make: '"$currentLine"
+			sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --ui=none --no-questions -j "$currentParallel" --no-cc-version-check -k "$currentLine" -m=kernel
 			
-			export SYSSRC=/usr/src/linux-headers-"$currentLine"
-			export IGNORE_CC_MISMATCH=1
-			
-			export IGNORE_MISSING_MODULE_SYMVERS=1
-			
-			
-			cd "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"/kernel
-			
-			make clean
-			
-			_messagePlain_probe 'nvidia: make -j $(nproc)'
-			make -j $(nproc)
-			#[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "2" ]] && _messagePlain_bad 'bad: fail: make: currentIterationsTotal='"$currentIterationsTotal" && currentExitStatus=1
-			#[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "1" ]] && _messagePlain_bad 'bad: fail: make: currentIterationsTotal='"$currentIterationsTotal" && currentExitStatus=1
-			[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "0" ]] && _messagePlain_bad 'bad: fail: make: currentIterationsTotal='"$currentIterationsTotal" && currentExitStatus=1
-			
-			mkdir -p /lib/modules/"$currentLine"/kernel/drivers/video
-			cp -f ./*.ko /lib/modules/"$currentLine"/kernel/drivers/video/
-			
-			# https://stackoverflow.com/questions/34800731/module-not-found-when-i-do-a-modprobe
-			sudo -n depmod "$currentLine"
-			
-			
-			# https://forums.developer.nvidia.com/t/error-nvidia-settings-could-not-find-the-registry-key-file/50142/2
-			cd /usr/share/nvidia
-			sudo ln -sf $(ls -1 nvidia-application-profiles-*-key-documentation | sort -r -V) nvidia-application-profiles-key-documentation
-			
-			
-			#--systemd
-			#--expert
-			#_messagePlain_probe nvidia "$currentLine"
-			#sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --ui=none --no-questions -j "$currentParallel" --no-cc-version-check -k "$currentLine" --dkms -m=kernel
-			#[[ "$?" != "0" ]] && currentExitStatus=1
-			
-			# TODO
-			# http://download.nvidia.com/XFree86/Linux-x86_64/515.43.04/README/kernel_open.html
+			# DISABLED. Has been tested. Hoped may eventually be useful toward open-source drivers.
 			# https://github.com/NVIDIA/open-gpu-kernel-modules
-			# https://github.com/NVIDIA/open-gpu-kernel-modules/blob/main/README.md
-			#--no-kernel-module
+			if false
+			then
+				_messagePlain_probe 'nvidia: make: '"$currentLine"
+				
+				export SYSSRC=/usr/src/linux-headers-"$currentLine"
+				export IGNORE_CC_MISMATCH=1
+				
+				export IGNORE_MISSING_MODULE_SYMVERS=1
+				
+				
+				cd "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"/kernel
+				
+				make clean
+				
+				_messagePlain_probe 'nvidia: make -j $(nproc)'
+				make -j $(nproc)
+				#[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "2" ]] && _messagePlain_bad 'bad: fail: make: currentIterationsTotal='"$currentIterationsTotal" && currentExitStatus=1
+				#[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "1" ]] && _messagePlain_bad 'bad: fail: make: currentIterationsTotal='"$currentIterationsTotal" && currentExitStatus=1
+				[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "0" ]] && _messagePlain_bad 'bad: fail: make: currentIterationsTotal='"$currentIterationsTotal" && currentExitStatus=1
+				
+				mkdir -p /lib/modules/"$currentLine"/kernel/drivers/video
+				cp -f ./*.ko /lib/modules/"$currentLine"/kernel/drivers/video/
+				
+				# https://stackoverflow.com/questions/34800731/module-not-found-when-i-do-a-modprobe
+				sudo -n depmod "$currentLine"
+				
+				
+				# https://forums.developer.nvidia.com/t/error-nvidia-settings-could-not-find-the-registry-key-file/50142/2
+				cd /usr/share/nvidia
+				sudo ln -sf $(ls -1 nvidia-application-profiles-*-key-documentation | sort -r -V) nvidia-application-profiles-key-documentation
+				
+				
+				#--systemd
+				#--expert
+				#_messagePlain_probe nvidia "$currentLine"
+				#sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --ui=none --no-questions -j "$currentParallel" --no-cc-version-check -k "$currentLine" --dkms -m=kernel
+				#[[ "$?" != "0" ]] && currentExitStatus=1
+				
+				# TODO
+				# http://download.nvidia.com/XFree86/Linux-x86_64/515.43.04/README/kernel_open.html
+				# https://github.com/NVIDIA/open-gpu-kernel-modules
+				# https://github.com/NVIDIA/open-gpu-kernel-modules/blob/main/README.md
+				#--no-kernel-module
+			fi
 			
 			let currentIteration=currentIteration+1
 			let currentIterationsTotal=currentIterationsTotal+1
@@ -1138,62 +1145,70 @@ _install_nvidia() {
 			
 			_patch_nvidia "$currentVersion" "$currentLine"
 
-			sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom.run --extract-only
-			[[ "$?" != "0" ]] && currentExitStatus=1
-
-
-
-			# ###
-			cd "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom
-			"$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom/nvidia-installer --no-kernel-module --ui=none --no-questions
-			[[ "$?" != "0" ]] && currentExitStatus=1
+			sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom.run --ui=none --no-questions -j "$currentParallel" --no-cc-version-check -k "$currentLine" -m=kernel
 			
-			
-			
-			_messagePlain_probe 'nvidia: make: '"$currentLine"
-			
-			export SYSSRC=/usr/src/linux-headers-"$currentLine"
-			export IGNORE_CC_MISMATCH=1
-			
-			export IGNORE_MISSING_MODULE_SYMVERS=1
-			
-			
-			cd "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom/kernel
-			
-			make clean
-			
-			_messagePlain_probe 'nvidia: make -j $(nproc)'
-			make -j $(nproc)
-			#[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "2" ]] && _messagePlain_bad 'bad: fail: make: currentIterationsTotal='"$currentIterationsTotal" && currentExitStatus=1
-			#[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "1" ]] && _messagePlain_bad 'bad: fail: make: currentIterationsTotal='"$currentIterationsTotal" && currentExitStatus=1
-			[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "0" ]] && _messagePlain_bad 'bad: fail: make: currentIterationsTotal='"$currentIterationsTotal" && currentExitStatus=1
-			
-			mkdir -p /lib/modules/"$currentLine"/kernel/drivers/video
-			cp -f ./*.ko /lib/modules/"$currentLine"/kernel/drivers/video/
-			
-			# https://stackoverflow.com/questions/34800731/module-not-found-when-i-do-a-modprobe
-			sudo -n depmod "$currentLine"
-			
-			
-			# https://forums.developer.nvidia.com/t/error-nvidia-settings-could-not-find-the-registry-key-file/50142/2
-			cd /usr/share/nvidia
-			sudo ln -sf $(ls -1 nvidia-application-profiles-*-key-documentation | sort -r -V) nvidia-application-profiles-key-documentation
-			
-			
-			#--systemd
-			#--expert
-			#_messagePlain_probe nvidia "$currentLine"
-			#sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom.run --ui=none --no-questions -j "$currentParallel" --no-cc-version-check -k "$currentLine" --dkms -m=kernel
-			#[[ "$?" != "0" ]] && currentExitStatus=1
-			
-			# TODO
-			# http://download.nvidia.com/XFree86/Linux-x86_64/515.43.04/README/kernel_open.html
+			# DISABLED. Has been tested. Hoped may eventually be useful toward open-source drivers.
 			# https://github.com/NVIDIA/open-gpu-kernel-modules
-			# https://github.com/NVIDIA/open-gpu-kernel-modules/blob/main/README.md
-			#--no-kernel-module
+			if false
+			then
+				sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom.run --extract-only
+				[[ "$?" != "0" ]] && currentExitStatus=1
+
+
+
+				# ###
+				cd "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom
+				"$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom/nvidia-installer --no-kernel-module --ui=none --no-questions
+				[[ "$?" != "0" ]] && currentExitStatus=1
+				
+				
+				
+				_messagePlain_probe 'nvidia: make: '"$currentLine"
+				
+				export SYSSRC=/usr/src/linux-headers-"$currentLine"
+				export IGNORE_CC_MISMATCH=1
+				
+				export IGNORE_MISSING_MODULE_SYMVERS=1
+				
+				
+				cd "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom/kernel
+				
+				make clean
+				
+				_messagePlain_probe 'nvidia: make -j $(nproc)'
+				make -j $(nproc)
+				#[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "2" ]] && _messagePlain_bad 'bad: fail: make: currentIterationsTotal='"$currentIterationsTotal" && currentExitStatus=1
+				#[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "1" ]] && _messagePlain_bad 'bad: fail: make: currentIterationsTotal='"$currentIterationsTotal" && currentExitStatus=1
+				[[ "$?" != "0" ]] && [[ "$currentIterationsTotal" -le "0" ]] && _messagePlain_bad 'bad: fail: make: currentIterationsTotal='"$currentIterationsTotal" && currentExitStatus=1
+				
+				mkdir -p /lib/modules/"$currentLine"/kernel/drivers/video
+				cp -f ./*.ko /lib/modules/"$currentLine"/kernel/drivers/video/
+				
+				# https://stackoverflow.com/questions/34800731/module-not-found-when-i-do-a-modprobe
+				sudo -n depmod "$currentLine"
+				
+				
+				# https://forums.developer.nvidia.com/t/error-nvidia-settings-could-not-find-the-registry-key-file/50142/2
+				cd /usr/share/nvidia
+				sudo ln -sf $(ls -1 nvidia-application-profiles-*-key-documentation | sort -r -V) nvidia-application-profiles-key-documentation
+				
+				
+				#--systemd
+				#--expert
+				#_messagePlain_probe nvidia "$currentLine"
+				#sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom.run --ui=none --no-questions -j "$currentParallel" --no-cc-version-check -k "$currentLine" --dkms -m=kernel
+				#[[ "$?" != "0" ]] && currentExitStatus=1
+				
+				# TODO
+				# http://download.nvidia.com/XFree86/Linux-x86_64/515.43.04/README/kernel_open.html
+				# https://github.com/NVIDIA/open-gpu-kernel-modules
+				# https://github.com/NVIDIA/open-gpu-kernel-modules/blob/main/README.md
+				#--no-kernel-module
+			fi
 			
 			let currentIteration=currentIteration+1
 			let currentIterationsTotal=currentIterationsTotal+1
+			# ###
 		done
 
 		#cp -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-orig.run "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
