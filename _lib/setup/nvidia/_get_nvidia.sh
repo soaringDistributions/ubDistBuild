@@ -837,9 +837,18 @@ _if_patch_nvidia() {
 		return 1
 	fi
 	
+	
 	if [[ "$1" == "470.256.02" ]] && [[ "$2" == "" ]] && [[ "$3" == "" ]]
 	then
 		grep -v "6.12.1\|6.12.2\|6.12.3\|NULL"
+		[[ "$?" == "0" ]] && return 1
+		return 0
+	fi
+
+	if [[ "$2" == "" ]] && [[ "$3" == "" ]]
+	then
+		#grep -v "NULL"
+		cat
 		[[ "$?" == "0" ]] && return 1
 		return 0
 	fi
@@ -851,7 +860,7 @@ _if_patch_nvidia() {
 		return 0
 	fi
 
-	if [[ "$1" == "" ]] && [[ "$2" == "" ]] && [[ "$3" == "invert" ]]
+	if [[ "$2" == "" ]] && [[ "$3" == "invert" ]]
 	then
 		grep "doNotMatch_1234567890_3141592654\|NULL"
 		[[ "$?" == "0" ]] && return 1
