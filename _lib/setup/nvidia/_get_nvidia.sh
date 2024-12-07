@@ -1071,6 +1071,8 @@ _install_nvidia() {
 			
 			# DISABLED. Has been tested. Hoped may eventually be useful toward open-source drivers.
 			# https://github.com/NVIDIA/open-gpu-kernel-modules
+			# Similar procedure has also been used by CI compatibility checks for custom kernels, though similar logging benefits theoretically may be achieved by reading /var/log files .
+			# Does NOT compile properly with Debian packages splitting the headers with 'common' packages.
 			if false
 			then
 				_messagePlain_probe 'nvidia: make: '"$currentLine"
@@ -1149,6 +1151,8 @@ _install_nvidia() {
 			
 			# DISABLED. Has been tested. Hoped may eventually be useful toward open-source drivers.
 			# https://github.com/NVIDIA/open-gpu-kernel-modules
+			# Similar procedure has also been used by CI compatibility checks for custom kernels, though similar logging benefits theoretically may be achieved by reading /var/log files .
+			# Does NOT compile properly with Debian packages splitting the headers with 'common' packages.
 			if false
 			then
 				sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom.run --extract-only
