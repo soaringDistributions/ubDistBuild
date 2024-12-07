@@ -850,6 +850,13 @@ _if_patch_nvidia() {
 		[[ "$?" == "0" ]] && return 1
 		return 0
 	fi
+
+	if [[ "$1" == "" ]] && [[ "$2" == "" ]] && [[ "$3" == "invert" ]]
+	then
+		grep "doNotMatch_1234567890_3141592654\|NULL"
+		[[ "$?" == "0" ]] && return 1
+		return 0
+	fi
 	
 	cat
 	[[ "$?" == "0" ]] && return 1
@@ -1108,7 +1115,7 @@ _install_nvidia() {
 		ls -A -1 -d /usr/src/linux-headers-* | sort -r -V | head -n 12 | sed -s 's/.*linux-headers-//' | _if_patch_nvidia "$currentVersion" "" "invert" | grep -v '\-common$' | while read -r currentLine
 		do
 			_messagePlain_probe 'nvidia: PATCH , EXTRACT'
-
+			cd "$scriptAbsoluteFolder"/
 
 			_safeRMR "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"
 			_safeRMR "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom
@@ -1124,7 +1131,7 @@ _install_nvidia() {
 
 			# ###
 			cd "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom
-			"$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"/nvidia-installer --no-kernel-module --ui=none --no-questions
+			"$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom/nvidia-installer --no-kernel-module --ui=none --no-questions
 			[[ "$?" != "0" ]] && currentExitStatus=1
 			
 			
