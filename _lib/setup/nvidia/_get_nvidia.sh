@@ -1276,7 +1276,7 @@ Type=Application
 	systemctl stop gdm3
 	systemctl start sddm
 	sleep 6
-	systemctl status sddm
+	systemctl status sddm | cat
 	
 	cd "$functionEntryPWD"
 	[[ "$currentExitStatus" != "0" ]] && _messageFAIL
