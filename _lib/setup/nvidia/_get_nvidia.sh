@@ -835,20 +835,22 @@ _if_patch_nvidia() {
 	then
 		[[ "$1" == "470.256.02" ]] && ( [[ "$2" == "6.12.1" ]] || [[ "$2" == "6.12.2" ]] || [[ "$2" == "6.12.3" ]] ) && return 0
 		return 1
-	else
-		if [[ "$1" == "470.256.02" ]] && [[ "$3" == "" ]]
-		then
-			grep -v "6.12.1\|6.12.2\|6.12.3\|NULL"
-			[[ "$?" == "0" ]] && return 1
-			return 0
-		fi
-		if [[ "$1" == "470.256.02" ]] && [[ "$3" == "invert" ]]
-		then
-			grep "6.12.1\|6.12.2\|6.12.3\|NULL"
-			[[ "$?" == "0" ]] && return 1
-			return 0
-		fi
 	fi
+	
+	if [[ "$1" == "470.256.02" ]] && [[ "$2" == "" ]] && [[ "$3" == "" ]]
+	then
+		grep -v "6.12.1\|6.12.2\|6.12.3\|NULL"
+		[[ "$?" == "0" ]] && return 1
+		return 0
+	fi
+
+	if [[ "$1" == "470.256.02" ]] && [[ "$2" == "" ]] && [[ "$3" == "invert" ]]
+	then
+		grep "6.12.1\|6.12.2\|6.12.3\|NULL"
+		[[ "$?" == "0" ]] && return 1
+		return 0
+	fi
+	
 	cat
 	[[ "$?" == "0" ]] && return 1
 
@@ -860,6 +862,7 @@ _patch_nvidia() {
 
 	cd "$scriptAbsoluteFolder"
 	
+	rm -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch"-custom.run
 	
 	local currentVersion_patch="$1"
 	[[ "$currentVersion_patch" == "" ]] && currentVersion_patch="$currentVersion"
@@ -893,17 +896,18 @@ _patch_nvidia() {
 		#env TERM=dumb sh ./NVIDIA-Linux-x86_64-470.256.02.run -s --ui=none --no-questions --apply-patch ./gcc14-k6.10-k6.12.patch.txt < /dev/null 2>&1
 		#_messagePlain_probe_cmd cat "$scriptAbsoluteFolder"/nv_patch.log
 
-		#mv -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch"-orig.run
-		rm -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run
-		mv -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch"-custom.run "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run
-		chmod 755 "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run
-		_messagePlain_probe_cmd ls -l "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-*
-
 		# In practice, 'nvidia-drm' 'modeset' occurs elsewhere in '_get_nvidia.sh' scripted installation, and is implemented by default through 'modprobe' options .
 		#echo 'GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT nvidia-drm.modeset=1"' | sudo -n tee /etc/default/grub.d/91_nvPatch.cfg
 		#sudo -n chmod 644 "/etc/default/grub.d/91_nvPatch.cfg"
 		#sudo -n update-grub
 	fi
+
+	##mv -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch"-orig.run
+	#rm -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run
+	#mv -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch"-custom.run "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run
+	#chmod 755 "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch".run
+	chmod 755 "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion_patch"-custom.run
+	_messagePlain_probe_cmd ls -l "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-*
 
 
 	cd "$functionEntryPWD"
@@ -1099,34 +1103,27 @@ _install_nvidia() {
 		# Local variables may be unavailable in a function.
 		# Directory must be extracted from NVIDIA installer separately for each patch (due to at least differing kernel versions).
 		
-		rm -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-orig.run
 		currentIteration=0
 		# If headers for more than 12 kernels are installed, that is an issue.
 		ls -A -1 -d /usr/src/linux-headers-* | sort -r -V | head -n 12 | sed -s 's/.*linux-headers-//' | _if_patch_nvidia "$currentVersion" "" "invert" | grep -v '\-common$' | while read -r currentLine
 		do
 			_messagePlain_probe 'nvidia: PATCH , EXTRACT'
 
-			[[ -e "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run ]] && cp -n "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-orig.run
 
 			_safeRMR "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"
-			rm -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
-			cp -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-orig.run "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
-			chmod 755 "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
+			_safeRMR "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom
+			rm -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom.run
 
-
+			
 			_patch_nvidia "$currentVersion" "$currentLine"
 
-			sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --extract-only
+			sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom.run --extract-only
 			[[ "$?" != "0" ]] && currentExitStatus=1
-
-			rm -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
-
-			mv -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"
 
 
 
 			# ###
-			cd "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"
+			cd "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom
 			"$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"/nvidia-installer --no-kernel-module --ui=none --no-questions
 			[[ "$?" != "0" ]] && currentExitStatus=1
 			
@@ -1140,7 +1137,7 @@ _install_nvidia() {
 			export IGNORE_MISSING_MODULE_SYMVERS=1
 			
 			
-			cd "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"/kernel
+			cd "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom/kernel
 			
 			make clean
 			
@@ -1163,7 +1160,7 @@ _install_nvidia() {
 			#--systemd
 			#--expert
 			#_messagePlain_probe nvidia "$currentLine"
-			#sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --ui=none --no-questions -j "$currentParallel" --no-cc-version-check -k "$currentLine" --dkms -m=kernel
+			#sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom.run --ui=none --no-questions -j "$currentParallel" --no-cc-version-check -k "$currentLine" --dkms -m=kernel
 			#[[ "$?" != "0" ]] && currentExitStatus=1
 			
 			# TODO
@@ -1173,15 +1170,10 @@ _install_nvidia() {
 			#--no-kernel-module
 			
 			let currentIteration=currentIteration+1
-
-			# ###
-
-			_safeRMR "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"
-			rm -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
 		done
 
-		cp -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-orig.run "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
-		chmod 755 "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
+		#cp -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-orig.run "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
+		#chmod 755 "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
 
 		#_safeRMR "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"
 		
@@ -1191,12 +1183,14 @@ _install_nvidia() {
 		local currentKernel=$(uname -r)
 		_messagePlain_probe nvidia uname -r "$currentKernel"
 
-		_patch_nvidia "$currentVersion" "$currentKernel"
+		if _if_patch_nvidia "$currentVersion" "$currentKernel"
+		then
+			_patch_nvidia "$currentVersion" "$currentKernel"
 
-		sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --ui=none --no-questions -j "$currentParallel" --no-cc-version-check -k "$currentKernel" -m=kernel
-
-		cp -f "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-orig.run "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
-		chmod 755 "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run
+			sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion"-custom.run --ui=none --no-questions -j "$currentParallel" --no-cc-version-check -k "$currentKernel" -m=kernel
+		else
+			sh "$scriptAbsoluteFolder"/NVIDIA-Linux-x86_64-"$currentVersion".run --ui=none --no-questions -j "$currentParallel" --no-cc-version-check -k "$currentKernel" -m=kernel
+		fi
 	fi
 	
 	
