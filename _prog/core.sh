@@ -1221,6 +1221,8 @@ _create_ubDistBuild-rotten_install-core() {
 	
 	_getMost_backend_aptGetInstall statserial
 
+	
+	_getMost_backend_aptGetInstall chirp
 
 
 	_getMost_backend_aptGetInstall sox
