@@ -45,15 +45,15 @@ on:
         - latest
         - internal
         - base
-      devfast:
-        type: boolean
-        default: true
+      #devfast:
+        #type: boolean
+        #default: true
       skimfast:
         type: boolean
-        default: false
+        default: true
       qemuNoKVM:
         type: boolean
-        default: false
+        default: true
       runnerName:
         required: false
         default: ubuntu-latest-m
@@ -102,7 +102,8 @@ jobs:
 
   build_before_noBoot:
     needs: [build_release]
-    runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
+    #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
+    runs-on: ubuntu-latest
     steps:
       - name: RAND_SEED
         shell: bash
@@ -318,11 +319,14 @@ jobs:
       - name: zSpecial_report-delete
         shell: bash
         run: |
+          ! ./ubiquitous_bash.sh _openChRoot && exit 1
           ./ubiquitous_bash.sh _chroot rm -f /dpkg
           ./ubiquitous_bash.sh _chroot rm -f /lsmodReport
           ./ubiquitous_bash.sh _chroot rm -f /binReport
           ./ubiquitous_bash.sh _chroot rm -f /coreReport
           ./ubiquitous_bash.sh _chroot rm -f /cfgFW.log
+          ! ./ubiquitous_bash.sh _closeChRoot && exit 1
+          true
 
 
       - name: Force KVM group perms
@@ -404,6 +408,15 @@ jobs:
           export skimfast=${{ github.event.inputs.skimfast }}
           echo $skimfast
           ./ubiquitous_bash.sh _hash_img
+
+
+      - name: release! hash! before_noBoot
+        shell: bash
+        run: |
+          mv -f ./_local/_hash-ubdist.txt ./_local/_hash-ubdist_before_noBoot.txt
+          gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/_hash-ubdist_before_noBoot.txt
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: report! cfgFW
         shell: bash
@@ -750,15 +763,6 @@ jobs:
           df -h
           df -h /
 
-
-
-      - name: release! hash!
-        shell: bash
-        run: |
-          mv -f ./_local/_hash-ubdist.txt ./_local/_hash-ubdist.txt
-          gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/_hash-ubdist.txt
-        env:
-          GH_TOKEN: ${{ github.token }}
 
       - name: release! package_image
         shell: bash
