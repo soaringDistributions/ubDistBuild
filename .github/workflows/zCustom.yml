@@ -361,7 +361,7 @@ jobs:
           export qemuXvfb="true"
           echo qemuXvfb "$qemuXvfb"
           mkdir -p ./_local/analysis/screenshots
-          ./_create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log && exit ${PIPESTATUS[0]}
+          ./ubiquitous_bash.sh _create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log && exit ${PIPESTATUS[0]}
 
       #- name: _zSpecial_report
         #shell: bash
@@ -421,7 +421,12 @@ jobs:
       - name: report! cfgFW
         shell: bash
         run: |
+          ! ./ubiquitous_bash.sh _openChRoot && exit 1
+          sudo -n cp -f "$globalVirtFS"/cfgFW.log "./_local"/cfgFW.log
+          sudo -n chown "$USER":"$USER" "./_local"/cfgFW.log
           cat ./_local/cfgFW.log
+          rm -f ./_local/cfgFW.log
+          ! ./ubiquitous_bash.sh _closeChRoot && exit 1
       
       #- name: release! report! internal
         #shell: bash
