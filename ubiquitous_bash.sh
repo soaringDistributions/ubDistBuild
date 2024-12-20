@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='664157604'
+export ub_setScriptChecksum_contents='2782489484'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -48615,6 +48615,27 @@ _ubDistBuild_split_beforeBoot() {
 	done
 
 	rm -f ./package_image_beforeBoot.tar.flx
+
+	cd "$functionEntryPWD"
+}
+_ubDistBuild_split_before_noBoot() {
+	mv -f "$scriptLocal"/package_image.tar.flx "$scriptLocal"/package_image_before_noBoot.tar.flx
+	
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+
+
+	cd "$scriptLocal"
+	#split -b 1856000000 -d package_image_before_noBoot.tar.flx package_image_before_noBoot.tar.flx.part
+
+	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
+	local currentIteration
+	for currentIteration in $(seq -w 0 24)
+	do
+		[[ -s ./package_image_before_noBoot.tar.flx ]] && [[ -e ./package_image_before_noBoot.tar.flx ]] && tail -c 1856000000 package_image_before_noBoot.tar.flx > package_image_before_noBoot.tar.flx.part"$currentIteration" && truncate -s -1856000000 package_image_before_noBoot.tar.flx
+	done
+
+	rm -f ./package_image_before_noBoot.tar.flx
 
 	cd "$functionEntryPWD"
 }
