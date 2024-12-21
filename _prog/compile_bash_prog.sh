@@ -120,6 +120,8 @@ _compile_bash_program_prog() {
 	
 	includeScriptList+=( get.sh )
 
+	includeScriptList+=( core-custom.sh )
+
 	includeScriptList+=( features.sh )
 
 

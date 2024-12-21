@@ -100,6 +100,7 @@ jobs:
 
 
 
+
   build_before_noBoot:
     needs: [build_release]
     #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
@@ -326,6 +327,7 @@ jobs:
           ./ubiquitous_bash.sh _chroot rm -f /binReport
           ./ubiquitous_bash.sh _chroot rm -f /coreReport
           ./ubiquitous_bash.sh _chroot rm -f /cfgFW.log
+          ./ubiquitous_bash.sh _chroot rm -f /FW-done
           ! ./ubiquitous_bash.sh _closeChRoot && exit 1
           true
 
@@ -675,6 +677,7 @@ jobs:
           #./ubiquitous_bash.sh _chroot rm -f /binReport
           #./ubiquitous_bash.sh _chroot rm -f /coreReport
           #./ubiquitous_bash.sh _chroot rm -f /cfgFW.log
+          #./ubiquitous_bash.sh _chroot rm -f /FW-done
 
       - name: _zSpecial_report
         shell: bash
