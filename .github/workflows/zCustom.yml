@@ -431,6 +431,7 @@ jobs:
           cat ./_local/cfgFW.log
           rm -f ./_local/cfgFW.log
           ! ./ubiquitous_bash.sh _closeChRoot && exit 1
+          true
       
       #- name: release! report! internal
         #shell: bash
