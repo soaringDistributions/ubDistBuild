@@ -681,11 +681,11 @@ jobs:
           #./ubiquitous_bash.sh _chroot rm -f /cfgFW.log
           #./ubiquitous_bash.sh _chroot rm -f /FW-done
 
-      - name: _zSpecial_report
+      - name: _zSpecial_report-FORCE
         shell: bash
         continue-on-error: true
         run: |
-          ./ubiquitous_bash.sh _zSpecial_report
+          ./ubiquitous_bash.sh _zSpecial_report-FORCE
           ls -l ./_local/grub.cfg
           ls -l ./_local/grubenv
           ls -l ./_local/dpkg

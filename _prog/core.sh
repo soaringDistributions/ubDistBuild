@@ -2554,6 +2554,20 @@ _zSpecial_report() {
 	return 0
 }
 
+# WARNING: No production use. Standardizes extra commands in customization scripts to force recreation and copying of otherwise existing files.
+_zSpecial_report-FORCE() {
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	
+	_chroot dpkg --get-selections | cut -f1 | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
+	sudo -n cp -f "$globalVirtFS"/dpkg "$scriptLocal"/dpkg
+	sudo -n chown "$USER":"$USER" "$scriptLocal"/dpkg
+	
+	_zSpecial_report_procedure "$@"
+	
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	return 0
+}
+
 # ATTENTION: Override with 'ops.sh' or similar.
 _zSpecial_qemu_chroot() {
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
