@@ -364,7 +364,8 @@ jobs:
           export qemuXvfb="true"
           echo qemuXvfb "$qemuXvfb"
           mkdir -p ./_local/analysis/screenshots
-          ./ubiquitous_bash.sh _create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log && exit ${PIPESTATUS[0]}
+          #./ubiquitous_bash.sh _create_ubDistBuild-bootOnce | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log && exit ${PIPESTATUS[0]}
+          ./ubiquitous_bash.sh _create_ubDistBuild-bootOnce-before_noBoot | sudo -n tee ./_local/_create_ubDistBuild-bootOnce.log && exit ${PIPESTATUS[0]}
 
       #- name: _zSpecial_report
         #shell: bash
