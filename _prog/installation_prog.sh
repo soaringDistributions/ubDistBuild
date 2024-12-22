@@ -7,6 +7,24 @@ _test_prog() {
 	_wantGetDep unsquashfs
 }
 
+_gitMad_neighbors_procedure() {
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+
+	[[ ! -e '/cygdrive/c/core/variant/ubdist_dummy' ]] && _messageFAIL
+	cd '/cygdrive/c/core/variant/ubdist_dummy'
+	_gitMad
+	
+	[[ ! -e '/cygdrive/c/core/variant/ubdist_puddleJumper' ]] && _messageFAIL
+	cd '/cygdrive/c/core/variant/ubdist_puddleJumper'
+	_gitMad
+	
+	cd "$functionEntryPWD"
+}
+_gitMad_neighbors() {
+	"$scriptAbsoluteLocation _gitMad_neighbors "$@""
+}
+
 
 _setup_install() {
 	true
@@ -63,6 +81,8 @@ _setup_install() {
 	
 
 	_messagePlain_probe_cmd _self_gitMad
+
+	_messagePlain_probe_cmd _gitMad_neighbors
 
 	sleep 5
 }

@@ -86,6 +86,15 @@ Section "Install"
   RMDir "C:\core\infrastructure\ubDistBuild-backup-$0"
 
 
+  Rename "C:\core\variant\ubdist_dummy" "C:\core\variant\ubdist_dummy-backup-$0"
+  SetOutPath "C:\core\variant\ubdist_dummy"
+  File /r "..\..\..\extendedInterface-accessories\parts\ubdist_dummy\*"
+
+  Rename "C:\core\variant\ubdist_puddleJumper" "C:\core\variant\ubdist_puddleJumper-backup-$0"
+  SetOutPath "C:\core\variant\ubdist_puddleJumper"
+  File /r "..\..\..\extendedInterface-accessories\parts\ubdist_puddleJumper\*"
+
+
   SetShellVarContext all
 
 
@@ -200,6 +209,20 @@ section "uninstall"
   
   ;RMDir /r "C:\core\infrastructure\ubDistBuild"
   RMDir /r /REBOOTOK "C:\core\infrastructure\ubDistBuild"
+
+
+
+  # Rename AND/OR Remove  adjacent installed repositories.
+  Rename "C:\core\variant\ubdist_dummy" "C:\core\variant\ubdist_dummy-uninstalled-$0"
+  RMDir /r /REBOOTOK "C:\core\variant\ubdist_dummy"
+  ;...
+
+  # Rename AND/OR Remove  adjacent installed repositories.
+  Rename "C:\core\variant\ubdist_puddleJumper" "C:\core\variant\ubdist_puddleJumper-uninstalled-$0"
+  RMDir /r /REBOOTOK "C:\core\variant\ubdist_puddleJumper"
+  ;...
+
+
  
 	# Always delete uninstaller as the last action
 	delete "C:\core\infrastructure\ubDistBuild-uninst.exe"

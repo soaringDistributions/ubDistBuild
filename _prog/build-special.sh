@@ -181,6 +181,17 @@ _build_ubDistBuild-fetch() {
     cd "$functionEntryPWD"
 
 
+
+
+    cd "$currentAccessoriesDir"/parts/
+    _gitBest clone --depth 1 --recursive git@github.com:soaringDistributions/ubdist_dummy.git
+    cd "$functionEntryPWD"
+
+        cd "$currentAccessoriesDir"/parts/
+    _gitBest clone --depth 1 --recursive git@github.com:soaringDistributions/ubdist_puddleJumper.git
+    cd "$functionEntryPWD"
+
+
     cd "$functionEntryPWD"
     _stop
 }
