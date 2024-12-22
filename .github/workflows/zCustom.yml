@@ -105,7 +105,6 @@ jobs:
 
 
   build_before_noBoot:
-    if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
     needs: [build_release]
     #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
     runs-on: ubuntu-latest
@@ -190,6 +189,7 @@ jobs:
           echo $USER
           groups
       - name: _getCore_ub
+        if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         shell: bash
         timeout-minutes: 90
         run: |
@@ -199,9 +199,11 @@ jobs:
           cd ubiquitous_bash
           ./_setupUbiquitous.bat
       - uses: actions/checkout@v3
+        if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         with:
           submodules: recursive
       - name: _getMinimal_cloud
+        if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         shell: bash
         run: |
           ! ./ubiquitous_bash.sh _getMinimal_cloud && exit 1
@@ -211,6 +213,7 @@ jobs:
           df -h /
         timeout-minutes: 355
       - name: _getMost-xvfb
+        if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         shell: bash
         run: |
           #! ./ubiquitous_bash.sh _getMost && exit 1
@@ -227,6 +230,7 @@ jobs:
         timeout-minutes: 355
       
       - name: _test_hash_legacy
+        if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         shell: bash
         run: |
           if [[ -e "/etc/ssl/openssl_legacy.cnf" ]]
@@ -291,6 +295,7 @@ jobs:
           true
 
       - name: _get_vmImg_ubDistBuild
+        if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         shell: bash
         run: |
           current_releaseLabel="${{ inputs.releaseLabel }}"
@@ -309,11 +314,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: fallocate --dig-holes
+        if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         shell: bash
         run: |
           fallocate --dig-holes ./_local/vm.img
 
       - name: _hash_img
+        if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         shell: bash
         run: |
           export skimfast=${{ github.event.inputs.skimfast }}
@@ -323,6 +330,7 @@ jobs:
 
 
       - name: zSpecial_report-delete
+        if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         shell: bash
         run: |
           ! ./ubiquitous_bash.sh _openChRoot && exit 1
@@ -354,6 +362,7 @@ jobs:
           groups
           echo
       - name: _create_ubDistBuild-bootOnce
+        if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         shell: bash
         continue-on-error: true
         run: |
@@ -385,6 +394,7 @@ jobs:
           #ls -l ./_local/cfgFW.log
 
       - name: artifacts
+        if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: convert-live-exhaustive---analysis-screenshots-10-fromImg
@@ -405,12 +415,14 @@ jobs:
             #./_local/cfgFW.log
 
       - name: check! FAIL_bootOnce
+        if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         shell: bash
         run: |
           ! [[ -e ./_local/FAIL_bootOnce ]]
           
 
       - name: _hash_img
+        if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         shell: bash
         run: |
           export skimfast=${{ github.event.inputs.skimfast }}
@@ -419,6 +431,7 @@ jobs:
 
 
       - name: release! hash! before_noBoot
+        if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         shell: bash
         run: |
           mv -f ./_local/_hash-ubdist.txt ./_local/_hash-ubdist_before_noBoot.txt
@@ -427,6 +440,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
       - name: report! cfgFW
+        if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         shell: bash
         run: |
           ! ./ubiquitous_bash.sh _openChRoot && exit 1
@@ -436,33 +450,22 @@ jobs:
           rm -f ./_local/cfgFW.log
           ! ./ubiquitous_bash.sh _closeChRoot && exit 1
           true
-      
-      #- name: release! report! internal
-        #shell: bash
-        #run: |
-            #gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/grub.cfg
-            #gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/grubenv
-            #gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/dpkg
-            #gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/lsmodReport
-            #gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/binReport
-            #gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/coreReport
-            #cat /proc/cpuinfo > ./_local/cpuinfo
-            #gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/cpuinfo
-        #env:
-          #GH_TOKEN: ${{ github.token }}
 
       - name: fallocate --dig-holes
+        if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         shell: bash
         run: |
           fallocate --dig-holes ./_local/vm.img
 
       - name: _package_ubDistBuild_image
+        if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         shell: bash
         run: |
           export skimfast=${{ github.event.inputs.skimfast }}
           echo $skimfast
           ./ubiquitous_bash.sh _package_ubDistBuild_image | sudo -n tee ./_local/_package_ubDistBuild_image.log && exit ${PIPESTATUS[0]}
       - name: _ubDistBuild_split_before_noBoot
+        if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         shell: bash
         run: |
           ./ubiquitous_bash.sh _ubDistBuild_split_before_noBoot | sudo -n tee ./_lib/_ubDistBuild_split_before_noBoot.log && exit ${PIPESTATUS[0]}
@@ -474,6 +477,7 @@ jobs:
           df -h /
 
       - name: release! package_image_before_noBoot
+        if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         shell: bash
         run: |
           #gh release create build-${{ github.run_id }}-${{ github.run_attempt }} --title build --notes ""
