@@ -37,8 +37,8 @@ on:
   workflow_dispatch:
     inputs:
       releaseOrigin:
-        required: true
-        default: soaringDistributions/ubDistBuild
+        required: false
+        default: DEFAULT
         type: choice
         options:
           - DEFAULT
