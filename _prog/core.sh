@@ -45,20 +45,20 @@ _custom_kernel_server-sequence() {
 	
 	
 	cd "$safeTmp"
-	if [[ -e "$scriptLocal"/"linux-lts-server-amd64-debian.tar.gz" ]]
+	if [[ -e "$scriptLocal"/"linux-mainline-server-amd64-debian.tar.gz" ]]
 	then
-		sudo -n cp -f "$scriptLocal"/"linux-lts-server-amd64-debian.tar.gz" "$globalVirtFS"/
-	elif _wget_githubRelease_internal "soaringDistributions/mirage335KernelBuild" "linux-lts-server-amd64-debian.tar.gz" && [[ -e "$safeTmp"/"linux-lts-server-amd64-debian.tar.gz" ]]
+		sudo -n cp -f "$scriptLocal"/"linux-mainline-server-amd64-debian.tar.gz" "$globalVirtFS"/
+	elif _wget_githubRelease_internal "soaringDistributions/mirage335KernelBuild" "linux-mainline-server-amd64-debian.tar.gz" && [[ -e "$safeTmp"/"linux-mainline-server-amd64-debian.tar.gz" ]]
 	then
-		sudo -n cp -f "$safeTmp"/"linux-lts-server-amd64-debian.tar.gz" "$globalVirtFS"/
+		sudo -n cp -f "$safeTmp"/"linux-mainline-server-amd64-debian.tar.gz" "$globalVirtFS"/
 	else
-		sudo -n cp -f "$globalVirtFS"/home/user/core/installations/kernel_linux/linux-lts-server-amd64-debian.tar.gz "$globalVirtFS"/
+		sudo -n cp -f "$globalVirtFS"/home/user/core/installations/kernel_linux/linux-mainline-server-amd64-debian.tar.gz "$globalVirtFS"/
 	fi
-	_chroot tar xf /linux-lts-server-amd64-debian.tar.gz
+	_chroot tar xf /linux-mainline-server-amd64-debian.tar.gz
 	_chroot bash -c 'dpkg -i ./lts-server/*.deb'
 	_chroot rm -f ./lts-server/.config './lts-server/linux-*' ./lts-server/statement.sh.out.txt
-	_chroot rm -f ./lts-server/linux-lts-server-amd64-debian.tar.gz
-	_chroot rm -f /linux-lts-server-amd64-debian.tar.gz
+	_chroot rm -f ./lts-server/linux-mainline-server-amd64-debian.tar.gz
+	_chroot rm -f /linux-mainline-server-amd64-debian.tar.gz
 	
 	
 	
