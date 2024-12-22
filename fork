@@ -618,6 +618,8 @@ cp -a ./_lib/ubDistBuild/.github/workflows/zCustom-monolithic.yml ./.github/work
 cp -a ./_lib/ubDistBuild/.github/workflows/_renameTag-build_to_internal.yml ./.github/workflows/
 cp -a ./_lib/ubDistBuild/.github/workflows/_renameTag-internal_to_internal-date.yml ./.github/workflows/
 
+cp -a ./_lib/ubDistBuild/.github/workflows/_delete-partFiles.yml ./.github/workflows/
+
 ##### Runtime Configuration
 mkdir -p ./_local
 
