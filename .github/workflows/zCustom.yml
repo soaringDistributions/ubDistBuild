@@ -801,6 +801,15 @@ jobs:
           gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part14 --yes || true
           gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part15 --yes || true
           gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part16 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part17 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part18 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part19 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part20 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part21 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part22 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part23 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part24 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part25 --yes || true
           true
         env:
           GH_TOKEN: ${{ github.token }}
