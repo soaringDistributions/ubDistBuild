@@ -760,6 +760,11 @@ jobs:
           echo $skimfast
           ./ubiquitous_bash.sh _hash_img
       
+
+      - name: fallocate --dig-holes
+        shell: bash
+        run: |
+          fallocate --dig-holes ./_local/vm.img
       
       
       - name: _package_ubDistBuild_image
