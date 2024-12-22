@@ -41,6 +41,7 @@ on:
         default: soaringDistributions/ubDistBuild
         type: choice
         options:
+          - DEFAULT
           - soaringDistributions/ubDistBuild
           - soaringDistributions/ubdist_dummy
       releaseLabel:
@@ -305,6 +306,9 @@ jobs:
         if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         shell: bash
         run: |
+          current_releaseOrigin="${{ inputs.releaseOrigin }}"
+          ( [[ "$current_releaseOrigin" == "" ]] || [[ "$current_releaseOrigin" == "DEFAULT" ]] ) && current_releaseOrigin=$(head -n1 ./.github/workflows/DEFAULT_releaseOrigin.txt)
+          [[ "$current_releaseOrigin" == "" ]] && current_releaseOrigin="soaringDistributions/ubDistBuild"
           current_releaseLabel="${{ inputs.releaseLabel }}"
           #[[ "$current_releaseLabel" == "" ]] && current_releaseLabel="base"
           [[ "$current_releaseLabel" == "" ]] && current_releaseLabel="latest"
@@ -316,7 +320,7 @@ jobs:
           export MANDATORY_HASH="true"
           cd ./_local
           rm -f hash-download.txt
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "${{ inputs.releaseOrigin }}" "$current_releaseLabel" "package_image.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "$current_releaseOrigin" "$current_releaseLabel" "package_image.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -627,6 +631,9 @@ jobs:
         if: ${{ github.event.inputs.DISABLE_BOOT == 'true' }}
         shell: bash
         run: |
+          current_releaseOrigin="${{ inputs.releaseOrigin }}"
+          ( [[ "$current_releaseOrigin" == "" ]] || [[ "$current_releaseOrigin" == "DEFAULT" ]] ) && current_releaseOrigin=$(head -n1 ./.github/workflows/DEFAULT_releaseOrigin.txt)
+          [[ "$current_releaseOrigin" == "" ]] && current_releaseOrigin="soaringDistributions/ubDistBuild"
           current_releaseLabel="${{ inputs.releaseLabel }}"
           #[[ "$current_releaseLabel" == "" ]] && current_releaseLabel="base"
           [[ "$current_releaseLabel" == "" ]] && current_releaseLabel="latest"
@@ -638,7 +645,7 @@ jobs:
           export MANDATORY_HASH="true"
           cd ./_local
           rm -f hash-download.txt
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "${{ inputs.releaseOrigin }}" "$current_releaseLabel" "package_image.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "$current_releaseOrigin" "$current_releaseLabel" "package_image.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
