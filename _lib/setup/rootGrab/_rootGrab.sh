@@ -590,7 +590,10 @@ _detect_small() {
 	#[[ $(bc <<< "scale=0; "$(df --block-size=1 --output=avail /home/"$custom_user"/ | tr -dc '0-9')" / 1000000000") -le 35 ]] && echo 'detect: df: <35GB' && return 0
 	
 	# Must be enough for multiple VM images. Will prevent 'create' unless filesystem definitely expanded enough for expected usual workstations, preventing undesired complexity during '_custom' and similar using 'chroot', 'qemu', etc.
-	[[ $(bc <<< "scale=0; "$(df --block-size=1 --output=avail /home/"$custom_user"/ | tr -dc '0-9')" / 1000000000") -le 60 ]] && echo 'detect: df: <60GB' && return 0
+	#[[ $(bc <<< "scale=0; "$(df --block-size=1 --output=avail /home/"$custom_user"/ | tr -dc '0-9')" / 1000000000") -le 60 ]] && echo 'detect: df: <60GB' && return 0
+
+	# Larger, to ignore much larger custom VM images. Seems unusual to use <128GB disk anyway.
+	[[ $(bc <<< "scale=0; "$(df --block-size=1 --output=avail /home/"$custom_user"/ | tr -dc '0-9')" / 1000000000") -le 96 ]] && echo 'detect: df: <96GB' && return 0
 	
 	return 1
 }
