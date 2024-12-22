@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2990324807'
+export ub_setScriptChecksum_contents='3950898990'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -46229,6 +46229,24 @@ _test_prog() {
 	_wantGetDep unsquashfs
 }
 
+_gitMad_neighbors_procedure() {
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+
+	[[ ! -e '/cygdrive/c/core/variant/ubdist_dummy' ]] && _messageFAIL
+	cd '/cygdrive/c/core/variant/ubdist_dummy'
+	_gitMad
+	
+	[[ ! -e '/cygdrive/c/core/variant/ubdist_puddleJumper' ]] && _messageFAIL
+	cd '/cygdrive/c/core/variant/ubdist_puddleJumper'
+	_gitMad
+	
+	cd "$functionEntryPWD"
+}
+_gitMad_neighbors() {
+	"$scriptAbsoluteLocation _gitMad_neighbors "$@""
+}
+
 
 _setup_install() {
 	true
@@ -46285,6 +46303,8 @@ _setup_install() {
 	
 
 	_messagePlain_probe_cmd _self_gitMad
+
+	_messagePlain_probe_cmd _gitMad_neighbors
 
 	sleep 5
 }
@@ -50066,6 +50086,17 @@ _build_ubDistBuild-fetch() {
     mkdir -p "$currentAccessoriesDir"/parts/ubDistBuild_bundle-adhoc/qemu/
     cd "$currentAccessoriesDir"/parts/ubDistBuild_bundle-adhoc/qemu/
     wget 'https://qemu.weilnetz.de/w64/2023/qemu-w64-setup-20230817.exe'
+    cd "$functionEntryPWD"
+
+
+
+
+    cd "$currentAccessoriesDir"/parts/
+    _gitBest clone --depth 1 --recursive git@github.com:soaringDistributions/ubdist_dummy.git
+    cd "$functionEntryPWD"
+
+        cd "$currentAccessoriesDir"/parts/
+    _gitBest clone --depth 1 --recursive git@github.com:soaringDistributions/ubdist_puddleJumper.git
     cd "$functionEntryPWD"
 
 
