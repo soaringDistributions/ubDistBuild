@@ -1281,7 +1281,8 @@ jobs:
 
   build-hash:
     needs: [build, build-convert-rootfs, build-convert-live]
-    runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
+    runs-on: ubuntu-latest
+    #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
     steps:
       - name: report! API Rate Limit
         shell: bash
