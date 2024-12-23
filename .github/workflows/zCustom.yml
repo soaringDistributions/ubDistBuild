@@ -761,6 +761,8 @@ jobs:
           ./ubiquitous_bash.sh _chroot df -h / | tee ./_local/root_df.log
           ! ./ubiquitous_bash.sh _closeChRoot && exit 1
           gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/root_df.log
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: _zSpecial_report-FORCE
         shell: bash
