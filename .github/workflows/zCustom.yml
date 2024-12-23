@@ -70,11 +70,11 @@ on:
         default: true
       runnerName:
         required: false
-        default: ubuntu-latest-m
+        default: ubuntu-latest-l
         type: choice
         options:
-        - ubuntu-latest-m
         - ubuntu-latest-l
+        - ubuntu-latest-m
         - ubuntu-latest
   # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
   #schedule:
@@ -747,11 +747,20 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
+      # Discouraged. Usually more useful and more standard to do this within '_custom' function.
       # ONLY enable if a replacement '_lib/custom/package_kde.tar.xz' is available and desired. This WILL fail if the file is not present, and this is NOT necessary unless a different customization is needed: it is better to rely on the upstream 'ubDistBuild' repository KDE configuration package installed for 'ubdist/OS' .
       #- name: _rotten_install-kde
         #shell: bash
         #run: |
           #./ubiquitous_bash.sh _create_ubDistBuild-rotten_install-kde
+
+      - name: report! root df
+        shell: bash
+        run: |
+          ! ./ubiquitous_bash.sh _openChRoot && exit 1
+          ./ubiquitous_bash.sh _chroot df -h / | tee ./_local/root_df.log
+          ! ./ubiquitous_bash.sh _closeChRoot && exit 1
+          gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/root_df.log
 
       - name: _zSpecial_report-FORCE
         shell: bash
