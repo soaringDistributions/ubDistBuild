@@ -53,6 +53,9 @@ on:
         - latest
         - internal
         - base
+      DISABLE_ROOTFS:
+        type: boolean
+        default: true
       #devfast:
         #type: boolean
         #default: true
@@ -934,7 +937,7 @@ jobs:
 
   build-convert-rootfs:
     needs: [build, build_release]
-    runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
+    runs-on: ${{ github.event.inputs.DISABLE_ROOTFS != 'false' && 'ubuntu-latest' || github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
     steps:
       - name: RAND_SEED
         shell: bash
@@ -959,7 +962,7 @@ jobs:
           true
       # https://github.com/easimon/maximize-build-space
       - name: Maximize build space
-        if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' && github.event.inputs.runnerName != 'ubuntu-latest-l' && github.event.inputs.runnerName != 'ubuntu-latest-h' }}
+        if: ${{ github.event.inputs.DISABLE_ROOTFS == 'false' && github.event.inputs.runnerName != 'ubuntu-latest-m' && github.event.inputs.runnerName != 'ubuntu-latest-l' && github.event.inputs.runnerName != 'ubuntu-latest-h' }}
         uses: easimon/maximize-build-space@master
         with:
           root-reserve-mb: 1625
@@ -976,7 +979,7 @@ jobs:
           #remove-docker-images: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' && github.event.inputs.runnerName != 'ubuntu-latest-l' && github.event.inputs.runnerName != 'ubuntu-latest-h' }}
           remove-docker-images: 'true'
       - name: Maximize build space ! remove ONLY
-        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' || github.event.inputs.runnerName == 'ubuntu-latest-l' || github.event.inputs.runnerName == 'ubuntu-latest-h' }}
+        if: ${{ github.event.inputs.DISABLE_ROOTFS == 'false' && ( github.event.inputs.runnerName == 'ubuntu-latest-m' || github.event.inputs.runnerName == 'ubuntu-latest-l' || github.event.inputs.runnerName == 'ubuntu-latest-h' ) }}
         uses: AdityaGarg8/remove-unwanted-software@v4.1
         with:
           remove-dotnet: 'true'
@@ -1043,45 +1046,50 @@ jobs:
 
       # ###
           
-      #- name: _get_vmImg_ubDistBuild
-        #shell: bash
-        #run: |
-          ##export FORCE_AXEL=8
-          ##./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
-          ## DANGER: Github Actions (strictly internal) ONLY!
-          ##export FORCE_AXEL=8
-          ##export MANDATORY_HASH="true"
-          #cd ./_local
-          #rm -f hash-download.txt
-          #../ubiquitous_bash.sh _wget_githubRelease_join-stdout "${{ github.repository }}" "" "package_image.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+      - name: _get_vmImg_ubDistBuild
+        if: ${{ github.event.inputs.DISABLE_ROOTFS == 'false' }}
+        shell: bash
+        run: |
+          #export FORCE_AXEL=8
+          #./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
+          # DANGER: Github Actions (strictly internal) ONLY!
+          #export FORCE_AXEL=8
+          #export MANDATORY_HASH="true"
+          cd ./_local
+          rm -f hash-download.txt
+          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "${{ github.repository }}" "" "package_image.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         #env:
           #GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      #- name: fallocate --dig-holes
-        #shell: bash
-        #run: |
-          #fallocate --dig-holes ./_local/vm.img
+      - name: fallocate --dig-holes
+        if: ${{ github.event.inputs.DISABLE_ROOTFS == 'false' }}
+        shell: bash
+        run: |
+          fallocate --dig-holes ./_local/vm.img
 
-      #- name: _hash_img
-        #shell: bash
-        #run: |
-          #export skimfast=${{ inputs.skimfast }}
-          #echo $skimfast
-          ##./ubiquitous_bash.sh _hash_img
-          #cat _local/hash-download.txt
+      - name: _hash_img
+        if: ${{ github.event.inputs.DISABLE_ROOTFS == 'false' }}
+        shell: bash
+        run: |
+          export skimfast=${{ inputs.skimfast }}
+          echo $skimfast
+          #./ubiquitous_bash.sh _hash_img
+          cat _local/hash-download.txt
 
 
-      #- name: _convert-rootfs
-        #shell: bash
-        #run: |
-          #export current_diskConstrained="true"
-          #./ubiquitous_bash.sh _convert_rm
-          #./ubiquitous_bash.sh _convert-rootfs | sudo -n tee ./_convert-rootfs.log && exit ${PIPESTATUS[0]}
+      - name: _convert-rootfs
+        if: ${{ github.event.inputs.DISABLE_ROOTFS == 'false' }}
+        shell: bash
+        run: |
+          export current_diskConstrained="true"
+          ./ubiquitous_bash.sh _convert_rm
+          ./ubiquitous_bash.sh _convert-rootfs | sudo -n tee ./_convert-rootfs.log && exit ${PIPESTATUS[0]}
 
       # ###
       
       # ###
       - name: DUMMY-rootfs
+        if: ${{ github.event.inputs.DISABLE_ROOTFS != 'false' }}
         shell: bash
         run: |
           rm -f ./_local/package_rootfs.tar || true
