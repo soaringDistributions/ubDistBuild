@@ -53,6 +53,13 @@ on:
         - latest
         - internal
         - base
+      customTimeout:
+        required: false
+        default: '45'
+        type: choice
+        options:
+          - '45'
+          - '300'
       DISABLE_ROOTFS:
         type: boolean
         default: true
@@ -738,6 +745,7 @@ jobs:
         shell: bash
         run: |
           ./ubiquitous_bash.sh _custom || true
+        timeout-minutes: ${{ github.event.inputs.customTimeout }}
       
       
       - name: _custom-bundle
