@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2303160304'
+export ub_setScriptChecksum_contents='2169812845'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -27036,7 +27036,7 @@ _wget_githubRelease_join-stdout() {
 
 	local currentIteration
 	currentIteration=0
-	for currentIteration in $(seq -f "%02g" 0 32)
+	for currentIteration in $(seq -f "%02g" 0 50)
 	do
 		currentURL=$(_wget_githubRelease-URL "$1" "$2" "$3"".part""$currentIteration")
 		[[ "$currentURL" == "" ]] && break
@@ -48537,7 +48537,7 @@ _ubDistBuild_join() {
 		_messagePlain_nominal '_ubDistBuild_join: package_image.tar.flx'
 		rm -f "$scriptLocal"/package_image.tar.flx > /dev/null 2>&1
 		currentIteration=""
-		for currentIteration in $(seq -w 0 48 | sort -r)
+		for currentIteration in $(seq -w 0 50 | sort -r)
 		do
 			_messagePlain_probe_var currentIteration
 			[[ -e "$scriptLocal"/package_image.tar.flx.part"$currentIteration" ]] && dd if="$scriptLocal"/package_image.tar.flx.part"$currentIteration" bs=1M status=progress >> "$scriptLocal"/package_image.tar.flx
@@ -48558,7 +48558,7 @@ _ubDistBuild_join() {
 		_messagePlain_nominal '_ubDistBuild_join: vm-live.iso'
 		rm -f "$scriptLocal"/vm-live.iso > /dev/null 2>&1
 		currentIteration=""
-		for currentIteration in $(seq -w 0 48 | sort -r)
+		for currentIteration in $(seq -w 0 50 | sort -r)
 		do
 			_messagePlain_probe_var currentIteration
 			[[ -e "$scriptLocal"/vm-live.iso.part"$currentIteration" ]] && dd if="$scriptLocal"/vm-live.iso.part"$currentIteration" bs=1M status=progress >> "$scriptLocal"/vm-live.iso
@@ -48576,7 +48576,7 @@ _ubDistBuild_join() {
 		_messagePlain_nominal '_ubDistBuild_join: package_rootfs.tar.flx'
 		rm -f "$scriptLocal"/package_rootfs.tar.flx > /dev/null 2>&1
 		currentIteration=""
-		for currentIteration in $(seq -w 0 48 | sort -r)
+		for currentIteration in $(seq -w 0 50 | sort -r)
 		do
 			_messagePlain_probe_var currentIteration
 			[[ -e "$scriptLocal"/package_rootfs.tar.flx.part"$currentIteration" ]] && dd if="$scriptLocal"/package_rootfs.tar.flx.part"$currentIteration" bs=1M status=progress >> "$scriptLocal"/package_rootfs.tar.flx
@@ -48604,13 +48604,13 @@ _ubDistBuild_split() {
 
 
 	cd "$scriptLocal"
-	#split -b 1856000000 -d package_image.tar.flx package_image.tar.flx.part
+	#split -b 1997378560 -d package_image.tar.flx package_image.tar.flx.part
 
 	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
 	local currentIteration
-	for currentIteration in $(seq -w 0 48)
+	for currentIteration in $(seq -w 0 50)
 	do
-		[[ -s ./package_image.tar.flx ]] && [[ -e ./package_image.tar.flx ]] && tail -c 1856000000 package_image.tar.flx > package_image.tar.flx.part"$currentIteration" && truncate -s -1856000000 package_image.tar.flx
+		[[ -s ./package_image.tar.flx ]] && [[ -e ./package_image.tar.flx ]] && tail -c 1997378560 package_image.tar.flx > package_image.tar.flx.part"$currentIteration" && truncate -s -1997378560 package_image.tar.flx
 	done
 
 	rm -f ./package_image.tar.flx
@@ -48625,13 +48625,13 @@ _ubDistBuild_split_beforeBoot() {
 
 
 	cd "$scriptLocal"
-	#split -b 1856000000 -d package_image_beforeBoot.tar.flx package_image_beforeBoot.tar.flx.part
+	#split -b 1997378560 -d package_image_beforeBoot.tar.flx package_image_beforeBoot.tar.flx.part
 
 	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
 	local currentIteration
-	for currentIteration in $(seq -w 0 48)
+	for currentIteration in $(seq -w 0 50)
 	do
-		[[ -s ./package_image_beforeBoot.tar.flx ]] && [[ -e ./package_image_beforeBoot.tar.flx ]] && tail -c 1856000000 package_image_beforeBoot.tar.flx > package_image_beforeBoot.tar.flx.part"$currentIteration" && truncate -s -1856000000 package_image_beforeBoot.tar.flx
+		[[ -s ./package_image_beforeBoot.tar.flx ]] && [[ -e ./package_image_beforeBoot.tar.flx ]] && tail -c 1997378560 package_image_beforeBoot.tar.flx > package_image_beforeBoot.tar.flx.part"$currentIteration" && truncate -s -1997378560 package_image_beforeBoot.tar.flx
 	done
 
 	rm -f ./package_image_beforeBoot.tar.flx
@@ -48646,13 +48646,13 @@ _ubDistBuild_split_before_noBoot() {
 
 
 	cd "$scriptLocal"
-	#split -b 1856000000 -d package_image_before_noBoot.tar.flx package_image_before_noBoot.tar.flx.part
+	#split -b 1997378560 -d package_image_before_noBoot.tar.flx package_image_before_noBoot.tar.flx.part
 
 	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
 	local currentIteration
-	for currentIteration in $(seq -w 0 48)
+	for currentIteration in $(seq -w 0 50)
 	do
-		[[ -s ./package_image_before_noBoot.tar.flx ]] && [[ -e ./package_image_before_noBoot.tar.flx ]] && tail -c 1856000000 package_image_before_noBoot.tar.flx > package_image_before_noBoot.tar.flx.part"$currentIteration" && truncate -s -1856000000 package_image_before_noBoot.tar.flx
+		[[ -s ./package_image_before_noBoot.tar.flx ]] && [[ -e ./package_image_before_noBoot.tar.flx ]] && tail -c 1997378560 package_image_before_noBoot.tar.flx > package_image_before_noBoot.tar.flx.part"$currentIteration" && truncate -s -1997378560 package_image_before_noBoot.tar.flx
 	done
 
 	rm -f ./package_image_before_noBoot.tar.flx
@@ -48666,14 +48666,14 @@ _ubDistBuild_split-live() {
 
 
 	cd "$scriptLocal"
-	#split -b 1856000000 -d vm-live.iso vm-live.iso.part
+	#split -b 1997378560 -d vm-live.iso vm-live.iso.part
 
 
 	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
 	local currentIteration
-	for currentIteration in $(seq -w 0 48)
+	for currentIteration in $(seq -w 0 50)
 	do
-		[[ -s ./vm-live.iso ]] && [[ -e ./vm-live.iso ]] && tail -c 1856000000 vm-live.iso > vm-live.iso.part"$currentIteration" && truncate -s -1856000000 vm-live.iso
+		[[ -s ./vm-live.iso ]] && [[ -e ./vm-live.iso ]] && tail -c 1997378560 vm-live.iso > vm-live.iso.part"$currentIteration" && truncate -s -1997378560 vm-live.iso
 	done
 
 	rm -f ./vm-live.iso
@@ -48690,9 +48690,9 @@ _ubDistBuild_split-rootfs() {
 
 	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
 	local currentIteration
-	for currentIteration in $(seq -w 0 48)
+	for currentIteration in $(seq -w 0 50)
 	do
-		[[ -s ./package_rootfs.tar.flx ]] && [[ -e ./package_rootfs.tar.flx ]] && tail -c 1856000000 package_rootfs.tar.flx > package_rootfs.tar.flx.part"$currentIteration" && truncate -s -1856000000 package_rootfs.tar.flx
+		[[ -s ./package_rootfs.tar.flx ]] && [[ -e ./package_rootfs.tar.flx ]] && tail -c 1997378560 package_rootfs.tar.flx > package_rootfs.tar.flx.part"$currentIteration" && truncate -s -1997378560 package_rootfs.tar.flx
 	done
 
 	rm -f ./package_rootfs.tar.flx
