@@ -745,7 +745,7 @@ jobs:
         shell: bash
         run: |
           ./ubiquitous_bash.sh _custom || true
-        timeout-minutes: ${{ github.event.inputs.customTimeout }}
+        timeout-minutes: ${{ github.event.inputs.customTimeout == '300' && 300 || 45 }}
       
       
       - name: _custom-bundle
