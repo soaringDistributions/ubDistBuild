@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2845849364'
+export ub_setScriptChecksum_contents='355745215'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -46357,6 +46357,10 @@ _custom_kernel_server-sequence() {
 	_chroot apt-get -y remove 'linux-image*mainline'
 	#'linux-headers*lts'
 	_chroot apt-get -y remove 'linux-image*lts'
+
+
+	_chroot apt-get -y remove 'linux-image*'
+
 	
 	_chroot apt-get -y install 'linux-headers-amd64'
 	
@@ -46374,9 +46378,9 @@ _custom_kernel_server-sequence() {
 		sudo -n cp -f "$globalVirtFS"/home/user/core/installations/kernel_linux/linux-mainline-server-amd64-debian.tar.gz "$globalVirtFS"/
 	fi
 	_chroot tar xf /linux-mainline-server-amd64-debian.tar.gz
-	_chroot bash -c 'dpkg -i ./lts-server/*.deb'
-	_chroot rm -f ./lts-server/.config './lts-server/linux-*' ./lts-server/statement.sh.out.txt
-	_chroot rm -f ./lts-server/linux-mainline-server-amd64-debian.tar.gz
+	_chroot bash -c 'dpkg -i ./mainline-server/*.deb'
+	_chroot rm -f ./mainline-server/.config './mainline-server/linux-*' ./mainline-server/statement.sh.out.txt
+	_chroot rm -f ./mainline-server/linux-mainline-server-amd64-debian.tar.gz
 	_chroot rm -f /linux-mainline-server-amd64-debian.tar.gz
 	
 	
@@ -46413,6 +46417,10 @@ _custom_kernel_lts-sequence() {
 	_chroot apt-get -y remove 'linux-image*mainline'
 	
 	_chroot apt-get -y install 'linux-headers-amd64'
+
+
+	_chroot apt-get -y remove 'linux-image*'
+
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
@@ -47457,6 +47465,9 @@ _create_ubDistBuild-rotten_install-core() {
 	_getMost_backend_aptGetInstall gnuradio-doc
 	_getMost_backend_aptGetInstall gnuradio-dev
 
+	# Apparent suggested/recommends/etc of gnuradio, which as another bad dkms thing, has been found to apparently break several critically essential things: apt , linux kernel , initramfs , live boot .
+	_getMost_backend apt-get -y remove langford-dkms
+
 	_chroot sudo -n -u user bash -c 'cd /home/user/core/installations/gr-pipe ; mkdir -p ./build ; cd ./build ; cmake .. ; make ; sudo -n make install'
 
 	_getMost_backend_aptGetInstall gr-air-modes
@@ -48000,6 +48011,9 @@ CZXWXcRMTo8EmM8i4d
 	sudo -n cat "$globalVirtFS"/etc/apt/sources.list.default | _getMost_backend tee /etc/apt/sources.list > /dev/null
 
 	_getMost_backend apt-get update
+
+	# Have been known to apparently break several critically essential things: apt , linux kernel , initramfs , live boot . Redundant remove commands are placed here.
+	_getMost_backend apt-get -y remove langford-dkms
 	
 	_getMost_backend apt-get -y clean
 	
