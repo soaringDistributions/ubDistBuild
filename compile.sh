@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1706748260'
+export ub_setScriptChecksum_contents='2470737951'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -6274,6 +6274,11 @@ _deps_hardware() {
 	export enUb_hardware="true"
 }
 
+_deps_measurement() {
+	_deps_hardware
+	export enUb_measurement="true"
+}
+
 _deps_x220t() {
 	_deps_notLean
 	_deps_hardware
@@ -6871,6 +6876,7 @@ _compile_bash_deps() {
 		_deps_linux
 		
 		_deps_hardware
+		_deps_measurement
 		_deps_x220t
 		_deps_w540
 		
@@ -7076,6 +7082,7 @@ _compile_bash_deps() {
 		#_deps_synergy
 		
 		#_deps_hardware
+		#_deps_measurement
 		#_deps_x220t
 		#_deps_w540
 		#_deps_peripherial
@@ -7178,6 +7185,7 @@ _compile_bash_deps() {
 		#_deps_synergy
 		
 		#_deps_hardware
+		#_deps_measurement
 		#_deps_x220t
 		#_deps_w540
 		#_deps_peripherial
@@ -7280,6 +7288,7 @@ _compile_bash_deps() {
 		_deps_synergy
 		
 		_deps_hardware
+		_deps_measurement
 		_deps_x220t
 		_deps_w540
 		_deps_peripherial
@@ -7768,6 +7777,8 @@ _compile_bash_hardware() {
 	[[ "$enUb_hardware" == "true" ]] && [[ "$enUb_w540" == "true" ]] && includeScriptList+=( "hardware/w540"/w540_fan.sh )
 	
 	[[ "$enUb_hardware" == "true" ]] && [[ "$enUb_peripherial" == "true" ]] && includeScriptList+=( "hardware/peripherial/h1060p"/h1060p.sh )
+
+	( [[ "$enUb_hardware" == "true" ]] || [[ "$enUb_measurement" == "true" ]] ) && includeScriptList+=( "hardware/measurement"/live_hash.sh )
 }
 
 _compile_bash_vars_basic() {
@@ -8227,6 +8238,7 @@ _compile_bash_deps_prog() {
 		_deps_fw
 		_deps_github
 		_deps_virt_translation_gui
+		_deps_measurement
 		return 0
 	fi
 	return 1

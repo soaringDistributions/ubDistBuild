@@ -5,6 +5,7 @@ _compile_bash_deps_prog() {
 		_deps_fw
 		_deps_github
 		_deps_virt_translation_gui
+		_deps_measurement
 		return 0
 	fi
 	return 1
