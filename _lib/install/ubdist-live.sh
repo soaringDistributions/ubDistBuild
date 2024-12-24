@@ -50,6 +50,7 @@ cd
 
 sudo -n apt-get update
 sudo -n apt-get install -y wget curl aria2 axel openssl jq git lz4 bc xxd;
+sudo -n apt-get install -y growisofs;
 sudo -n apt-get install -y gh;
 
 wget https://raw.githubusercontent.com/mirage335-colossus/ubiquitous_bash/master/ubiquitous_bash.sh
