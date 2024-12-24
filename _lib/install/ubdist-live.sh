@@ -25,9 +25,9 @@ echo -e -n ' \E[0m'
 
 # NOTICE
 
-#export ssh="" ; wget -qO- https://raw.githubusercontent.com/soaringDistributions/ubDistBuild/main/_lib/install/ubdist.sh | bash
+#export ssh="" ; wget -qO- https://raw.githubusercontent.com/soaringDistributions/ubDistBuild/main/_lib/install/ubdist-live.sh | bash
 
-#export ssh="" ; export GH_TOKEN="" ; export owner="" ; export repo="" ; export INPUT_GITHUB_TOKEN="$GH_TOKEN" ; wget -qO- https://raw.githubusercontent.com/soaringDistributions/ubDistBuild/main/_lib/install/ubdist.sh | bash
+#export ssh="" ; export GH_TOKEN="" ; export owner="" ; export repo="" ; export INPUT_GITHUB_TOKEN="$GH_TOKEN" ; wget -qO- https://raw.githubusercontent.com/soaringDistributions/ubDistBuild/main/_lib/install/ubdist-live.sh | bash
 
 
 
@@ -69,7 +69,8 @@ cd "$repo"
 
 #export FORCE_AXEL=8
 #export FORCE_WGET=true
-./ubiquitous_bash.sh _get_vmImg_ubDistBuild "$rl" "" "$dev"
+#./ubiquitous_bash.sh _get_vmImg_ubDistBuild "$rl" "" "$dev"
+./ubiquitous_bash.sh _get_vmImg_ubDistBuild-live "$rl" "" "$dev"
 
 if [[ "$dev" == "/dev/"* ]]
 then
