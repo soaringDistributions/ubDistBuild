@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2169812845'
+export ub_setScriptChecksum_contents='2845849364'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -50457,11 +50457,19 @@ _get_vmImg_ubDistBuild-live_sequence() {
 	mkdir -p "$scriptLocal"
 	cd "$scriptLocal"
 	export MANDATORY_HASH="true"
+	local currentExitStatus
+	local fallThroughFAIL=FAIL
 	if [[ "$3" == "" ]] # || [[ "$FORCE_AXEL" != "" ]]
 	then
+		fallThroughFAIL=PASS
 		_wget_githubRelease_join "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso"
 		currentExitStatus="$?"
-	else
+	fi
+	# Other device names are apparently possible, including rcd, rdvd, svnd0c .
+	#  https://en.wikibooks.org/wiki/Guide_to_Unix/Explanations/Compact_Discs
+	if [[ "$3" == "/dev/sr"* ]] || [[ "$3" == "/dev/dvd"* ]] || [[ "$3" == "/dev/cdrom"* ]]
+	then
+		fallThroughFAIL=PASS
 		currentHash_bytes=$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "_hash-ubdist.txt" | head -n 14 | tail -n 1 | sed 's/^.*count=$(bc <<< '"'"'//' | cut -f1 -d\  )
 		
 		if ! [[ $(df --block-size=1000000 --output=avail "$tmpSelf" | tr -dc '0-9') -gt "3880" ]]
@@ -50515,6 +50523,14 @@ _get_vmImg_ubDistBuild-live_sequence() {
 		#growisofs -M /dev/dvd=/dev/zero
 		#growisofs -M /dev/sr1=/dev/zero -use-the-force-luke=notray
 	fi
+	if [[ "$3" == "/dev/sd"* ]] || [[ "$3" == "/dev/hd"* ]] || [[ "$3" == "/dev/disk/"* ]]
+	then
+		fallThroughFAIL=PASS
+
+		( _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-live.iso" | tee >(openssl dgst -whirlpool -binary | xxd -p -c 256 >> "$scriptLocal"/hash-download.txt) ; dd if=/dev/zero bs=2048 count=$(bc <<< '1000000000000 / 2048' ) ) | sudo -n dd of="$3" bs=1M status=progress
+		currentExitStatus="$?"
+	fi
+	[[ "$fallThroughFAIL" != "PASS" ]] && _messagePlain_bad 'fail: write device' && _messageFAIL
 	#[[ "$currentExitStatus" != "0" ]] && _messageFAIL
 	if [[ "$currentExitStatus" != "0" ]]
 	then
