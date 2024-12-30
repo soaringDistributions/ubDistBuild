@@ -88,11 +88,11 @@ Section "Install"
 
   Rename "C:\core\variant\ubdist_dummy" "C:\core\variant\ubdist_dummy-backup-$0"
   SetOutPath "C:\core\variant\ubdist_dummy"
-  File /r "..\..\..\extendedInterface-accessories\parts\ubdist_dummy\*"
+  File /r "..\..\..\ubDistBuild-accessories\parts\ubdist_dummy\*"
 
   Rename "C:\core\variant\ubdist_puddleJumper" "C:\core\variant\ubdist_puddleJumper-backup-$0"
   SetOutPath "C:\core\variant\ubdist_puddleJumper"
-  File /r "..\..\..\extendedInterface-accessories\parts\ubdist_puddleJumper\*"
+  File /r "..\..\..\ubDistBuild-accessories\parts\ubdist_puddleJumper\*"
 
 
   SetShellVarContext all
