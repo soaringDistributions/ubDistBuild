@@ -145,6 +145,13 @@ Section "Install"
   ExecWait "$TEMP\ubDistBuild_bundle-adhoc\qemu\qemu-w64-setup-20230817.exe /S"
 
 
+
+  ;SetOutPath "C:\core\installations\filezilla_install"
+  SetOutPath "C:\core\installations"
+  File /r "..\..\..\ubDistBuild-accessories\parts\ubDistBuild_bundle\filezilla\*"
+
+
+
   ExpandEnvStrings $5 %COMSPEC%
   ExecWait '"$5" /C "C:\core\infrastructure\ubDistBuild\_bin.bat" _setup_install $0'
   DetailPrint '"$0"'

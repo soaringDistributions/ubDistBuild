@@ -84,6 +84,16 @@ Software "vc_redist" is apparently distributed under Microsoft specifc 'EULA ID:
 
 --------------------------------------------------
 
+https://www.majorgeeks.com/files/details/filezilla_64_bit.html
+https://filezilla-project.org/download.php?platform=source
+https://en.wikipedia.org/wiki/FileZilla
+https://web.archive.org/web/20230122192710/https://filezilla-project.org/license.php
+https://filezilla-project.org/license.php
+
+Software "filezilla" is apparently distributed under the 'GPL-2.0-or-later'.
+
+--------------------------------------------------
+
 
                     GNU AFFERO GENERAL PUBLIC LICENSE
                        Version 3, 19 November 2007
