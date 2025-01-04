@@ -215,7 +215,7 @@ _build_ubDistBuild-build() {
     unix2dos "$scriptAbsoluteFolder"/license-installer.txt
 
     cd "$scriptLib"/nsis
-    makensis "$scriptLib"/nsis/ubDistBuild.nsi
+    makensis -V4 "$scriptLib"/nsis/ubDistBuild.nsi
 
 
 
