@@ -123,7 +123,8 @@ jobs:
   build_installer:
     needs: [build_release]
     #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
-    runs-on: 'ubuntu-latest'
+    #runs-on: 'ubuntu-latest'
+    runs-on: 'ubuntu-22.04'
     steps:
       - name: RAND_SEED
         shell: bash
