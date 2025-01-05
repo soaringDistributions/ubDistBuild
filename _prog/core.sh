@@ -1689,6 +1689,15 @@ CZXWXcRMTo8EmM8i4d
 
 
 
+
+	_messageNormal 'chroot: rotten_install: core: special: hardware'
+
+
+	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistBuild ; chmod 755 ./ubiquitous_bash.sh ; ./ubiquitous_bash.sh _gitBest pull ; chmod 755 ./ubiquitous_bash.sh ; ./ubiquitous_bash.sh _gitBest submodule update --recursive ; chmod 755 ./_lib/setup/hardware/_get_hardware.sh ; ./_lib/setup/hardware/_get_hardware.sh _install'
+
+
+	_messageNormal 'chroot: rotten_install: core: special'
+
 	sudo -n cat "$globalVirtFS"/etc/apt/sources.list.default | _getMost_backend tee /etc/apt/sources.list > /dev/null
 
 	_getMost_backend apt-get update
