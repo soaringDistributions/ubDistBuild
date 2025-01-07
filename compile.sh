@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3861144918'
+export ub_setScriptChecksum_contents='846461396'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -6033,6 +6033,7 @@ _deps_search() {
 _deps_cloud() {
 	_deps_repo
 	_deps_proxy
+	_deps_serial
 	_deps_stopwatch
 	
 	_deps_fakehome
@@ -6098,6 +6099,12 @@ _deps_proxy() {
 _deps_proxy_special() {
 	_deps_proxy
 	export enUb_proxy_special="true"
+}
+
+_deps_serial() {
+	_deps_notLean
+	
+	export enUb_serial="true"
 }
 
 _deps_fw() {
@@ -6260,6 +6267,7 @@ _deps_command() {
 	_deps_os_x11
 	_deps_proxy
 	_deps_proxy_special
+	_deps_serial
 	
 	export enUb_command="true"
 }
@@ -6834,6 +6842,10 @@ _compile_bash_deps() {
 		
 		#_deps_virt_translation
 		
+		# Serial depends on '_getMost_backend', which explicitly requires only 'notLean' .
+		#_deps_notLean
+		#_deps_serial
+		
 		_deps_stopwatch
 		
 		_deps_queue
@@ -6845,6 +6857,8 @@ _compile_bash_deps() {
 	if [[ "$1" == "ubcore" ]]
 	then
 		_deps_notLean
+		
+		_deps_serial
 
 		_deps_fw
 		
@@ -6904,6 +6918,8 @@ _compile_bash_deps() {
 		_deps_proxy
 		_deps_proxy_special
 
+		_deps_serial
+
 		_deps_fw
 		
 		_deps_clog
@@ -6955,6 +6971,8 @@ _compile_bash_deps() {
 		_deps_queue
 		_deps_metaengine
 		
+		_deps_serial
+		
 		_deps_stopwatch
 		
 		return 0
@@ -6977,6 +6995,8 @@ _compile_bash_deps() {
 		_deps_metaengine
 		
 		_deps_abstractfs
+		
+		_deps_serial
 		
 		_deps_stopwatch
 		
@@ -7002,6 +7022,8 @@ _compile_bash_deps() {
 		
 		_deps_fakehome
 		_deps_abstractfs
+		
+		_deps_serial
 		
 		_deps_stopwatch
 		
@@ -7091,6 +7113,7 @@ _compile_bash_deps() {
 		
 		#_deps_proxy
 		#_deps_proxy_special
+		_deps_serial
 
 		_deps_fw
 		
@@ -7194,6 +7217,7 @@ _compile_bash_deps() {
 		
 		#_deps_proxy
 		#_deps_proxy_special
+		_deps_serial
 
 		_deps_fw
 		
@@ -7297,6 +7321,7 @@ _compile_bash_deps() {
 		
 		_deps_proxy
 		_deps_proxy_special
+		_deps_serial
 
 		_deps_fw
 		
@@ -7430,6 +7455,10 @@ _compile_bash_utilities() {
 	
 	[[ "$enUb_proxy" == "true" ]] && includeScriptList+=( "generic/net/proxy/proxyrouter"/here_proxyrouter.sh )
 	[[ "$enUb_proxy" == "true" ]] && includeScriptList+=( "generic/net/proxy/proxyrouter"/proxyrouter.sh )
+
+	[[ "$enUb_serial" == "true" ]] && includeScriptList+=( "generic/serial"/forwardPort.sh )
+	[[ "$enUb_serial" == "true" ]] && includeScriptList+=( "generic/serial"/forwardPort-service.sh )
+	[[ "$enUb_serial" == "true" ]] && includeScriptList+=( "generic/serial"/terminal.sh )
 	
 	[[ "$enUb_fw" == "true" ]] && includeScriptList+=( "generic/net/fw"/fw.sh )
 	[[ "$enUb_fw" == "true" ]] && includeScriptList+=( "generic/net/fw"/hosts.sh )
