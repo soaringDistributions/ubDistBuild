@@ -1076,7 +1076,11 @@ _create_ubDistBuild-rotten_install-core() {
 	
 
 	_getMost_backend_aptGetInstall w3m
-	
+
+
+	# Building out-of-tree kernel modules is an essential feature of ubdist/OS , ubDistBuild , etc . If these packages are added to '_getMost' for "ubiquitous_bash", the then redundant install commands here will still remain important.
+	_getMost_backend_aptGetInstall dh-dkms
+	_getMost_backend_aptGetInstall dkms devscripts debhelper dh-dkms build-essential
 	
 	
 	_getMost_backend_aptGetInstall adb

@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2991962286'
+export ub_setScriptChecksum_contents='1422984691'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -9905,6 +9905,7 @@ _fetchDep_debianBookworm_special() {
 		sudo -n env DEBIAN_FRONTEND=noninteractive apt-get remove -y docker docker-engine docker.io docker-ce docker
 		sudo -n env DEBIAN_FRONTEND=noninteractive apt-get install --install-recommends -y docker-ce
 		sudo -n env DEBIAN_FRONTEND=noninteractive apt-get install --install-recommends -y docker-compose-plugin
+		sudo -n env DEBIAN_FRONTEND=noninteractive apt-get install --install-recommends -y docker-ce
 		
 		sudo -n usermod -a -G docker "$USER"
 		
@@ -11803,8 +11804,10 @@ _getMost_debian11_install() {
 		# WARNING: Untested. May cause problems.
 		#_getMost_backend_aptGetInstall docker-ce
 		#_getMost_backend_aptGetInstall docker-compose-plugin
+		#_getMost_backend_aptGetInstall docker-ce
 		_getMost_backend apt-get -d install -y docker-ce
 		_getMost_backend apt-get -d install -y docker-compose-plugin
+		_getMost_backend apt-get -d install -y docker-ce
 	fi
 	
 	
@@ -48213,7 +48216,11 @@ _create_ubDistBuild-rotten_install-core() {
 	
 
 	_getMost_backend_aptGetInstall w3m
-	
+
+
+	# Building out-of-tree kernel modules is an essential feature of ubdist/OS , ubDistBuild , etc . If these packages are added to '_getMost' for "ubiquitous_bash", the then redundant install commands here will still remain important.
+	_getMost_backend_aptGetInstall dh-dkms
+	_getMost_backend_aptGetInstall dkms devscripts debhelper dh-dkms build-essential
 	
 	
 	_getMost_backend_aptGetInstall adb

@@ -548,6 +548,9 @@ true
 # /var/cache/apt/archives
 # gasket-dkms libedgetpu1-std
 _install_tpu() {
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+	
 	_messageNormal 'init: _install_tpu'
 
 	_messagePlain_probe 'repo: coral-edgetpu-stable'
@@ -558,7 +561,27 @@ _install_tpu() {
 	sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -y update
 
 	_messagePlain_probe 'apt-get install: gasket-dkms libedgetpu1-std'
-	sudo -n env DEBIAN_FRONTEND=noninteractive apt-get install --install-recommends -y gasket-dkms libedgetpu1-std
+	#sudo -n env DEBIAN_FRONTEND=noninteractive apt-get install --install-recommends -y gasket-dkms libedgetpu1-std
+
+	# WARNING: Upstream 'gasket-dkms' apparently is not updated often enough for newer kernels, breaking apt with the failed kernel module build. Download ONLY, do NOT install.
+	sudo -n apt-get remove -y gasket-dkms
+	sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -d install --install-recommends -y gasket-dkms
+	sudo -n env DEBIAN_FRONTEND=noninteractive apt-get install --install-recommends -y libedgetpu1-std
+
+
+	_messagePlain_probe 'apt-get install: gasket-dkms (source, and/or Soaring Distributions LLC built Debian package)'
+	cd "$scriptAbsoluteFolder"
+	_gitBest clone git@github.com:soaringDistributions/getHardware-CoralTPU.git
+	cd getHardware-CoralTPU
+
+	#./ubiquitous_bash.sh _setup_prog
+	#./ubiquitous_bash.sh _build_prog
+
+	sudo -n env DEBIAN_FRONTEND=noninteractive dpkg -i ./_lib/install/gasket-driver-debian/*.deb
+
+	cd "$functionEntryPWD"
+
+
 
 	_messagePlain_probe 'udev rules'
 	sudo -n sh -c "echo 'SUBSYSTEM==\"apex\", MODE=\"0660\", GROUP=\"apex\"' >> /etc/udev/rules.d/65-apex.rules"
@@ -574,6 +597,9 @@ _install_tpu() {
 	#03:00.0 System peripheral: Device 1ac1:089a
 	_messagePlain_request 'ls -l /dev/apex_0'
 	#/dev/apex_0
+
+
+	cd "$functionEntryPWD"
 }
 
 
