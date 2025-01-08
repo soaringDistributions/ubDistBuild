@@ -547,6 +547,8 @@ true
 #  'dpkg-deb --fsys-tarfile foo.deb |tar -xvO ./usr/share/doc/foo/copyright'
 # /var/cache/apt/archives
 # gasket-dkms libedgetpu1-std
+# 
+# https://github.com/google/gasket-driver/issues/36
 _install_tpu() {
 	local functionEntryPWD
 	functionEntryPWD="$PWD"
