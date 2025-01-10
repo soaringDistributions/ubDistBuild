@@ -1206,7 +1206,8 @@ jobs:
           curl -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/dpkg"
 
           # Loop through each release
-          for RELEASE in $(echo "$RELEASES" | jq -r '.[].tag_name' | sort --reverse); do
+          #for RELEASE in $(echo "$RELEASES" | jq -r '.[].tag_name' | sort --reverse); do
+          for RELEASE in $(echo "$RELEASES" | jq -r 'sort_by(.published_at) | reverse | .[].tag_name'); do
 
             # Compare the list of binaries in this release to the current release
             if [ "$RELEASE" != "$currentReleaseTag" ]; then
