@@ -1043,7 +1043,7 @@ _create_ubDistBuild-rotten_install-core() {
 
 
 
-	_chroot find /home/user/core/installations /home/user/core/infrastructure -not \( -path \*.git\* -prune \) | sudo -n tee "$globalVirtFS"/coreReport > /dev/null
+	_chroot find /home/user/core/installations /home/user/core/infrastructure -not \( -path \*.git\* -prune \) | grep -v '_local/h' | sudo -n tee "$globalVirtFS"/coreReport > /dev/null
 	sudo -n cp -f "$globalVirtFS"/coreReport "$scriptLocal"/coreReport
 	sudo -n chown "$USER":"$USER" "$scriptLocal"/coreReport
 
@@ -2549,7 +2549,7 @@ _zSpecial_report_procedure() {
 	
 	#if [[ ! -e "$globalVirtFS"/coreReport ]]
 	#then
-		_chroot find /home/user/core/installations /home/user/core/infrastructure -not \( -path \*.git\* -prune \) | sudo -n tee "$globalVirtFS"/coreReport > /dev/null
+		_chroot find /home/user/core/installations /home/user/core/infrastructure -not \( -path \*.git\* -prune \) | grep -v '_local/h' | sudo -n tee "$globalVirtFS"/coreReport > /dev/null
 		sudo -n cp -f "$globalVirtFS"/coreReport "$scriptLocal"/coreReport
 		sudo -n chown "$USER":"$USER" "$scriptLocal"/coreReport
 	#fi
