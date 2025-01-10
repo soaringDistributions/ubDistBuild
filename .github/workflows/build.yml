@@ -1226,7 +1226,7 @@ jobs:
               comm -23 <(sort "binReport-$RELEASE") <(sort "binReport-$currentReleaseTag") | tee -a ./missing-binReport
               echo | tee -a ./missing-coreReport
               echo "Binaries (core) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-coreReport
-              comm -23 <(sort "coreReport-$RELEASE") <(sort "coreReport-$currentReleaseTag") | tee -a ./missing-coreReport
+              comm -23 <(sort "coreReport-$RELEASE" | grep -v '_local/h') <(sort "coreReport-$currentReleaseTag" | grep -v '_local/h') | tee -a ./missing-coreReport
               echo | tee -a ./missing-dpkg
               echo "Binaries (dpkg) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-dpkg
               comm -23 <(sort "dpkg-$RELEASE") <(sort "dpkg-$currentReleaseTag") | tee -a ./missing-dpkg
