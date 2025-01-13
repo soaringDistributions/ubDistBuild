@@ -261,13 +261,15 @@ _upgrade_kernel_mainline_server() {
 }
 
 _upgrade_kernel_lts() {
-	"$scriptAbsoluteLocation" _upgrade_kernel linux-lts-amd64-debian.tar.gz
+	"$scriptAbsoluteLocation" _upgrade_kernel_kernel linux-lts-amd64-debian.tar.gz
     echo '          good: success: _upgrade_kernel_lts'
     echo
 }
 
 _upgrade_kernel() {
-    _upgrade_kernel_lts
+	"$scriptAbsoluteLocation" _upgrade_kernel_kernel linux-lts-amd64-debian.tar.gz
+    echo '          good: success: _upgrade_kernel_lts'
+    echo
 }
 
 
