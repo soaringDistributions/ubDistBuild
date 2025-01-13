@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='650289412'
+export ub_setScriptChecksum_contents='3433292172'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -37458,6 +37458,153 @@ _test_h1060p() {
 }
 
 
+# WARNING: May be untested.
+# TODO: Detect 'gpd' device, ceasing if not a 'gpd' device.
+# TODO: Temperature sensing may be untested.
+
+# https://aur.archlinux.org/cgit/aur.git/tree/gpdfanspeed?h=gpd-fan-driver-dkms-git
+# https://github.com/Cryolitia/gpd-fan-driver
+
+# ATTENTION
+#_chroot sudo -n --preserve-env=GH_TOKEN --preserve-env=INPUT_GITHUB_TOKEN -u user bash -c 'cd /home/user/core/infrastructure/ubiquitous_bash ; /home/user/ubDistBuild/ubiquitous_bash.sh _gitBest pull'
+#_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubiquitous_bash ; ./ubiquitous_bash.sh _gpdWinMini2024_8840U_fan_install'
+_gpdWinMini2024_8840U_fan_install() {
+    # DUBIOUS . May be untested.
+    #( crontab -l ; echo '#*/1 * * * * sleep 0.1 ; sleep 210 ; /home/user/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _gpdWinMini2024_8840U_fan_cron > /dev/null 2>&1' ) | crontab -
+
+    if ! crontab -l | grep _gpdWinMini2024_8840U_fan_cron > /dev/null
+	then
+        (
+            crontab -l
+            cat << 'CZXWXcRMTo8EmM8i4d'
+*/1 * * * * sleep 0.1 ; sleep 210 ; /home/user/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _gpdWinMini2024_8840U_fan_cron > /dev/null 2>&1
+CZXWXcRMTo8EmM8i4d
+        ) | crontab -
+	fi
+}
+
+
+_gpdWinMini2024_8840U_fan_cfg-write() {
+	#echo "options gpd-fan fan_control=1" | sudo -n tee /etc/modprobe.d/gpd_fan.conf
+    true
+}
+
+_gpdWinMini2024_8840U_fan_cfg-modprobe() {
+	sudo -n modprobe -rv gpd-fan
+	sudo -n modprobe -v gpd-fan
+}
+
+_gpdWinMini2024_8840U_fan_cfg() {
+	#echo watchdog 120 | sudo -n tee /proc/acpi/gpd/fan
+    true
+}
+
+# cron recommended
+#*/1 * * * * sleep 0.1 ; /home/user/.ubcore/ubcore.sh _gpdWinMini2024_8840U_hardware_cron > /dev/null 2>&1
+#*/1 * * * * sleep 0.1 ; /home/user/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _gpdWinMini2024_8840U_hardware_cron > /dev/null 2>&1
+_gpdWinMini2024_8840U_fan_cron() {
+	#! sudo -n dmidecode -s system-family | grep 'gpdWinMini2024_8840U' && return 0
+    #! [[ -e /sys/devices/platform/gpd_fan ]] && return 0
+	
+	_gpdWinMini2024_8840U_fan
+	
+	return 0
+}
+
+# cron recommended
+#*/1 * * * * sleep 0.1 ; /home/user/.ubcore/ubiquitous_bash/ubcore.sh _gpdWinMini2024_8840U_fan > /dev/null 2>&1
+#*/1 * * * * sleep 0.1 ; /home/user/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _gpdWinMini2024_8840U_hardware_cron > /dev/null 2>&1
+# https://github.com/Cryolitia/gpd-fan-driver
+_gpdWinMini2024_8840U_fan() {
+	_gpdWinMini2024_8840U_fan_cfg
+	
+    # ATTENTION: TODO: WARNING: May be untested.
+	local currentTemp_coretemp0
+	read currentTemp_coretemp0 < /sys/devices/platform/coretemp.0/hwmon/hwmon4/temp1_input
+
+    if [[ -e "$HOME"/fanFast ]]
+    then
+        # 0: disable (full speed)
+        # 1: manual
+        # 2: auto
+        echo 2 | sudo -n tee /sys/devices/platform/gpd_fan/hwmon/hwmon*/pwm1_enable
+        return 0
+    fi
+
+    if [[ -e "$HOME"/fanIdle ]]
+    then
+        # 0: disable (full speed)
+        # 1: manual
+        # 2: auto
+        echo 1 | sudo -n tee /sys/devices/platform/gpd_fan/hwmon/hwmon*/pwm1_enable
+
+        echo 92 | sudo -n tee /sys/devices/platform/gpd_fan/hwmon/hwmon*/pwm1 && return 0
+
+        return 0
+    fi
+
+    #Suggested fan curve:
+    #35% 50degC
+    #38% 65degC
+    #38% 70degC
+    #100% 80degC
+    # range: 0-255
+
+    # 0: disable (full speed)
+    # 1: manual
+    # 2: auto
+    echo 1 | sudo -n tee /sys/devices/platform/gpd_fan/hwmon/hwmon*/pwm1_enable
+	
+    #35% 50degC
+	[[ "$currentTemp_coretemp0" -lt 50000 ]] && echo 92 | sudo -n tee /sys/devices/platform/gpd_fan/hwmon/hwmon*/pwm1 && return 0
+
+    [[ "$currentTemp_coretemp0" -lt 53000 ]] && echo 93 | sudo -n tee /sys/devices/platform/gpd_fan/hwmon/hwmon*/pwm1 && return 0
+    [[ "$currentTemp_coretemp0" -lt 60000 ]] && echo 94 | sudo -n tee /sys/devices/platform/gpd_fan/hwmon/hwmon*/pwm1 && return 0
+    [[ "$currentTemp_coretemp0" -lt 63000 ]] && echo 95 | sudo -n tee /sys/devices/platform/gpd_fan/hwmon/hwmon*/pwm1 && return 0
+
+    #38% 65degC
+	[[ "$currentTemp_coretemp0" -lt 65000 ]] && echo 97 | sudo -n tee /sys/devices/platform/gpd_fan/hwmon/hwmon*/pwm1 && return 0
+
+    #38% 70degC
+    [[ "$currentTemp_coretemp0" -lt 70000 ]] && echo 97 | sudo -n tee /sys/devices/platform/gpd_fan/hwmon/hwmon*/pwm1 && return 0
+
+    #100% 80degC
+    [[ "$currentTemp_coretemp0" -lt 80000 ]] && echo 255 | sudo -n tee /sys/devices/platform/gpd_fan/hwmon/hwmon*/pwm1 && return 0
+}
+
+_gpdWinMini2024_8840U_idle() {
+	_gpdWinMini2024_8840U_fan_cfg
+	
+	while true
+	do
+		echo powersave | sudo -n tee /sys/devices/system/cpu/cpufreq/*/scaling_governor
+
+        rm -f "$HOME"/fanFast
+        rm -f "$HOME"/fanIdle
+
+        echo > "$HOME"/fanIdle
+		
+        # 0: disable (full speed)
+        # 1: manual
+        # 2: auto
+		echo 1 | sudo -n tee /sys/devices/platform/gpd_fan/hwmon/hwmon*/pwm1_enable
+
+        echo 92 | sudo -n tee /sys/devices/platform/gpd_fan/hwmon/hwmon*/pwm1 && return 0
+		
+		sleep 45
+	done
+}
+
+_gpdWinMini2024_8840U_normal() {
+	echo schedutil | sudo -n tee /sys/devices/system/cpu/cpufreq/*/scaling_governor
+
+    rm -f "$HOME"/fanFast
+    rm -f "$HOME"/fanIdle
+
+    echo 2 | sudo -n tee /sys/devices/platform/gpd_fan/hwmon/hwmon*/pwm1_enable
+}
+
+
 # ATTRIBUTION-AI: ChatGPT o1 2024-12-24 .
 _live_hash-getRootBlkDevice()  {
     _if_cygwin && _stop
@@ -48225,7 +48372,7 @@ _create_ubDistBuild-rotten_install-core() {
 
 
 
-	_chroot find /home/user/core/installations /home/user/core/infrastructure -not \( -path \*.git\* -prune \) | grep -v '_local/h' | sudo -n tee "$globalVirtFS"/coreReport > /dev/null
+	_chroot find /home/user/core/installations /home/user/core/infrastructure /home/user/core/variant /home/user/core/info -not \( -path \*.git\* -prune \) | grep -v '_local/h' | sudo -n tee "$globalVirtFS"/coreReport > /dev/null
 	sudo -n cp -f "$globalVirtFS"/coreReport "$scriptLocal"/coreReport
 	sudo -n chown "$USER":"$USER" "$scriptLocal"/coreReport
 
@@ -49731,7 +49878,7 @@ _zSpecial_report_procedure() {
 	
 	#if [[ ! -e "$globalVirtFS"/coreReport ]]
 	#then
-		_chroot find /home/user/core/installations /home/user/core/infrastructure -not \( -path \*.git\* -prune \) | grep -v '_local/h' | sudo -n tee "$globalVirtFS"/coreReport > /dev/null
+		_chroot find /home/user/core/installations /home/user/core/infrastructure /home/user/core/variant /home/user/core/info -not \( -path \*.git\* -prune \) | grep -v '_local/h' | sudo -n tee "$globalVirtFS"/coreReport > /dev/null
 		sudo -n cp -f "$globalVirtFS"/coreReport "$scriptLocal"/coreReport
 		sudo -n chown "$USER":"$USER" "$scriptLocal"/coreReport
 	#fi
@@ -53810,6 +53957,269 @@ _convert-live-exhaustive-BDDL() {
 
 
 
+
+# WARNING: No production use. May be untested.
+
+# WARNING: Upgrade functions are also called by 'custom' scripts to ensure such binaries as 'extIface.exe' are most recent.
+
+# ATTENTION: This 'upgrade' functionality is a non-essential and intentionally less than comprehensive development tool to reduce cycle time for 'ubDistBuild' by cautiously and quickly upgrading only repositories, etc, with still rapidly developing essential functionality.
+
+
+_upgrade_report() {
+    local functionEntryPWD
+    functionEntryPWD="$PWD"
+    
+    echo
+    echo 'init: _upgrade_report'
+    echo
+
+	_messagePlain_probe_cmd ! _openChRoot && _messagePlain_bad 'fail: openChroot' && _messageFAIL
+
+    _messageNormal 'init: _upgrade_report: dpkg'
+    #_chroot dpkg -l | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
+    _chroot dpkg --get-selections | cut -f1 | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
+    sudo -n cp -f "$globalVirtFS"/dpkg "$scriptLocal"/dpkg
+    sudo -n chown "$USER":"$USER" "$scriptLocal"/dpkg
+    _messagePlain_nominal 'PASS'
+    _messagePlain_good 'good: success: _upgrade_report: dpkg'
+
+    _messageNormal 'init: _upgrade_report: binReport'
+    _chroot find /bin/ /usr/bin/ /sbin/ /usr/sbin/ | sudo -n tee "$globalVirtFS"/binReport > /dev/null
+    _chroot find /home/user/.nix-profile/bin | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null 2>&1
+    _chroot find /home/user/.gcloud/google-cloud-sdk/bin | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null
+    _chroot find /home/user/.ebcli-virtual-env/executables | sudo -n tee -a "$globalVirtFS"/binReport > /dev/null 2>&1
+    sudo -n cp -f "$globalVirtFS"/binReport "$scriptLocal"/binReport
+    sudo -n chown "$USER":"$USER" "$scriptLocal"/binReport
+    _messagePlain_nominal 'PASS'
+    _messagePlain_good 'good: success: _upgrade_report: binReport'
+
+    _messageNormal 'init: _upgrade_report: coreReport'
+    _messagePlain_probe "_chroot find /home/user/core/installations /home/user/core/infrastructure /home/user/core/variant /home/user/core/info -not \( -path \*.git\* -prune \) | grep -v '_local/h' | sudo -n tee ""$globalVirtFS""/coreReport > /dev/null"
+    _chroot find /home/user/core/installations /home/user/core/infrastructure /home/user/core/variant /home/user/core/info -not \( -path \*.git\* -prune \) | grep -v '_local/h' | sudo -n tee "$globalVirtFS"/coreReport > /dev/null
+	sudo -n cp -f "$globalVirtFS"/coreReport "$scriptLocal"/coreReport
+	sudo -n chown "$USER":"$USER" "$scriptLocal"/coreReport
+    _messagePlain_nominal 'PASS'
+    _messagePlain_good 'good: success: _upgrade_report: coreReport'
+	
+	_messagePlain_probe_cmd ! _closeChRoot && _messagePlain_bad 'fail: closeChroot' && _messageFAIL
+
+    cd "$functionEntryPWD"
+    echo
+    echo '          PASS'
+    echo '          good: success: _upgrade_report'
+    echo
+}
+
+
+
+_upgrade_core() {
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+
+    ! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+
+    _chroot sudo -n --preserve-env=GH_TOKEN --preserve-env=INPUT_GITHUB_TOKEN -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; /home/user/ubDistBuild/ubiquitous_bash.sh _gitBest pull'
+    _chroot sudo -n --preserve-env=GH_TOKEN --preserve-env=INPUT_GITHUB_TOKEN -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; /home/user/ubDistBuild/ubiquitous_bash.sh _gitBest submodule update --recursive'
+    _chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; ./ubiquitous_bash.sh _upgrade'
+
+    ! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+    cd "$functionEntryPWD"
+}
+
+# Normally does nothing: MSWindows installers are usually only copied with custom ubdist/OS derivatives specifically used for bootstrapping MSWindows... and usually those derivatives custom procedures will effect this update, etc, already.
+_upgrade_installers() {
+    local functionEntryPWD
+    functionEntryPWD="$PWD"
+    
+    echo
+    echo 'init: _upgrade_installers'
+    echo
+
+	_messagePlain_probe_cmd ! _openChRoot && _messagePlain_bad 'fail: openChroot' && _messageFAIL
+
+    if _chroot sudo -n -u user bash -c '[[ -e /home/user/core/installations/pumpCompanion.exe ]] || [[ -e /home/user/core/installations/extIface.exe ]] || [[ -e /home/user/core/installations/ubDistBuild.exe ]]'
+    then
+
+        # https://unix.stackexchange.com/questions/486760/is-it-possible-to-allow-multiple-ssh-host-keys-for-the-same-ip
+        _messagePlain_probe_cmd _chroot sudo -n --preserve-env=GH_TOKEN --preserve-env=INPUT_GITHUB_TOKEN -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; /home/user/ubDistBuild/ubiquitous_bash.sh _gitBest pull'
+        _messagePlain_probe_cmd _chroot sudo -n --preserve-env=GH_TOKEN --preserve-env=INPUT_GITHUB_TOKEN -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; /home/user/ubDistBuild/ubiquitous_bash.sh _gitBest submodule update --recursive'
+
+        #_wget_githubRelease "mirage335-gizmos/pumpCompanion" "internal" "pumpCompanion.exe"
+        #sudo -n mv -f pumpCompanion.exe "$globalVirtFS"/home/user/core/installations/
+        _chroot sudo -n -u user bash -c '[[ -e /home/user/core/installations/pumpCompanion.exe ]]' && _messagePlain_probe_cmd _chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; ./ubiquitous_bash.sh _upgrade_binary_GitHubRelease mirage335-gizmos/pumpCompanion pumpCompanion.exe /home/user/core/installations/pumpCompanion.exe'
+        
+
+        #_wget_githubRelease "mirage335-colossus/extendedInterface" "internal" "extIface.exe"
+        #sudo -n mv -f extIface.exe "$globalVirtFS"/home/user/core/installations/
+        _chroot sudo -n -u user bash -c '[[ -e /home/user/core/installations/extIface.exe ]]' && _messagePlain_probe_cmd _chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; ./ubiquitous_bash.sh _upgrade_binary_GitHubRelease mirage335-colossus/extendedInterface extIface.exe /home/user/core/installations/extIface.exe'
+        
+        
+        #_wget_githubRelease "soaringDistributions/ubDistBuild" "internal" "ubDistBuild.exe"
+        #sudo -n mv -f ubDistBuild.exe "$globalVirtFS"/home/user/core/installations/
+        _chroot sudo -n -u user bash -c '[[ -e /home/user/core/installations/ubDistBuild.exe ]]' && _messagePlain_probe_cmd _chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; ./ubiquitous_bash.sh _upgrade_binary_GitHubRelease soaringDistributions/ubDistBuild ubDistBuild.exe /home/user/core/installations/ubDistBuild.exe'
+
+    fi
+	
+	_messagePlain_probe_cmd ! _closeChRoot && _messagePlain_bad 'fail: closeChroot' && _messageFAIL
+
+    cd "$functionEntryPWD"
+    echo
+    echo '          PASS'
+    echo '          good: success: _upgrade_installers'
+    echo
+}
+
+
+_upgrade_apt() {
+    local functionEntryPWD
+    functionEntryPWD="$PWD"
+    
+    echo
+    echo 'init: _upgrade_apt'
+    echo
+    
+	# ATTRIBUTION-AI: ChatGPT o1-preview 2024-11-20 .
+    _messagePlain_probe sudo -n tee /etc/apt/apt.conf.d/99autoremove-recommends
+	echo 'APT::AutoRemove::RecommendsImportant "true";
+APT::AutoRemove::SuggestsImportant "true";' | sudo -n tee /etc/apt/apt.conf.d/99autoremove-recommends > /dev/null
+    
+    # https://www.commandinline.com/cheat-sheet/apt/?utm_source=chatgpt.com
+    _chroot env DEBIAN_FRONTEND=noninteractive apt-get -y update
+    _chroot env DEBIAN_FRONTEND=noninteractive apt-get --install-recommends -y upgrade
+    _chroot env DEBIAN_FRONTEND=noninteractive apt --install-recommends -y upgrade
+    _chroot env DEBIAN_FRONTEND=noninteractive apt --install-recommends -y full-upgrade
+
+
+
+
+    cd "$functionEntryPWD"
+    echo
+    echo '          PASS'
+    echo '          good: success: _upgrade_apt: '"$1"
+    echo
+}
+
+
+
+
+
+# ATTENTION: Upgrade kernel functions are similar to 'custom' functions, and WILL replace the existing kernel.
+
+_upgrade_kernel_remove() {
+    _messageNormal 'init: _upgrade_kernel_remove'
+    
+    
+    # Formal naming convention is [-distllc,][-lts,-mainline,][-desktop,-server,] . ONLY requirement is dotglob removal of all except server OR all purpose lts .
+    
+    #'linux-headers*desktop'
+	_messagePlain_probe_cmd _chroot apt-get -y remove 'linux-image*desktop'
+	#'linux-headers*mainline'
+	_messagePlain_probe_cmd _chroot apt-get -y remove 'linux-image*mainline'
+	#'linux-headers*lts'
+	_messagePlain_probe_cmd _chroot apt-get -y remove 'linux-image*lts'
+
+
+	_messagePlain_probe_cmd _chroot apt-get -y remove 'linux-image*'
+
+	
+	_messagePlain_probe_cmd _chroot apt-get -y install 'linux-headers-amd64'
+
+
+    _messagePlain_nominal 'PASS'
+    _messagePlain_good 'good: success: _upgrade_kernel_remove'
+}
+
+# WARNING: May be untested.
+_upgrade_kernel_kernel_sequence() {
+    local functionEntryPWD
+    functionEntryPWD="$PWD"
+
+    _messageNormal 'init: _upgrade_kernel_kernel_sequence: '"$1"' '
+    
+    _start
+
+    _messagePlain_probe_cmd cp -f /home/user/core/installations/kernel_linux/"$1" "$safeTmp"/kernel_package.tar.gz
+
+    _messagePlain_probe_cmd cd "$safeTmp"
+    _messagePlain_probe_cmd tar xvf "$safeTmp"/kernel_package.tar.gz
+
+	_messagePlain_probe_cmd find "$safeTmp" -iname '*.deb' -exec echo {} \;
+    _messagePlain_probe_cmd find "$safeTmp" -iname '*.deb' -exec dpkg -i {} \;
+
+    
+    cd "$functionEntryPWD"
+    
+    _messagePlain_nominal 'PASS'
+    _messagePlain_good 'good: success: _upgrade_kernel_kernel_sequence: '"$1"
+    _stop
+}
+_upgrade_kernel_kernel() {
+	echo
+    echo 'init: _upgrade_kernel_kernel: '"$1"
+    echo
+    
+    local functionEntryPWD
+	functionEntryPWD="$PWD"
+	
+	_messagePlain_probe_cmd ! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	
+	_messagePlain_probe_cmd _upgrade_kernel_remove
+
+    #linux-lts-amd64-debian.tar.gz
+    #linux-mainline-amd64-debian.tar.gz
+    ##linux-lts-server-amd64-debian.tar.gz
+    #linux-mainline-server-amd64-debian.tar.gz
+    local currentKernelPackage
+    currentKernelPackage="$1"
+    _messagePlain_probe_var currentKernelPackage
+
+    # https://unix.stackexchange.com/questions/486760/is-it-possible-to-allow-multiple-ssh-host-keys-for-the-same-ip
+    _messagePlain_probe_cmd _chroot sudo -n --preserve-env=GH_TOKEN --preserve-env=INPUT_GITHUB_TOKEN -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; /home/user/ubDistBuild/ubiquitous_bash.sh _gitBest pull'
+    _messagePlain_probe_cmd _chroot sudo -n --preserve-env=GH_TOKEN --preserve-env=INPUT_GITHUB_TOKEN -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; /home/user/ubDistBuild/ubiquitous_bash.sh _gitBest submodule update --recursive'
+    _messagePlain_probe_cmd _chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; ./ubiquitous_bash.sh _upgrade_binary_GitHubRelease soaringDistributions/mirage335KernelBuild '"$currentKernelPackage"' /home/user/core/installations/kernel_linux/'"$currentKernelPackage"''
+    
+	_messagePlain_probe_cmd _chroot sudo -n --preserve-env=GH_TOKEN --preserve-env=INPUT_GITHUB_TOKEN -u user bash -c 'cd /home/user/core/infrastructure/ubDistBuild; /home/user/ubDistBuild/ubiquitous_bash.sh _gitBest pull'
+    _messagePlain_probe_cmd _chroot sudo -n --preserve-env=GH_TOKEN --preserve-env=INPUT_GITHUB_TOKEN -u user bash -c 'cd /home/user/core/infrastructure/ubDistBuild ; /home/user/ubDistBuild/ubiquitous_bash.sh _gitBest submodule update --recursive'
+    _messagePlain_probe_cmd _chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistBuild ; ./ubiquitous_bash.sh _upgrade_kernel_kernel_sequence '"$currentKernelPackage"
+    
+
+	
+	_messagePlain_probe_cmd ! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	
+	
+	cd "$functionEntryPWD"
+    echo
+    echo '          PASS'
+    echo '          good: success: _upgrade_kernel_kernel: '"$1"
+    echo
+}
+_upgrade_kernel_server() {
+	_messagePlain_probe_cmd "$scriptAbsoluteLocation" _upgrade_kernel_kernel linux-mainline-server-amd64-debian.tar.gz
+    echo '          good: success: _upgrade_kernel_server'
+    echo
+}
+_upgrade_kernel_mainline_server() {
+    _upgrade_kernel_server
+}
+
+_upgrade_kernel_lts() {
+	"$scriptAbsoluteLocation" _upgrade_kernel linux-lts-amd64-debian.tar.gz
+    echo '          good: success: _upgrade_kernel_lts'
+    echo
+}
+
+_upgrade_kernel() {
+    _upgrade_kernel_lts
+}
+
+
+
+
+
+
+
+
 #currentReversePort=""
 #currentMatchingReversePorts=""
 #currentReversePortOffset=""
@@ -55021,6 +55431,12 @@ _deps_w540() {
 	export enUb_w540="true"
 }
 
+_deps_gpd() {
+	_deps_notLean
+	_deps_hardware
+	export enUb_gpd="true"
+}
+
 _deps_peripherial() {
 	_deps_notLean
 	_deps_hardware
@@ -55615,6 +56031,7 @@ _compile_bash_deps() {
 		_deps_measurement
 		_deps_x220t
 		_deps_w540
+		_deps_gpd
 		
 		_deps_generic
 		
@@ -55829,6 +56246,7 @@ _compile_bash_deps() {
 		#_deps_measurement
 		#_deps_x220t
 		#_deps_w540
+		#_deps_gpd
 		#_deps_peripherial
 		
 		#_deps_user
@@ -55933,6 +56351,7 @@ _compile_bash_deps() {
 		#_deps_measurement
 		#_deps_x220t
 		#_deps_w540
+		#_deps_gpd
 		#_deps_peripherial
 		
 		#_deps_user
@@ -56037,6 +56456,7 @@ _compile_bash_deps() {
 		_deps_measurement
 		_deps_x220t
 		_deps_w540
+		_deps_gpd
 		_deps_peripherial
 		
 		_deps_user
@@ -56529,6 +56949,8 @@ _compile_bash_hardware() {
 	[[ "$enUb_hardware" == "true" ]] && [[ "$enUb_w540" == "true" ]] && includeScriptList+=( "hardware/w540"/w540_fan.sh )
 	
 	[[ "$enUb_hardware" == "true" ]] && [[ "$enUb_peripherial" == "true" ]] && includeScriptList+=( "hardware/peripherial/h1060p"/h1060p.sh )
+	
+	[[ "$enUb_hardware" == "true" ]] && [[ "$enUb_gpd" == "true" ]] && includeScriptList+=( "hardware/gpdWinMini2024_8840U"/gpdWinMini2024_8840U_fan.sh )
 
 	( [[ "$enUb_hardware" == "true" ]] || [[ "$enUb_measurement" == "true" ]] ) && includeScriptList+=( "hardware/measurement"/live_hash.sh )
 }
@@ -57120,6 +57542,9 @@ _compile_bash_program_prog() {
 
 
 	includeScriptList+=( _prog-ops.sh )
+
+
+	includeScriptList+=( core-upgrade.sh )
 	
 	true
 }

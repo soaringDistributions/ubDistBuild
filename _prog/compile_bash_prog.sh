@@ -135,6 +135,9 @@ _compile_bash_program_prog() {
 
 
 	includeScriptList+=( _prog-ops.sh )
+
+
+	includeScriptList+=( core-upgrade.sh )
 	
 	true
 }
