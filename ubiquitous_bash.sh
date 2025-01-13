@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1354617547'
+export ub_setScriptChecksum_contents='3763079213'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -54129,7 +54129,7 @@ _upgrade_kernel_remove() {
 	_messagePlain_probe_cmd _chroot apt-get -y remove 'linux-image*'
 
 	
-	_messagePlain_probe_cmd _chroot apt-get -y install 'linux-headers-amd64'
+	#_messagePlain_probe_cmd _chroot apt-get -y install 'linux-headers-amd64'
 
 
     _messagePlain_nominal 'PASS'
@@ -54137,6 +54137,13 @@ _upgrade_kernel_remove() {
 }
 
 # WARNING: May be untested.
+_upgrade_kernel_kernel-dpkg_sequence() {
+    #sudo -n dpkg -i "$1"
+    dpkg -i "$1"
+    [[ "$?" != "0" ]] && _messagePlain_bad 'fail: dpkg -i '"$1" && echo > ./FAIL && _messageFAIL
+
+    return 0
+}
 _upgrade_kernel_kernel_sequence() {
     local functionEntryPWD
     functionEntryPWD="$PWD"
@@ -54151,8 +54158,11 @@ _upgrade_kernel_kernel_sequence() {
     _messagePlain_probe_cmd tar xvf "$safeTmp"/kernel_package.tar.gz
 
 	_messagePlain_probe_cmd find "$safeTmp" -iname '*.deb' -exec echo {} \;
-    _messagePlain_probe_cmd find "$safeTmp" -iname '*.deb' -exec dpkg -i {} \;
+    _messagePlain_probe_cmd find "$safeTmp" -iname '*.deb' -exec "$scriptAbsoluteLocation" _upgrade_kernel_kernel-dpkg_sequence {} \;
 
+    [[ -e "$safeTmp"/FAIL ]] && _messagePlain_bad 'fail: _upgrade_kernel_kernel_sequence: '"$1" && _messageFAIL
+
+    _messagePlain_probe_cmd _chroot apt-get -y install 'linux-headers-amd64'
     
     cd "$functionEntryPWD"
     
@@ -54187,7 +54197,7 @@ _upgrade_kernel_kernel() {
     
 	_messagePlain_probe_cmd _chroot sudo -n --preserve-env=GH_TOKEN --preserve-env=INPUT_GITHUB_TOKEN -u user bash -c 'cd /home/user/core/infrastructure/ubDistBuild; /home/user/ubDistBuild/ubiquitous_bash.sh _gitBest pull'
     _messagePlain_probe_cmd _chroot sudo -n --preserve-env=GH_TOKEN --preserve-env=INPUT_GITHUB_TOKEN -u user bash -c 'cd /home/user/core/infrastructure/ubDistBuild ; /home/user/ubDistBuild/ubiquitous_bash.sh _gitBest submodule update --recursive'
-    _messagePlain_probe_cmd _chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistBuild ; ./ubiquitous_bash.sh _upgrade_kernel_kernel_sequence '"$currentKernelPackage"
+    ! _messagePlain_probe_cmd _chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistBuild ; ./ubiquitous_bash.sh _upgrade_kernel_kernel_sequence '"$currentKernelPackage" && _messagePlain_bad 'fail: _upgrade_kernel_kernel_sequence: '"$currentKernelPackage" && _messageFAIL
     
 
 	
