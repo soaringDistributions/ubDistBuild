@@ -71,6 +71,9 @@ on:
       DISABLE_RELEASE:
         type: boolean
         default: true
+      #DISABLE_ROOTFS:
+        #type: boolean
+        #default: false
       #devfast:
         #type: boolean
         #default: true
@@ -118,7 +121,7 @@ jobs:
       - name: release! create
         shell: bash
         run: |
-          gh release create build-${{ github.run_id }}-${{ github.run_attempt }} --title build-upgrade --notes ""
+          gh release create build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} --title build_upgrade --notes ""
         env:
           GH_TOKEN: ${{ github.token }}
       - name: report! API Rate Limit
@@ -482,7 +485,7 @@ jobs:
         shell: bash
         run: |
           mv -f ./_local/_hash-ubdist.txt ./_local/_hash-ubdist_before_noBoot.txt
-          gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/_hash-ubdist_before_noBoot.txt
+          gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/_hash-ubdist_before_noBoot.txt
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -527,11 +530,11 @@ jobs:
         if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         shell: bash
         run: |
-          #gh release create build-${{ github.run_id }}-${{ github.run_attempt }} --title build-upgrade --notes ""
+          #gh release create build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} --title build_upgrade --notes ""
           bash -c '
           for currentFile in ./_local/package_image_before_noBoot.tar.flx.part*
           do
-            ./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
+            ./ubiquitous_bash.sh _stopwatch gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
             while [[ $(jobs | wc -l) -ge 12 ]]
             do
               sleep 2
@@ -721,6 +724,7 @@ jobs:
           cat _local/hash-download.txt
 
       - name: fallocate --dig-holes
+        if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' || github.event.inputs.DISABLE_BOOT == 'false' }}
         shell: bash
         run: |
           fallocate --dig-holes ./_local/vm.img
@@ -738,7 +742,7 @@ jobs:
         run: |
           ! ./ubiquitous_bash.sh _openChRoot && exit 1
           ! echo ${{ github.repository }} | ./ubiquitous_bash.sh _chroot tee /info-github-upgrade && exit 1
-          ! echo build-${{ github.run_id }}-${{ github.run_attempt }} | ./ubiquitous_bash.sh _chroot tee -a /info-github-custom && exit 1
+          ! echo build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} | ./ubiquitous_bash.sh _chroot tee -a /info-github-custom && exit 1
           ! date +"%Y-%m-%d" | ./ubiquitous_bash.sh _chroot tee -a /info-github-upgrade && exit 1
           ! ./ubiquitous_bash.sh _closeChRoot && exit 1
           true
@@ -795,7 +799,7 @@ jobs:
           ! ./ubiquitous_bash.sh _openChRoot && exit 1
           ./ubiquitous_bash.sh _chroot df -h / | tee ./_local/root_df.log
           ! ./ubiquitous_bash.sh _closeChRoot && exit 1
-          gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/root_df.log
+          gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/root_df.log
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -837,14 +841,14 @@ jobs:
       - name: release! report! internal
         shell: bash
         run: |
-            #gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/grub.cfg
-            #gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/grubenv
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/dpkg
-            #gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/lsmodReport
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/binReport
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/coreReport
+            #gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/grub.cfg
+            #gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/grubenv
+            gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/dpkg
+            #gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/lsmodReport
+            gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/binReport
+            gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/coreReport
             cat /proc/cpuinfo > ./_local/cpuinfo
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/cpuinfo
+            gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/cpuinfo
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -862,21 +866,21 @@ jobs:
       
 
       - name: fallocate --dig-holes
-        if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' }}
+        if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' || github.event.inputs.DISABLE_BOOT == 'false' }}
         shell: bash
         run: |
           fallocate --dig-holes ./_local/vm.img
       
       
       - name: _package_ubDistBuild_image
-        if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' }}
+        if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' || github.event.inputs.DISABLE_BOOT == 'false' }}
         shell: bash
         run: |
           export skimfast=${{ inputs.skimfast }}
           echo $skimfast
           ./ubiquitous_bash.sh _package_ubDistBuild_image | sudo -n tee ./_local/_package_ubDistBuild_image.log && exit ${PIPESTATUS[0]}
       - name: _ubDistBuild_split
-        if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' }}
+        if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' || github.event.inputs.DISABLE_BOOT == 'false' }}
         shell: bash
         run: |
           ./ubiquitous_bash.sh _ubDistBuild_split | sudo -n tee ./_lib/_ubDistBuild_split.log && exit ${PIPESTATUS[0]}
@@ -889,14 +893,14 @@ jobs:
 
 
       - name: release! package_image
-        if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' }}
+        if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' || github.event.inputs.DISABLE_BOOT == 'false' }}
         shell: bash
         run: |
-          #gh release create build-${{ github.run_id }}-${{ github.run_attempt }} --title build-upgrade --notes ""
+          #gh release create build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} --title build_upgrade --notes ""
           bash -c '
           for currentFile in ./_local/package_image.tar.flx.part*
           do
-            ./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
+            ./ubiquitous_bash.sh _stopwatch gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
             while [[ $(jobs | wc -l) -ge 12 ]]
             do
               sleep 2
@@ -909,50 +913,51 @@ jobs:
 
 
       - name: release! delete! package_image_before_noBoot
+        if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' || github.event.inputs.DISABLE_BOOT == 'false' }}
         shell: bash
         continue-on-error: true
         run: |
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part00 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part01 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part02 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part03 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part04 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part05 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part06 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part07 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part08 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part09 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part10 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part11 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part12 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part13 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part14 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part15 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part16 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part17 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part18 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part19 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part20 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part21 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part22 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part23 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part24 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part25 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part26 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part27 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part28 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part29 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part30 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part31 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part32 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part33 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part34 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part35 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part36 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part37 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part38 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part39 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part40 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part00 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part01 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part02 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part03 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part04 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part05 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part06 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part07 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part08 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part09 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part10 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part11 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part12 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part13 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part14 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part15 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part16 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part17 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part18 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part19 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part20 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part21 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part22 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part23 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part24 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part25 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part26 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part27 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part28 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part29 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part30 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part31 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part32 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part33 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part34 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part35 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part36 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part37 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part38 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part39 --yes || true
+          gh release delete-asset build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part40 --yes || true
           true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -987,8 +992,10 @@ jobs:
 
 
   build-convert-rootfs:
+    if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' }}
     needs: [build, build_release]
-    runs-on: ${{ github.event.inputs.DISABLE_RELEASE != 'false' && 'ubuntu-latest' || github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
+    #runs-on: ${{ github.event.inputs.DISABLE_ROOTFS != 'false' && 'ubuntu-latest' || github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
+    runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
     steps:
       - name: RAND_SEED
         shell: bash
@@ -1013,7 +1020,8 @@ jobs:
           true
       # https://github.com/easimon/maximize-build-space
       - name: Maximize build space
-        if: ${{ github.event.inputs.DISABLE_RELEASE == 'false' && github.event.inputs.runnerName != 'ubuntu-latest-m' && github.event.inputs.runnerName != 'ubuntu-latest-l' && github.event.inputs.runnerName != 'ubuntu-latest-h' }}
+        #if: ${{ github.event.inputs.DISABLE_ROOTFS == 'false' && github.event.inputs.runnerName != 'ubuntu-latest-m' && github.event.inputs.runnerName != 'ubuntu-latest-l' && github.event.inputs.runnerName != 'ubuntu-latest-h' }}
+        if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' && github.event.inputs.runnerName != 'ubuntu-latest-l' && github.event.inputs.runnerName != 'ubuntu-latest-h' }}
         uses: easimon/maximize-build-space@master
         with:
           root-reserve-mb: 1625
@@ -1030,7 +1038,8 @@ jobs:
           #remove-docker-images: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' && github.event.inputs.runnerName != 'ubuntu-latest-l' && github.event.inputs.runnerName != 'ubuntu-latest-h' }}
           remove-docker-images: 'true'
       - name: Maximize build space ! remove ONLY
-        if: ${{ github.event.inputs.DISABLE_RELEASE == 'false' && ( github.event.inputs.runnerName == 'ubuntu-latest-m' || github.event.inputs.runnerName == 'ubuntu-latest-l' || github.event.inputs.runnerName == 'ubuntu-latest-h' ) }}
+        #if: ${{ github.event.inputs.DISABLE_ROOTFS == 'false' && ( github.event.inputs.runnerName == 'ubuntu-latest-m' || github.event.inputs.runnerName == 'ubuntu-latest-l' || github.event.inputs.runnerName == 'ubuntu-latest-h' ) }}
+        if: ${{ ( github.event.inputs.runnerName == 'ubuntu-latest-m' || github.event.inputs.runnerName == 'ubuntu-latest-l' || github.event.inputs.runnerName == 'ubuntu-latest-h' ) }}
         uses: AdityaGarg8/remove-unwanted-software@v4.1
         with:
           remove-dotnet: 'true'
@@ -1098,7 +1107,7 @@ jobs:
       # ###
           
       - name: _get_vmImg_ubDistBuild
-        if: ${{ github.event.inputs.DISABLE_RELEASE == 'false' }}
+        #if: ${{ github.event.inputs.DISABLE_ROOTFS == 'false' }}
         shell: bash
         run: |
           #export FORCE_AXEL=8
@@ -1113,13 +1122,13 @@ jobs:
           #GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: fallocate --dig-holes
-        if: ${{ github.event.inputs.DISABLE_RELEASE == 'false' }}
+        #if: ${{ github.event.inputs.DISABLE_ROOTFS == 'false' }}
         shell: bash
         run: |
           fallocate --dig-holes ./_local/vm.img
 
       - name: _hash_img
-        if: ${{ github.event.inputs.DISABLE_RELEASE == 'false' }}
+        #if: ${{ github.event.inputs.DISABLE_ROOTFS == 'false' }}
         shell: bash
         run: |
           export skimfast=${{ inputs.skimfast }}
@@ -1129,7 +1138,7 @@ jobs:
 
 
       - name: _convert-rootfs
-        if: ${{ github.event.inputs.DISABLE_RELEASE == 'false' }}
+        #if: ${{ github.event.inputs.DISABLE_ROOTFS == 'false' }}
         shell: bash
         run: |
           export current_diskConstrained="true"
@@ -1140,7 +1149,7 @@ jobs:
       
       # ###
       - name: DUMMY-rootfs
-        if: ${{ github.event.inputs.DISABLE_RELEASE != 'false' }}
+        #if: ${{ github.event.inputs.DISABLE_ROOTFS != 'false' }}
         shell: bash
         run: |
           rm -f ./_local/package_rootfs.tar || true
@@ -1173,11 +1182,11 @@ jobs:
       - name: release! package_rootfs
         shell: bash
         run: |
-          #gh release create build-${{ github.run_id }}-${{ github.run_attempt }} --title build-upgrade --notes ""
+          #gh release create build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} --title build_upgrade --notes ""
           bash -c '
           for currentFile in ./_local/package_rootfs.tar.flx.part*
           do
-            ./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
+            ./ubiquitous_bash.sh _stopwatch gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
             while [[ $(jobs | wc -l) -ge 3 ]]
             do
               sleep 2
@@ -1416,11 +1425,11 @@ jobs:
       - name: release! live
         shell: bash
         run: |
-          #gh release create build-${{ github.run_id }}-${{ github.run_attempt }} --title build-upgrade --notes ""
+          #gh release create build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} --title build_upgrade --notes ""
           bash -c '
           for currentFile in ./_local/vm-live.iso.part*
           do
-            ./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
+            ./ubiquitous_bash.sh _stopwatch gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
             while [[ $(jobs | wc -l) -ge 3 ]]
             do
               sleep 2
@@ -1617,7 +1626,7 @@ jobs:
       - name: release! hash
         shell: bash
         run: |
-          gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/_hash-ubdist.txt
+          gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/_hash-ubdist.txt
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -1722,16 +1731,16 @@ jobs:
             fi
           done
         env:
-          currentReleaseTag: build-${{ github.run_id }}-${{ github.run_attempt }}
+          currentReleaseTag: build_upgrade-${{ github.run_id }}-${{ github.run_attempt }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: release! analysis! missing-binaries
         shell: bash
         run: |
-            #gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-lsmodReport
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-binReport
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-coreReport
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-dpkg
+            #gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-lsmodReport
+            gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-binReport
+            gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-coreReport
+            gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-dpkg
         env:
           GH_TOKEN: ${{ github.token }}
 
