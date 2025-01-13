@@ -704,6 +704,7 @@ jobs:
 
       
       - name: _hash_img
+        #if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' }}
         shell: bash
         run: |
           export skimfast=${{ inputs.skimfast }}
@@ -739,7 +740,7 @@ jobs:
       - name: upgrade_core
         shell: bash
         run: |
-          ./ubiquitous_bash.sh upgrade_core || true
+          ./ubiquitous_bash.sh _upgrade_core || true
         timeout-minutes: ${{ github.event.inputs.upgradeTimeout == '300' && 300 || 45 }}
         env:
           GH_TOKEN: ${{ github.token }}
@@ -820,10 +821,10 @@ jobs:
             ./_local/coreReport
             #./_local/cfgFW.log
 
-      - name: report! cfgFW
-        shell: bash
-        run: |
-          cat ./_local/cfgFW.log
+      #- name: report! cfgFW
+        #shell: bash
+        #run: |
+          #cat ./_local/cfgFW.log
       
       - name: release! report! internal
         shell: bash
@@ -844,6 +845,7 @@ jobs:
 
 
       - name: _hash_img
+        if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' }}
         shell: bash
         run: |
           export skimfast=${{ inputs.skimfast }}
@@ -852,18 +854,21 @@ jobs:
       
 
       - name: fallocate --dig-holes
+        if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' }}
         shell: bash
         run: |
           fallocate --dig-holes ./_local/vm.img
       
       
       - name: _package_ubDistBuild_image
+        if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' }}
         shell: bash
         run: |
           export skimfast=${{ inputs.skimfast }}
           echo $skimfast
           ./ubiquitous_bash.sh _package_ubDistBuild_image | sudo -n tee ./_local/_package_ubDistBuild_image.log && exit ${PIPESTATUS[0]}
       - name: _ubDistBuild_split
+        if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' }}
         shell: bash
         run: |
           ./ubiquitous_bash.sh _ubDistBuild_split | sudo -n tee ./_lib/_ubDistBuild_split.log && exit ${PIPESTATUS[0]}

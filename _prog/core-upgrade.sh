@@ -20,7 +20,7 @@ _upgrade_report() {
     echo 'init: _upgrade_report'
     echo
 
-	_messagePlain_probe_cmd ! _openChRoot && _messagePlain_bad 'fail: openChroot' && _messageFAIL
+	! _messagePlain_probe_cmd _openChRoot && _messagePlain_bad 'fail: openChroot' && _messageFAIL
 
     _messageNormal 'init: _upgrade_report: dpkg'
     #_chroot dpkg -l | sudo -n tee "$globalVirtFS"/dpkg > /dev/null
@@ -48,7 +48,7 @@ _upgrade_report() {
     _messagePlain_nominal 'PASS'
     _messagePlain_good 'good: success: _upgrade_report: coreReport'
 	
-	_messagePlain_probe_cmd ! _closeChRoot && _messagePlain_bad 'fail: closeChroot' && _messageFAIL
+	! _messagePlain_probe_cmd _closeChRoot && _messagePlain_bad 'fail: closeChroot' && _messageFAIL
 
     cd "$functionEntryPWD"
     echo
@@ -83,7 +83,7 @@ _upgrade_installers() {
     echo 'init: _upgrade_installers'
     echo
 
-	_messagePlain_probe_cmd ! _openChRoot && _messagePlain_bad 'fail: openChroot' && _messageFAIL
+	! _messagePlain_probe_cmd _openChRoot && _messagePlain_bad 'fail: openChroot' && _messageFAIL
 
     if _chroot sudo -n -u user bash -c '[[ -e /home/user/core/installations/pumpCompanion.exe ]] || [[ -e /home/user/core/installations/extIface.exe ]] || [[ -e /home/user/core/installations/ubDistBuild.exe ]]'
     then
@@ -108,7 +108,7 @@ _upgrade_installers() {
 
     fi
 	
-	_messagePlain_probe_cmd ! _closeChRoot && _messagePlain_bad 'fail: closeChroot' && _messageFAIL
+	! _messagePlain_probe_cmd _closeChRoot && _messagePlain_bad 'fail: closeChroot' && _messageFAIL
 
     cd "$functionEntryPWD"
     echo
@@ -209,7 +209,7 @@ _upgrade_kernel_kernel() {
     local functionEntryPWD
 	functionEntryPWD="$PWD"
 	
-	_messagePlain_probe_cmd ! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+	! _messagePlain_probe_cmd "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
 	_messagePlain_probe_cmd _upgrade_kernel_remove
 
@@ -232,7 +232,7 @@ _upgrade_kernel_kernel() {
     
 
 	
-	_messagePlain_probe_cmd ! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+	! _messagePlain_probe_cmd "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 	
 	
 	cd "$functionEntryPWD"
