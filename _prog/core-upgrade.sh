@@ -94,17 +94,17 @@ _upgrade_installers() {
 
         #_wget_githubRelease "mirage335-gizmos/pumpCompanion" "internal" "pumpCompanion.exe"
         #sudo -n mv -f pumpCompanion.exe "$globalVirtFS"/home/user/core/installations/
-        _chroot sudo -n -u user bash -c '[[ -e /home/user/core/installations/pumpCompanion.exe ]]' && _messagePlain_probe_cmd _chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; ./ubiquitous_bash.sh _upgrade_binary_GitHubRelease mirage335-gizmos/pumpCompanion pumpCompanion.exe /home/user/core/installations/pumpCompanion.exe'
+        _chroot sudo -n -u user bash -c '[[ -e /home/user/core/installations/pumpCompanion.exe ]]' && _messagePlain_probe_cmd _chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; ./ubiquitous_bash.sh _upgrade_binary_GitHubRelease mirage335-gizmos/pumpCompanion pumpCompanion.exe /home/user/core/installations'
         
 
         #_wget_githubRelease "mirage335-colossus/extendedInterface" "internal" "extIface.exe"
         #sudo -n mv -f extIface.exe "$globalVirtFS"/home/user/core/installations/
-        _chroot sudo -n -u user bash -c '[[ -e /home/user/core/installations/extIface.exe ]]' && _messagePlain_probe_cmd _chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; ./ubiquitous_bash.sh _upgrade_binary_GitHubRelease mirage335-colossus/extendedInterface extIface.exe /home/user/core/installations/extIface.exe'
+        _chroot sudo -n -u user bash -c '[[ -e /home/user/core/installations/extIface.exe ]]' && _messagePlain_probe_cmd _chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; ./ubiquitous_bash.sh _upgrade_binary_GitHubRelease mirage335-colossus/extendedInterface extIface.exe /home/user/core/installations'
         
         
         #_wget_githubRelease "soaringDistributions/ubDistBuild" "internal" "ubDistBuild.exe"
         #sudo -n mv -f ubDistBuild.exe "$globalVirtFS"/home/user/core/installations/
-        _chroot sudo -n -u user bash -c '[[ -e /home/user/core/installations/ubDistBuild.exe ]]' && _messagePlain_probe_cmd _chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; ./ubiquitous_bash.sh _upgrade_binary_GitHubRelease soaringDistributions/ubDistBuild ubDistBuild.exe /home/user/core/installations/ubDistBuild.exe'
+        _chroot sudo -n -u user bash -c '[[ -e /home/user/core/installations/ubDistBuild.exe ]]' && _messagePlain_probe_cmd _chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; ./ubiquitous_bash.sh _upgrade_binary_GitHubRelease soaringDistributions/ubDistBuild ubDistBuild.exe /home/user/core/installations'
 
     fi
 	
@@ -234,7 +234,7 @@ _upgrade_kernel_kernel() {
     # https://unix.stackexchange.com/questions/486760/is-it-possible-to-allow-multiple-ssh-host-keys-for-the-same-ip
     _messagePlain_probe_cmd _chroot sudo -n --preserve-env=GH_TOKEN --preserve-env=INPUT_GITHUB_TOKEN -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; /home/user/ubDistBuild/ubiquitous_bash.sh _gitBest pull'
     _messagePlain_probe_cmd _chroot sudo -n --preserve-env=GH_TOKEN --preserve-env=INPUT_GITHUB_TOKEN -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; /home/user/ubDistBuild/ubiquitous_bash.sh _gitBest submodule update --recursive'
-    _messagePlain_probe_cmd _chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; ./ubiquitous_bash.sh _upgrade_binary_GitHubRelease soaringDistributions/mirage335KernelBuild '"$currentKernelPackage"' /home/user/core/installations/kernel_linux/'"$currentKernelPackage"''
+    _messagePlain_probe_cmd _chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; ./ubiquitous_bash.sh _upgrade_binary_GitHubRelease soaringDistributions/mirage335KernelBuild '"$currentKernelPackage"' /home/user/core/installations/kernel_linux'
     
 	_messagePlain_probe_cmd _chroot sudo -n --preserve-env=GH_TOKEN --preserve-env=INPUT_GITHUB_TOKEN -u user bash -c 'cd /home/user/core/infrastructure/ubDistBuild; /home/user/ubDistBuild/ubiquitous_bash.sh _gitBest pull'
     _messagePlain_probe_cmd _chroot sudo -n --preserve-env=GH_TOKEN --preserve-env=INPUT_GITHUB_TOKEN -u user bash -c 'cd /home/user/core/infrastructure/ubDistBuild ; /home/user/ubDistBuild/ubiquitous_bash.sh _gitBest submodule update --recursive'
@@ -252,7 +252,7 @@ _upgrade_kernel_kernel() {
     echo
 }
 _upgrade_kernel_server() {
-	_messagePlain_probe_cmd "$scriptAbsoluteLocation" _upgrade_kernel_kernel linux-mainline-server-amd64-debian.tar.gz
+	! _messagePlain_probe_cmd "$scriptAbsoluteLocation" _upgrade_kernel_kernel linux-mainline-server-amd64-debian.tar.gz && _messagePlain_bad 'fail: _upgrade_kernel_server' && _messageFAIL
     echo '          good: success: _upgrade_kernel_server'
     echo
 }
@@ -261,15 +261,13 @@ _upgrade_kernel_mainline_server() {
 }
 
 _upgrade_kernel_lts() {
-	"$scriptAbsoluteLocation" _upgrade_kernel_kernel linux-lts-amd64-debian.tar.gz
+	! _messagePlain_probe_cmd "$scriptAbsoluteLocation" _upgrade_kernel_kernel linux-lts-amd64-debian.tar.gz && _messagePlain_bad 'fail: _upgrade_kernel_lts' && _messageFAIL
     echo '          good: success: _upgrade_kernel_lts'
     echo
 }
 
 _upgrade_kernel() {
-	"$scriptAbsoluteLocation" _upgrade_kernel_kernel linux-lts-amd64-debian.tar.gz
-    echo '          good: success: _upgrade_kernel_lts'
-    echo
+	_upgrade_kernel_lts
 }
 
 
