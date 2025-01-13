@@ -6,6 +6,12 @@
 # ATTENTION: This 'upgrade' functionality is a non-essential and intentionally less than comprehensive development tool to reduce cycle time for 'ubDistBuild' by cautiously and quickly upgrading only repositories, etc, with still rapidly developing essential functionality.
 
 
+
+# ATTENTION
+#./ubiquitous_bash.sh _create_ubDistBuild-rotten_install-kde
+
+
+# May be substituted in practice for '_zSpecial_report-FORCE' if there are issues with this function.
 _upgrade_report() {
     local functionEntryPWD
     functionEntryPWD="$PWD"
