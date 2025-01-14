@@ -634,7 +634,7 @@ jobs:
           cd ubiquitous_bash
           ./_setupUbiquitous.bat
       #- name: _getMinimal_cloud
-        #if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' || github.event.inputs.DANGERfast_EXPERIMENT != 'true' }}
+        ##if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' || github.event.inputs.DANGERfast_EXPERIMENT != 'true' }}
         #shell: bash
         #run: |
           #! ~/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _getMinimal_cloud && exit 1
