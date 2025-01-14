@@ -16,7 +16,7 @@ _getMinimal_cloud_ubDistBuild_noBoot_backend() {
 
 _getMinimal_cloud_ubDistBuild_noBoot() {
     echo 'APT::AutoRemove::RecommendsImportant "true";
-APT::AutoRemove::SuggestsImportant "true";' | _getMost_backend tee /etc/apt/apt.conf.d/99autoremove-recommends > /dev/null
+APT::AutoRemove::SuggestsImportant "true";' | sudo -n tee /etc/apt/apt.conf.d/99autoremove-recommends > /dev/null
 
     #dpkg --add-architecture i386
     #apt-get update
@@ -34,18 +34,20 @@ APT::AutoRemove::SuggestsImportant "true";' | _getMost_backend tee /etc/apt/apt.
     sudo -n env XZ_OPT="-T0" DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" remove --autoremove -y plasma-discover
 
     _messagePlain_probe _custom_splice_opensslConfig
-	_here_opensslConfig_legacy | _getMost_backend tee /etc/ssl/openssl_legacy.cnf > /dev/null 2>&1
+	_here_opensslConfig_legacy | sudo -n tee /etc/ssl/openssl_legacy.cnf > /dev/null 2>&1
 
-    if ! _getMost_backend grep 'openssl_legacy' /etc/ssl/openssl.cnf > /dev/null 2>&1
+    if ! sudo -n grep 'openssl_legacy' /etc/ssl/openssl.cnf > /dev/null 2>&1
     then
-        _getMost_backend cp -f /etc/ssl/openssl.cnf /etc/ssl/openssl.cnf.orig
+        sudo -n cp -f /etc/ssl/openssl.cnf /etc/ssl/openssl.cnf.orig
         echo '
 
 
 .include = /etc/ssl/openssl_legacy.cnf
 
-' | _getMost_backend cat /etc/ssl/openssl.cnf.orig - | _getMost_backend tee /etc/ssl/openssl.cnf > /dev/null 2>&1
+' | sudo -n cat /etc/ssl/openssl.cnf.orig - | sudo -n tee /etc/ssl/openssl.cnf > /dev/null 2>&1
     fi
+
+    true
 }
 # WARNING: Forces all workflows to use this specialized function by default . Beware the possibility of external assumptions breaking very long build jobs.
 #_getMinimal_cloud() {
