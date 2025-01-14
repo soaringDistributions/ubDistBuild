@@ -234,7 +234,7 @@ _upgrade_kernel_kernel() {
     # https://unix.stackexchange.com/questions/486760/is-it-possible-to-allow-multiple-ssh-host-keys-for-the-same-ip
     _messagePlain_probe_cmd _chroot sudo -n --preserve-env=GH_TOKEN --preserve-env=INPUT_GITHUB_TOKEN -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; /home/user/ubDistBuild/ubiquitous_bash.sh _gitBest pull'
     _messagePlain_probe_cmd _chroot sudo -n --preserve-env=GH_TOKEN --preserve-env=INPUT_GITHUB_TOKEN -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; /home/user/ubDistBuild/ubiquitous_bash.sh _gitBest submodule update --recursive'
-    _messagePlain_probe_cmd _chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; ./ubiquitous_bash.sh _upgrade_binary_GitHubRelease soaringDistributions/mirage335KernelBuild '"$currentKernelPackage"' /home/user/core/installations/kernel_linux'
+    ! _messagePlain_probe_cmd _chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; ./ubiquitous_bash.sh _upgrade_binary_GitHubRelease soaringDistributions/mirage335KernelBuild '"$currentKernelPackage"' /home/user/core/installations/kernel_linux' && _messagePlain_bad 'fail: _upgrade_binary_GitHubRelease: '"$currentKernelPackage" && _messageFAIL
     
 	_messagePlain_probe_cmd _chroot sudo -n --preserve-env=GH_TOKEN --preserve-env=INPUT_GITHUB_TOKEN -u user bash -c 'cd /home/user/core/infrastructure/ubDistBuild; /home/user/ubDistBuild/ubiquitous_bash.sh _gitBest pull'
     _messagePlain_probe_cmd _chroot sudo -n --preserve-env=GH_TOKEN --preserve-env=INPUT_GITHUB_TOKEN -u user bash -c 'cd /home/user/core/infrastructure/ubDistBuild ; /home/user/ubDistBuild/ubiquitous_bash.sh _gitBest submodule update --recursive'

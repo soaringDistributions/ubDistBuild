@@ -752,7 +752,7 @@ jobs:
       - name: upgrade_core
         shell: bash
         run: |
-          ./ubiquitous_bash.sh _upgrade_core || true
+          ./ubiquitous_bash.sh _upgrade_core
         timeout-minutes: ${{ github.event.inputs.upgradeTimeout == '300' && 300 || 45 }}
         env:
           GH_TOKEN: ${{ github.token }}
@@ -762,8 +762,8 @@ jobs:
         if: ${{ github.event.inputs.upgradeKernel == 'lts' }}
         shell: bash
         run: |
-          ./ubiquitous_bash.sh _upgrade_kernel_lts || true
-          #./ubiquitous_bash.sh _upgrade_kernel || true
+          ./ubiquitous_bash.sh _upgrade_kernel_lts
+          #./ubiquitous_bash.sh _upgrade_kernel
         timeout-minutes: ${{ github.event.inputs.upgradeTimeout == '300' && 300 || 45 }}
         env:
           GH_TOKEN: ${{ github.token }}
@@ -773,7 +773,7 @@ jobs:
         if: ${{ github.event.inputs.upgradeKernel == 'mainline-server' }}
         shell: bash
         run: |
-          ./ubiquitous_bash.sh _upgrade_kernel_mainline_server || true
+          ./ubiquitous_bash.sh _upgrade_kernel_mainline_server
         timeout-minutes: ${{ github.event.inputs.upgradeTimeout == '300' && 300 || 45 }}
         env:
           GH_TOKEN: ${{ github.token }}
@@ -782,7 +782,7 @@ jobs:
       - name: upgrade_installers
         shell: bash
         run: |
-          ./ubiquitous_bash.sh _upgrade_installers || true
+          ./ubiquitous_bash.sh _upgrade_installers
         timeout-minutes: ${{ github.event.inputs.upgradeTimeout == '300' && 300 || 45 }}
         env:
           GH_TOKEN: ${{ github.token }}
@@ -808,10 +808,10 @@ jobs:
       - name: _upgrade_report
         shell: bash
         run: |
-          ./ubiquitous_bash.sh _upgrade_report || true
+          ./ubiquitous_bash.sh _upgrade_report
         env:
           GH_TOKEN: ${{ github.token }}
-          
+
 
       #- name: _zSpecial_report-FORCE
         #shell: bash
