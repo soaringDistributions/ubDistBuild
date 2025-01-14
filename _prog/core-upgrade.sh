@@ -180,7 +180,7 @@ _upgrade_kernel_remove() {
 # WARNING: May be untested.
 _upgrade_kernel_kernel-dpkg_sequence() {
     #sudo -n dpkg -i "$1"
-    dpkg -i "$1"
+    sudo -n dpkg -i "$1"
     [[ "$?" != "0" ]] && _messagePlain_bad 'fail: dpkg -i '"$1" && echo > ./FAIL && _messageFAIL
 
     return 0
