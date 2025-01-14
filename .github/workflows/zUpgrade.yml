@@ -36,14 +36,6 @@ on:
   #push:
   workflow_dispatch:
     inputs:
-      releaseOrigin:
-        required: false
-        default: soaringDistributions/ubDistBuild
-        type: choice
-        options:
-          #- DEFAULT
-          - soaringDistributions/ubDistBuild
-          #- soaringDistributions/ubdist_dummy
       releaseLabel:
         required: false
         #default: spring
@@ -348,7 +340,7 @@ jobs:
         if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         shell: bash
         run: |
-          current_releaseOrigin="${{ inputs.releaseOrigin }}"
+          current_releaseOrigin="${{ github.repository }}"
           #( [[ "$current_releaseOrigin" == "" ]] || [[ "$current_releaseOrigin" == "DEFAULT" ]] ) && current_releaseOrigin=$(head -n1 ./.github/workflows/DEFAULT_releaseOrigin.txt)
           [[ "$current_releaseOrigin" == "" ]] && current_releaseOrigin="soaringDistributions/ubDistBuild"
           current_releaseLabel="${{ inputs.releaseLabel }}"
@@ -693,7 +685,7 @@ jobs:
         if: ${{ github.event.inputs.DISABLE_BOOT == 'true' }}
         shell: bash
         run: |
-          current_releaseOrigin="${{ inputs.releaseOrigin }}"
+          current_releaseOrigin="${{ github.repository }}"
           ( [[ "$current_releaseOrigin" == "" ]] || [[ "$current_releaseOrigin" == "DEFAULT" ]] ) && current_releaseOrigin=$(head -n1 ./.github/workflows/DEFAULT_releaseOrigin.txt)
           [[ "$current_releaseOrigin" == "" ]] && current_releaseOrigin="soaringDistributions/ubDistBuild"
           current_releaseLabel="${{ inputs.releaseLabel }}"
@@ -1783,6 +1775,7 @@ jobs:
               [[ "$currentIteration" -lt "6" ]] && curl -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/binReport"
               [[ "$currentIteration" -lt "7" ]] && curl -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/coreReport"
               curl -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/dpkg"
+              curl -s -H "Authorization: token $GH_TOKEN" -L -o "customReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/customReport"
               
               #[[ "$currentIteration" -lt "5" ]] && echo | tee -a ./missing-lsmodReport
               #[[ "$currentIteration" -lt "5" ]] && echo "Binaries (lsmod) loaded in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-lsmodReport
