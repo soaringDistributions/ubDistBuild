@@ -253,7 +253,7 @@ jobs:
         if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         shell: bash
         run: |
-          ! ./ubiquitous_bash.sh _getMinimal_cloud && exit 1
+          ! ./ubiquitous_bash.sh _getMinimal_cloud_ubDistBuild && exit 1
           true
           #! sudo -n apt-get -y clean && exit 1
           df -h
@@ -636,7 +636,7 @@ jobs:
       - name: _getMinimal_cloud
         shell: bash
         run: |
-          ! ~/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _getMinimal_cloud && exit 1
+          ! ~/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _getMinimal_cloud_ubDistBuild && exit 1
           true
           #! sudo -n apt-get -y clean && exit 1
           df -h
@@ -649,7 +649,7 @@ jobs:
         if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' }}
         shell: bash
         run: |
-          ! ./ubiquitous_bash.sh _getMinimal_cloud && exit 1
+          ! ./ubiquitous_bash.sh _getMinimal_cloud_ubDistBuild && exit 1
           true
           #! sudo -n apt-get -y clean && exit 1
           df -h
@@ -1082,7 +1082,7 @@ jobs:
       - name: _getMinimal_cloud
         shell: bash
         run: |
-          ! ./ubiquitous_bash.sh _getMinimal_cloud && exit 1
+          ! ./ubiquitous_bash.sh _getMinimal_cloud_ubDistBuild && exit 1
           true
           #! sudo -n apt-get -y clean && exit 1
           df -h
@@ -1287,7 +1287,7 @@ jobs:
       - name: _getMinimal_cloud
         shell: bash
         run: |
-          ! ~/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _getMinimal_cloud && exit 1
+          ! ~/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _getMinimal_cloud_ubDistBuild && exit 1
           true
           #! sudo -n apt-get -y clean && exit 1
           df -h
@@ -1299,7 +1299,7 @@ jobs:
       - name: _getMinimal_cloud
         shell: bash
         run: |
-          ! ./ubiquitous_bash.sh _getMinimal_cloud && exit 1
+          ! ./ubiquitous_bash.sh _getMinimal_cloud_ubDistBuild && exit 1
           true
           #! sudo -n apt-get -y clean && exit 1
           df -h
@@ -1527,7 +1527,7 @@ jobs:
       #- name: _getMinimal_cloud
         #shell: bash
         #run: |
-          #! ~/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _getMinimal_cloud && exit 1
+          #! ~/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _getMinimal_cloud_ubDistBuild && exit 1
           #true
           ##! sudo -n apt-get -y clean && exit 1
           #df -h
@@ -1676,7 +1676,7 @@ jobs:
       - name: _getMinimal_cloud
         shell: bash
         run: |
-          ! ./ubiquitous_bash.sh _getMinimal_cloud && exit 1
+          ! ./ubiquitous_bash.sh _getMinimal_cloud_ubDistBuild && exit 1
           true
           #! sudo -n apt-get -y clean && exit 1
           df -h
@@ -1714,27 +1714,31 @@ jobs:
           curl -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/dpkg"
 
           # Loop through each release
+          local currentIteration
+          currentIteration=0
           #for RELEASE in $(echo "$RELEASES" | jq -r '.[].tag_name' | sort --reverse); do
-          for RELEASE in $(echo "$RELEASES" | jq -r 'sort_by(.published_at) | reverse | .[].tag_name'); do
+          for RELEASE in $(echo "$RELEASES" | jq -r 'sort_by(.published_at) | reverse | .[].tag_name' | head -n 20); do
+
+            currentIteration=$((currentIteration+1))
 
             # Compare the list of binaries in this release to the current release
             if [ "$RELEASE" != "$currentReleaseTag" ]; then
               
               # Download the binReport file for this release
-              #curl -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/lsmodReport"
-              curl -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/binReport"
-              curl -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/coreReport"
+              #[[ "$currentIteration" -lt "3" ]] && curl -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/lsmodReport"
+              [[ "$currentIteration" -lt "3" ]] && curl -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/binReport"
+              [[ "$currentIteration" -lt "4" ]] && curl -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/coreReport"
               curl -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/dpkg"
               
-              #echo | tee -a ./missing-lsmodReport
-              #echo "Binaries (lsmod) loaded in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-lsmodReport
-              #comm -23 <(sort "lsmodReport-$RELEASE") <(sort "lsmodReport-$currentReleaseTag") | tee -a ./missing-lsmodReport
-              echo | tee -a ./missing-binReport
-              echo "Binaries (filesystem) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-binReport
-              comm -23 <(sort "binReport-$RELEASE") <(sort "binReport-$currentReleaseTag") | tee -a ./missing-binReport
-              echo | tee -a ./missing-coreReport
-              echo "Binaries (core) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-coreReport
-              comm -23 <(sort "coreReport-$RELEASE" | grep -v '_local/h') <(sort "coreReport-$currentReleaseTag" | grep -v '_local/h') | tee -a ./missing-coreReport
+              #[[ "$currentIteration" -lt "3" ]] && echo | tee -a ./missing-lsmodReport
+              #[[ "$currentIteration" -lt "3" ]] && echo "Binaries (lsmod) loaded in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-lsmodReport
+              #[[ "$currentIteration" -lt "3" ]] && comm -23 <(sort "lsmodReport-$RELEASE") <(sort "lsmodReport-$currentReleaseTag") | tee -a ./missing-lsmodReport
+              [[ "$currentIteration" -lt "3" ]] && echo | tee -a ./missing-binReport
+              [[ "$currentIteration" -lt "3" ]] && echo "Binaries (filesystem) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-binReport
+              [[ "$currentIteration" -lt "3" ]] && comm -23 <(sort "binReport-$RELEASE") <(sort "binReport-$currentReleaseTag") | tee -a ./missing-binReport
+              [[ "$currentIteration" -lt "4" ]] && echo | tee -a ./missing-coreReport
+              [[ "$currentIteration" -lt "4" ]] && echo "Binaries (core) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-coreReport
+              [[ "$currentIteration" -lt "4" ]] && comm -23 <(sort "coreReport-$RELEASE" | grep -v '_local/h') <(sort "coreReport-$currentReleaseTag" | grep -v '_local/h') | tee -a ./missing-coreReport
               echo | tee -a ./missing-dpkg
               echo "Binaries (dpkg) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-dpkg
               comm -23 <(sort "dpkg-$RELEASE") <(sort "dpkg-$currentReleaseTag") | tee -a ./missing-dpkg
