@@ -827,8 +827,17 @@ _create_ubDistBuild-rotten_install() {
 	
 	
 	#'linux-headers*'
-	_chroot apt-get -y remove 'linux-image*'
+	#_chroot apt-get -y remove 'linux-image*'
+
+    _messagePlain_probe_cmd _chroot apt-get -y remove 'linux-image*'
+    _messagePlain_probe_cmd _chroot apt-get -y purge 'linux-image*'
+    _messagePlain_probe_cmd _chroot apt-get autoremove --purge
+
+    _messagePlain_probe_cmd _chroot dpkg --get-selections | grep 'linux-image'
+
 	! _chroot /rotten_install.sh _custom_kernel && _messageFAIL
+
+	_messagePlain_probe_cmd _chroot apt-get -y install -f
 	
 	# Mainline kernel will be available from usual "core/installations" folders , however, is no longer booted by default, due to apparently frequent regressions (not just out-of-tree module compatibility issues but in-tree issues) with mainline kernels acceptably recent (ie. latest stable branch still apparently has too many regressions) .
 	#'linux-headers*mainline'

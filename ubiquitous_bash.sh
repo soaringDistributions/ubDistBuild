@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1670521746'
+export ub_setScriptChecksum_contents='3363173578'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -48215,8 +48215,17 @@ _create_ubDistBuild-rotten_install() {
 	
 	
 	#'linux-headers*'
-	_chroot apt-get -y remove 'linux-image*'
+	#_chroot apt-get -y remove 'linux-image*'
+
+    _messagePlain_probe_cmd _chroot apt-get -y remove 'linux-image*'
+    _messagePlain_probe_cmd _chroot apt-get -y purge 'linux-image*'
+    _messagePlain_probe_cmd _chroot apt-get autoremove --purge
+
+    _messagePlain_probe_cmd _chroot dpkg --get-selections | grep 'linux-image'
+
 	! _chroot /rotten_install.sh _custom_kernel && _messageFAIL
+
+	_messagePlain_probe_cmd _chroot apt-get -y install -f
 	
 	# Mainline kernel will be available from usual "core/installations" folders , however, is no longer booted by default, due to apparently frequent regressions (not just out-of-tree module compatibility issues but in-tree issues) with mainline kernels acceptably recent (ie. latest stable branch still apparently has too many regressions) .
 	#'linux-headers*mainline'
@@ -54335,6 +54344,8 @@ _upgrade_kernel_kernel_sequence() {
     [[ -e "$safeTmp"/FAIL ]] && _messagePlain_bad 'fail: _upgrade_kernel_kernel_sequence: '"$1" && _messageFAIL
 
     _messagePlain_probe_cmd _chroot apt-get -y install 'linux-headers-amd64'
+
+	! _messagePlain_probe_cmd _chroot apt-get -y install -f && _messagePlain_bad 'fail: apt-get -y install -f' && _messageFAIL
     
     cd "$functionEntryPWD"
     

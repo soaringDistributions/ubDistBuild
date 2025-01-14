@@ -1668,10 +1668,10 @@ jobs:
           #./_setupUbiquitous.bat
           #./ubiquitous_bash.sh _custom_splice_opensslConfig
 
-      #- uses: actions/checkout@v3
-        #with:
-          #fetch-depth: 1
-          ##submodules: 'recursive'
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          #submodules: 'recursive'
 
       #- name: _getMinimal_cloud
         #shell: bash
@@ -1752,11 +1752,6 @@ jobs:
         env:
           currentReleaseTag: build_upgrade-${{ github.run_id }}-${{ github.run_attempt }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-          #submodules: 'recursive'
 
       - name: release! analysis! missing-binaries
         shell: bash

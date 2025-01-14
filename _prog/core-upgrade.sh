@@ -211,6 +211,8 @@ _upgrade_kernel_kernel_sequence() {
     [[ -e "$safeTmp"/FAIL ]] && _messagePlain_bad 'fail: _upgrade_kernel_kernel_sequence: '"$1" && _messageFAIL
 
     _messagePlain_probe_cmd _chroot apt-get -y install 'linux-headers-amd64'
+
+	! _messagePlain_probe_cmd _chroot apt-get -y install -f && _messagePlain_bad 'fail: apt-get -y install -f' && _messageFAIL
     
     cd "$functionEntryPWD"
     
