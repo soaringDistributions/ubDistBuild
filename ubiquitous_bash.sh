@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3363173578'
+export ub_setScriptChecksum_contents='1411169456'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -49945,6 +49945,40 @@ _upload_ubDistBuild_custom() {
 }
 
 
+_custom_report() {
+    local functionEntryPWD
+    functionEntryPWD="$PWD"
+    
+    echo
+    echo 'init: _custom_report'
+    echo
+
+	! _messagePlain_probe_cmd _openChRoot && _messagePlain_bad 'fail: openChroot' && _messageFAIL
+
+	_messageNormal 'init: _custom_report: customReport, cronUserReport, cronRootReport'
+
+    _chroot find /etc /var/lib/docker | sudo -n tee "$globalVirtFS"/customReport > /dev/null
+    sudo -n cp -f "$globalVirtFS"/customReport "$scriptLocal"/customReport
+    sudo -n chown "$USER":"$USER" "$scriptLocal"/customReport
+
+	_chroot sudo -n -u user bash -c "crontab -l" | sudo -n tee "$globalVirtFS"/cronUserReport > /dev/null
+    sudo -n cp -f "$globalVirtFS"/cronUserReport "$scriptLocal"/cronUserReport
+	_chroot sudo -n -u root bash -c "crontab -l" | sudo -n tee "$globalVirtFS"/cronRootReport > /dev/null
+	sudo -n cp -f "$globalVirtFS"/cronRootReport "$scriptLocal"/cronRootReport
+
+    _messagePlain_nominal 'PASS'
+    _messagePlain_good 'good: success: _custom_report: customReport, cronUserReport, cronRootReport'
+	
+	! _messagePlain_probe_cmd _closeChRoot && _messagePlain_bad 'fail: closeChroot' && _messageFAIL
+
+    cd "$functionEntryPWD"
+    echo
+    echo '          PASS'
+    echo '          good: success: _custom_report'
+    echo
+}
+
+
 # WARNING: OBSOLETE .
 _get_vmImg_ubDistBuild-tempFile() {
 	cd "$scriptLocal"
@@ -54343,9 +54377,9 @@ _upgrade_kernel_kernel_sequence() {
 
     [[ -e "$safeTmp"/FAIL ]] && _messagePlain_bad 'fail: _upgrade_kernel_kernel_sequence: '"$1" && _messageFAIL
 
-    _messagePlain_probe_cmd _chroot apt-get -y install 'linux-headers-amd64'
+    _messagePlain_probe_cmd sudo -n apt-get -y install 'linux-headers-amd64'
 
-	! _messagePlain_probe_cmd _chroot apt-get -y install -f && _messagePlain_bad 'fail: apt-get -y install -f' && _messageFAIL
+	! _messagePlain_probe_cmd sudo -n apt-get -y install -f && _messagePlain_bad 'fail: apt-get -y install -f' && _messageFAIL
     
     cd "$functionEntryPWD"
     

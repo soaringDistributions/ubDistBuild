@@ -2557,6 +2557,40 @@ _upload_ubDistBuild_custom() {
 }
 
 
+_custom_report() {
+    local functionEntryPWD
+    functionEntryPWD="$PWD"
+    
+    echo
+    echo 'init: _custom_report'
+    echo
+
+	! _messagePlain_probe_cmd _openChRoot && _messagePlain_bad 'fail: openChroot' && _messageFAIL
+
+	_messageNormal 'init: _custom_report: customReport, cronUserReport, cronRootReport'
+
+    _chroot find /etc /var/lib/docker | sudo -n tee "$globalVirtFS"/customReport > /dev/null
+    sudo -n cp -f "$globalVirtFS"/customReport "$scriptLocal"/customReport
+    sudo -n chown "$USER":"$USER" "$scriptLocal"/customReport
+
+	_chroot sudo -n -u user bash -c "crontab -l" | sudo -n tee "$globalVirtFS"/cronUserReport > /dev/null
+    sudo -n cp -f "$globalVirtFS"/cronUserReport "$scriptLocal"/cronUserReport
+	_chroot sudo -n -u root bash -c "crontab -l" | sudo -n tee "$globalVirtFS"/cronRootReport > /dev/null
+	sudo -n cp -f "$globalVirtFS"/cronRootReport "$scriptLocal"/cronRootReport
+
+    _messagePlain_nominal 'PASS'
+    _messagePlain_good 'good: success: _custom_report: customReport, cronUserReport, cronRootReport'
+	
+	! _messagePlain_probe_cmd _closeChRoot && _messagePlain_bad 'fail: closeChroot' && _messageFAIL
+
+    cd "$functionEntryPWD"
+    echo
+    echo '          PASS'
+    echo '          good: success: _custom_report'
+    echo
+}
+
+
 # WARNING: OBSOLETE .
 _get_vmImg_ubDistBuild-tempFile() {
 	cd "$scriptLocal"

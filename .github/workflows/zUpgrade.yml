@@ -816,6 +816,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
+      - name: _custom_report
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _custom_report
+        env:
+          GH_TOKEN: ${{ github.token }}
+
 
       #- name: _zSpecial_report-FORCE
         #shell: bash
@@ -863,6 +870,9 @@ jobs:
             gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/coreReport
             cat /proc/cpuinfo > ./_local/cpuinfo
             gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/cpuinfo
+            gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/customReport
+            gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/cronUserReport
+            gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/cronRootReport
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -1717,6 +1727,7 @@ jobs:
           curl -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/binReport"
           curl -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/coreReport"
           curl -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/dpkg"
+          curl -s -H "Authorization: token $GH_TOKEN" -L -o "customReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/customReport"
 
           # Loop through each release
           #local currentIteration
@@ -1747,6 +1758,9 @@ jobs:
               echo | tee -a ./missing-dpkg
               echo "Binaries (dpkg) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-dpkg
               comm -23 <(sort "dpkg-$RELEASE") <(sort "dpkg-$currentReleaseTag") | tee -a ./missing-dpkg
+              echo | tee -a ./missing-customReport
+              echo "Binaries (filesystem: custom) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-customReport
+              comm -23 <(sort "customReport-$RELEASE" | grep -v '_local/h') <(sort "customReport-$currentReleaseTag" | grep -v '_local/h') | tee -a ./missing-customReport
             fi
           done
         env:
@@ -1760,8 +1774,47 @@ jobs:
             gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-binReport
             gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-coreReport
             gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-dpkg
+            gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-customReport
         env:
           GH_TOKEN: ${{ github.token }}
+
+      - name: report! cronUserReport
+        shell: bash
+        run: |
+          mkdir -p ./_local/analysis
+
+          cd ./_local/analysis
+
+          # Get the list of releases
+          RELEASES=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/"${{ github.repository }}"/releases)
+
+          # Download binReport file for the current release
+          curl -s -H "Authorization: token $GH_TOKEN" -L -o "cronUserReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/cronUserReport"
+
+          echo
+          cat ./cronUserReport-$currentReleaseTag
+        env:
+          currentReleaseTag: build_upgrade-${{ github.run_id }}-${{ github.run_attempt }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: report! cronRootReport
+        shell: bash
+        run: |
+          mkdir -p ./_local/analysis
+
+          cd ./_local/analysis
+
+          # Get the list of releases
+          RELEASES=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/"${{ github.repository }}"/releases)
+
+          # Download binReport file for the current release
+          curl -s -H "Authorization: token $GH_TOKEN" -L -o "cronRootReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/cronRootReport"
+
+          echo
+          cat ./cronRootReport-$currentReleaseTag
+        env:
+          currentReleaseTag: build_upgrade-${{ github.run_id }}-${{ github.run_attempt }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
       - name: report! API Rate Limit
         shell: bash

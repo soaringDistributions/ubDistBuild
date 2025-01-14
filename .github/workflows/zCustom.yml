@@ -772,6 +772,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
+      - name: _custom_report
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _custom_report
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: _zSpecial_report-FORCE
         shell: bash
         continue-on-error: true
