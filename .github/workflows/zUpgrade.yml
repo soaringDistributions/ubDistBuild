@@ -1719,7 +1719,7 @@ jobs:
           curl -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/dpkg"
 
           # Loop through each release
-          local currentIteration
+          #local currentIteration
           currentIteration=0
           #for RELEASE in $(echo "$RELEASES" | jq -r '.[].tag_name' | sort --reverse); do
           for RELEASE in $(echo "$RELEASES" | jq -r 'sort_by(.published_at) | reverse | .[].tag_name' | head -n 20); do
