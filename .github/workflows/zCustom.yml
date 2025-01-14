@@ -634,7 +634,7 @@ jobs:
           cd ubiquitous_bash
           ./_setupUbiquitous.bat
       #- name: _getMinimal_cloud
-        ##if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' || github.event.inputs.DANGERfast_EXPERIMENT != 'true' }}
+        ##if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' && github.event.inputs.DANGERfast_EXPERIMENT != 'build_DANGERfast_EXPERIMENT' }}
         #shell: bash
         #run: |
           #! ~/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _getMinimal_cloud && exit 1
@@ -703,7 +703,7 @@ jobs:
           export MANDATORY_HASH="true"
           cd ./_local
           rm -f hash-download.txt
-          if [[ ${{ github.event.inputs.DISABLE_RELEASE }} != true || ${{ github.event.inputs.DANGERfast_EXPERIMENT }} != true ]]
+          if [[ ${{ github.event.inputs.DISABLE_RELEASE }} != true && ${{ github.event.inputs.DANGERfast_EXPERIMENT }} != build_DANGERfast_EXPERIMENT ]]
           then
           ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "$current_releaseOrigin" "$current_releaseLabel" "package_image.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
           else
@@ -715,7 +715,7 @@ jobs:
 
       
       - name: _hash_img
-        if : ${{ github.event.inputs.DISABLE_RELEASE != 'true' || github.event.inputs.DANGERfast_EXPERIMENT != 'true' }}
+        if : ${{ github.event.inputs.DISABLE_RELEASE != 'true' && github.event.inputs.DANGERfast_EXPERIMENT != 'build_DANGERfast_EXPERIMENT' }}
         shell: bash
         run: |
           export skimfast=${{ inputs.skimfast }}
@@ -853,7 +853,7 @@ jobs:
 
 
       - name: _hash_img
-        if : ${{ github.event.inputs.DISABLE_RELEASE != 'true' || github.event.inputs.DANGERfast_EXPERIMENT != 'true' }}
+        if : ${{ github.event.inputs.DISABLE_RELEASE != 'true' && github.event.inputs.DANGERfast_EXPERIMENT != 'build_DANGERfast_EXPERIMENT' }}
         shell: bash
         run: |
           export skimfast=${{ inputs.skimfast }}
@@ -1443,7 +1443,7 @@ jobs:
 
 
   build-hash:
-    if : ${{ github.event.inputs.DISABLE_RELEASE != 'true' && github.event.inputs.DANGERfast_EXPERIMENT != 'true' }}
+    if : ${{ github.event.inputs.DISABLE_RELEASE != 'true' && github.event.inputs.DANGERfast_EXPERIMENT != 'build_DANGERfast_EXPERIMENT' }}
     needs: [build, build-convert-rootfs, build-convert-live]
     runs-on: ubuntu-latest
     #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
