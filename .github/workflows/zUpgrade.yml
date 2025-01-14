@@ -1730,20 +1730,20 @@ jobs:
             if [ "$RELEASE" != "$currentReleaseTag" ]; then
               
               # Download the binReport file for this release
-              #[[ "$currentIteration" -lt "3" ]] && curl -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/lsmodReport"
-              [[ "$currentIteration" -lt "3" ]] && curl -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/binReport"
-              [[ "$currentIteration" -lt "4" ]] && curl -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/coreReport"
+              #[[ "$currentIteration" -lt "5" ]] && curl -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/lsmodReport"
+              [[ "$currentIteration" -lt "6" ]] && curl -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/binReport"
+              [[ "$currentIteration" -lt "7" ]] && curl -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/coreReport"
               curl -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/dpkg"
               
-              #[[ "$currentIteration" -lt "3" ]] && echo | tee -a ./missing-lsmodReport
-              #[[ "$currentIteration" -lt "3" ]] && echo "Binaries (lsmod) loaded in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-lsmodReport
-              #[[ "$currentIteration" -lt "3" ]] && comm -23 <(sort "lsmodReport-$RELEASE") <(sort "lsmodReport-$currentReleaseTag") | tee -a ./missing-lsmodReport
-              [[ "$currentIteration" -lt "3" ]] && echo | tee -a ./missing-binReport
-              [[ "$currentIteration" -lt "3" ]] && echo "Binaries (filesystem) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-binReport
-              [[ "$currentIteration" -lt "3" ]] && comm -23 <(sort "binReport-$RELEASE") <(sort "binReport-$currentReleaseTag") | tee -a ./missing-binReport
-              [[ "$currentIteration" -lt "4" ]] && echo | tee -a ./missing-coreReport
-              [[ "$currentIteration" -lt "4" ]] && echo "Binaries (core) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-coreReport
-              [[ "$currentIteration" -lt "4" ]] && comm -23 <(sort "coreReport-$RELEASE" | grep -v '_local/h') <(sort "coreReport-$currentReleaseTag" | grep -v '_local/h') | tee -a ./missing-coreReport
+              #[[ "$currentIteration" -lt "5" ]] && echo | tee -a ./missing-lsmodReport
+              #[[ "$currentIteration" -lt "5" ]] && echo "Binaries (lsmod) loaded in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-lsmodReport
+              #[[ "$currentIteration" -lt "5" ]] && comm -23 <(sort "lsmodReport-$RELEASE") <(sort "lsmodReport-$currentReleaseTag") | tee -a ./missing-lsmodReport
+              [[ "$currentIteration" -lt "6" ]] && echo | tee -a ./missing-binReport
+              [[ "$currentIteration" -lt "6" ]] && echo "Binaries (filesystem) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-binReport
+              [[ "$currentIteration" -lt "6" ]] && comm -23 <(sort "binReport-$RELEASE") <(sort "binReport-$currentReleaseTag") | tee -a ./missing-binReport
+              [[ "$currentIteration" -lt "7" ]] && echo | tee -a ./missing-coreReport
+              [[ "$currentIteration" -lt "7" ]] && echo "Binaries (core) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-coreReport
+              [[ "$currentIteration" -lt "7" ]] && comm -23 <(sort "coreReport-$RELEASE" | grep -v '_local/h') <(sort "coreReport-$currentReleaseTag" | grep -v '_local/h') | tee -a ./missing-coreReport
               echo | tee -a ./missing-dpkg
               echo "Binaries (dpkg) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-dpkg
               comm -23 <(sort "dpkg-$RELEASE") <(sort "dpkg-$currentReleaseTag") | tee -a ./missing-dpkg
