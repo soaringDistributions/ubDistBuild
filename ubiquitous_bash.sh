@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2553912799'
+export ub_setScriptChecksum_contents='1670521746'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -49694,20 +49694,118 @@ _join() {
 }
 
 
+# NOTICE: Most well tested and expected most reliable .
+_ubDistBuild_split-tail_procedure() {
+	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
+	local currentIteration
+	for currentIteration in $(seq -w 0 50)
+	do
+		[[ -s ./"$1" ]] && [[ -e ./"$1" ]] && tail -c 1997378560 "$1" > "$1".part"$currentIteration" && truncate -s -1997378560 "$1"
+	done
+}
+
+# Expected fastest.
+# ATTRIBUTION-AI: ChatGPT o1 2024-01-14 
+_ubDistBuild_split_reflink() {
+    local inputFile=""$1""
+    local chunkSize=1997378560  # ~1.86 GB
+    local currentIteration=0
+
+    # Sanity check
+    [[ ! -e "$inputFile" ]] && return 1
+
+    while [[ -s "$inputFile" ]]; do
+        local fileSize
+        fileSize="$(stat -c%s "$inputFile")"
+
+        # Zero-pad the iteration index (2 digits)
+        local iterationStr
+        iterationStr="$(printf "%02d" "$currentIteration")"
+
+        # If the file is smaller than (or equal to) chunkSize, then this is our final chunk
+        if [[ $fileSize -le $chunkSize ]]; then
+            cp --reflink=always "$inputFile" "${inputFile}.part${iterationStr}"
+            rm -f "$inputFile"
+            break
+        else
+            # 1. Make a reflink copy of the whole file
+            cp --reflink=always "$inputFile" "${inputFile}.part${iterationStr}"
+
+            # 2. Punch out everything except the last $chunkSize bytes in the new part file
+            fallocate --punch-hole --offset 0 --length $((fileSize - chunkSize)) \
+                      "${inputFile}.part${iterationStr}"
+
+            # 3. Truncate the *original* file by the chunk size from the end
+            truncate -s -"$chunkSize" "$inputFile"
+        fi
+
+        ((currentIteration++))
+    done
+}
+
+# Expected to avoid repeatedly reading most of file through 'tail', however, not as fast as near-instant sector mapping.
+# ATTRIBUTION-AI: ChatGPT o1 2024-01-14 
+_ubDistBuild_split_dd() {
+	    local functionEntryPWD="$PWD"
+    cd "$scriptLocal" || exit 1
+
+    # Size of each chunk in bytes.
+    local chunkSize=1997378560
+    local currentIteration
+
+    for currentIteration in $(seq -w 0 50); do
+        # Make sure the file still exists and is non-empty.
+        if [[ -s "$1" && -e "$1" ]]; then
+            # Get the current file size.
+            local fileSize
+            fileSize=$(stat -c %s ""$1"")
+
+            # If the file is already smaller than the chunk size, just move all of it.
+            if (( fileSize <= chunkSize )); then
+                mv "$1" ""$1".part${currentIteration}"
+            else
+                # dd can seek directly to the end of the file. We skip all bytes except the last chunkSize.
+                local skipBytes=$(( fileSize - chunkSize ))
+
+                # Copy the last chunk into a new file.
+                dd if=""$1"" \
+                   of=""$1".part${currentIteration}" \
+                   bs=1 \
+                   skip="${skipBytes}" \
+                   count="${chunkSize}" \
+                   status=none
+
+                # Truncate the original file, removing the last chunk.
+                truncate -s "${skipBytes}" ""$1""
+            fi
+        fi
+    done
+
+    rm -f "$1"
+    cd "$functionEntryPWD" || exit 1
+}
+
+_ubDistBuild_split_procedure() {
+	_ubDistBuild_split_reflink "$@"
+}
+
+
 _ubDistBuild_split() {
 	local functionEntryPWD
 	functionEntryPWD="$PWD"
 
 
 	cd "$scriptLocal"
-	#split -b 1997378560 -d package_image.tar.flx package_image.tar.flx.part
+	##split -b 1997378560 -d package_image.tar.flx package_image.tar.flx.part
 
-	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
-	local currentIteration
-	for currentIteration in $(seq -w 0 50)
-	do
-		[[ -s ./package_image.tar.flx ]] && [[ -e ./package_image.tar.flx ]] && tail -c 1997378560 package_image.tar.flx > package_image.tar.flx.part"$currentIteration" && truncate -s -1997378560 package_image.tar.flx
-	done
+	## https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
+	#local currentIteration
+	#for currentIteration in $(seq -w 0 50)
+	#do
+		#[[ -s ./package_image.tar.flx ]] && [[ -e ./package_image.tar.flx ]] && tail -c 1997378560 package_image.tar.flx > package_image.tar.flx.part"$currentIteration" && truncate -s -1997378560 package_image.tar.flx
+	#done
+
+	_ubDistBuild_split_procedure ./package_image.tar.flx
 
 	rm -f ./package_image.tar.flx
 
@@ -49721,14 +49819,16 @@ _ubDistBuild_split_beforeBoot() {
 
 
 	cd "$scriptLocal"
-	#split -b 1997378560 -d package_image_beforeBoot.tar.flx package_image_beforeBoot.tar.flx.part
+	##split -b 1997378560 -d package_image_beforeBoot.tar.flx package_image_beforeBoot.tar.flx.part
 
-	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
-	local currentIteration
-	for currentIteration in $(seq -w 0 50)
-	do
-		[[ -s ./package_image_beforeBoot.tar.flx ]] && [[ -e ./package_image_beforeBoot.tar.flx ]] && tail -c 1997378560 package_image_beforeBoot.tar.flx > package_image_beforeBoot.tar.flx.part"$currentIteration" && truncate -s -1997378560 package_image_beforeBoot.tar.flx
-	done
+	## https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
+	#local currentIteration
+	#for currentIteration in $(seq -w 0 50)
+	#do
+		#[[ -s ./package_image_beforeBoot.tar.flx ]] && [[ -e ./package_image_beforeBoot.tar.flx ]] && tail -c 1997378560 package_image_beforeBoot.tar.flx > package_image_beforeBoot.tar.flx.part"$currentIteration" && truncate -s -1997378560 package_image_beforeBoot.tar.flx
+	#done
+
+	_ubDistBuild_split_procedure ./package_image_beforeBoot.tar.flx
 
 	rm -f ./package_image_beforeBoot.tar.flx
 
@@ -49742,14 +49842,16 @@ _ubDistBuild_split_before_noBoot() {
 
 
 	cd "$scriptLocal"
-	#split -b 1997378560 -d package_image_before_noBoot.tar.flx package_image_before_noBoot.tar.flx.part
+	##split -b 1997378560 -d package_image_before_noBoot.tar.flx package_image_before_noBoot.tar.flx.part
 
-	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
-	local currentIteration
-	for currentIteration in $(seq -w 0 50)
-	do
-		[[ -s ./package_image_before_noBoot.tar.flx ]] && [[ -e ./package_image_before_noBoot.tar.flx ]] && tail -c 1997378560 package_image_before_noBoot.tar.flx > package_image_before_noBoot.tar.flx.part"$currentIteration" && truncate -s -1997378560 package_image_before_noBoot.tar.flx
-	done
+	## https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
+	#local currentIteration
+	#for currentIteration in $(seq -w 0 50)
+	#do
+		#[[ -s ./package_image_before_noBoot.tar.flx ]] && [[ -e ./package_image_before_noBoot.tar.flx ]] && tail -c 1997378560 package_image_before_noBoot.tar.flx > package_image_before_noBoot.tar.flx.part"$currentIteration" && truncate -s -1997378560 package_image_before_noBoot.tar.flx
+	#done
+
+	_ubDistBuild_split_procedure ./package_image_before_noBoot.tar.flx
 
 	rm -f ./package_image_before_noBoot.tar.flx
 
@@ -49762,15 +49864,17 @@ _ubDistBuild_split-live() {
 
 
 	cd "$scriptLocal"
-	#split -b 1997378560 -d vm-live.iso vm-live.iso.part
+	##split -b 1997378560 -d vm-live.iso vm-live.iso.part
 
 
-	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
-	local currentIteration
-	for currentIteration in $(seq -w 0 50)
-	do
-		[[ -s ./vm-live.iso ]] && [[ -e ./vm-live.iso ]] && tail -c 1997378560 vm-live.iso > vm-live.iso.part"$currentIteration" && truncate -s -1997378560 vm-live.iso
-	done
+	## https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
+	#local currentIteration
+	#for currentIteration in $(seq -w 0 50)
+	#do
+		#[[ -s ./vm-live.iso ]] && [[ -e ./vm-live.iso ]] && tail -c 1997378560 vm-live.iso > vm-live.iso.part"$currentIteration" && truncate -s -1997378560 vm-live.iso
+	#done
+
+	_ubDistBuild_split_procedure ./vm-live.iso
 
 	rm -f ./vm-live.iso
 
@@ -49784,12 +49888,14 @@ _ubDistBuild_split-rootfs() {
 
 	cd "$scriptLocal"
 
-	# https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
-	local currentIteration
-	for currentIteration in $(seq -w 0 50)
-	do
-		[[ -s ./package_rootfs.tar.flx ]] && [[ -e ./package_rootfs.tar.flx ]] && tail -c 1997378560 package_rootfs.tar.flx > package_rootfs.tar.flx.part"$currentIteration" && truncate -s -1997378560 package_rootfs.tar.flx
-	done
+	## https://unix.stackexchange.com/questions/628747/split-large-file-into-chunks-and-delete-original
+	#local currentIteration
+	#for currentIteration in $(seq -w 0 50)
+	#do
+		#[[ -s ./package_rootfs.tar.flx ]] && [[ -e ./package_rootfs.tar.flx ]] && tail -c 1997378560 package_rootfs.tar.flx > package_rootfs.tar.flx.part"$currentIteration" && truncate -s -1997378560 package_rootfs.tar.flx
+	#done
+
+	_ubDistBuild_split_procedure ./package_rootfs.tar.flx
 
 	rm -f ./package_rootfs.tar.flx
 
