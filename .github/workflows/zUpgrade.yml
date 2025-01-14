@@ -134,7 +134,7 @@ jobs:
 
 
   build_before_noBoot:
-    if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
+    #if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
     needs: [build_release]
     #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
     runs-on: ubuntu-latest
