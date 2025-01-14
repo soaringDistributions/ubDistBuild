@@ -629,16 +629,16 @@ jobs:
           git clone --depth 1 https://github.com/mirage335-colossus/ubiquitous_bash.git
           cd ubiquitous_bash
           ./_setupUbiquitous.bat
-      - name: _getMinimal_cloud
-        if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' }}
-        shell: bash
-        run: |
-          ! ~/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _getMinimal_cloud && exit 1
-          true
+      #- name: _getMinimal_cloud
+        #if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' }}
+        #shell: bash
+        #run: |
+          #! ~/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _getMinimal_cloud && exit 1
+          #true
           #! sudo -n apt-get -y clean && exit 1
-          df -h
-          df -h /
-        timeout-minutes: 90
+          #df -h
+          #df -h /
+        #timeout-minutes: 90
       - uses: actions/checkout@v3
         with:
           submodules: recursive
@@ -699,7 +699,7 @@ jobs:
           export MANDATORY_HASH="true"
           cd ./_local
           rm -f hash-download.txt
-          if [[ ${{ github.event.inputs.DISABLE_RELEASE }} == false ]]
+          if [[ ${{ github.event.inputs.DISABLE_RELEASE }} != true ]]
           then
           ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "$current_releaseOrigin" "$current_releaseLabel" "package_image.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
           else
@@ -711,7 +711,7 @@ jobs:
 
       
       - name: _hash_img
-        if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' }}
+        if : ${{ github.event.inputs.DISABLE_RELEASE != 'true' }}
         shell: bash
         run: |
           export skimfast=${{ inputs.skimfast }}
@@ -873,7 +873,7 @@ jobs:
 
 
       - name: _hash_img
-        if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' }}
+        if : ${{ github.event.inputs.DISABLE_RELEASE != 'true' }}
         shell: bash
         run: |
           export skimfast=${{ inputs.skimfast }}
@@ -929,7 +929,7 @@ jobs:
 
 
       - name: release! delete! package_image_before_noBoot
-        if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' || github.event.inputs.DISABLE_BOOT == 'false' }}
+        if : ${{ github.event.inputs.DISABLE_BOOT == 'false' }}
         shell: bash
         continue-on-error: true
         run: |
@@ -1468,7 +1468,7 @@ jobs:
 
 
   build-hash:
-    if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' }}
+    if : ${{ github.event.inputs.DISABLE_RELEASE != 'true' }}
     needs: [build, build-convert-rootfs, build-convert-live]
     runs-on: ubuntu-latest
     #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
