@@ -1706,6 +1706,44 @@ jobs:
           #sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y aria2
         #timeout-minutes: 355
 
+      - name: report! cronUserReport
+        shell: bash
+        run: |
+          mkdir -p ./_local/analysis
+
+          cd ./_local/analysis
+
+          # Get the list of releases
+          RELEASES=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/"${{ github.repository }}"/releases)
+
+          # Download binReport file for the current release
+          curl -s -H "Authorization: token $GH_TOKEN" -L -o "cronUserReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/cronUserReport"
+
+          echo
+          cat ./cronUserReport-$currentReleaseTag
+        env:
+          currentReleaseTag: build_upgrade-${{ github.run_id }}-${{ github.run_attempt }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: report! cronRootReport
+        shell: bash
+        run: |
+          mkdir -p ./_local/analysis
+
+          cd ./_local/analysis
+
+          # Get the list of releases
+          RELEASES=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/"${{ github.repository }}"/releases)
+
+          # Download binReport file for the current release
+          curl -s -H "Authorization: token $GH_TOKEN" -L -o "cronRootReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/cronRootReport"
+
+          echo
+          cat ./cronRootReport-$currentReleaseTag
+        env:
+          currentReleaseTag: build_upgrade-${{ github.run_id }}-${{ github.run_attempt }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
       - name: analysis! missing-binaries
         shell: bash
@@ -1777,44 +1815,6 @@ jobs:
             gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-customReport
         env:
           GH_TOKEN: ${{ github.token }}
-
-      - name: report! cronUserReport
-        shell: bash
-        run: |
-          mkdir -p ./_local/analysis
-
-          cd ./_local/analysis
-
-          # Get the list of releases
-          RELEASES=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/"${{ github.repository }}"/releases)
-
-          # Download binReport file for the current release
-          curl -s -H "Authorization: token $GH_TOKEN" -L -o "cronUserReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/cronUserReport"
-
-          echo
-          cat ./cronUserReport-$currentReleaseTag
-        env:
-          currentReleaseTag: build_upgrade-${{ github.run_id }}-${{ github.run_attempt }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: report! cronRootReport
-        shell: bash
-        run: |
-          mkdir -p ./_local/analysis
-
-          cd ./_local/analysis
-
-          # Get the list of releases
-          RELEASES=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/"${{ github.repository }}"/releases)
-
-          # Download binReport file for the current release
-          curl -s -H "Authorization: token $GH_TOKEN" -L -o "cronRootReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/cronRootReport"
-
-          echo
-          cat ./cronRootReport-$currentReleaseTag
-        env:
-          currentReleaseTag: build_upgrade-${{ github.run_id }}-${{ github.run_attempt }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
       - name: report! API Rate Limit
         shell: bash

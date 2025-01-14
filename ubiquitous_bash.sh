@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1411169456'
+export ub_setScriptChecksum_contents='966318874'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -48219,7 +48219,7 @@ _create_ubDistBuild-rotten_install() {
 
     _messagePlain_probe_cmd _chroot apt-get -y remove 'linux-image*'
     _messagePlain_probe_cmd _chroot apt-get -y purge 'linux-image*'
-    _messagePlain_probe_cmd _chroot apt-get autoremove --purge
+    _messagePlain_probe_cmd _chroot apt-get autoremove -y --purge
 
     _messagePlain_probe_cmd _chroot dpkg --get-selections | grep 'linux-image'
 
@@ -54339,7 +54339,7 @@ _upgrade_kernel_remove() {
 
     _messagePlain_probe_cmd _chroot apt-get -y remove 'linux-image*'
     _messagePlain_probe_cmd _chroot apt-get -y purge 'linux-image*'
-    _messagePlain_probe_cmd _chroot apt-get autoremove --purge
+    _messagePlain_probe_cmd _chroot apt-get autoremove -y --purge
 
     _messagePlain_probe_cmd _chroot dpkg --get-selections | grep 'linux-image'
 

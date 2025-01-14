@@ -831,7 +831,7 @@ _create_ubDistBuild-rotten_install() {
 
     _messagePlain_probe_cmd _chroot apt-get -y remove 'linux-image*'
     _messagePlain_probe_cmd _chroot apt-get -y purge 'linux-image*'
-    _messagePlain_probe_cmd _chroot apt-get autoremove --purge
+    _messagePlain_probe_cmd _chroot apt-get autoremove -y --purge
 
     _messagePlain_probe_cmd _chroot dpkg --get-selections | grep 'linux-image'
 
