@@ -159,15 +159,18 @@ _upgrade_kernel_remove() {
     
     # Formal naming convention is [-distllc,][-lts,-mainline,][-desktop,-server,] . ONLY requirement is dotglob removal of all except server OR all purpose lts .
     
-    #'linux-headers*desktop'
-	_messagePlain_probe_cmd _chroot apt-get -y remove 'linux-image*desktop'
-	#'linux-headers*mainline'
-	_messagePlain_probe_cmd _chroot apt-get -y remove 'linux-image*mainline'
-	#'linux-headers*lts'
-	_messagePlain_probe_cmd _chroot apt-get -y remove 'linux-image*lts'
+    ##'linux-headers*desktop'
+	#_messagePlain_probe_cmd _chroot apt-get -y remove 'linux-image*desktop'
+	##'linux-headers*mainline'
+	#_messagePlain_probe_cmd _chroot apt-get -y remove 'linux-image*mainline'
+	##'linux-headers*lts'
+	#_messagePlain_probe_cmd _chroot apt-get -y remove 'linux-image*lts'
 
 
-	_messagePlain_probe_cmd _chroot apt-get -y remove 'linux-image*'
+	#_messagePlain_probe_cmd _chroot apt-get -y remove 'linux-image*'
+
+
+    _messagePlain_probe_cmd _chroot apt-get -y remove 'linux-image*'
 
 	
 	#_messagePlain_probe_cmd _chroot apt-get -y install 'linux-headers-amd64'
@@ -180,7 +183,7 @@ _upgrade_kernel_remove() {
 # WARNING: May be untested.
 _upgrade_kernel_kernel-dpkg_sequence() {
     #sudo -n dpkg -i "$1"
-    sudo -n dpkg -i "$1"
+    _messagePlain_probe_cmd sudo -n dpkg -i "$1"
     [[ "$?" != "0" ]] && _messagePlain_bad 'fail: dpkg -i '"$1" && echo > ./FAIL && _messageFAIL
 
     return 0
@@ -198,7 +201,7 @@ _upgrade_kernel_kernel_sequence() {
     _messagePlain_probe_cmd cd "$safeTmp"
     _messagePlain_probe_cmd tar xvf "$safeTmp"/kernel_package.tar.gz
 
-	_messagePlain_probe_cmd find "$safeTmp" -iname '*.deb' -exec echo {} \;
+	#_messagePlain_probe_cmd find "$safeTmp" -iname '*.deb' -exec echo {} \;
     _messagePlain_probe_cmd find "$safeTmp" -iname '*.deb' -exec "$scriptAbsoluteLocation" _upgrade_kernel_kernel-dpkg_sequence {} \;
 
     [[ -e "$safeTmp"/FAIL ]] && _messagePlain_bad 'fail: _upgrade_kernel_kernel_sequence: '"$1" && _messageFAIL
