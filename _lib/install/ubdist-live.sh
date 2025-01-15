@@ -69,9 +69,41 @@ export profileScriptFolder="/root"
 cd "$repo"
 
 #export FORCE_AXEL=8
-#export FORCE_WGET=true
-#./ubiquitous_bash.sh _get_vmImg_ubDistBuild "$rl" "" "$dev"
-./ubiquitous_bash.sh _get_vmImg_ubDistBuild-live "$rl" "" "$dev"
+#export FORCE_WGET=true# DANGER: Do NOT enable DANGERfast_EXPERIMENT unless both necessary and using appropriate specialized/expendable/cloud computers for development purposes only.
+#export DANGERfast_EXPERIMENT=true
+if [[ DANGERfast_EXPERIMENT == "" ]]
+then
+	#./ubiquitous_bash.sh _get_vmImg_ubDistBuild "$rl" "" "$dev"
+	./ubiquitous_bash.sh _get_vmImg_ubDistBuild-live "$rl" "" "$dev"
+else
+	echo
+	_messagePlain_bad 'warn: bad: DANGERfast_EXPERIMENT:  DANGER: Skipping hash!'
+	_messagePlain_warn 'Do NOT use except during development on specialized/expendable/cloud computers! NO PRODUCTION USE!'
+	_messageError DANGER: Skipping hash!
+	echo
+
+	#_wget_githubRelease_join-stdout ""$owner"/"$repo"" "$rl" "package_image.tar.flx" | _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | sudo -n dd of="$dev" bs=1M status=progress
+
+	if [[ "$3" == "/dev/sr"* ]] || [[ "$3" == "/dev/dvd"* ]] || [[ "$3" == "/dev/cdrom"* ]]
+	then
+		if ! [[ $(df --block-size=1000000 --output=avail "$tmpSelf" | tr -dc '0-9') -gt "3880" ]]
+		then
+			_messagePlain_bad 'bad: Detected <3.88GB disk free. Assuming TMPFS from booted LiveISO, insufficient unoccupied RAM.'
+			_messageFAIL
+		fi
+
+		# WARNING: May be untested.
+		#( _wget_githubRelease_join-stdout ""$owner"/"$repo"" "$rl" "vm-live.iso" ; dd if=/dev/zero bs=2048 count=$(bc <<< '1000000000000 / 2048' ) ) | sudo -n growisofs -speed=3 -dvd-compat -Z "$dev"=/dev/stdin -use-the-force-luke=notray -use-the-force-luke=spare:min -use-the-force-luke=bufsize:128m
+		#-dvd-compat
+		( _wget_githubRelease_join-stdout ""$owner"/"$repo"" "$rl" "vm-live.iso" ) | sudo -n growisofs -speed=3 -Z "$dev"=/dev/stdin -use-the-force-luke=notray -use-the-force-luke=spare:min -use-the-force-luke=bufsize:128m
+	fi
+
+	if [[ "$3" == "/dev/sd"* ]] || [[ "$3" == "/dev/hd"* ]] || [[ "$3" == "/dev/disk/"* ]]
+	then
+		#( _wget_githubRelease_join-stdout ""$owner"/"$repo"" "$rl" "vm-live.iso" ; dd if=/dev/zero bs=2048 count=$(bc <<< '1000000000000 / 2048' ) ) | sudo -n dd of="$dev" bs=1M status=progress
+		( _wget_githubRelease_join-stdout ""$owner"/"$repo"" "$rl" "vm-live.iso" ) | sudo -n dd of="$dev" bs=1M status=progress
+	fi
+fi
 
 #if [[ "$dev" == "/dev/"* ]]
 #then

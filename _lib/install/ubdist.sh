@@ -69,7 +69,20 @@ cd "$repo"
 
 #export FORCE_AXEL=8
 #export FORCE_WGET=true
-./ubiquitous_bash.sh _get_vmImg_ubDistBuild "$rl" "" "$dev"
+# DANGER: Do NOT enable DANGERfast_EXPERIMENT unless both necessary and using appropriate specialized/expendable/cloud computers for development purposes only.
+#export DANGERfast_EXPERIMENT=true
+if [[ DANGERfast_EXPERIMENT == "" ]]
+then
+	./ubiquitous_bash.sh _get_vmImg_ubDistBuild "$rl" "" "$dev"
+else
+	echo
+	_messagePlain_bad 'warn: bad: DANGERfast_EXPERIMENT:  DANGER: Skipping hash!'
+	_messagePlain_warn 'Do NOT use except during development on specialized/expendable/cloud computers! NO PRODUCTION USE!'
+	_messageError DANGER: Skipping hash!
+	echo
+
+	_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$rl" "package_image.tar.flx" | _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | sudo -n dd of="$dev" bs=1M status=progress
+fi
 
 if [[ "$dev" == "/dev/"* ]]
 then
