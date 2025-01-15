@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='548171806'
+export ub_setScriptChecksum_contents='3173596016'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -49715,7 +49715,7 @@ _ubDistBuild_split-tail_procedure() {
 
 # Expected fastest.
 # ATTRIBUTION-AI: ChatGPT o1 2025-01-14 
-_ubDistBuild_split_reflink() {
+_ubDistBuild_split-reflink() {
     local inputFile=""$1""
     local chunkSize=1997537280  # ~1.86 GB
     local currentIteration=0
@@ -49754,7 +49754,7 @@ _ubDistBuild_split_reflink() {
 
 # Expected to avoid repeatedly reading most of file through 'tail', however, not as fast as near-instant sector mapping.
 # ATTRIBUTION-AI: ChatGPT o1 2025-01-14
-_ubDistBuild_split_dd() {
+_ubDistBuild_split-dd_procedure() {
 local functionEntryPWD="$PWD"
     cd "$scriptLocal" || exit 1
 
@@ -49806,7 +49806,7 @@ local functionEntryPWD="$PWD"
 }
 
 _ubDistBuild_split_procedure() {
-	_ubDistBuild_split_dd "$@"
+	_ubDistBuild_split-tail_procedure "$@"
 }
 
 

@@ -2327,7 +2327,7 @@ _ubDistBuild_split-tail_procedure() {
 
 # Expected fastest.
 # ATTRIBUTION-AI: ChatGPT o1 2025-01-14 
-_ubDistBuild_split_reflink() {
+_ubDistBuild_split-reflink_procedure() {
     local inputFile=""$1""
     local chunkSize=1997537280  # ~1.86 GB
     local currentIteration=0
@@ -2366,7 +2366,7 @@ _ubDistBuild_split_reflink() {
 
 # Expected to avoid repeatedly reading most of file through 'tail', however, not as fast as near-instant sector mapping.
 # ATTRIBUTION-AI: ChatGPT o1 2025-01-14
-_ubDistBuild_split_dd() {
+_ubDistBuild_split-dd_procedure() {
 local functionEntryPWD="$PWD"
     cd "$scriptLocal" || exit 1
 
@@ -2418,7 +2418,7 @@ local functionEntryPWD="$PWD"
 }
 
 _ubDistBuild_split_procedure() {
-	_ubDistBuild_split_dd "$@"
+	_ubDistBuild_split-tail_procedure "$@"
 }
 
 
