@@ -123,6 +123,81 @@ jobs:
           curl -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ""${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28"  https://api.github.com/rate_limit
           #curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/rate_limit | jq -r ".rate"
 
+  build_installer:
+    if : ${{ github.event.inputs.DISABLE_RELEASE != 'true' }}
+    needs: [build_release]
+    #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
+    #runs-on: 'ubuntu-latest'
+    runs-on: 'ubuntu-22.04'
+    steps:
+      - name: RAND_SEED
+        shell: bash
+        run: |
+          echo "$RAND_SEED" | tee /dev/urandom > /dev/null
+          echo "$RAND_SEED" | tee /dev/random > /dev/null
+          echo "$RAND_SEED" | sudo -n tee /dev/urandom > /dev/null
+          echo "$RAND_SEED" | sudo -n tee /dev/random > /dev/null
+        env:
+          RAND_SEED: ${{ secrets.RAND_SEED }}
+      - name: report! API Rate Limit
+        shell: bash
+        run: |
+          curl -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ""${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28"  https://api.github.com/rate_limit
+          #curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/rate_limit | jq -r ".rate"
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          submodules: 'recursive'
+      - name: _getMinimal_cloud
+        shell: bash
+        timeout-minutes: 120
+        run: |
+          ./ubiquitous_bash.sh _getMinimal_cloud
+      
+      - name: _test_hash_legacy
+        shell: bash
+        run: |
+          if [[ -e "/etc/ssl/openssl_legacy.cnf" ]]
+          then
+              echo -n | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256
+              exit ${PIPESTATUS[0]}
+          else
+              echo -n | openssl dgst -whirlpool -binary | xxd -p -c 256
+              exit ${PIPESTATUS[0]}
+          fi
+      
+      - name: _getMinimal-build_ubDistBuild
+        shell: bash
+        timeout-minutes: 120
+        run: |
+          ./ubiquitous_bash.sh _getMinimal-build_ubDistBuild
+      - name: build-fetch
+        shell: bash
+        timeout-minutes: 120
+        run: |
+          mkdir -p ../ubDistBuild-accessories/integrations/ubcp
+          curl -L -o ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
+          ./ubiquitous_bash.sh _build_ubDistBuild-fetch
+      - name: build-build
+        shell: bash
+        timeout-minutes: 120
+        run: |
+          rm -f ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z
+          ./ubiquitous_bash.sh _build_ubDistBuild-build
+
+      - name: _hash_ubDistBuildExe
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _hash_ubDistBuildExe
+      
+      - name: release!
+        shell: bash
+        run: |
+            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ../ubDistBuild.exe
+            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/_hash-ubDistBuildExe.txt
+        env:
+          GH_TOKEN: ${{ github.token }}
+
 
 
 
