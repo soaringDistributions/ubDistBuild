@@ -746,7 +746,16 @@ jobs:
           ! date +"%Y-%m-%d" | ./ubiquitous_bash.sh _chroot tee -a /info-github-custom && exit 1
           ! ./ubiquitous_bash.sh _closeChRoot && exit 1
           true
-      
+
+
+      - name: upgrade_installers
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _upgrade_installers
+        timeout-minutes: 180
+        env:
+          GH_TOKEN: ${{ github.token }}
+
 
       - name: _custom-expand
         shell: bash
