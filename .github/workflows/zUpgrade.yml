@@ -1168,16 +1168,16 @@ jobs:
       # ###
       
       # ###
-      - name: DUMMY-rootfs
-        #if: ${{ github.event.inputs.DISABLE_ROOTFS == 'true' }}
-        shell: bash
-        run: |
-          rm -f ./_local/package_rootfs.tar || true
-          rm -f ./_local/package_rootfs.tar.flx || true
-          #echo > ./_local/package_rootfs.tar
-          #echo > ./_local/package_rootfs.tar.flx
-          tar -cf - /dev/null > ./_local/package_rootfs.tar
-          tar -cf - /dev/null | lz4 -z --fast=1 - ./_local/package_rootfs.tar.flx
+      #- name: DUMMY-rootfs
+        ##if: ${{ github.event.inputs.DISABLE_ROOTFS == 'true' }}
+        #shell: bash
+        #run: |
+          #rm -f ./_local/package_rootfs.tar || true
+          #rm -f ./_local/package_rootfs.tar.flx || true
+          ##echo > ./_local/package_rootfs.tar
+          ##echo > ./_local/package_rootfs.tar.flx
+          #tar -cf - /dev/null > ./_local/package_rootfs.tar
+          #tar -cf - /dev/null | lz4 -z --fast=1 - ./_local/package_rootfs.tar.flx
       # ###
           
 
