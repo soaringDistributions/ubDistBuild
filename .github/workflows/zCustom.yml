@@ -1133,7 +1133,7 @@ jobs:
           fallocate --dig-holes ./_local/vm.img
 
       - name: _hash_img
-        if: ${{ github.event.inputs.DISABLE_ROOTFS == 'false' }}
+        if: ${{ github.event.inputs.DISABLE_ROOTFS == 'false' && github.event.inputs.DANGERfast_EXPERIMENT != 'build_DANGERfast_EXPERIMENT' }}
         shell: bash
         run: |
           export skimfast=${{ inputs.skimfast }}
@@ -1167,6 +1167,7 @@ jobs:
           
 
       - name: _hash_rootfs
+        if: ${{ github.event.inputs.DANGERfast_EXPERIMENT != 'build_DANGERfast_EXPERIMENT' }}
         shell: bash
         run: |
           export skimfast=${{ inputs.skimfast }}
@@ -1334,6 +1335,7 @@ jobs:
           fallocate --dig-holes ./_local/vm.img
 
       - name: _hash_img
+        if: ${{ github.event.inputs.DANGERfast_EXPERIMENT != 'build_DANGERfast_EXPERIMENT' }}
         shell: bash
         run: |
           export skimfast=${{ inputs.skimfast }}
@@ -1410,6 +1412,7 @@ jobs:
           cat ./_convert-live_ISO.log | sudo -n tee ./_convert-live.log && exit ${PIPESTATUS[0]}
 
       - name: _hash_live
+        if: ${{ github.event.inputs.DANGERfast_EXPERIMENT != 'build_DANGERfast_EXPERIMENT' }}
         shell: bash
         run: |
           export skimfast=${{ inputs.skimfast }}

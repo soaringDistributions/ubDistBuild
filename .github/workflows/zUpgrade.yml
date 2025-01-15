@@ -1013,7 +1013,7 @@ jobs:
   build-convert-rootfs:
     if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' }}
     needs: [build, build_release]
-    #runs-on: ${{ github.event.inputs.DISABLE_ROOTFS != 'false' && 'ubuntu-latest' || github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
+    #runs-on: ${{ github.event.inputs.DISABLE_ROOTFS == 'true' && 'ubuntu-latest' || github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
     runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
     steps:
       - name: RAND_SEED
@@ -1039,7 +1039,7 @@ jobs:
           true
       # https://github.com/easimon/maximize-build-space
       - name: Maximize build space
-        #if: ${{ github.event.inputs.DISABLE_ROOTFS == 'false' && github.event.inputs.runnerName != 'ubuntu-latest-m' && github.event.inputs.runnerName != 'ubuntu-latest-l' && github.event.inputs.runnerName != 'ubuntu-latest-h' }}
+        #if: ${{ github.event.inputs.DISABLE_ROOTFS != 'true' && github.event.inputs.runnerName != 'ubuntu-latest-m' && github.event.inputs.runnerName != 'ubuntu-latest-l' && github.event.inputs.runnerName != 'ubuntu-latest-h' }}
         if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' && github.event.inputs.runnerName != 'ubuntu-latest-l' && github.event.inputs.runnerName != 'ubuntu-latest-h' }}
         uses: easimon/maximize-build-space@master
         with:
@@ -1057,7 +1057,7 @@ jobs:
           #remove-docker-images: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' && github.event.inputs.runnerName != 'ubuntu-latest-l' && github.event.inputs.runnerName != 'ubuntu-latest-h' }}
           remove-docker-images: 'true'
       - name: Maximize build space ! remove ONLY
-        #if: ${{ github.event.inputs.DISABLE_ROOTFS == 'false' && ( github.event.inputs.runnerName == 'ubuntu-latest-m' || github.event.inputs.runnerName == 'ubuntu-latest-l' || github.event.inputs.runnerName == 'ubuntu-latest-h' ) }}
+        #if: ${{ github.event.inputs.DISABLE_ROOTFS != 'true' && ( github.event.inputs.runnerName == 'ubuntu-latest-m' || github.event.inputs.runnerName == 'ubuntu-latest-l' || github.event.inputs.runnerName == 'ubuntu-latest-h' ) }}
         if: ${{ ( github.event.inputs.runnerName == 'ubuntu-latest-m' || github.event.inputs.runnerName == 'ubuntu-latest-l' || github.event.inputs.runnerName == 'ubuntu-latest-h' ) }}
         uses: AdityaGarg8/remove-unwanted-software@v4.1
         with:
@@ -1127,7 +1127,7 @@ jobs:
       # ###
           
       - name: _get_vmImg_ubDistBuild
-        #if: ${{ github.event.inputs.DISABLE_ROOTFS == 'false' }}
+        #if: ${{ github.event.inputs.DISABLE_ROOTFS != 'true' }}
         shell: bash
         run: |
           #export FORCE_AXEL=8
@@ -1142,13 +1142,13 @@ jobs:
           #GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: fallocate --dig-holes
-        #if: ${{ github.event.inputs.DISABLE_ROOTFS == 'false' }}
+        #if: ${{ github.event.inputs.DISABLE_ROOTFS != 'true' }}
         shell: bash
         run: |
           fallocate --dig-holes ./_local/vm.img
 
       - name: _hash_img
-        #if: ${{ github.event.inputs.DISABLE_ROOTFS == 'false' }}
+        #if: ${{ github.event.inputs.DISABLE_ROOTFS != 'true' }}
         shell: bash
         run: |
           export skimfast=${{ inputs.skimfast }}
@@ -1158,7 +1158,7 @@ jobs:
 
 
       - name: _convert-rootfs
-        #if: ${{ github.event.inputs.DISABLE_ROOTFS == 'false' }}
+        #if: ${{ github.event.inputs.DISABLE_ROOTFS != 'true' }}
         shell: bash
         run: |
           export current_diskConstrained="true"
@@ -1169,7 +1169,7 @@ jobs:
       
       # ###
       - name: DUMMY-rootfs
-        #if: ${{ github.event.inputs.DISABLE_ROOTFS != 'false' }}
+        #if: ${{ github.event.inputs.DISABLE_ROOTFS == 'true' }}
         shell: bash
         run: |
           rm -f ./_local/package_rootfs.tar || true
