@@ -2407,7 +2407,7 @@ _ubDistBuild_split_dd() {
 }
 
 _ubDistBuild_split_procedure() {
-	_ubDistBuild_split_reflink "$@"
+	_ubDistBuild_split_dd "$@"
 }
 
 
