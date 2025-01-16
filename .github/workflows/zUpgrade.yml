@@ -1709,7 +1709,7 @@ jobs:
           cat ./_local/_hash-ubdist.txt
 
       - name: artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: _hash-ubdist.txt
           path: |
