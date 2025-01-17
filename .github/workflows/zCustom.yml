@@ -595,8 +595,8 @@ jobs:
 
   build:
     needs: [build_before_noBoot, build_release]
-    #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
-    runs-on: 'ubuntu-latest'
+    runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
+    #runs-on: 'ubuntu-latest'
     steps:
       - name: RAND_SEED
         shell: bash
