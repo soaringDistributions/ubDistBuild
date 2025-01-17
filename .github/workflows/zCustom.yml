@@ -497,7 +497,8 @@ jobs:
           
 
       - name: _hash_img
-        if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
+        #if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
+        if : ${{ github.event.inputs.DISABLE_BOOT != 'true' && github.event.inputs.DISABLE_RELEASE != 'true' && github.event.inputs.DANGERfast_EXPERIMENT != 'build_DANGERfast_EXPERIMENT' }}
         shell: bash
         run: |
           export skimfast=${{ github.event.inputs.skimfast }}
@@ -506,7 +507,8 @@ jobs:
 
 
       - name: release! hash! before_noBoot
-        if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
+        #if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
+        if : ${{ github.event.inputs.DISABLE_BOOT != 'true' && github.event.inputs.DISABLE_RELEASE != 'true' && github.event.inputs.DANGERfast_EXPERIMENT != 'build_DANGERfast_EXPERIMENT' }}
         shell: bash
         run: |
           mv -f ./_local/_hash-ubdist.txt ./_local/_hash-ubdist_before_noBoot.txt
