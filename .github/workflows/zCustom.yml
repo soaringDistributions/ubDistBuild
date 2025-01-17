@@ -109,6 +109,16 @@ jobs:
   build_release:
     runs-on: ubuntu-latest
     steps:
+      - name: check! valid! inputs
+        if : ( ${{ github.event.inputs.runnerName != 'ubuntu-latest-l' }} && ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }} ) && ( ${{ github.event.inputs.qemuNoKVM == false }} )
+        shell: bash
+        run: |
+          echo FAIL: invalid inputs!
+      - name: check! valid! inputs
+        if : ( ${{ github.event.inputs.runnerName == 'ubuntu-latest-l' }} || ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }} ) && ( ${{ github.event.inputs.qemuNoKVM == true }} )
+        shell: bash
+        run: |
+          echo FAIL: SLOW inputs!
       #- name: report! API Rate Limit
         #shell: bash
         #run: |
@@ -134,9 +144,10 @@ jobs:
 
 
   build_before_noBoot:
+    #if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
     needs: [build_release]
-    #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
+    #runs-on: ubuntu-latest
     steps:
       - name: RAND_SEED
         shell: bash
@@ -571,7 +582,8 @@ jobs:
 
   build:
     needs: [build_before_noBoot, build_release]
-    runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
+    #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
+    runs-on: 'ubuntu-latest'
     steps:
       - name: RAND_SEED
         shell: bash
@@ -1002,7 +1014,7 @@ jobs:
   build-convert-rootfs:
     if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' }}
     needs: [build, build_release]
-    runs-on: ${{ github.event.inputs.DISABLE_ROOTFS != 'false' && 'ubuntu-latest' || github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
+    runs-on: ${{ github.event.inputs.DISABLE_ROOTFS == 'true' && 'ubuntu-latest' || github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
     steps:
       - name: RAND_SEED
         shell: bash
