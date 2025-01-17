@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3173596016'
+export ub_setScriptChecksum_contents='4108148397'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -674,6 +674,7 @@ APT::AutoRemove::SuggestsImportant "true";' | sudo -n tee /etc/apt/apt.conf.d/99
     #gpg pigz curl gdisk lz4 mawk jq gawk build-essential autoconf pkg-config bsdutils findutils patch tar gzip bzip2 sed lua-lpeg axel aria2 gh rsync pv expect libfuse2 udftools debootstrap cifs-utils dos2unix xxd debhelper p7zip nsis jp2a btrfs-progs btrfs-compsize zstd zlib1g coreutils util-linux kpartx openssl growisofs udev gdisk parted bc e2fsprogs xz-utils libreadline8 mkisofs genisoimage byobu xorriso squashfs-tools grub-pc-bin grub-efi-amd64-bin grub-common mtools dosfstools fdisk cloud-guest-utils
     ##dnsutils bind9-dnsutils bison libelf-dev elfutils flex libncurses-dev libudev-dev dwarves pahole cmake sockstat liblinear4 liblua5.3-0 nmap nmap-common socat dwarves pahole libssl-dev cpio libgtk2.0-0 libwxgtk3.0-gtk3-0v5 wipe iputils-ping nilfs-tools python3 sg3-utils cryptsetup php
     ##qemu-system-x86
+    ##qemu-user qemu-utils
     _getMinimal_cloud_ubDistBuild_noBoot_backend gpg pigz curl gdisk lz4 mawk jq gawk build-essential autoconf pkg-config bsdutils findutils patch tar gzip bzip2 sed lua-lpeg axel aria2 gh rsync pv expect libfuse2 udftools debootstrap cifs-utils dos2unix xxd debhelper p7zip nsis jp2a btrfs-progs btrfs-compsize zstd zlib1g coreutils util-linux kpartx openssl growisofs udev gdisk parted bc e2fsprogs xz-utils libreadline8 mkisofs genisoimage byobu xorriso squashfs-tools grub-pc-bin grub-efi-amd64-bin grub-common mtools dosfstools fdisk cloud-guest-utils
 
     _messagePlain_probe apt-get remove --autoremove -y plasma-discover
@@ -12801,6 +12802,9 @@ _getMinimal_cloud() {
 	_getMost_backend_aptGetInstall bzip2
 	
 	_getMost_backend_aptGetInstall flex
+
+	_getMost_backend_aptGetInstall imagemagick
+	_getMost_backend_aptGetInstall graphicsmagick-imagemagick-compat
 	
 	_getMost_backend_aptGetInstall librecode0
 	_getMost_backend_aptGetInstall wkhtmltopdf
@@ -12940,6 +12944,7 @@ _getMinimal_cloud() {
 	
 	_getMost_backend_aptGetInstall debootstrap
 	
+	#_getMost_backend_aptGetInstall qemu-user qemu-utils
 	_getMost_backend_aptGetInstall qemu-system-x86
 	
 	_getMost_backend_aptGetInstall cifs-utils
@@ -49715,7 +49720,7 @@ _ubDistBuild_split-tail_procedure() {
 
 # Expected fastest.
 # ATTRIBUTION-AI: ChatGPT o1 2025-01-14 
-_ubDistBuild_split-reflink() {
+_ubDistBuild_split-reflink_procedure() {
     local inputFile=""$1""
     local chunkSize=1997537280  # ~1.86 GB
     local currentIteration=0
