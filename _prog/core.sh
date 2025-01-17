@@ -30,20 +30,25 @@ _custom_kernel_server-sequence() {
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	
 	
-	# Formal naming convention is [-distllc,][-lts,-mainline,][-desktop,-server,] . ONLY requirement is dotglob removal of all except server OR all purpose lts .
+	## Formal naming convention is [-distllc,][-lts,-mainline,][-desktop,-server,] . ONLY requirement is dotglob removal of all except server OR all purpose lts .
 	
-	#'linux-headers*desktop'
-	_chroot apt-get -y remove 'linux-image*desktop'
-	#'linux-headers*mainline'
-	_chroot apt-get -y remove 'linux-image*mainline'
+	##'linux-headers*desktop'
+	#_chroot apt-get -y remove 'linux-image*desktop'
+	##'linux-headers*mainline'
+	#_chroot apt-get -y remove 'linux-image*mainline'
 	#'linux-headers*lts'
-	_chroot apt-get -y remove 'linux-image*lts'
+	#_chroot apt-get -y remove 'linux-image*lts'
 
-
-	_chroot apt-get -y remove 'linux-image*'
-
+	#_chroot apt-get -y remove 'linux-image*'
 	
-	_chroot apt-get -y install 'linux-headers-amd64'
+	#_chroot apt-get -y install 'linux-headers-amd64'
+
+
+	# ATTENTION: For reliability, remove all linux-image packages, then install new kernel, resulting in only the desired kernel definitely becoming default to boot.
+	_messagePlain_probe_cmd _chroot apt-get -y remove 'linux-image*'
+    _messagePlain_probe_cmd _chroot apt-get -y purge 'linux-image*'
+
+    _messagePlain_probe_cmd _chroot dpkg --get-selections | grep 'linux-image'
 	
 	
 	
@@ -90,17 +95,45 @@ _custom_kernel_lts-sequence() {
 	
 	
 	
-	# Formal naming convention is [-distllc,][-lts,-mainline,][-desktop,-server,] . ONLY requirement is dotglob removal of all except server OR all purpose lts .
+	## Formal naming convention is [-distllc,][-lts,-mainline,][-desktop,-server,] . ONLY requirement is dotglob removal of all except server OR all purpose lts .
 	
-	#'linux-headers*server'
-	_chroot apt-get -y remove 'linux-image*server'
-	#'linux-headers*mainline'
-	_chroot apt-get -y remove 'linux-image*mainline'
+	##'linux-headers*server'
+	#_chroot apt-get -y remove 'linux-image*server'
+	##'linux-headers*mainline'
+	#_chroot apt-get -y remove 'linux-image*mainline'
 	
-	_chroot apt-get -y install 'linux-headers-amd64'
+	#_chroot apt-get -y install 'linux-headers-amd64'
+
+	#_chroot apt-get -y remove 'linux-image*'
 
 
-	_chroot apt-get -y remove 'linux-image*'
+	# ATTENTION: For reliability, remove all linux-image packages, then install new kernel, resulting in only the desired kernel definitely becoming default to boot.
+	_messagePlain_probe_cmd _chroot apt-get -y remove 'linux-image*'
+    _messagePlain_probe_cmd _chroot apt-get -y purge 'linux-image*'
+
+    _messagePlain_probe_cmd _chroot dpkg --get-selections | grep 'linux-image'
+
+
+
+
+	cd "$safeTmp"
+	if [[ -e "$scriptLocal"/"linux-lts-amd64-debian.tar.gz" ]]
+	then
+		sudo -n cp -f "$scriptLocal"/"linux-lts-amd64-debian.tar.gz" "$globalVirtFS"/
+	elif _wget_githubRelease_internal "soaringDistributions/mirage335KernelBuild" "linux-lts-amd64-debian.tar.gz" && [[ -e "$safeTmp"/"linux-lts-amd64-debian.tar.gz" ]]
+	then
+		sudo -n cp -f "$safeTmp"/"linux-lts-amd64-debian.tar.gz" "$globalVirtFS"/
+	else
+		sudo -n cp -f "$globalVirtFS"/home/user/core/installations/kernel_linux/linux-lts-amd64-debian.tar.gz "$globalVirtFS"/
+	fi
+	_chroot tar xf /linux-lts-amd64-debian.tar.gz
+	_chroot bash -c 'dpkg -i ./lts/*.deb'
+	_chroot rm -f ./lts/.config './lts/linux-*' ./lts/statement.sh.out.txt
+	_chroot rm -f ./lts/linux-lts-amd64-debian.tar.gz
+	_chroot rm -f /linux-lts-amd64-debian.tar.gz
+
+
+	
 
 	
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
