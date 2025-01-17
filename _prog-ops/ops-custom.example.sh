@@ -1,3 +1,6 @@
+
+# CAUTION: ATTENTION: Do NOT unnecessarily download infrastructure, etc, exclusively, as opposed to updating, from external sources. Changes to the underlying Debian dist/OS (eg. python2.7 'deprecation') breaks such very useful tools as gEDA - maintaining a CI pipeline originating from ubdist/OS or ubdist_dummy/OS with manually made changes to the 'disk image', offline conversion to live ISO/USB, WSL rootfs, etc, is a very important feature of ubDistBuild/ubdist/OS, which absolutely should NOT be broken.
+
 _custom() {
 	true
 }
