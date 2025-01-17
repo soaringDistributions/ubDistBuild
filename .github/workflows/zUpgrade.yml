@@ -751,7 +751,11 @@ jobs:
               exit ${PIPESTATUS[0]}
           fi
       
-      
+      - name: mkdir _local
+        shell: bash
+        run: |
+          mkdir -p ./_local
+            
       - name: _get_vmImg_ubDistBuild_before_noBoot
         if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         shell: bash
