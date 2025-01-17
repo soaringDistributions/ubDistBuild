@@ -2637,6 +2637,7 @@ _custom_report() {
 
 # WARNING: OBSOLETE .
 _get_vmImg_ubDistBuild-tempFile() {
+	mkdir -p "$scriptLocal"
 	cd "$scriptLocal"
 	
 	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part00"
@@ -2651,6 +2652,33 @@ _get_vmImg_ubDistBuild-tempFile() {
 	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part09" > /dev/null
 	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part10" > /dev/null
 	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part11" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part12" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part13" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part14" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part15" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part16" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part17" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part18" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part19" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part20" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part21" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part22" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part23" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part24" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part25" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part26" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part27" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part28" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part29" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part30" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part31" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part32" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part33" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part34" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part35" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part36" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part37" > /dev/null
+	_wget_githubRelease_internal "soaringDistributions/ubDistBuild" "package_image.tar.flx.part38" > /dev/null
 
 	cat "package_image.tar.flx.part"* > "package_image.tar.flx"
 	rm -f "package_image.tar.flx.part"*

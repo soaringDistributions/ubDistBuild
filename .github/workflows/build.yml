@@ -118,6 +118,10 @@ jobs:
         with:
           fetch-depth: 1
           submodules: 'recursive'
+      - name: mkdir _local
+        shell: bash
+        run: |
+          mkdir -p ./_local
       - name: release! create
         shell: bash
         run: |
@@ -155,6 +159,10 @@ jobs:
         with:
           fetch-depth: 1
           submodules: 'recursive'
+      - name: mkdir _local
+        shell: bash
+        run: |
+          mkdir -p ./_local
       - name: _getMinimal_cloud
         shell: bash
         timeout-minutes: 120
@@ -349,6 +357,10 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+      - name: mkdir _local
+        shell: bash
+        run: |
+          mkdir -p ./_local
       - name: _getMinimal_cloud
         shell: bash
         run: |
@@ -783,6 +795,10 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+      - name: mkdir _local
+        shell: bash
+        run: |
+          mkdir -p ./_local
       - name: _getMinimal_cloud
         shell: bash
         run: |
@@ -905,6 +921,7 @@ jobs:
           # DANGER: Github Actions (strictly internal) ONLY!
           export FORCE_AXEL=8
           export MANDATORY_HASH="true"
+          mkdir -p ./_local
           cd ./_local
           rm -f hash-download.txt
           ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image_beforeBoot.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
@@ -1175,6 +1192,10 @@ jobs:
         with:
           fetch-depth: 1
           submodules: 'recursive'
+      - name: mkdir _local
+        shell: bash
+        run: |
+          mkdir -p ./_local
 
       - name: _getMinimal_cloud
         shell: bash
@@ -1390,6 +1411,10 @@ jobs:
         with:
           fetch-depth: 1
           submodules: 'recursive'
+      - name: mkdir _local
+        shell: bash
+        run: |
+          mkdir -p ./_local
 
       - name: _getMinimal_cloud
         shell: bash
@@ -1460,6 +1485,7 @@ jobs:
           # DANGER: Github Actions (strictly internal) ONLY!
           export FORCE_AXEL=8
           export MANDATORY_HASH="true"
+          mkdir -p ./_local
           cd ./_local
           rm -f hash-download.txt
           ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
@@ -1585,6 +1611,10 @@ jobs:
         with:
           fetch-depth: 1
           submodules: 'recursive'
+      - name: mkdir _local
+        shell: bash
+        run: |
+          mkdir -p ./_local
 
       - name: _getMinimal_cloud
         shell: bash
@@ -1655,6 +1685,7 @@ jobs:
           # DANGER: Github Actions (strictly internal) ONLY!
           export FORCE_AXEL=8
           export MANDATORY_HASH="true"
+          mkdir -p ./_local
           cd ./_local
           rm -f hash-download.txt
           ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
@@ -1884,6 +1915,10 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+      - name: mkdir _local
+        shell: bash
+        run: |
+          mkdir -p ./_local
       
       
       - name: _test_hash_legacy
