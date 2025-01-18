@@ -87,7 +87,8 @@ else
 	./ubiquitous_bash.sh _messageError DANGER: Skipping hash!
 	echo
 
-	./ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$rl" "package_image.tar.flx" | ./ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | sudo -n dd of="$dev" bs=1M status=progress
+	[[ "$rl" == "latest" ]] && export rl=""
+	./ubiquitous_bash.sh _wget_githubRelease_join-stdout "$owner"/"$repo" "$rl" "package_image.tar.flx" | ./ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | sudo -n dd of="$dev" bs=1M status=progress
 fi
 
 if [[ "$dev" == "/dev/"* ]]
