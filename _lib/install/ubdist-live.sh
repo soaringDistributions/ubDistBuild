@@ -56,6 +56,7 @@ sudo -n apt-get install -y gh;
 wget https://raw.githubusercontent.com/mirage335-colossus/ubiquitous_bash/master/ubiquitous_bash.sh
 ! [[ -e ./ubiquitous_bash.sh ]] && echo 'FAIL: missing: ./ubiquitous_bash.sh' && exit 1
 chmod 755 ./ubiquitous_bash.sh
+mkdir -p ./_local
 ! ./ubiquitous_bash.sh _true && echo 'FAIL: _true' && exit 1
 ./ubiquitous_bash.sh _false && echo 'FAIL: _false' && exit 1
 ./ubiquitous_bash.sh _setupUbiquitous
@@ -71,6 +72,7 @@ export profileScriptFolder="/root"
 
 ! cd "$repo" && echo 'FAIL: cd "$repo"' && exit 1
 ! [[ -e ./ubiquitous_bash.sh ]] && echo 'FAIL: missing: ./ubiquitous_bash.sh' && exit 1
+mkdir -p ./_local
 ! ./ubiquitous_bash.sh _true && echo 'FAIL: _true' && exit 1
 ./ubiquitous_bash.sh _false && echo 'FAIL: _false' && exit 1
 
@@ -120,6 +122,7 @@ fi
 #fi
 
 
+#mkdir -p ./_local
 #./ubiquitous_bash.sh _openChRoot
 
 #./ubiquitous_bash.sh _chroot mkdir -p /root/.ssh
