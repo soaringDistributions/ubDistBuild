@@ -54,9 +54,9 @@ sudo -n apt-get install -y gh;
 
 wget https://raw.githubusercontent.com/mirage335-colossus/ubiquitous_bash/master/ubiquitous_bash.sh
 ! [[ -e ./ubiquitous_bash.sh ]] && echo 'FAIL: missing: ./ubiquitous_bash.sh' && exit 1
+chmod 755 ./ubiquitous_bash.sh
 ! ./ubiquitous_bash.sh _true && echo 'FAIL: _true' && exit 1
 ./ubiquitous_bash.sh _false && echo 'FAIL: _false' && exit 1
-chmod 755 ./ubiquitous_bash.sh
 ./ubiquitous_bash.sh _setupUbiquitous
 ./ubiquitous_bash.sh _custom_splice_opensslConfig
 
