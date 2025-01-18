@@ -46,7 +46,7 @@ echo -e -n ' \E[0m'
 [[ "$rl" == "" ]] && export rl=latest
 [[ "$ssh" == "" ]] && export ssh=
 
-cd
+! cd && echo 'FAIL: cd' && exit 1
 
 sudo -n apt-get update
 sudo -n apt-get install -y wget curl aria2 axel openssl jq git lz4 bc xxd;
@@ -54,6 +54,9 @@ sudo -n apt-get install -y growisofs;
 sudo -n apt-get install -y gh;
 
 wget https://raw.githubusercontent.com/mirage335-colossus/ubiquitous_bash/master/ubiquitous_bash.sh
+! [[ -e ./ubiquitous_bash.sh ]] && echo 'FAIL: missing: ./ubiquitous_bash.sh' && exit 1
+! ./ubiquitous_bash.sh _true && echo 'FAIL: _true' && exit 1
+./ubiquitous_bash.sh _false && echo 'FAIL: _false' && exit 1
 chmod 755 ./ubiquitous_bash.sh
 ./ubiquitous_bash.sh _setupUbiquitous
 ./ubiquitous_bash.sh _custom_splice_opensslConfig
@@ -66,7 +69,10 @@ export profileScriptFolder="/root"
 #git@github.com:soaringDistributions/ubDistBuild.git
 ./ubiquitous_bash.sh _gitBest clone --recursive --depth 1 git@github.com:"$owner"/"$repo".git
 
-cd "$repo"
+! cd "$repo" && echo 'FAIL: cd "$repo"' && exit 1
+! [[ -e ./ubiquitous_bash.sh ]] && echo 'FAIL: missing: ./ubiquitous_bash.sh' && exit 1
+! ./ubiquitous_bash.sh _true && echo 'FAIL: _true' && exit 1
+./ubiquitous_bash.sh _false && echo 'FAIL: _false' && exit 1
 
 #export FORCE_AXEL=8
 #export FORCE_WGET=true# DANGER: Do NOT enable DANGERfast_EXPERIMENT unless both necessary and using appropriate specialized/expendable/cloud computers for development purposes only.
@@ -77,31 +83,31 @@ then
 	./ubiquitous_bash.sh _get_vmImg_ubDistBuild-live "$rl" "" "$dev"
 else
 	echo
-	_messagePlain_bad 'warn: bad: DANGERfast_EXPERIMENT:  DANGER: Skipping hash!'
-	_messagePlain_warn 'Do NOT use except during development on specialized/expendable/cloud computers! NO PRODUCTION USE!'
-	_messageError DANGER: Skipping hash!
+	./ubiquitous_bash.sh _messagePlain_bad 'warn: bad: DANGERfast_EXPERIMENT:  DANGER: Skipping hash!'
+	./ubiquitous_bash.sh _messagePlain_warn 'Do NOT use except during development on specialized/expendable/cloud computers! NO PRODUCTION USE!'
+	./ubiquitous_bash.sh _messageError DANGER: Skipping hash!
 	echo
 
-	#_wget_githubRelease_join-stdout ""$owner"/"$repo"" "$rl" "package_image.tar.flx" | _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | sudo -n dd of="$dev" bs=1M status=progress
+	#./ubiquitous_bash.sh _wget_githubRelease_join-stdout ""$owner"/"$repo"" "$rl" "package_image.tar.flx" | ./ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | sudo -n dd of="$dev" bs=1M status=progress
 
 	if [[ "$3" == "/dev/sr"* ]] || [[ "$3" == "/dev/dvd"* ]] || [[ "$3" == "/dev/cdrom"* ]]
 	then
 		if ! [[ $(df --block-size=1000000 --output=avail "$tmpSelf" | tr -dc '0-9') -gt "3880" ]]
 		then
-			_messagePlain_bad 'bad: Detected <3.88GB disk free. Assuming TMPFS from booted LiveISO, insufficient unoccupied RAM.'
-			_messageFAIL
+			./ubiquitous_bash.sh _messagePlain_bad 'bad: Detected <3.88GB disk free. Assuming TMPFS from booted LiveISO, insufficient unoccupied RAM.'
+			./ubiquitous_bash.sh _messageFAIL
 		fi
 
 		# WARNING: May be untested.
-		#( _wget_githubRelease_join-stdout ""$owner"/"$repo"" "$rl" "vm-live.iso" ; dd if=/dev/zero bs=2048 count=$(bc <<< '1000000000000 / 2048' ) ) | sudo -n growisofs -speed=3 -dvd-compat -Z "$dev"=/dev/stdin -use-the-force-luke=notray -use-the-force-luke=spare:min -use-the-force-luke=bufsize:128m
+		#( ./ubiquitous_bash.sh _wget_githubRelease_join-stdout ""$owner"/"$repo"" "$rl" "vm-live.iso" ; dd if=/dev/zero bs=2048 count=$(bc <<< '1000000000000 / 2048' ) ) | sudo -n growisofs -speed=3 -dvd-compat -Z "$dev"=/dev/stdin -use-the-force-luke=notray -use-the-force-luke=spare:min -use-the-force-luke=bufsize:128m
 		#-dvd-compat
-		( _wget_githubRelease_join-stdout ""$owner"/"$repo"" "$rl" "vm-live.iso" ) | sudo -n growisofs -speed=3 -Z "$dev"=/dev/stdin -use-the-force-luke=notray -use-the-force-luke=spare:min -use-the-force-luke=bufsize:128m
+		( ./ubiquitous_bash.sh _wget_githubRelease_join-stdout ""$owner"/"$repo"" "$rl" "vm-live.iso" ) | sudo -n growisofs -speed=3 -Z "$dev"=/dev/stdin -use-the-force-luke=notray -use-the-force-luke=spare:min -use-the-force-luke=bufsize:128m
 	fi
 
 	if [[ "$3" == "/dev/sd"* ]] || [[ "$3" == "/dev/hd"* ]] || [[ "$3" == "/dev/disk/"* ]]
 	then
-		#( _wget_githubRelease_join-stdout ""$owner"/"$repo"" "$rl" "vm-live.iso" ; dd if=/dev/zero bs=2048 count=$(bc <<< '1000000000000 / 2048' ) ) | sudo -n dd of="$dev" bs=1M status=progress
-		( _wget_githubRelease_join-stdout ""$owner"/"$repo"" "$rl" "vm-live.iso" ) | sudo -n dd of="$dev" bs=1M status=progress
+		#( ./ubiquitous_bash.sh _wget_githubRelease_join-stdout ""$owner"/"$repo"" "$rl" "vm-live.iso" ; dd if=/dev/zero bs=2048 count=$(bc <<< '1000000000000 / 2048' ) ) | sudo -n dd of="$dev" bs=1M status=progress
+		( ./ubiquitous_bash.sh _wget_githubRelease_join-stdout ""$owner"/"$repo"" "$rl" "vm-live.iso" ) | sudo -n dd of="$dev" bs=1M status=progress
 	fi
 fi
 

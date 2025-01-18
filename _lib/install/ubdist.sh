@@ -46,13 +46,16 @@ echo -e -n ' \E[0m'
 [[ "$rl" == "" ]] && export rl=latest
 [[ "$ssh" == "" ]] && export ssh=
 
-cd
+! cd && echo 'FAIL: cd' && exit 1
 
 sudo -n apt-get update
 sudo -n apt-get install -y wget curl aria2 axel openssl jq git lz4 bc xxd;
 sudo -n apt-get install -y gh;
 
 wget https://raw.githubusercontent.com/mirage335-colossus/ubiquitous_bash/master/ubiquitous_bash.sh
+! [[ -e ./ubiquitous_bash.sh ]] && echo 'FAIL: missing: ./ubiquitous_bash.sh' && exit 1
+! ./ubiquitous_bash.sh _true && echo 'FAIL: _true' && exit 1
+./ubiquitous_bash.sh _false && echo 'FAIL: _false' && exit 1
 chmod 755 ./ubiquitous_bash.sh
 ./ubiquitous_bash.sh _setupUbiquitous
 ./ubiquitous_bash.sh _custom_splice_opensslConfig
@@ -65,7 +68,10 @@ export profileScriptFolder="/root"
 #git@github.com:soaringDistributions/ubDistBuild.git
 ./ubiquitous_bash.sh _gitBest clone --recursive --depth 1 git@github.com:"$owner"/"$repo".git
 
-cd "$repo"
+! cd "$repo" && echo 'FAIL: cd "$repo"' && exit 1
+! [[ -e ./ubiquitous_bash.sh ]] && echo 'FAIL: missing: ./ubiquitous_bash.sh' && exit 1
+! ./ubiquitous_bash.sh _true && echo 'FAIL: _true' && exit 1
+./ubiquitous_bash.sh _false && echo 'FAIL: _false' && exit 1
 
 #export FORCE_AXEL=8
 #export FORCE_WGET=true
@@ -76,12 +82,12 @@ then
 	./ubiquitous_bash.sh _get_vmImg_ubDistBuild "$rl" "" "$dev"
 else
 	echo
-	_messagePlain_bad 'warn: bad: DANGERfast_EXPERIMENT:  DANGER: Skipping hash!'
-	_messagePlain_warn 'Do NOT use except during development on specialized/expendable/cloud computers! NO PRODUCTION USE!'
-	_messageError DANGER: Skipping hash!
+	./ubiquitous_bash.sh _messagePlain_bad 'warn: bad: DANGERfast_EXPERIMENT:  DANGER: Skipping hash!'
+	./ubiquitous_bash.sh _messagePlain_warn 'Do NOT use except during development on specialized/expendable/cloud computers! NO PRODUCTION USE!'
+	./ubiquitous_bash.sh _messageError DANGER: Skipping hash!
 	echo
 
-	_wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$rl" "package_image.tar.flx" | _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | sudo -n dd of="$dev" bs=1M status=progress
+	./ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$rl" "package_image.tar.flx" | ./ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | sudo -n dd of="$dev" bs=1M status=progress
 fi
 
 if [[ "$dev" == "/dev/"* ]]
