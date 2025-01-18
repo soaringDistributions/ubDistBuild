@@ -64,7 +64,9 @@ _custom_kernel_server-sequence() {
 		sudo -n cp -f "$globalVirtFS"/home/user/core/installations/kernel_linux/linux-mainline-server-amd64-debian.tar.gz "$globalVirtFS"/
 	fi
 	_chroot tar xf /linux-mainline-server-amd64-debian.tar.gz
-	_chroot bash -c 'dpkg -i ./mainline-server/*.deb'
+	_messagePlain_probe_cmd _chroot bash -c 'dpkg -i ./mainline-server/*headers*.deb'
+	_messagePlain_probe_cmd _chroot bash -c 'ls -l /usr/src/*'
+	_messagePlain_probe_cmd _chroot bash -c 'dpkg -i ./mainline-server/*.deb'
 	_chroot rm -f ./mainline-server/.config './mainline-server/linux-*' ./mainline-server/statement.sh.out.txt
 	_chroot rm -f ./mainline-server/linux-mainline-server-amd64-debian.tar.gz
 	_chroot rm -f /linux-mainline-server-amd64-debian.tar.gz
@@ -127,7 +129,9 @@ _custom_kernel_lts-sequence() {
 		sudo -n cp -f "$globalVirtFS"/home/user/core/installations/kernel_linux/linux-lts-amd64-debian.tar.gz "$globalVirtFS"/
 	fi
 	_chroot tar xf /linux-lts-amd64-debian.tar.gz
-	_chroot bash -c 'dpkg -i ./lts/*.deb'
+	_messagePlain_probe_cmd _chroot bash -c 'dpkg -i ./lts/*headers*.deb'
+	_messagePlain_probe_cmd _chroot bash -c 'ls -l /usr/src/*'
+	_messagePlain_probe_cmd _chroot bash -c 'dpkg -i ./lts/*.deb'
 	_chroot rm -f ./lts/.config './lts/linux-*' ./lts/statement.sh.out.txt
 	_chroot rm -f ./lts/linux-lts-amd64-debian.tar.gz
 	_chroot rm -f /linux-lts-amd64-debian.tar.gz

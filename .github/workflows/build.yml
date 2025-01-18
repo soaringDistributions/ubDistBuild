@@ -371,7 +371,7 @@ jobs:
           df -h /
         timeout-minutes: 355
       ## For VBoxManage for _convert . Otherwise historically not apparently necessary.
-      #- name: _getMost_ubuntu22-VBoxManage
+      #- name: _getMost_ubuntu24-VBoxManage
         #shell: bash
         #run: |
           ##! ./ubiquitous_bash.sh _getMost && exit 1
@@ -380,7 +380,7 @@ jobs:
           ##! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
           ##sudo -n apt-get update
           ##! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
-          #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
+          #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu24-VBoxManage && exit 1
           #df -h
           #df -h /
         #timeout-minutes: 355
@@ -393,7 +393,7 @@ jobs:
           #! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
           #sudo -n apt-get update
           #! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
-          #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
+          #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu24-VBoxManage && exit 1
           sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y xvfb
           df -h
           df -h /
@@ -809,7 +809,7 @@ jobs:
           df -h /
         timeout-minutes: 355
       ## For VBoxManage for _convert . Otherwise historically not apparently necessary.
-      #- name: _getMost_ubuntu22-VBoxManage
+      #- name: _getMost_ubuntu24-VBoxManage
         #shell: bash
         #run: |
           ##! ./ubiquitous_bash.sh _getMost && exit 1
@@ -818,7 +818,7 @@ jobs:
           ##! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
           ##sudo -n apt-get update
           ##! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
-          #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
+          #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu24-VBoxManage && exit 1
           #df -h
           #df -h /
         #timeout-minutes: 355
@@ -831,7 +831,7 @@ jobs:
           #! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
           #sudo -n apt-get update
           #! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
-          #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
+          #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu24-VBoxManage && exit 1
           sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y xvfb
           sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y x11-apps
           df -h
@@ -1435,7 +1435,7 @@ jobs:
         timeout-minutes: 355
 
       ## For VBoxManage for _convert . Otherwise historically not apparently necessary.
-      #- name: _getMost_ubuntu22-VBoxManage
+      #- name: _getMost_ubuntu24-VBoxManage
         #shell: bash
         #run: |
           ##! ./ubiquitous_bash.sh _getMost && exit 1
@@ -1444,7 +1444,7 @@ jobs:
           ##! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
           ##sudo -n apt-get update
           ##! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
-          #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
+          #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu24-VBoxManage && exit 1
           #df -h
           #df -h /
         #timeout-minutes: 355
@@ -1457,7 +1457,7 @@ jobs:
           ##! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
           ##sudo -n apt-get update
           ##! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
-          ##! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
+          ##! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu24-VBoxManage && exit 1
           #sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y xvfb
           #df -h
           #df -h /
@@ -1635,7 +1635,7 @@ jobs:
         timeout-minutes: 355
 
       ## For VBoxManage for _convert . Otherwise historically not apparently necessary.
-      #- name: _getMost_ubuntu22-VBoxManage
+      #- name: _getMost_ubuntu24-VBoxManage
         #shell: bash
         #run: |
           ##! ./ubiquitous_bash.sh _getMost && exit 1
@@ -1644,7 +1644,7 @@ jobs:
           ##! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
           ##sudo -n apt-get update
           ##! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
-          #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
+          #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu24-VBoxManage && exit 1
           #df -h
           #df -h /
         #timeout-minutes: 355
@@ -1657,7 +1657,7 @@ jobs:
           ##! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
           ##sudo -n apt-get update
           ##! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
-          ##! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu22-VBoxManage && exit 1
+          ##! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu24-VBoxManage && exit 1
           #sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y xvfb
           #df -h
           #df -h /

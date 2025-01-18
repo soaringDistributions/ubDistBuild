@@ -206,6 +206,8 @@ _upgrade_kernel_kernel_sequence() {
     _messagePlain_probe_cmd tar xvf "$safeTmp"/kernel_package.tar.gz
 
 	#_messagePlain_probe_cmd find "$safeTmp" -iname '*.deb' -exec echo {} \;
+    _messagePlain_probe_cmd find "$safeTmp" -iname '*headers*.deb' -exec "$scriptAbsoluteLocation" _upgrade_kernel_kernel-dpkg_sequence {} \;
+    _messagePlain_probe_cmd ls -l /usr/src/*
     _messagePlain_probe_cmd find "$safeTmp" -iname '*.deb' -exec "$scriptAbsoluteLocation" _upgrade_kernel_kernel-dpkg_sequence {} \;
 
     [[ -e "$safeTmp"/FAIL ]] && _messagePlain_bad 'fail: _upgrade_kernel_kernel_sequence: '"$1" && _messageFAIL
