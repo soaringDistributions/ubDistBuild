@@ -38,8 +38,8 @@ on:
     inputs:
       releaseLabel:
         required: false
-        #default: spring
-        default: internal
+        default: spring
+        #default: internal
         type: choice
         options:
         - latest
@@ -107,11 +107,13 @@ jobs:
         shell: bash
         run: |
           echo FAIL: invalid inputs!
+          exit 1
       - name: check! valid! inputs
-        if : ( ${{ github.event.inputs.runnerName == 'ubuntu-latest-l' }} || ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }} ) && ( ${{ github.event.inputs.qemuNoKVM == true }} )
+        if : ${{ ( github.event.inputs.runnerName == 'ubuntu-latest-l' || github.event.inputs.runnerName == 'ubuntu-latest-m' ) && ( github.event.inputs.qemuNoKVM == true ) }}
         shell: bash
         run: |
           echo FAIL: SLOW inputs!
+          exit 1
       #- name: report! API Rate Limit
         #shell: bash
         #run: |
