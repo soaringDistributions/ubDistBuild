@@ -208,7 +208,11 @@ _upgrade_kernel_kernel_sequence() {
 	#_messagePlain_probe_cmd find "$safeTmp" -iname '*.deb' -exec echo {} \;
     _messagePlain_probe_cmd find "$safeTmp" -iname '*headers*.deb' -exec "$scriptAbsoluteLocation" _upgrade_kernel_kernel-dpkg_sequence {} \;
     _messagePlain_probe_cmd ls -l /usr/src/*
+    _messagePlain_probe_cmd find "$safeTmp" -iname '*libc*.deb' -exec "$scriptAbsoluteLocation" _upgrade_kernel_kernel-dpkg_sequence {} \;
+    _messagePlain_probe_cmd find "$safeTmp" -iname '*image*.deb' -exec "$scriptAbsoluteLocation" _upgrade_kernel_kernel-dpkg_sequence {} \;
     _messagePlain_probe_cmd find "$safeTmp" -iname '*.deb' -exec "$scriptAbsoluteLocation" _upgrade_kernel_kernel-dpkg_sequence {} \;
+
+    ! _messagePlain_probe_cmd apt-get -y install -f && _messagePlain_bad 'fail: apt-get -y install -f' && _messageFAIL
 
     [[ -e "$safeTmp"/FAIL ]] && _messagePlain_bad 'fail: _upgrade_kernel_kernel_sequence: '"$1" && _messageFAIL
 
