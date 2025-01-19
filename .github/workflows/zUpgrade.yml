@@ -856,6 +856,10 @@ jobs:
           true
       
       
+      - name: _upgrade_apt
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _upgrade_apt
       
       - name: upgrade_core
         shell: bash
