@@ -103,13 +103,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: check! valid! inputs
-        if : ( ${{ github.event.inputs.runnerName != 'ubuntu-latest-l' }} && ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }} ) && ( ${{ github.event.inputs.qemuNoKVM == false }} )
+        if : ${{ ( github.event.inputs.runnerName != 'ubuntu-latest-l' && github.event.inputs.runnerName != 'ubuntu-latest-m' ) && github.event.inputs.qemuNoKVM == false }}
         shell: bash
         run: |
           echo FAIL: invalid inputs!
           exit 1
       - name: check! valid! inputs
-        if : ${{ ( github.event.inputs.runnerName == 'ubuntu-latest-l' || github.event.inputs.runnerName == 'ubuntu-latest-m' ) && ( github.event.inputs.qemuNoKVM == true ) }}
+        if : ${{ ( github.event.inputs.runnerName == 'ubuntu-latest-l' || github.event.inputs.runnerName == 'ubuntu-latest-m' ) && github.event.inputs.qemuNoKVM == true }}
         shell: bash
         run: |
           echo FAIL: SLOW inputs!
