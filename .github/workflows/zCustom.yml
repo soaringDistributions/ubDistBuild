@@ -900,9 +900,9 @@ jobs:
             gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/coreReport
             cat /proc/cpuinfo > ./_local/cpuinfo
             gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/cpuinfo
-            gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/customReport
-            gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/cronUserReport
-            gh release upload build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} ./_local/cronRootReport
+            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/customReport
+            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/cronUserReport
+            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/cronRootReport
         env:
           GH_TOKEN: ${{ github.token }}
 
