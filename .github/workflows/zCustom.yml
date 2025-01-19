@@ -123,12 +123,12 @@ jobs:
           echo DISABLE_BOOT ${{ github.event.inputs.DISABLE_BOOT }}
           echo runnerName ${{ github.event.inputs.runnerName }}
       - name: check! valid! inputs
-        if : ( ${{ github.event.inputs.runnerName != 'ubuntu-latest-l' }} && ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }} ) && ( ${{ github.event.inputs.qemuNoKVM == false }} )
+        if : ${{ ( github.event.inputs.runnerName != 'ubuntu-latest-l' && github.event.inputs.runnerName != 'ubuntu-latest-m' ) && github.event.inputs.qemuNoKVM == false }}
         shell: bash
         run: |
           echo FAIL: invalid inputs!
       - name: check! valid! inputs
-        if : ( ${{ github.event.inputs.runnerName == 'ubuntu-latest-l' }} || ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }} ) && ( ${{ github.event.inputs.qemuNoKVM == true }} )
+        if : ${{ ( github.event.inputs.runnerName == 'ubuntu-latest-l' || github.event.inputs.runnerName == 'ubuntu-latest-m' ) && github.event.inputs.qemuNoKVM == true }}
         shell: bash
         run: |
           echo FAIL: SLOW inputs!
