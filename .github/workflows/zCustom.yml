@@ -840,14 +840,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
 
-      - name: upgrade_kernel-mainline-server
-        if: ${{ github.event.inputs.upgradeSlow != 'false' }}
-        shell: bash
-        run: |
-          ./ubiquitous_bash.sh _upgrade_kernel_mainline_server
-        timeout-minutes: 90
-        env:
-          GH_TOKEN: ${{ github.token }}
+      #- name: upgrade_kernel-mainline-server
+        #if: ${{ github.event.inputs.upgradeSlow != 'false' }}
+        #shell: bash
+        #run: |
+          #./ubiquitous_bash.sh _upgrade_kernel_mainline_server
+        #timeout-minutes: 90
+        #env:
+          #GH_TOKEN: ${{ github.token }}
 
 
 
