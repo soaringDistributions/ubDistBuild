@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='615733136'
+export ub_setScriptChecksum_contents='1433949787'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -54461,13 +54461,19 @@ _upgrade_core() {
 	local functionEntryPWD
 	functionEntryPWD="$PWD"
 
+    local currentExitStatus
+    currentExitStatus=0
+
     ! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 
     _chroot sudo -n --preserve-env=GH_TOKEN --preserve-env=INPUT_GITHUB_TOKEN -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; /home/user/ubDistBuild/ubiquitous_bash.sh _gitBest pull'
     _chroot sudo -n --preserve-env=GH_TOKEN --preserve-env=INPUT_GITHUB_TOKEN -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; /home/user/ubDistBuild/ubiquitous_bash.sh _gitBest submodule update --recursive'
     _chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; ./ubiquitous_bash.sh _upgrade'
+    [[ "$?" != "0" ]] && currentExitStatus=1
 
     ! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+    [[ "$currentExitStatus" != "0" ]] && _messagePlain_bad 'fail: _upgrade_core' && _messageFAIL
 
     cd "$functionEntryPWD"
 }
@@ -54523,6 +54529,8 @@ _upgrade_apt() {
     echo
     echo 'init: _upgrade_apt'
     echo
+
+	! _messagePlain_probe_cmd _openChRoot && _messagePlain_bad 'fail: openChroot' && _messageFAIL
     
 	# ATTRIBUTION-AI: ChatGPT o1-preview 2024-11-20 .
     _messagePlain_probe sudo -n tee /etc/apt/apt.conf.d/99autoremove-recommends
@@ -54531,12 +54539,15 @@ APT::AutoRemove::SuggestsImportant "true";' | sudo -n tee /etc/apt/apt.conf.d/99
     
     # https://www.commandinline.com/cheat-sheet/apt/?utm_source=chatgpt.com
     _chroot env DEBIAN_FRONTEND=noninteractive apt-get -y update
+    ! _chroot env DEBIAN_FRONTEND=noninteractive apt-get -y update && _messagePlain_bad 'fail: update' && _messageFAIL
     _chroot env DEBIAN_FRONTEND=noninteractive apt-get --install-recommends -y upgrade
-    _chroot env DEBIAN_FRONTEND=noninteractive apt --install-recommends -y upgrade
-    _chroot env DEBIAN_FRONTEND=noninteractive apt --install-recommends -y full-upgrade
+    ! _chroot env DEBIAN_FRONTEND=noninteractive apt --install-recommends -y upgrade && _messagePlain_bad 'fail: upgrade' && _messageFAIL
+    ! _chroot env DEBIAN_FRONTEND=noninteractive apt --install-recommends -y full-upgrade && _messagePlain_bad 'fail: full-upgrade' && _messageFAIL
 
 
 
+
+    ! _messagePlain_probe_cmd _closeChRoot && _messagePlain_bad 'fail: closeChroot' && _messageFAIL
 
     cd "$functionEntryPWD"
     echo

@@ -63,13 +63,19 @@ _upgrade_core() {
 	local functionEntryPWD
 	functionEntryPWD="$PWD"
 
+    local currentExitStatus
+    currentExitStatus=0
+
     ! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 
     _chroot sudo -n --preserve-env=GH_TOKEN --preserve-env=INPUT_GITHUB_TOKEN -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; /home/user/ubDistBuild/ubiquitous_bash.sh _gitBest pull'
     _chroot sudo -n --preserve-env=GH_TOKEN --preserve-env=INPUT_GITHUB_TOKEN -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; /home/user/ubDistBuild/ubiquitous_bash.sh _gitBest submodule update --recursive'
     _chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistFetch ; ./ubiquitous_bash.sh _upgrade'
+    [[ "$?" != "0" ]] && currentExitStatus=1
 
     ! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+    [[ "$currentExitStatus" != "0" ]] && _messagePlain_bad 'fail: _upgrade_core' && _messageFAIL
 
     cd "$functionEntryPWD"
 }
@@ -135,9 +141,10 @@ APT::AutoRemove::SuggestsImportant "true";' | sudo -n tee /etc/apt/apt.conf.d/99
     
     # https://www.commandinline.com/cheat-sheet/apt/?utm_source=chatgpt.com
     _chroot env DEBIAN_FRONTEND=noninteractive apt-get -y update
+    ! _chroot env DEBIAN_FRONTEND=noninteractive apt-get -y update && _messagePlain_bad 'fail: update' && _messageFAIL
     _chroot env DEBIAN_FRONTEND=noninteractive apt-get --install-recommends -y upgrade
-    _chroot env DEBIAN_FRONTEND=noninteractive apt --install-recommends -y upgrade
-    _chroot env DEBIAN_FRONTEND=noninteractive apt --install-recommends -y full-upgrade
+    ! _chroot env DEBIAN_FRONTEND=noninteractive apt --install-recommends -y upgrade && _messagePlain_bad 'fail: upgrade' && _messageFAIL
+    ! _chroot env DEBIAN_FRONTEND=noninteractive apt --install-recommends -y full-upgrade && _messagePlain_bad 'fail: full-upgrade' && _messageFAIL
 
 
 
