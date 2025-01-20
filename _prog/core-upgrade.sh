@@ -125,6 +125,8 @@ _upgrade_apt() {
     echo
     echo 'init: _upgrade_apt'
     echo
+
+	! _messagePlain_probe_cmd _openChRoot && _messagePlain_bad 'fail: openChroot' && _messageFAIL
     
 	# ATTRIBUTION-AI: ChatGPT o1-preview 2024-11-20 .
     _messagePlain_probe sudo -n tee /etc/apt/apt.conf.d/99autoremove-recommends
@@ -139,6 +141,8 @@ APT::AutoRemove::SuggestsImportant "true";' | sudo -n tee /etc/apt/apt.conf.d/99
 
 
 
+
+    ! _messagePlain_probe_cmd _closeChRoot && _messagePlain_bad 'fail: closeChroot' && _messageFAIL
 
     cd "$functionEntryPWD"
     echo

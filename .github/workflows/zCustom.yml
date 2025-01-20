@@ -53,6 +53,19 @@ on:
         - latest
         - internal
         - base
+      # ATTENTION: NOTICE: Updating core will already update the kernel packages used by _custom_kernel ... . Except to ensure the very latest 'lts' desktop kernel is used, this usually just wastes time.
+      upgradeKernel:
+        required: false
+        default: none
+        type: choice
+        options:
+        - none
+        - lts
+        - mainline-server
+      # ATTENTION: Delays custom/build cycle time by ~3 minutes . Enabled by default, but may be disabled for very rapid testing if not useful.
+      upgradeCore:
+        type: boolean
+        default: true
       customTimeout:
         required: false
         default: '45'
@@ -792,6 +805,46 @@ jobs:
           ! echo from releaseLabel=${{ inputs.releaseLabel }} | ./ubiquitous_bash.sh _chroot tee -a /info-github-custom && exit 1
           ! ./ubiquitous_bash.sh _closeChRoot && exit 1
           true
+
+
+      - name: _upgrade_apt
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _upgrade_apt
+        timeout-minutes: 90
+      
+      # Also updates kernel packages available for _custom_kernel ... .
+      - name: upgrade_core
+        if : ${{ github.event.inputs.upgradeCore != 'false' }}
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _upgrade_core
+        timeout-minutes: 90
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+
+      
+      - name: upgrade_kernel-lts
+        if: ${{ github.event.inputs.upgradeKernel == 'lts' }}
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _upgrade_kernel_lts
+          #./ubiquitous_bash.sh _upgrade_kernel
+        timeout-minutes: 90
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+
+      - name: upgrade_kernel-mainline-server
+        if: ${{ github.event.inputs.upgradeKernel == 'mainline-server' }}
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _upgrade_kernel_mainline_server
+        timeout-minutes: 90
+        env:
+          GH_TOKEN: ${{ github.token }}
+
 
 
       - name: upgrade_installers
