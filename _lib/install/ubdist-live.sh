@@ -79,7 +79,7 @@ mkdir -p ./_local
 #export FORCE_AXEL=8
 #export FORCE_WGET=true# DANGER: Do NOT enable DANGERfast_EXPERIMENT unless both necessary and using appropriate specialized/expendable/cloud computers for development purposes only.
 #export DANGERfast_EXPERIMENT=true
-if [[ DANGERfast_EXPERIMENT == "" ]] || [[ DANGERfast_EXPERIMENT == "false" ]] || [[ DANGERfast_EXPERIMENT == "build" ]]
+if [[ "$DANGERfast_EXPERIMENT" == "" ]] || [[ "$DANGERfast_EXPERIMENT" == "false" ]] || [[ "$DANGERfast_EXPERIMENT" == "build" ]]
 then
 	#./ubiquitous_bash.sh _get_vmImg_ubDistBuild "$rl" "" "$dev"
 	./ubiquitous_bash.sh _get_vmImg_ubDistBuild-live "$rl" "" "$dev"
