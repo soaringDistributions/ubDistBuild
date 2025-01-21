@@ -2346,6 +2346,9 @@ _ubDistBuild_join() {
 		_hash_file ubdist-join package_rootfs.tar "$scriptLocal"/package_rootfs.tar dd bs=1M status=progress
 		rm -f "$scriptLocal"/_hash-ubdist-join.txt > /dev/null 2>&1
 	fi
+
+	_messagePlain_request 'Done. Press ENTER to continue.'
+	read
 }
 _join() {
 	_ubDistBuild_join "$@"

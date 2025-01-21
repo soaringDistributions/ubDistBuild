@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='721155679'
+export ub_setScriptChecksum_contents='1957813310'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -49893,6 +49893,9 @@ _ubDistBuild_join() {
 		_hash_file ubdist-join package_rootfs.tar "$scriptLocal"/package_rootfs.tar dd bs=1M status=progress
 		rm -f "$scriptLocal"/_hash-ubdist-join.txt > /dev/null 2>&1
 	fi
+
+	_messagePlain_request 'Done. Press ENTER to continue.'
+	read
 }
 _join() {
 	_ubDistBuild_join "$@"
