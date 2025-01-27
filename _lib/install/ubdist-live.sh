@@ -54,6 +54,7 @@ echo -e -n ' \E[0m'
 
 sudo -n apt-get update
 sudo -n apt-get install -y wget curl aria2 axel openssl jq git lz4 bc xxd;
+sudo -n apt-get install -y pv;
 sudo -n apt-get install -y growisofs;
 sudo -n apt-get install -y gh;
 
