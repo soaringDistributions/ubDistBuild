@@ -2,7 +2,11 @@
 
 # CAUTION: DANGER: This script and these commands WILL erase data on your disk!
 
-( [[ "$profileScriptLocation" != "" ]] || [[ "$ub_import" == "true" ]] || env | grep -i '^kde\|kde$' > /dev/null 2>&1 || [[ "$XDG_SESSION_DESKTOP" != "" ]] || [[ "$XDG_CURRENT_DESKTOP" != "" ]] ) && return 0
+if ( [[ "$profileScriptLocation" != "" ]] || [[ "$ub_import" == "true" ]] || env | grep -i '^kde\|kde$' > /dev/null 2>&1 || [[ "$XDG_SESSION_DESKTOP" != "" ]] || [[ "$XDG_CURRENT_DESKTOP" != "" ]] )
+then
+	exit 0
+	return 0
+fi
 
 #_messagePlain_warn 'WARNING: will ERASE DATA on your disk!'
 echo -e -n '\E[1;33m '
