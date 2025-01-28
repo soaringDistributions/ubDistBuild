@@ -1219,6 +1219,28 @@ jobs:
       - name: analysis! missing-binaries
         shell: bash
         run: |
+          #echo -n
+          _safeEcho() {
+            printf '%s' "$1"
+            shift
+            
+            [[ "$@" == "" ]] && return 0
+            
+            local currentArg
+            for currentArg in "$@"
+            do
+              printf '%s' " "
+              printf '%s' "$currentArg"
+            done
+            return 0
+          }
+
+          #echo
+          _safeEcho_newline() {
+            _safeEcho "$@"
+            printf '\n'
+          }
+        
           mkdir -p ./_local/analysis
 
           #cp ./_local/lsmodReport ./_local/analysis/lsmodReport
@@ -1238,8 +1260,8 @@ jobs:
           curl -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/dpkg"
 
           # Loop through each release
-          #for RELEASE in $(echo "$RELEASES" | jq -r '.[].tag_name' | sort --reverse); do
-          for RELEASE in $(echo "$RELEASES" | jq -r 'sort_by(.published_at) | reverse | .[].tag_name'); do
+          #for RELEASE in $(_safeEcho_newline "$RELEASES" | jq -r '.[].tag_name' | sort --reverse); do
+          for RELEASE in $(_safeEcho_newline "$RELEASES" | jq -r 'sort_by(.published_at) | reverse | .[].tag_name' | tr -dc 'a-zA-Z0-9\-_.:\n'); do
 
             # Compare the list of binaries in this release to the current release
             if [ "$RELEASE" != "$currentReleaseTag" ]; then
