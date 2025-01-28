@@ -454,6 +454,8 @@ jobs:
           export MANDATORY_HASH="true"
           #export FORCE_DIRECT="true"
           #export FORCE_BUFFER="false"
+          export FORCE_AXEL="5"
+          export FORCE_PARALLEL="2"
           mkdir -p ./_local
           cd ./_local
           rm -f hash-download.txt
@@ -788,6 +790,8 @@ jobs:
           #export MANDATORY_HASH="true"
           #export FORCE_DIRECT="true"
           #export FORCE_BUFFER="false"
+          export FORCE_AXEL="5"
+          export FORCE_PARALLEL="2"
           mkdir -p ./_local
           cd ./_local
           rm -f hash-download.txt
@@ -814,6 +818,8 @@ jobs:
           export MANDATORY_HASH="true"
           #export FORCE_DIRECT="true"
           #export FORCE_BUFFER="false"
+          export FORCE_AXEL="5"
+          export FORCE_PARALLEL="2"
           mkdir -p ./_local
           cd ./_local
           rm -f hash-download.txt
@@ -1263,6 +1269,8 @@ jobs:
           #export MANDATORY_HASH="true"
           #export FORCE_DIRECT="true"
           #export FORCE_BUFFER="false"
+          export FORCE_AXEL="5"
+          export FORCE_PARALLEL="2"
           mkdir -p ./_local
           cd ./_local
           rm -f hash-download.txt
@@ -1474,6 +1482,8 @@ jobs:
           #export MANDATORY_HASH="true"
           #export FORCE_DIRECT="true"
           #export FORCE_BUFFER="false"
+          export FORCE_AXEL="5"
+          export FORCE_PARALLEL="2"
           mkdir -p ./_local
           cd ./_local
           rm -f hash-download.txt
@@ -1762,6 +1772,8 @@ jobs:
           #export MANDATORY_HASH="true"
           #export FORCE_DIRECT="true"
           #export FORCE_BUFFER="false"
+          export FORCE_AXEL="5"
+          export FORCE_PARALLEL="2"
           ./ubiquitous_bash.sh _hash_ubdist-fast
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
