@@ -452,8 +452,8 @@ jobs:
           # DANGER: Github Actions (strictly internal) ONLY!
           #export FORCE_AXEL=8
           export MANDATORY_HASH="true"
-          export FORCE_DIRECT="true"
-          export FORCE_BUFFER="false"
+          #export FORCE_DIRECT="true"
+          #export FORCE_BUFFER="false"
           mkdir -p ./_local
           cd ./_local
           rm -f hash-download.txt
@@ -786,8 +786,8 @@ jobs:
           # DANGER: Github Actions (strictly internal) ONLY!
           #export FORCE_AXEL=8
           #export MANDATORY_HASH="true"
-          export FORCE_DIRECT="true"
-          export FORCE_BUFFER="false"
+          #export FORCE_DIRECT="true"
+          #export FORCE_BUFFER="false"
           mkdir -p ./_local
           cd ./_local
           rm -f hash-download.txt
@@ -812,8 +812,8 @@ jobs:
           # DANGER: Github Actions (strictly internal) ONLY!
           #export FORCE_AXEL=8
           export MANDATORY_HASH="true"
-          export FORCE_DIRECT="true"
-          export FORCE_BUFFER="false"
+          #export FORCE_DIRECT="true"
+          #export FORCE_BUFFER="false"
           mkdir -p ./_local
           cd ./_local
           rm -f hash-download.txt
@@ -1261,8 +1261,8 @@ jobs:
           # DANGER: Github Actions (strictly internal) ONLY!
           #export FORCE_AXEL=8
           #export MANDATORY_HASH="true"
-          export FORCE_DIRECT="true"
-          export FORCE_BUFFER="false"
+          #export FORCE_DIRECT="true"
+          #export FORCE_BUFFER="false"
           mkdir -p ./_local
           cd ./_local
           rm -f hash-download.txt
@@ -1472,8 +1472,8 @@ jobs:
           # DANGER: Github Actions (strictly internal) ONLY!
           #export FORCE_AXEL=8
           #export MANDATORY_HASH="true"
-          export FORCE_DIRECT="true"
-          export FORCE_BUFFER="false"
+          #export FORCE_DIRECT="true"
+          #export FORCE_BUFFER="false"
           mkdir -p ./_local
           cd ./_local
           rm -f hash-download.txt
@@ -1760,8 +1760,8 @@ jobs:
           echo $skimfast
           #export FORCE_AXEL=8
           #export MANDATORY_HASH="true"
-          export FORCE_DIRECT="true"
-          export FORCE_BUFFER="false"
+          #export FORCE_DIRECT="true"
+          #export FORCE_BUFFER="false"
           ./ubiquitous_bash.sh _hash_ubdist-fast
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
