@@ -405,7 +405,7 @@ jobs:
           #export FORCE_AXEL=8
           #./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
           # DANGER: Github Actions (strictly internal) ONLY!
-          export FORCE_AXEL=8
+          #export FORCE_AXEL=8
           export MANDATORY_HASH="true"
           cd ./_local
           rm -f hash-download.txt
@@ -760,7 +760,7 @@ jobs:
           #export FORCE_AXEL=8
           #./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
           # DANGER: Github Actions (strictly internal) ONLY!
-          export FORCE_AXEL=8
+          #export FORCE_AXEL=8
           export MANDATORY_HASH="true"
           cd ./_local
           rm -f hash-download.txt

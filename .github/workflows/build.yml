@@ -919,7 +919,7 @@ jobs:
           #export FORCE_AXEL=8
           #./ubiquitous_bash.sh _get_vmImg_beforeBoot_ubDistBuild "latest"
           # DANGER: Github Actions (strictly internal) ONLY!
-          export FORCE_AXEL=8
+          #export FORCE_AXEL=8
           export MANDATORY_HASH="true"
           mkdir -p ./_local
           cd ./_local
@@ -1483,7 +1483,7 @@ jobs:
           #export FORCE_AXEL=8
           #./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
           # DANGER: Github Actions (strictly internal) ONLY!
-          export FORCE_AXEL=8
+          #export FORCE_AXEL=8
           export MANDATORY_HASH="true"
           mkdir -p ./_local
           cd ./_local
@@ -1683,7 +1683,7 @@ jobs:
           #export FORCE_AXEL=8
           #./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
           # DANGER: Github Actions (strictly internal) ONLY!
-          export FORCE_AXEL=8
+          #export FORCE_AXEL=8
           export MANDATORY_HASH="true"
           mkdir -p ./_local
           cd ./_local
@@ -1986,7 +1986,7 @@ jobs:
           ##export FORCE_AXEL=8
           ##./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
           ## DANGER: Github Actions (strictly internal) ONLY!
-          #export FORCE_AXEL=8
+          ##export FORCE_AXEL=8
           #export MANDATORY_HASH="true"
           #cd ./_local
           #../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image.tar.flx" 2> /dev/null | ../ubiquitous_bash.sh _get_extract_ubDistBuild
@@ -2010,7 +2010,7 @@ jobs:
           ##export FORCE_AXEL=8
           ##./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
           ## DANGER: Github Actions (strictly internal) ONLY!
-          #export FORCE_AXEL=8
+          ##export FORCE_AXEL=8
           #export MANDATORY_HASH="true"
           #cd ./_local
           #../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_rootfs.tar.flx" 2> /dev/null > ./package_rootfs.tar.flx
@@ -2034,7 +2034,7 @@ jobs:
           ##export FORCE_AXEL=8
           ##./ubiquitous_bash.sh _get_vmImg_ubDistBuild "latest"
           ## DANGER: Github Actions (strictly internal) ONLY!
-          #export FORCE_AXEL=8
+          ##export FORCE_AXEL=8
           #export MANDATORY_HASH="true"
           #cd ./_local
           #../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "vm-live.iso" 2> /dev/null > ./vm-live.iso
@@ -2059,7 +2059,7 @@ jobs:
         run: |
           export skimfast=${{ github.event.inputs.skimfast }}
           echo $skimfast
-          export FORCE_AXEL=8
+          #export FORCE_AXEL=8
           export MANDATORY_HASH="true"
           ./ubiquitous_bash.sh _hash_ubdist-fast
         env:
