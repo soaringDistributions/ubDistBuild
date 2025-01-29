@@ -1891,7 +1891,7 @@ jobs:
           cd ./_local/analysis
 
           # Get the list of releases
-          RELEASES=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/"${{ github.repository }}"/releases)
+          RELEASES=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/"${{ github.repository }}"/releases?per_page=100&page=1)
 
           # Download binReport file for the current release
           #curl -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/lsmodReport"

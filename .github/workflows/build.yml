@@ -1251,7 +1251,7 @@ jobs:
           cd ./_local/analysis
 
           # Get the list of releases
-          RELEASES=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/soaringDistributions/ubDistBuild/releases)
+          RELEASES=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/soaringDistributions/ubDistBuild/releases?per_page=100&page=1)
 
           # Download binReport file for the current release
           curl -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/lsmodReport"
