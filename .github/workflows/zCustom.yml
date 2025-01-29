@@ -53,6 +53,8 @@ on:
         - latest
         - internal
         - base
+        # DISCOURAGED. Very not normal to not have an 'internal' or at least 'base' build of ubdist .
+        - spring
       ## ATTENTION: NOTICE: Updating core will already update the kernel packages used by _custom_kernel ... . Except to ensure the very latest 'lts' desktop kernel is used, this usually just wastes time.
       #upgradeKernel:
         #required: false
