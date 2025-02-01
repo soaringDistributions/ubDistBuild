@@ -539,6 +539,14 @@ jobs:
           #! ./ubiquitous_bash.sh _closeChRoot && exit 1
           true
 
+      - name: _build_fallback_staging-buildYML-build_beforeBoot
+        shell: bash
+        run: |
+          #! ./ubiquitous_bash.sh _openChRoot && exit 1
+          ! ./ubiquitous_bash.sh _build_fallback_staging-buildYML-build_beforeBoot && exit 1
+          #! ./ubiquitous_bash.sh _closeChRoot && exit 1
+          true
+
       - name: scribe! info! github
         shell: bash
         run: |
@@ -927,6 +935,15 @@ jobs:
           ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image_beforeBoot.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: _build_fallback_staging-buildYML-build
+        shell: bash
+        run: |
+          #! ./ubiquitous_bash.sh _openChRoot && exit 1
+          ! ./ubiquitous_bash.sh _build_fallback_staging-buildYML-build && exit 1
+          #! ./ubiquitous_bash.sh _closeChRoot && exit 1
+          true
+
 
       - name: fallocate --dig-holes
         shell: bash

@@ -446,6 +446,15 @@ jobs:
           ! ./ubiquitous_bash.sh _closeChRoot && exit 1
           true
 
+      - name: _build_fallback_staging-zCustomYML-before_noBoot
+        shell: bash
+        run: |
+          #! ./ubiquitous_bash.sh _openChRoot && exit 1
+          ! ./ubiquitous_bash.sh _build_fallback_staging-zCustomYML-before_noBoot && exit 1
+          #! ./ubiquitous_bash.sh _closeChRoot && exit 1
+          true
+
+
 
       - name: Force KVM group perms
         if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' || github.event.inputs.runnerName == 'ubuntu-latest-l' || github.event.inputs.runnerName == 'ubuntu-latest-h' }}
@@ -897,6 +906,15 @@ jobs:
         #shell: bash
         #run: |
           #./ubiquitous_bash.sh _create_ubDistBuild-rotten_install-kde
+
+      - name: _build_fallback_staging-zCustomYML-build
+        shell: bash
+        run: |
+          #! ./ubiquitous_bash.sh _openChRoot && exit 1
+          ! ./ubiquitous_bash.sh _build_fallback_staging-zCustomYML-build && exit 1
+          #! ./ubiquitous_bash.sh _closeChRoot && exit 1
+          true
+
 
       - name: report! root df
         shell: bash
