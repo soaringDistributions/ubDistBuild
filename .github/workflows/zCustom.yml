@@ -450,7 +450,7 @@ jobs:
         shell: bash
         run: |
           #! ./ubiquitous_bash.sh _openChRoot && exit 1
-          ! ./ubiquitous_bash.sh _build_fallback_staging-zCustomYML-before_noBoot && exit 1
+          [[ -e _lib/_build-staging-ops.sh ]] && ! ./ubiquitous_bash.sh _build_fallback_staging-zCustomYML-before_noBoot && exit 1
           #! ./ubiquitous_bash.sh _closeChRoot && exit 1
           true
 
@@ -911,7 +911,7 @@ jobs:
         shell: bash
         run: |
           #! ./ubiquitous_bash.sh _openChRoot && exit 1
-          ! ./ubiquitous_bash.sh _build_fallback_staging-zCustomYML-build && exit 1
+          [[ -e _lib/_build-staging-ops.sh ]] && ! ./ubiquitous_bash.sh _build_fallback_staging-zCustomYML-build && exit 1
           #! ./ubiquitous_bash.sh _closeChRoot && exit 1
           true
 
