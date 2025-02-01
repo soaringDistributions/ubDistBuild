@@ -257,21 +257,11 @@ jobs:
         #if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
         uses: easimon/maximize-build-space@master
         with:
-          ##root-reserve-mb: 512
-          ##root-reserve-mb: 1450
-          ##root-reserve-mb: 950
-          #root-reserve-mb: 1750
-          root-reserve-mb: 1625
-          ##temp-reserve-mb: 100
-          ##temp-reserve-mb: 300
-          ##temp-reserve-mb: 300
-          #temp-reserve-mb: 700
-          temp-reserve-mb: 50
-          ##swap-size-mb: 128
-          ##swap-size-mb: 192
-          #swap-size-mb: 8
+          root-reserve-mb: 4125
+          #root-reserve-mb: 1625
+          temp-reserve-mb: 1950
+          #temp-reserve-mb: 50
           swap-size-mb: 2
-          #swap-size-mb: 384
           #remove-dotnet: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
           remove-dotnet: 'true'
           #remove-android: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
@@ -703,21 +693,11 @@ jobs:
         if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
         uses: easimon/maximize-build-space@master
         with:
-          ##root-reserve-mb: 512
-          ##root-reserve-mb: 1450
-          ##root-reserve-mb: 950
-          #root-reserve-mb: 1750
-          root-reserve-mb: 1625
-          ##temp-reserve-mb: 100
-          ##temp-reserve-mb: 300
-          ##temp-reserve-mb: 300
-          #temp-reserve-mb: 700
-          temp-reserve-mb: 50
-          ##swap-size-mb: 128
-          ##swap-size-mb: 192
-          #swap-size-mb: 8
+          root-reserve-mb: 4125
+          #root-reserve-mb: 1625
+          temp-reserve-mb: 1950
+          #temp-reserve-mb: 50
           swap-size-mb: 2
-          #swap-size-mb: 384
           #remove-dotnet: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
           remove-dotnet: 'true'
           #remove-android: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
@@ -1422,8 +1402,10 @@ jobs:
         #if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
         uses: easimon/maximize-build-space@master
         with:
-          root-reserve-mb: 1625
-          temp-reserve-mb: 50
+          root-reserve-mb: 4125
+          #root-reserve-mb: 1625
+          temp-reserve-mb: 1950
+          #temp-reserve-mb: 50
           swap-size-mb: 2
           #remove-dotnet: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
           remove-dotnet: 'true'
@@ -1622,8 +1604,10 @@ jobs:
         #if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
         uses: easimon/maximize-build-space@master
         with:
-          root-reserve-mb: 1625
-          temp-reserve-mb: 50
+          root-reserve-mb: 4125
+          #root-reserve-mb: 1625
+          temp-reserve-mb: 1950
+          #temp-reserve-mb: 50
           swap-size-mb: 2
           #remove-dotnet: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
           remove-dotnet: 'true'
@@ -1902,8 +1886,10 @@ jobs:
         #if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
         uses: easimon/maximize-build-space@master
         with:
-          root-reserve-mb: 1625
-          temp-reserve-mb: 50
+          root-reserve-mb: 4125
+          #root-reserve-mb: 1625
+          temp-reserve-mb: 1950
+          #temp-reserve-mb: 50
           swap-size-mb: 2
           #remove-dotnet: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
           remove-dotnet: 'true'
