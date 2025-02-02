@@ -892,6 +892,9 @@ jobs:
       - name: _custom
         shell: bash
         run: |
+          # Using qemu within _custom is very strongly discouraged, unusual, and unwise.
+          export qemuNoKVM=${{ inputs.qemuNoKVM }}
+          echo qemuNoKVM $qemuNoKVM
           ./ubiquitous_bash.sh _custom || true
         #timeout-minutes: customTimeout
         timeout-minutes: 300
