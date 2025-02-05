@@ -619,18 +619,19 @@ jobs:
       - name: release! package_image_beforeBoot
         shell: bash
         run: |
-          #gh release create build-${{ github.run_id }}-${{ github.run_attempt }} --title build --notes ""
-          bash -c '
-          for currentFile in ./_local/package_image_beforeBoot.tar.flx.part*
-          do
-            ./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
-            while [[ $(jobs | wc -l) -ge 12 ]]
-            do
-              sleep 2
-            done
-          done
-          wait
-          '
+          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/package_image_beforeBoot.tar.flx.part*
+          ##gh release create build-${{ github.run_id }}-${{ github.run_attempt }} --title build --notes ""
+          #bash -c '
+          #for currentFile in ./_local/package_image_beforeBoot.tar.flx.part*
+          #do
+            #./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
+            #while [[ $(jobs | wc -l) -ge 12 ]]
+            #do
+              #sleep 2
+            #done
+          #done
+          #wait
+          #'
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -1086,18 +1087,19 @@ jobs:
       - name: release! package_image
         shell: bash
         run: |
-          #gh release create build-${{ github.run_id }}-${{ github.run_attempt }} --title build --notes ""
-          bash -c '
-          for currentFile in ./_local/package_image.tar.flx.part*
-          do
-            ./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
-            while [[ $(jobs | wc -l) -ge 12 ]]
-            do
-              sleep 2
-            done
-          done
-          wait
-          '
+          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/package_image.tar.flx.part*
+          ##gh release create build-${{ github.run_id }}-${{ github.run_attempt }} --title build --notes ""
+          #bash -c '
+          #for currentFile in ./_local/package_image.tar.flx.part*
+          #do
+            #./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
+            #while [[ $(jobs | wc -l) -ge 12 ]]
+            #do
+              #sleep 2
+            #done
+          #done
+          #wait
+          #'
         env:
           GH_TOKEN: ${{ github.token }}
           
@@ -1555,18 +1557,19 @@ jobs:
       - name: release! package_rootfs
         shell: bash
         run: |
-          #gh release create build-${{ github.run_id }}-${{ github.run_attempt }} --title build --notes ""
-          bash -c '
-          for currentFile in ./_local/package_rootfs.tar.flx.part*
-          do
-            ./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
-            while [[ $(jobs | wc -l) -ge 3 ]]
-            do
-              sleep 2
-            done
-          done
-          wait
-          '
+          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/package_rootfs.tar.flx.part*
+          ##gh release create build-${{ github.run_id }}-${{ github.run_attempt }} --title build --notes ""
+          #bash -c '
+          #for currentFile in ./_local/package_rootfs.tar.flx.part*
+          #do
+            #./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
+            #while [[ $(jobs | wc -l) -ge 3 ]]
+            #do
+              #sleep 2
+            #done
+          #done
+          #wait
+          #'
         env:
           GH_TOKEN: ${{ github.token }}
             
@@ -1817,18 +1820,19 @@ jobs:
       - name: release! live
         shell: bash
         run: |
-          #gh release create build-${{ github.run_id }}-${{ github.run_attempt }} --title build --notes ""
-          bash -c '
-          for currentFile in ./_local/vm-live.iso.part*
-          do
-            ./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
-            while [[ $(jobs | wc -l) -ge 3 ]]
-            do
-              sleep 2
-            done
-          done
-          wait
-          '
+          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/vm-live.iso.part*
+          ##gh release create build-${{ github.run_id }}-${{ github.run_attempt }} --title build --notes ""
+          #bash -c '
+          #for currentFile in ./_local/vm-live.iso.part*
+          #do
+            #./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
+            #while [[ $(jobs | wc -l) -ge 3 ]]
+            #do
+              #sleep 2
+            #done
+          #done
+          #wait
+          #'
         env:
           GH_TOKEN: ${{ github.token }}
 
