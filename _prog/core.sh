@@ -2389,7 +2389,7 @@ _ubDistBuild_split-tail_procedure() {
 # ATTRIBUTION-AI: ChatGPT o1 2025-01-14 
 _ubDistBuild_split-reflink_procedure() {
     local inputFile=""$1""
-    local chunkSize=1997537280  # ~1.86 GB
+    local chunkSize=1997537280  # ~1.86 GiB
     local currentIteration=0
 
     # Sanity check
