@@ -711,6 +711,23 @@ CZXWXcRMTo8EmM8i4d
 		#_chroot rsync -ax /linux-firmware/. /lib/firmware
 	#fi
 	
+
+	_messagePlain_nominal 'special (ie. packages missed by Debian Stable distribution, etc)'
+
+	sudo -n cp "$scriptLib"/"setup/debian/curlftpfs_0.9.2-9+b1_amd64.deb" "$globalVirtFS"/
+	if _chroot ls -A -1 "/curlftpfs_0.9.2-9+b1_amd64.deb" > /dev/null
+	then
+		_chroot dpkg -i "/curlftpfs_0.9.2-9+b1_amd64.deb"
+	else
+		# WARNING: HTTP (as opposed to HTTPS) strongly discouraged.
+		#_chroot wget 'http://ftp.debian.org/debian/pool/main/c/curlftpfs/curlftpfs_0.9.2-9+b1_amd64.deb'
+		_chroot wget 'https://mirrorservice.org/sites/ftp.debian.org/debian/pool/main/c/curlftpfs/curlftpfs_0.9.2-9+b1_amd64.deb'
+		
+		_chroot dpkg -i "./curlftpfs_0.9.2-9+b1_amd64.deb"
+	fi
+
+	_getMost_backend_aptGetInstall curlftpfs
+
 	
 	
 	_messagePlain_nominal 'tzdata, locales'

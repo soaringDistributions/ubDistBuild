@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2253948811'
+export ub_setScriptChecksum_contents='3352724851'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -49225,6 +49225,23 @@ CZXWXcRMTo8EmM8i4d
 		#_chroot rsync -ax /linux-firmware/. /lib/firmware
 	#fi
 	
+
+	_messagePlain_nominal 'special (ie. packages missed by Debian Stable distribution, etc)'
+
+	sudo -n cp "$scriptLib"/"setup/debian/curlftpfs_0.9.2-9+b1_amd64.deb" "$globalVirtFS"/
+	if _chroot ls -A -1 "/curlftpfs_0.9.2-9+b1_amd64.deb" > /dev/null
+	then
+		_chroot dpkg -i "/curlftpfs_0.9.2-9+b1_amd64.deb"
+	else
+		# WARNING: HTTP (as opposed to HTTPS) strongly discouraged.
+		#_chroot wget 'http://ftp.debian.org/debian/pool/main/c/curlftpfs/curlftpfs_0.9.2-9+b1_amd64.deb'
+		_chroot wget 'https://mirrorservice.org/sites/ftp.debian.org/debian/pool/main/c/curlftpfs/curlftpfs_0.9.2-9+b1_amd64.deb'
+		
+		_chroot dpkg -i "./curlftpfs_0.9.2-9+b1_amd64.deb"
+	fi
+
+	_getMost_backend_aptGetInstall curlftpfs
+
 	
 	
 	_messagePlain_nominal 'tzdata, locales'
