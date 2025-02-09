@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1755810391'
+export ub_setScriptChecksum_contents='4177422262'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -6259,8 +6259,8 @@ _setup_ssh_copyKey() {
 		chmod 600 "$scriptLocal"/ssh/"$sshKeyName"
 		chmod 600 "$scriptLocal"/ssh/"$sshKeyName".pub > /dev/null 2>&1
 		
-		cp --update=none "$scriptLocal"/ssh/"$sshKeyName" "$sshLocalSSH"/"$sshKeyName"
-		cp --update=none "$scriptLocal"/ssh/"$sshKeyName".pub "$sshLocalSSH"/"$sshKeyName".pub > /dev/null 2>&1
+		cp --no-clobber "$scriptLocal"/ssh/"$sshKeyName" "$sshLocalSSH"/"$sshKeyName"
+		cp --no-clobber "$scriptLocal"/ssh/"$sshKeyName".pub "$sshLocalSSH"/"$sshKeyName".pub > /dev/null 2>&1
 		
 		return 0
 	fi
@@ -6270,8 +6270,8 @@ _setup_ssh_copyKey() {
 		chmod 600 "$scriptLocal"/ssh/"$sshKeyLocalSubdirectory""$sshKeyName"
 		chmod 600 "$scriptLocal"/ssh/"$sshKeyLocalSubdirectory""$sshKeyName".pub > /dev/null 2>&1
 		
-		cp --update=none "$scriptLocal"/ssh/"$sshKeyLocalSubdirectory""$sshKeyName" "$sshLocalSSH"/"$sshKeyName"
-		cp --update=none "$scriptLocal"/ssh/"$sshKeyLocalSubdirectory""$sshKeyName".pub "$sshLocalSSH"/"$sshKeyName".pub > /dev/null 2>&1
+		cp --no-clobber "$scriptLocal"/ssh/"$sshKeyLocalSubdirectory""$sshKeyName" "$sshLocalSSH"/"$sshKeyName"
+		cp --no-clobber "$scriptLocal"/ssh/"$sshKeyLocalSubdirectory""$sshKeyName".pub "$sshLocalSSH"/"$sshKeyName".pub > /dev/null 2>&1
 		
 		return 0
 	fi
@@ -18677,6 +18677,7 @@ _mountChRoot() {
 	_bindMountManager "/dev" "$absolute1"/dev
 	
 	#_bindMountManager "/proc" "$absolute1"/proc
+	sudo -n mkdir -p "$absolute1"/proc
 	sudo -n mount -t proc none "$absolute1"/proc
 	
 	_bindMountManager "/sys" "$absolute1"/sys
@@ -18686,6 +18687,7 @@ _mountChRoot() {
 	_bindMountManager "/tmp" "$absolute1"/tmp
 	
 	#Provide an shm filesystem at /dev/shm.
+	sudo -n mkdir -p "$absolute1"/dev/shm
 	sudo -n mount -t tmpfs -o size=4G tmpfs "$absolute1"/dev/shm
 	
 	#Install ubiquitous_bash itself to chroot.
@@ -18719,12 +18721,12 @@ _mountChRoot() {
 	
 	if [[ -e "$absolute1"/etc/resolv.conf ]] && [[ ! -e "$absolute1"/etc/resolv.conf.host ]] && [[ -e /etc/resolv.conf ]]
 	then
-		sudo -n cp --update=none "$absolute1"/etc/resolv.conf "$absolute1"/etc/resolv.conf.guest.bak
+		sudo -n cp --no-clobber "$absolute1"/etc/resolv.conf "$absolute1"/etc/resolv.conf.guest.bak
 		sudo -n mv -n "$absolute1"/etc/resolv.conf "$absolute1"/etc/resolv.conf.guest
 		
 		#if [[ ! -e "$absolute1"/etc/resolv.conf.host ]]
 		#then
-			sudo -n cp --update=none -L /etc/resolv.conf "$absolute1"/etc/resolv.conf.host
+			sudo -n cp --no-clobber -L /etc/resolv.conf "$absolute1"/etc/resolv.conf.host
 			#sudo -n cat /etc/resolv.conf | sudo tee "$absolute1"/etc/resolv.conf.host > /dev/null 2>&1
 		#fi
 		
@@ -18884,7 +18886,7 @@ _mountChRoot_image_raspbian() {
 	sudo -n cp /usr/bin/qemu-arm-static "$chrootDir"/usr/bin/
 	sudo -n cp /usr/bin/qemu-armeb-static "$chrootDir"/usr/bin/
 	
-	sudo -n cp --update=none "$chrootDir"/etc/ld.so.preload "$chrootDir"/etc/ld.so.preload.orig
+	sudo -n cp --no-clobber "$chrootDir"/etc/ld.so.preload "$chrootDir"/etc/ld.so.preload.orig
 	echo | sudo -n tee "$chrootDir"/etc/ld.so.preload > /dev/null 2>&1
 	
 	
@@ -19638,7 +19640,8 @@ _createVMimage-micro() {
 	return 0
 }
 _createVMimage-micro_sequence() {
-    export ubVirtImageOverride="vm-ingredient.img"
+    #export ubVirtImageOverride="vm-ingredient.img"
+    export ubVirtImageOverride_alternate="$scriptLocal"/"vm-ingredient.img"
 	local ub_vmImage_micro="true"
 	_createVMimage "$@"
 }
@@ -19699,14 +19702,14 @@ _createVMimage() {
 	
 	mkdir -p "$scriptLocal"
 	
-	[[ "$ub_vmImage_micro" == "true" ]] && export ubVirtImageOverride="$scriptLocal"/vm-ingredient.img
+	#[[ "$ub_vmImage_micro" == "true" ]] && export ubVirtImageOverride="$scriptLocal"/vm-ingredient.img
 	
 	export vmImageFile="$scriptLocal"/vm.img
-	#[[ "$ub_vmImage_micro" == "true" ]] && export vmImageFile="$scriptLocal"/vm-ingredient.img
+	[[ "$ub_vmImage_micro" == "true" ]] && export vmImageFile="$scriptLocal"/vm-ingredient.img
 	[[ "$ubVirtImageOverride" != "" ]] && export vmImageFile="$ubVirtImageOverride"
 	
 	[[ "$ubVirtImageOverride" == "" ]] && [[ -e "$vmImageFile" ]] && _messagePlain_good 'exists: '"$vmImageFile" && return 0
-	[[ "$ubVirtImageOverride" == "" ]] && [[ -e "$scriptLocal"/vm.img ]] && _messagePlain_good 'exists: '"$vmImageFile" && return 0
+	[[ "$ubVirtImageOverride" == "" ]] && [[ -e "$scriptLocal"/vm.img ]] && _messagePlain_good 'exists: '"$scriptLocal"/vm.img && return 0
 	
 	[[ -e "$lock_open" ]]  && _messagePlain_bad 'bad: locked!' && _messageFAIL && _stop 1
 	[[ -e "$scriptLocal"/l_o ]]  && _messagePlain_bad 'bad: locked!' && _messageFAIL && _stop 1
@@ -19720,7 +19723,7 @@ _createVMimage() {
 	_open
 	
 	export vmImageFile="$scriptLocal"/vm.img
-	#[[ "$ub_vmImage_micro" == "true" ]] && export vmImageFile="$scriptLocal"/vm-ingredient.img
+	[[ "$ub_vmImage_micro" == "true" ]] && export vmImageFile="$scriptLocal"/vm-ingredient.img
 	[[ "$ubVirtImageOverride" != "" ]] && export vmImageFile="$ubVirtImageOverride"
 	
 	
@@ -19729,7 +19732,7 @@ _createVMimage() {
 		[[ -e "$vmImageFile" ]] && _messagePlain_bad 'exists: '"$vmImageFile" && _messageFAIL && _stop 1
 	
 	
-		_messageNormal 'create: vm.img: file'
+		_messageNormal 'create: '"$vmImageFile"': file'
 	
 
 		export vmSize=$(_vmsize)
@@ -19737,9 +19740,9 @@ _createVMimage() {
 
 		
 		export vmSize_boundary=$(bc <<< "$vmSize - 1")
-		_createRawImage
+		_createRawImage "$vmImageFile"
 	else
-		_messageNormal 'create: vm.img: device'
+		_messageNormal 'create: '"$vmImageFile"': device'
 
 		
 		export vmSize=$(bc <<< $(sudo -n lsblk -b --output SIZE -n -d "$vmImageFile")' / 1048576')
@@ -19748,7 +19751,7 @@ _createVMimage() {
 	fi
 	
 	
-	_messageNormal 'partition: vm.img'
+	_messageNormal 'partition: '"$vmImageFile"''
 	sudo -n parted --script "$vmImageFile" 'mklabel gpt'
 	
 	# Unusual.
@@ -19854,7 +19857,7 @@ _createVMimage() {
 	
 	
 	# Format partitions .
-	_messageNormal 'format: vm.img'
+	_messageNormal 'format: '"$vmImageFile"''
 	#"$scriptAbsoluteLocation" _loopImage_sequence || _stop 1
 	! "$scriptAbsoluteLocation" _openLoop && _messagePlain_bad 'fail: _openLoop' && _messageFAIL
 	
@@ -55486,12 +55489,14 @@ _create_ingredientVM_image() {
 
 	mkdir -p "$scriptLocal"
 	
+
+    [[ -e "$scriptLocal"/"vm-ingredient.img" ]] && _messagePlain_bad 'bad: fail: exists: vm-ingredient.img' && _messageFAIL
 	
 
     _messagePlain_nominal '_createVMimage-micro'
     unset ubVirtImageOverride
-    export ubVirtImageOverride="vm-ingredient.img"
 	_createVMimage-micro "$@"
+    export ubVirtImageOverride="$scriptLocal"/"vm-ingredient.img"
 
     
 
@@ -55510,7 +55515,7 @@ _create_ingredientVM_image() {
     #_createVMfstab
 
     _messagePlain_nominal 'os: globalVirtFS: write: fs'
-    cat << CZXWXcRMTo8EmM8i4d | tee -a "$globalVirtFS"/etc/sudoers > /dev/null
+    cat << CZXWXcRMTo8EmM8i4d | sudo -n tee -a "$globalVirtFS"/etc/sudoers > /dev/null
 #_____
 #Defaults	env_reset
 #Defaults	mail_badpass
@@ -55588,20 +55593,26 @@ CZXWXcRMTo8EmM8i4d
 	_messagePlain_nominal 'tzdata, locales'
 	_getMost_backend_aptGetInstall tzdata
 	_getMost_backend_aptGetInstall locales
+
+    
+	#_chroot tasksel install standard
+    _getMost_backend_aptGetInstall systemd
 	
 
 	_messagePlain_nominal 'timedatectl, update-locale, localectl'
 	[[ -e "$globalVirtFS"/usr/share/zoneinfo/America/New_York ]] && _chroot ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime
-	_chroot timedatectl set-timezone US/Eastern
-	_chroot update-locale LANG=en_US.UTF-8 LANGUAGE
-	_chroot localectl set-locale LANG=en_US.UTF-8
-	_chroot localectl --no-convert set-x11-keymap us pc104
+	#_chroot timedatectl set-timezone US/Eastern
+	#_chroot update-locale LANG=en_US.UTF-8 LANGUAGE
+	#_chroot localectl set-locale LANG=en_US.UTF-8
+	#_chroot localectl --no-convert set-x11-keymap us pc104
 	
     
 	_messagePlain_nominal 'useradd, usermod'
     _chroot useradd -m user
     _chroot usermod -s /bin/bash root
     _chroot usermod -s /bin/bash user
+
+    _rand_passwd() { cat /dev/urandom 2> /dev/null | base64 2> /dev/null | tr -dc 'a-zA-Z0-9' 2> /dev/null | head -c "$1" 2> /dev/null ; }
 
     echo 'root:'$(_rand_passwd 15) | _chroot chpasswd
     echo 'root:'$(_rand_passwd 32) | _chroot chpasswd
@@ -55625,13 +55636,15 @@ CZXWXcRMTo8EmM8i4d
 
     _messagePlain_nominal '> _closeChRoot'
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+    return 0
 }
 
 _create_ingredientVM_online() {
     _messageNormal '##### init: _create_ingredientVM_online'
 
     mkdir -p "$scriptLocal"
-    export ubVirtImageOverride="vm-ingredient.img"
+    export ubVirtImageOverride="$scriptLocal"/"vm-ingredient.img"
     
 
     _messagePlain_nominal '> _openChRoot'
@@ -55645,6 +55658,10 @@ _create_ingredientVM_online() {
     
     _messagePlain_nominal '_get_veracrypt'
     _create_ingredientVM_ubiquitous_bash '_get_veracrypt'
+
+    
+    _messagePlain_nominal 'ollama install'
+    curl -fsSL https://ollama.com/install.sh | _chroot sh
 
 
     _messagePlain_nominal 'nix package manager'
@@ -55702,6 +55719,8 @@ _create_ingredientVM_online() {
 
     _messagePlain_nominal '> _closeChRoot'
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+    return 0
 }
 
 
@@ -55712,7 +55731,7 @@ _create_ingredientVM_zeroFill() {
     _messageNormal '##### init: _create_ingredientVM_zeroFill'
 
     mkdir -p "$scriptLocal"
-    export ubVirtImageOverride="vm-ingredient.img"
+    export ubVirtImageOverride="$scriptLocal"/"vm-ingredient.img"
     
 
     _messagePlain_nominal '> _openChRoot'
@@ -55739,6 +55758,8 @@ _create_ingredientVM_zeroFill() {
 
     _messagePlain_nominal '> _closeChRoot'
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+    return 0
 }
 
 
@@ -55766,7 +55787,7 @@ _create_ingredientVM_ubiquitous_bash-cp() {
 	local functionEntryPWD="$PWD"
 
     mkdir -p "$scriptLocal"
-    export ubVirtImageOverride="vm-ingredient.img"
+    export ubVirtImageOverride="$scriptLocal"/"vm-ingredient.img"
 
 
 
@@ -55825,6 +55846,8 @@ _create_ingredientVM_ubiquitous_bash-cp() {
 
     _messagePlain_nominal '> _closeChRoot'
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+    return 0
 }
 _create_ingredientVM_ubiquitous_bash-rm() {
     _messageNormal '##### init: _create_ingredientVM_ubiquitous_bash-rm'
@@ -55832,7 +55855,7 @@ _create_ingredientVM_ubiquitous_bash-rm() {
 	local functionEntryPWD="$PWD"
 
     mkdir -p "$scriptLocal"
-    export ubVirtImageOverride="vm-ingredient.img"
+    export ubVirtImageOverride="$scriptLocal"/"vm-ingredient.img"
     
 
 
@@ -55850,6 +55873,8 @@ _create_ingredientVM_ubiquitous_bash-rm() {
 
     _messagePlain_nominal '> _closeChRoot'
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+    return 0
 }
 
 #currentReversePort=""

@@ -24,12 +24,14 @@ _create_ingredientVM_image() {
 
 	mkdir -p "$scriptLocal"
 	
+
+    [[ -e "$scriptLocal"/"vm-ingredient.img" ]] && _messagePlain_bad 'bad: fail: exists: vm-ingredient.img' && _messageFAIL
 	
 
     _messagePlain_nominal '_createVMimage-micro'
     unset ubVirtImageOverride
-    export ubVirtImageOverride="vm-ingredient.img"
 	_createVMimage-micro "$@"
+    export ubVirtImageOverride="$scriptLocal"/"vm-ingredient.img"
 
     
 
@@ -48,7 +50,7 @@ _create_ingredientVM_image() {
     #_createVMfstab
 
     _messagePlain_nominal 'os: globalVirtFS: write: fs'
-    cat << CZXWXcRMTo8EmM8i4d | tee -a "$globalVirtFS"/etc/sudoers > /dev/null
+    cat << CZXWXcRMTo8EmM8i4d | sudo -n tee -a "$globalVirtFS"/etc/sudoers > /dev/null
 #_____
 #Defaults	env_reset
 #Defaults	mail_badpass
@@ -126,20 +128,26 @@ CZXWXcRMTo8EmM8i4d
 	_messagePlain_nominal 'tzdata, locales'
 	_getMost_backend_aptGetInstall tzdata
 	_getMost_backend_aptGetInstall locales
+
+    
+	#_chroot tasksel install standard
+    _getMost_backend_aptGetInstall systemd
 	
 
 	_messagePlain_nominal 'timedatectl, update-locale, localectl'
 	[[ -e "$globalVirtFS"/usr/share/zoneinfo/America/New_York ]] && _chroot ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime
-	_chroot timedatectl set-timezone US/Eastern
-	_chroot update-locale LANG=en_US.UTF-8 LANGUAGE
-	_chroot localectl set-locale LANG=en_US.UTF-8
-	_chroot localectl --no-convert set-x11-keymap us pc104
+	#_chroot timedatectl set-timezone US/Eastern
+	#_chroot update-locale LANG=en_US.UTF-8 LANGUAGE
+	#_chroot localectl set-locale LANG=en_US.UTF-8
+	#_chroot localectl --no-convert set-x11-keymap us pc104
 	
     
 	_messagePlain_nominal 'useradd, usermod'
     _chroot useradd -m user
     _chroot usermod -s /bin/bash root
     _chroot usermod -s /bin/bash user
+
+    _rand_passwd() { cat /dev/urandom 2> /dev/null | base64 2> /dev/null | tr -dc 'a-zA-Z0-9' 2> /dev/null | head -c "$1" 2> /dev/null ; }
 
     echo 'root:'$(_rand_passwd 15) | _chroot chpasswd
     echo 'root:'$(_rand_passwd 32) | _chroot chpasswd
@@ -163,13 +171,15 @@ CZXWXcRMTo8EmM8i4d
 
     _messagePlain_nominal '> _closeChRoot'
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+    return 0
 }
 
 _create_ingredientVM_online() {
     _messageNormal '##### init: _create_ingredientVM_online'
 
     mkdir -p "$scriptLocal"
-    export ubVirtImageOverride="vm-ingredient.img"
+    export ubVirtImageOverride="$scriptLocal"/"vm-ingredient.img"
     
 
     _messagePlain_nominal '> _openChRoot'
@@ -183,6 +193,10 @@ _create_ingredientVM_online() {
     
     _messagePlain_nominal '_get_veracrypt'
     _create_ingredientVM_ubiquitous_bash '_get_veracrypt'
+
+    
+    _messagePlain_nominal 'ollama install'
+    curl -fsSL https://ollama.com/install.sh | _chroot sh
 
 
     _messagePlain_nominal 'nix package manager'
@@ -240,6 +254,8 @@ _create_ingredientVM_online() {
 
     _messagePlain_nominal '> _closeChRoot'
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+    return 0
 }
 
 
@@ -250,7 +266,7 @@ _create_ingredientVM_zeroFill() {
     _messageNormal '##### init: _create_ingredientVM_zeroFill'
 
     mkdir -p "$scriptLocal"
-    export ubVirtImageOverride="vm-ingredient.img"
+    export ubVirtImageOverride="$scriptLocal"/"vm-ingredient.img"
     
 
     _messagePlain_nominal '> _openChRoot'
@@ -277,6 +293,8 @@ _create_ingredientVM_zeroFill() {
 
     _messagePlain_nominal '> _closeChRoot'
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+    return 0
 }
 
 
@@ -304,7 +322,7 @@ _create_ingredientVM_ubiquitous_bash-cp() {
 	local functionEntryPWD="$PWD"
 
     mkdir -p "$scriptLocal"
-    export ubVirtImageOverride="vm-ingredient.img"
+    export ubVirtImageOverride="$scriptLocal"/"vm-ingredient.img"
 
 
 
@@ -363,6 +381,8 @@ _create_ingredientVM_ubiquitous_bash-cp() {
 
     _messagePlain_nominal '> _closeChRoot'
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+    return 0
 }
 _create_ingredientVM_ubiquitous_bash-rm() {
     _messageNormal '##### init: _create_ingredientVM_ubiquitous_bash-rm'
@@ -370,7 +390,7 @@ _create_ingredientVM_ubiquitous_bash-rm() {
 	local functionEntryPWD="$PWD"
 
     mkdir -p "$scriptLocal"
-    export ubVirtImageOverride="vm-ingredient.img"
+    export ubVirtImageOverride="$scriptLocal"/"vm-ingredient.img"
     
 
 
@@ -388,4 +408,6 @@ _create_ingredientVM_ubiquitous_bash-rm() {
 
     _messagePlain_nominal '> _closeChRoot'
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+    return 0
 }
