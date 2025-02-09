@@ -141,14 +141,19 @@ CZXWXcRMTo8EmM8i4d
     _chroot usermod -s /bin/bash root
     _chroot usermod -s /bin/bash user
 
-    groupadd users
-    groupadd disk
+    echo 'root:'$(_rand_passwd 15) | _chroot chpasswd
+    echo 'root:'$(_rand_passwd 32) | _chroot chpasswd
+    
+    echo 'user:'$(_rand_passwd 15) | _chroot chpasswd
+    echo 'user:'$(_rand_passwd 32) | _chroot chpasswd
+
+    _chroot groupadd users
+    _chroot groupadd disk
 
 	_chroot usermod -a -G sudo user
-	_chroot usermod -a -G sudo wheel
-
-	_chroot usermod -a -G sudo users
-	_chroot usermod -a -G disk users
+	_chroot usermod -a -G wheel user
+	_chroot usermod -a -G disk user
+	_chroot usermod -a -G users user
 
 
     _messagePlain_nominal 'apt: upgrade'
@@ -156,8 +161,8 @@ CZXWXcRMTo8EmM8i4d
 
 
 
-    _messagePlain_nominal '> _closeChroot'
-	! "$scriptAbsoluteLocation" _closeChroot && _messagePlain_bad 'fail: _closeChroot' && _messageFAIL
+    _messagePlain_nominal '> _closeChRoot'
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 }
 
 _create_ingredientVM_online() {
@@ -173,7 +178,7 @@ _create_ingredientVM_online() {
 
 
     _messagePlain_nominal 'report: disk usage'
-    _chroot bash -c 'df --block-size=1000000 --output=used / | tr -dc '0-9' | tee /report-micro-diskUsage'
+    _chroot bash -c 'df --block-size=1000000 --output=used / | tr -dc "0-9" | tee /report-micro-diskUsage'
 
     
     _messagePlain_nominal '_get_veracrypt'
@@ -233,8 +238,8 @@ _create_ingredientVM_online() {
 
 
 
-    _messagePlain_nominal '> _closeChroot'
-	! "$scriptAbsoluteLocation" _closeChroot && _messagePlain_bad 'fail: _closeChroot' && _messageFAIL
+    _messagePlain_nominal '> _closeChRoot'
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 }
 
 
@@ -242,7 +247,7 @@ _create_ingredientVM_online() {
 
 
 _create_ingredientVM_zeroFill() {
-    _messageNormal '##### init: _create_ingredientVM_online'
+    _messageNormal '##### init: _create_ingredientVM_zeroFill'
 
     mkdir -p "$scriptLocal"
     export ubVirtImageOverride="vm-ingredient.img"
@@ -270,8 +275,8 @@ _create_ingredientVM_zeroFill() {
 
 
 
-    _messagePlain_nominal '> _closeChroot'
-	! "$scriptAbsoluteLocation" _closeChroot && _messagePlain_bad 'fail: _closeChroot' && _messageFAIL
+    _messagePlain_nominal '> _closeChRoot'
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 }
 
 
@@ -284,7 +289,7 @@ _create_ingredientVM_zeroFill() {
 
 _create_ingredientVM_diskUsage() {
     _chroot bash -c '(echo ; echo '"$1"') | tee -a /report-micro-diskUsage'
-    _chroot bash -c 'df --block-size=1000000 --output=used / | tr -dc '0-9' | tee -a /report-micro-diskUsage'
+    _chroot bash -c 'df --block-size=1000000 --output=used / | tr -dc "0-9" | tee -a /report-micro-diskUsage'
 }
 
 _create_ingredientVM_ubiquitous_bash() {
@@ -329,7 +334,7 @@ _create_ingredientVM_ubiquitous_bash-cp() {
 	                  print diff;
 	                  print old_mode;
 	                  print new_mode;
-	                }' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/' | tee /dev/sdtout | git apply
+	                }' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/' | tee /dev/stdout | git apply
 
 	sleep 9
 	git config core.fileMode "$currentConfig"
@@ -356,8 +361,8 @@ _create_ingredientVM_ubiquitous_bash-cp() {
 	fi
 
 
-    _messagePlain_nominal '> _closeChroot'
-	! "$scriptAbsoluteLocation" _closeChroot && _messagePlain_bad 'fail: _closeChroot' && _messageFAIL
+    _messagePlain_nominal '> _closeChRoot'
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 }
 _create_ingredientVM_ubiquitous_bash-rm() {
     _messageNormal '##### init: _create_ingredientVM_ubiquitous_bash-rm'
@@ -381,6 +386,6 @@ _create_ingredientVM_ubiquitous_bash-rm() {
 
 
 
-    _messagePlain_nominal '> _closeChroot'
-	! "$scriptAbsoluteLocation" _closeChroot && _messagePlain_bad 'fail: _closeChroot' && _messageFAIL
+    _messagePlain_nominal '> _closeChRoot'
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 }

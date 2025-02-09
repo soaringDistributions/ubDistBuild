@@ -3131,7 +3131,7 @@ _chroot_test() {
 	                  print diff;
 	                  print old_mode;
 	                  print new_mode;
-	                }' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/' | tee /dev/sdtout | git apply
+	                }' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/' | tee /dev/stdout | git apply
 
 	sleep 9
 	git config core.fileMode "$currentConfig"
