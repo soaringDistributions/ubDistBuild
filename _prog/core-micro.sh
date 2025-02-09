@@ -8,12 +8,15 @@ _create_ingredientVM() {
     then
         exit 1
     fi
+
+    _create_ingredientVM_online "$@"
+    
     if ! "$scriptAbsoluteLocation" _create_ingredientVM_ubiquitous_bash-rm "$@"
     then
         exit 1
     fi
 
-    _create_ingredientVM_online "$@"
+    _create_ingredientVM_zeroFill "$@"
 }
 
 _create_ingredientVM_image() {
@@ -304,7 +307,7 @@ _create_ingredientVM_ubiquitous_bash-cp() {
     ! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 
     
-    
+
 	# https://superuser.com/questions/1559417/how-to-discard-only-mode-changes-with-git
 	cd "$scriptLib"/ubiquitous_bash
 	_messagePlain_probe_cmd ls -ld _lib/kit/app/researchEngine
