@@ -138,6 +138,11 @@ _compile_bash_program_prog() {
 
 
 	includeScriptList+=( core-upgrade.sh )
+
+
+
+
+	includeScriptList+=( core-micro.sh )
 	
 	true
 }
