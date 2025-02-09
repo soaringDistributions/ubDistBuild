@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='4177422262'
+export ub_setScriptChecksum_contents='989071430'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -51363,8 +51363,10 @@ _zSpecial_qemu() {
 
 
 
-_chroot_test() {
+_chroot_test_sequence() {
 	_messageNormal '##### init: _chroot_test'
+	_start
+
 	echo
 	
 	local functionEntryPWD="$PWD"
@@ -51412,7 +51414,8 @@ _chroot_test() {
 	                  print diff;
 	                  print old_mode;
 	                  print new_mode;
-	                }' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/' | tee /dev/stdout | git apply
+	                }' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/' | tee /dev/stdout > "$safeTmp"/patch.txt
+	cat patch.txt | git apply
 
 	sleep 9
 	git config core.fileMode "$currentConfig"
@@ -51442,6 +51445,14 @@ _chroot_test() {
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 
 	cd "$functionEntryPWD"
+	_stop
+	#return 0
+}
+_chroot_test() {
+	if ! "$scriptAbsoluteLocation" _chroot_test_sequence "$@"
+	then
+		_stop 1
+	fi
 	return 0
 }
 
@@ -55536,7 +55547,7 @@ user ALL=(ALL:ALL) NOPASSWD: ALL
 #%sudo	ALL=(ALL:ALL) ALL
 
 # Important. Prevents possibility of appending to sudoers again by 'rotten_install.sh' .
-noMoreRotten
+#noMoreRotten
 
 CZXWXcRMTo8EmM8i4d
 
@@ -55739,7 +55750,7 @@ _create_ingredientVM_zeroFill() {
 
 
 
-    _messagePlain_nominal 'zero fill'
+    _messagePlain_nominal 'zero fill: root'
     _chroot mount -o remount,compress=none /
 	_chroot rm -f /fill > /dev/null 2>&1
 	_chroot dd if=/dev/zero of=/fill bs=1M count=1 oflag=append conv=notrunc status=progress
@@ -55753,6 +55764,13 @@ _create_ingredientVM_zeroFill() {
 	else
 		_chroot mount -o remount,compress=zstd:9 /
 	fi
+
+
+    _messagePlain_nominal 'zero fill: boot'
+	_chroot rm -f /boot/fill > /dev/null 2>&1
+	_chroot dd if=/dev/zero of=/boot/fill bs=1M count=1 oflag=append conv=notrunc status=progress
+	_chroot dd if=/dev/zero of=/boot/fill bs=1M oflag=append conv=notrunc status=progress
+	_chroot rm -f /boot/fill
 
 
 
@@ -55781,8 +55799,9 @@ _create_ingredientVM_ubiquitous_bash() {
     _create_ingredientVM_diskUsage "$1"
 }
 
-_create_ingredientVM_ubiquitous_bash-cp() {
+_create_ingredientVM_ubiquitous_bash_sequence-cp() {
     _messageNormal '##### init: _create_ingredientVM_ubiquitous_bash-cp'
+    _start
 	
 	local functionEntryPWD="$PWD"
 
@@ -55817,7 +55836,8 @@ _create_ingredientVM_ubiquitous_bash-cp() {
 	                  print diff;
 	                  print old_mode;
 	                  print new_mode;
-	                }' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/' | tee /dev/stdout | git apply
+	                }' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/' | tee /dev/stdout > "$safeTmp"/patch.txt
+    cat "$safeTmp"/patch.txt | git apply
 
 	sleep 9
 	git config core.fileMode "$currentConfig"
@@ -55847,6 +55867,14 @@ _create_ingredientVM_ubiquitous_bash-cp() {
     _messagePlain_nominal '> _closeChRoot'
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 
+    _stop
+    #return 0
+}
+_create_ingredientVM_ubiquitous_bash-cp() {
+    if ! "$scriptAbsoluteLocation" _create_ingredientVM_ubiquitous_bash_sequence-cp "$@"
+    then
+        _stop 1
+    fi
     return 0
 }
 _create_ingredientVM_ubiquitous_bash-rm() {

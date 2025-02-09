@@ -3082,8 +3082,10 @@ _zSpecial_qemu() {
 
 
 
-_chroot_test() {
+_chroot_test_sequence() {
 	_messageNormal '##### init: _chroot_test'
+	_start
+
 	echo
 	
 	local functionEntryPWD="$PWD"
@@ -3131,7 +3133,8 @@ _chroot_test() {
 	                  print diff;
 	                  print old_mode;
 	                  print new_mode;
-	                }' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/' | tee /dev/stdout | git apply
+	                }' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/' | tee /dev/stdout > "$safeTmp"/patch.txt
+	cat patch.txt | git apply
 
 	sleep 9
 	git config core.fileMode "$currentConfig"
@@ -3161,6 +3164,14 @@ _chroot_test() {
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 
 	cd "$functionEntryPWD"
+	_stop
+	#return 0
+}
+_chroot_test() {
+	if ! "$scriptAbsoluteLocation" _chroot_test_sequence "$@"
+	then
+		_stop 1
+	fi
 	return 0
 }
 

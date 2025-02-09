@@ -71,7 +71,7 @@ user ALL=(ALL:ALL) NOPASSWD: ALL
 #%sudo	ALL=(ALL:ALL) ALL
 
 # Important. Prevents possibility of appending to sudoers again by 'rotten_install.sh' .
-noMoreRotten
+#noMoreRotten
 
 CZXWXcRMTo8EmM8i4d
 
@@ -274,7 +274,7 @@ _create_ingredientVM_zeroFill() {
 
 
 
-    _messagePlain_nominal 'zero fill'
+    _messagePlain_nominal 'zero fill: root'
     _chroot mount -o remount,compress=none /
 	_chroot rm -f /fill > /dev/null 2>&1
 	_chroot dd if=/dev/zero of=/fill bs=1M count=1 oflag=append conv=notrunc status=progress
@@ -288,6 +288,13 @@ _create_ingredientVM_zeroFill() {
 	else
 		_chroot mount -o remount,compress=zstd:9 /
 	fi
+
+
+    _messagePlain_nominal 'zero fill: boot'
+	_chroot rm -f /boot/fill > /dev/null 2>&1
+	_chroot dd if=/dev/zero of=/boot/fill bs=1M count=1 oflag=append conv=notrunc status=progress
+	_chroot dd if=/dev/zero of=/boot/fill bs=1M oflag=append conv=notrunc status=progress
+	_chroot rm -f /boot/fill
 
 
 
@@ -316,8 +323,9 @@ _create_ingredientVM_ubiquitous_bash() {
     _create_ingredientVM_diskUsage "$1"
 }
 
-_create_ingredientVM_ubiquitous_bash-cp() {
+_create_ingredientVM_ubiquitous_bash_sequence-cp() {
     _messageNormal '##### init: _create_ingredientVM_ubiquitous_bash-cp'
+    _start
 	
 	local functionEntryPWD="$PWD"
 
@@ -352,7 +360,8 @@ _create_ingredientVM_ubiquitous_bash-cp() {
 	                  print diff;
 	                  print old_mode;
 	                  print new_mode;
-	                }' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/' | tee /dev/stdout | git apply
+	                }' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/' | tee /dev/stdout > "$safeTmp"/patch.txt
+    cat "$safeTmp"/patch.txt | git apply
 
 	sleep 9
 	git config core.fileMode "$currentConfig"
@@ -382,6 +391,14 @@ _create_ingredientVM_ubiquitous_bash-cp() {
     _messagePlain_nominal '> _closeChRoot'
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
 
+    _stop
+    #return 0
+}
+_create_ingredientVM_ubiquitous_bash-cp() {
+    if ! "$scriptAbsoluteLocation" _create_ingredientVM_ubiquitous_bash_sequence-cp "$@"
+    then
+        _stop 1
+    fi
     return 0
 }
 _create_ingredientVM_ubiquitous_bash-rm() {
