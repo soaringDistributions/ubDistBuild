@@ -295,31 +295,45 @@ _create_ubDistBuild-create() {
 	
 	
 	
-	_createVMimage "$@"
+	if [[ ! -e "$scriptLocal"/vm-ingredient.img ]]
+	then
+
+		_createVMimage "$@"
+		
+		
+		
+		_messageNormal 'os: globalVirtFS: debootstrap'
+		
+		! "$scriptAbsoluteLocation" _openImage && _messagePlain_bad 'fail: _openImage' && _messageFAIL
+		local imagedev
+		imagedev=$(cat "$scriptLocal"/imagedev)
+		
+		
+		# https://gist.github.com/superboum/1c7adcd967d3e15dfbd30d04b9ae6144
+		# https://gist.github.com/dyejon/8e78b97c4eba954ddbda7ae482821879
+		#http://deb.debian.org/debian/
+		#--components=main --include=inetutils-ping,iproute
+		#! sudo -n debootstrap --variant=minbase --arch amd64 bullseye "$globalVirtFS" && _messageFAIL
+		! sudo -n debootstrap --variant=minbase --arch amd64 bookworm "$globalVirtFS" && _messageFAIL
+		
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	_messageNormal 'os: globalVirtFS: debootstrap'
-	
+		! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
+	else
+
+
+		mv -f "$scriptLocal"/vm-ingredient.img "$scriptLocal"/vm.img
+		[[ -e "$scriptLocal"/vm-ingredient.img ]] && _messagePlain_bad 'bad: fail: mv: vm-ingredient.img' && _messageFAIL
+		[[ ! -e "$scriptLocal"/vm.img ]] && _messagePlain_bad 'bad: fail: mv: vm-ingredient.img' && _messageFAIL
+
+
+	fi
+
+
+
 	! "$scriptAbsoluteLocation" _openImage && _messagePlain_bad 'fail: _openImage' && _messageFAIL
 	local imagedev
 	imagedev=$(cat "$scriptLocal"/imagedev)
-	
-	
-	# https://gist.github.com/superboum/1c7adcd967d3e15dfbd30d04b9ae6144
-	# https://gist.github.com/dyejon/8e78b97c4eba954ddbda7ae482821879
-	#http://deb.debian.org/debian/
-	#--components=main --include=inetutils-ping,iproute
-	#! sudo -n debootstrap --variant=minbase --arch amd64 bullseye "$globalVirtFS" && _messageFAIL
-	! sudo -n debootstrap --variant=minbase --arch amd64 bookworm "$globalVirtFS" && _messageFAIL
-	
-	
+
 	
 	_createVMfstab
 	

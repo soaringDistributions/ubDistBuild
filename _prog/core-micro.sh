@@ -6,14 +6,14 @@ _create_ingredientVM() {
 
     if ! "$scriptAbsoluteLocation" _create_ingredientVM_ubiquitous_bash-cp "$@"
     then
-        exit 1
+        _stop 1
     fi
 
     _create_ingredientVM_online "$@"
     
     if ! "$scriptAbsoluteLocation" _create_ingredientVM_ubiquitous_bash-rm "$@"
     then
-        exit 1
+        _stop 1
     fi
 
     _create_ingredientVM_zeroFill "$@"
@@ -41,6 +41,10 @@ _create_ingredientVM_image() {
 	local imagedev
 	imagedev=$(cat "$scriptLocal"/imagedev)
 
+
+
+    _messagePlain_nominal 'remount: compression'
+    sudo -n mount -o remount,compress=zstd:15 "$globalVirtFS"
 
 
     _messagePlain_nominal 'debootstrap'
@@ -102,14 +106,26 @@ CZXWXcRMTo8EmM8i4d
     _getMost_backend_aptGetInstall apt-fast
 
 
-    _messagePlain_nominal 'dependencies'
+    _messagePlain_nominal 'apt: minimal'
     _getMost_backend_aptGetInstall ca-certificates
 	
 	_getMost_backend_aptGetInstall apt-utils
 
+    _getMost_backend_aptGetInstall wget
 	_getMost_backend_aptGetInstall aria2 curl gpg
 	_getMost_backend_aptGetInstall gnupg
 	_getMost_backend_aptGetInstall lsb-release
+	
+	_getMost_backend_aptGetInstall xz-utils
+
+    _getMost_backend_aptGetInstall openssl jq git lz4 bc xxd
+    _getMost_backend_aptGetInstall pv
+    _getMost_backend_aptGetInstall gh
+
+    _getMost_backend_aptGetInstall p7zip
+	_getMost_backend_aptGetInstall p7zip-full
+    _getMost_backend_aptGetInstall unzip zip
+    _getMost_backend_aptGetInstall lbzip2
 
 	_getMost_backend_aptGetInstall btrfs-tools
 	_getMost_backend_aptGetInstall btrfs-progs
@@ -132,7 +148,12 @@ CZXWXcRMTo8EmM8i4d
     
 	#_chroot tasksel install standard
     _getMost_backend_aptGetInstall systemd
+
+
+    _messagePlain_nominal 'apt: DEPENDENCIES'
+    ! _getMost_backend_aptGetInstall fuse expect software-properties-common libvirt-daemon-system libvirt-daemon libvirt-daemon-driver-qemu libvirt-clients man-db && _messagePlain_bad 'bad: FAIL: apt-get install DEPENDENCIES' && _messageFAIL
 	
+
 
 	_messagePlain_nominal 'timedatectl, update-locale, localectl'
 	[[ -e "$globalVirtFS"/usr/share/zoneinfo/America/New_York ]] && _chroot ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime
@@ -168,6 +189,10 @@ CZXWXcRMTo8EmM8i4d
 	_chroot env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --install-recommends -y upgrade
 
 
+    _messagePlain_nominal 'apt: clean'
+    _chroot env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y clean
+    _chroot env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y autoclean
+
 
     _messagePlain_nominal '> _closeChRoot'
 	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
@@ -186,9 +211,42 @@ _create_ingredientVM_online() {
     ! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 
 
+    # WARNING: skimfast - No production use!
+    # WARNING: Do NOT pass skimfast to this function during normal builds. ONLY export the skimfast variable in CI YAML scripts specifically for very rapid development/testing and NOT production use!
+    _messagePlain_nominal 'remount: compression'
+	if [[ "$skimfast" == "true" ]]
+	then
+		#_chroot mount -o remount,compress=zstd:2 /
+        _chroot mount -o remount,compress=zstd:13 /
+	else
+		#_chroot mount -o remount,compress=zstd:9 /
+        _chroot mount -o remount,compress=zstd:15 /
+	fi
+
 
     _messagePlain_nominal 'report: disk usage'
     _chroot bash -c 'df --block-size=1000000 --output=used / | tr -dc "0-9" | tee /report-micro-diskUsage'
+
+    
+    # Enable if 'whirlpool' hash, etc, may be used.
+    #_messagePlain_nominal '_custom_splice_opensslConfig'
+    #_create_ingredientVM_ubiquitous_bash '_custom_splice_opensslConfig'
+
+
+
+    _messagePlain_nominal 'apt-key: vbox'
+    wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | _chroot apt-key add -
+    wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | _chroot apt-key add -
+
+    _messagePlain_nominal 'apt-key: docker'
+    curl -fsSL https://download.docker.com/linux/debian/gpg | _chroot apt-key add -
+	local aptKeyFingerprint
+	aptKeyFingerprint=$(_chroot apt-key fingerprint 0EBFCD88 2> /dev/null)
+	[[ "$aptKeyFingerprint" == "" ]] && _messagePlain_bad 'bad: fail: docker apt-key' && _messageFAIL
+
+    _messagePlain_nominal 'apt-key: hashicorp (terraform, vagrant)'
+    curl -fsSL https://apt.releases.hashicorp.com/gpg | _chroot apt-key add -
+
 
     
     _messagePlain_nominal '_get_veracrypt'
@@ -196,7 +254,7 @@ _create_ingredientVM_online() {
 
     
     _messagePlain_nominal 'ollama install'
-    curl -fsSL https://ollama.com/install.sh | _chroot sh
+    curl -fsSL https://ollama.com/install.sh | _chroot sudo -n -u user sh
 
 
     _messagePlain_nominal 'nix package manager'
@@ -205,6 +263,10 @@ _create_ingredientVM_online() {
 
     _messagePlain_nominal 'nix package manager - packages'
     _create_ingredientVM_ubiquitous_bash '_get_from_nix'
+
+
+    _messagePlain_nominal 'nix package manager - gc'
+    _chroot sudo -n -u user /bin/bash -l -c 'cd ; nix-store --gc'
 
 
     #_messagePlain_nominal '_test_cloud'
@@ -223,32 +285,24 @@ _create_ingredientVM_online() {
     _create_ingredientVM_ubiquitous_bash '_test_rclone'
 
 
-    _messagePlain_nominal '_test_terraform'
-    _create_ingredientVM_ubiquitous_bash '_test_terraform'
+    # May be achieved in practice with Debian packages from third-party repository.
+    #_messagePlain_nominal '_test_terraform'
+    ##sudo -n apt-add-repository -y "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+    ##vagrant-libvirt vagrant
+    #_create_ingredientVM_ubiquitous_bash '_test_terraform'
 
 
-    _messagePlain_nominal '_test_vagrant'
-    _create_ingredientVM_ubiquitous_bash '_test_vagrant'
+    # May be achieved in practice with Debian packages from third-party repository.
+    #_messagePlain_nominal '_test_vagrant_build'
+    ##sudo -n apt-add-repository -y "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+    ##vagrant-libvirt vagrant
+    #create_ingredientVM_ubiquitous_bash '_test_vagrant_build'
 
 
     #firejail
 
 
     #digimend
-
-
-    _messagePlain_nominal 'apt-key: vbox'
-    wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | _chroot apt-key add -
-    wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | _chroot apt-key add -
-
-    _messagePlain_nominal 'apt-key: docker'
-    curl -fsSL https://download.docker.com/linux/debian/gpg | _chroot apt-key add -
-	local aptKeyFingerprint
-	aptKeyFingerprint=$(_chroot apt-key fingerprint 0EBFCD88 2> /dev/null)
-	[[ "$aptKeyFingerprint" == "" ]] && _messagePlain_bad 'bad: fail: docker apt-key' && _messageFAIL
-
-    _messagePlain_nominal 'apt-key: hashicorp (terraform, vagrant)'
-    curl -fsSL https://apt.releases.hashicorp.com/gpg | _chroot apt-key add -
 
 
 
@@ -282,11 +336,15 @@ _create_ingredientVM_zeroFill() {
 	_chroot dd if=/dev/zero of=/fill bs=1M oflag=append conv=notrunc status=progress
 	_chroot rm -f /fill
 	
+    # WARNING: skimfast - No production use!
+    # WARNING: Do NOT pass skimfast to this function during normal builds. ONLY export the skimfast variable in CI YAML scripts specifically for very rapid development/testing and NOT production use!
 	if [[ "$skimfast" == "true" ]]
 	then
-		_chroot mount -o remount,compress=zstd:2 /
+		#_chroot mount -o remount,compress=zstd:2 /
+        _chroot mount -o remount,compress=zstd:13 /
 	else
-		_chroot mount -o remount,compress=zstd:9 /
+		#_chroot mount -o remount,compress=zstd:9 /
+        _chroot mount -o remount,compress=zstd:15 /
 	fi
 
 
@@ -339,7 +397,11 @@ _create_ingredientVM_ubiquitous_bash_sequence-cp() {
 
     
 
-	# https://superuser.com/questions/1559417/how-to-discard-only-mode-changes-with-git
+	_messagePlain_nominal 'remount: compression'
+    sudo -n mount -o remount,compress=zstd:15 "$globalVirtFS"
+
+
+    # https://superuser.com/questions/1559417/how-to-discard-only-mode-changes-with-git
 	cd "$scriptLib"/ubiquitous_bash
 	_messagePlain_probe_cmd ls -ld _lib/kit/app/researchEngine
 	local currentConfig
@@ -386,6 +448,11 @@ _create_ingredientVM_ubiquitous_bash_sequence-cp() {
 	then
 		_messageFAIL
 	fi
+    
+
+    #_messagePlain_nominal '_setupUbiquitous , _custom_splice_opensslConfig'
+    #_chroot sudo -n --preserve-env=devfast -u user bash -c 'cd /home/user/temp_micro/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ ; /home/user/temp_micro/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ubiquitous_bash.sh '"_setupUbiquitous"
+    #_chroot sudo -n --preserve-env=devfast -u user bash -c 'cd /home/user/temp_micro/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ ; /home/user/temp_micro/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ubiquitous_bash.sh '"_custom_splice_opensslConfig"
 
 
     _messagePlain_nominal '> _closeChRoot'
@@ -416,7 +483,11 @@ _create_ingredientVM_ubiquitous_bash-rm() {
 
 
 
-	## DANGER: Rare case of 'rm -rf' , called through '_chroot' instead of '_safeRMR' . If not called through '_chroot', very dangerous!
+	_messagePlain_nominal 'remount: compression'
+    sudo -n mount -o remount,compress=zstd:15 "$globalVirtFS"
+
+
+    ## DANGER: Rare case of 'rm -rf' , called through '_chroot' instead of '_safeRMR' . If not called through '_chroot', very dangerous!
 	_chroot rm -rf /home/user/temp_micro/test_"$ubiquitiousBashIDnano"/ubiquitous_bash/
 	_chroot rmdir /home/user/temp_micro/test_"$ubiquitiousBashIDnano"/
 	_chroot rmdir /home/user/temp_micro/
