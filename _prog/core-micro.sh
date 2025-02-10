@@ -499,3 +499,65 @@ _create_ingredientVM_ubiquitous_bash-rm() {
 
     return 0
 }
+
+
+
+
+
+
+
+
+
+
+_create_ingredientVM_experiment() {
+    if [[ ! -e "$scriptLocal"/vm-ingredient.img ]]
+    then
+        if !_create_ingredientVM_image "$@"
+        then
+            _messageFAIL
+        fi
+    fi
+    
+    if ! "$scriptAbsoluteLocation" _create_ingredientVM_ubiquitous_bash-cp "$@"
+    then
+        _stop 1
+    fi
+    
+    _messageNormal '##### init: _experiment'
+
+    mkdir -p "$scriptLocal"
+    export ubVirtImageOverride="$scriptLocal"/"vm-ingredient.img"
+    
+
+    _messagePlain_nominal '> _openChRoot'
+    ! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+    
+    _messagePlain_nominal '_setupUbiquitous , _custom_splice_opensslConfig'
+    sudo -n mount -o remount,compress=zstd:13 "$globalVirtFS"
+    _chroot sudo -n --preserve-env=devfast -u user bash -c 'cd /home/user/temp_micro/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ ; /home/user/temp_micro/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ubiquitous_bash.sh '"_setupUbiquitous"
+    _chroot sudo -n --preserve-env=devfast -u user bash -c 'cd /home/user/temp_micro/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ ; /home/user/temp_micro/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ubiquitous_bash.sh '"_custom_splice_opensslConfig"
+
+    _chroot sudo -n -u user bash -c 'cd /home/user/temp_micro/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ ; bash -i'
+
+
+    _messagePlain_nominal '> _closeChRoot'
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+
+    if ! "$scriptAbsoluteLocation" _create_ingredientVM_ubiquitous_bash-rm "$@"
+    then
+        _stop 1
+    fi
+
+    return 0
+}
+
+
+
+
+
+
+
+
+
+

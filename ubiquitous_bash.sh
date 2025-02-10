@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='411157570'
+export ub_setScriptChecksum_contents='2444086732'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -55998,6 +55998,68 @@ _create_ingredientVM_ubiquitous_bash-rm() {
 
     return 0
 }
+
+
+
+
+
+
+
+
+
+
+_create_ingredientVM_experiment() {
+    if [[ ! -e "$scriptLocal"/vm-ingredient.img ]]
+    then
+        if !_create_ingredientVM_image "$@"
+        then
+            _messageFAIL
+        fi
+    fi
+    
+    if ! "$scriptAbsoluteLocation" _create_ingredientVM_ubiquitous_bash-cp "$@"
+    then
+        _stop 1
+    fi
+    
+    _messageNormal '##### init: _experiment'
+
+    mkdir -p "$scriptLocal"
+    export ubVirtImageOverride="$scriptLocal"/"vm-ingredient.img"
+    
+
+    _messagePlain_nominal '> _openChRoot'
+    ! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+    
+    _messagePlain_nominal '_setupUbiquitous , _custom_splice_opensslConfig'
+    sudo -n mount -o remount,compress=zstd:13 "$globalVirtFS"
+    _chroot sudo -n --preserve-env=devfast -u user bash -c 'cd /home/user/temp_micro/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ ; /home/user/temp_micro/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ubiquitous_bash.sh '"_setupUbiquitous"
+    _chroot sudo -n --preserve-env=devfast -u user bash -c 'cd /home/user/temp_micro/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ ; /home/user/temp_micro/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ubiquitous_bash.sh '"_custom_splice_opensslConfig"
+
+    _chroot sudo -n -u user bash -c 'cd /home/user/temp_micro/test_'"$ubiquitiousBashIDnano"'/ubiquitous_bash/ ; bash -i'
+
+
+    _messagePlain_nominal '> _closeChRoot'
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+
+    if ! "$scriptAbsoluteLocation" _create_ingredientVM_ubiquitous_bash-rm "$@"
+    then
+        _stop 1
+    fi
+
+    return 0
+}
+
+
+
+
+
+
+
+
+
+
 
 #currentReversePort=""
 #currentMatchingReversePorts=""
