@@ -352,11 +352,11 @@ _create_ingredientVM_online() {
 
     
     _messagePlain_nominal '_get_veracrypt'
-    _create_ingredientVM_ubiquitous_bash '_get_veracrypt' 2> >(tail -n 200 >&2)
+    _create_ingredientVM_ubiquitous_bash '_get_veracrypt' 2> >(tail -n 30 >&2)
 
     
     _messagePlain_nominal 'ollama install'
-    curl -fsSL https://ollama.com/install.sh | _chroot sudo -n -u user sh 2> >(tail -n 150 >&2)
+    curl -fsSL https://ollama.com/install.sh | _chroot sudo -n -u user sh 2> >(tail -n 30 >&2)
 
 
     _messagePlain_nominal 'nix package manager'
@@ -364,7 +364,7 @@ _create_ingredientVM_online() {
 
 
     _messagePlain_nominal 'nix package manager - packages'
-    _create_ingredientVM_ubiquitous_bash '_get_from_nix'
+    _create_ingredientVM_ubiquitous_bash '_get_from_nix' 2> >(tail -n 30 >&2)
 
 
     _messagePlain_nominal 'nix package manager - gc'
@@ -610,9 +610,19 @@ _create_ingredientVM_ubiquitous_bash-rm() {
 
 
 
-
-
-
+_openChRoot_ingredient() {
+    # WARNING: Variable "$scriptLocal" will be defined differently, if at all, in an interactive shell outside the context of this script.
+    #  Thus, this function exists mostly to provide access to the "_openChRoot" command with the  'ubVirtImageOverride' variable coorrectly set, with the bonus of not changing with the user's 'ubVirtImageOverride' variable.
+    export ubVirtImageOverride="$scriptLocal"/"vm-ingredient.img"
+    "$scriptAbsoluteLocation" _openChRoot "$@"
+}
+#--force
+_closeChRoot_ingredient() {
+    # WARNING: Variable "$scriptLocal" will be defined differently, if at all, in an interactive shell outside the context of this script.
+    #  Thus, this function exists mostly to provide access to the "_openChRoot" command with the  'ubVirtImageOverride' variable coorrectly set, with the bonus of not changing with the user's 'ubVirtImageOverride' variable.
+    export ubVirtImageOverride="$scriptLocal"/"vm-ingredient.img"
+    "$scriptAbsoluteLocation" _closeChRoot "$@"
+}
 
 _create_ingredientVM_experiment() {
     type _if_cygwin > /dev/null 2>&1 && _if_cygwin && _messagePlain_warn 'warn: _if_cygwin' && _stop 1
