@@ -270,6 +270,8 @@ jobs:
       - name: _create_ingredientVM_image
         shell: bash
         run: |
+          # WARNING: Do NOT pass skimfast to this function during normal builds. ONLY export the skimfast variable in CI YAML scripts specifically for very rapid development/testing and NOT production use!
+          #export skimfast=${{ github.event.inputs.skimfast }}
           ./ubiquitous_bash.sh _create_ingredientVM_image
         timeout-minutes: 355
       - name: _create_ingredientVM_ubiquitous_bash-cp
@@ -280,9 +282,16 @@ jobs:
       - name: _create_ingredientVM_online
         shell: bash
         run: |
+          # WARNING: Do NOT pass skimfast to this function during normal builds. ONLY export the skimfast variable in CI YAML scripts specifically for very rapid development/testing and NOT production use!
+          #export skimfast=${{ github.event.inputs.skimfast }}
           ./ubiquitous_bash.sh _create_ingredientVM_online
         timeout-minutes: 355
-      - name: _create_ingredientVM_online
+      - name: _create_ingredientVM_ubiquitous_bash-rm
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _create_ingredientVM_ubiquitous_bash-rm
+        timeout-minutes: 355
+      - name: _create_ingredientVM_zeroFill
         shell: bash
         run: |
           ./ubiquitous_bash.sh _create_ingredientVM_zeroFill
@@ -545,7 +554,7 @@ jobs:
       - name: _get_ingredientVM
         shell: bash
         run: |
-          ./_get_ingredientVM
+          ./_get_ingredientVM 
           
       - name: _create_ubDistBuild-create
         shell: bash
