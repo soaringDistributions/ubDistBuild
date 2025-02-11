@@ -308,17 +308,148 @@ jobs:
           ./ubiquitous_bash.sh _split_ingredientVM
         timeout-minutes: 355
 
-      - name: release! hash! ingredient
+      - name: _create_ingredientVM_report
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _create_ingredientVM_report
+        timeout-minutes: 355
+
+      - name: release! ingredient! hash, reports
         shell: bash
         run: |
           gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/vm-ingredient.img.hash.txt
+          gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/micro-dpkg.txt
+          gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/micro-binReport.txt
         env:
           GH_TOKEN: ${{ github.token }}
 
-      - name: release! package_ingredientVM
+      - name: release! ingredient! package_ingredientVM
         shell: bash
         run: |
           ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/vm-ingredient.img.flx.part*
+
+
+      
+
+  build-analysis-ingredient:
+    needs: [build_ingredient, build_release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: report! API Rate Limit
+        shell: bash
+        run: |
+          curl -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ""${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28"  https://api.github.com/rate_limit
+          #curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/rate_limit | jq -r ".rate"
+      
+      - name: _getCore_ub
+        shell: bash
+        run: |
+          mkdir -p ~/core/infrastructure
+          cd ~/core/infrastructure
+          git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
+          cd ubiquitous_bash
+          ./_setupUbiquitous.bat
+          ./ubiquitous_bash.sh _custom_splice_opensslConfig
+
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          submodules: 'recursive'
+      - name: mkdir _local
+        shell: bash
+        run: |
+          mkdir -p ./_local
+
+      - name: _getMinimal_cloud
+        shell: bash
+        run: |
+          ! ./ubiquitous_bash.sh _getMinimal_cloud && exit 1
+          true
+          #! sudo -n apt-get -y clean && exit 1
+          df -h
+          df -h /
+        timeout-minutes: 355
+      
+      - name: _getMost-aria2
+        shell: bash
+        run: |
+          sudo -n apt-get -y clean
+          sudo -n apt-get update
+          sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y aria2
+        timeout-minutes: 355
+
+            
+      - name: analysis! missing-binaries
+        shell: bash
+        run: |
+          #echo -n
+          _safeEcho() {
+            printf '%s' "$1"
+            shift
+            
+            [[ "$@" == "" ]] && return 0
+            
+            local currentArg
+            for currentArg in "$@"
+            do
+              printf '%s' " "
+              printf '%s' "$currentArg"
+            done
+            return 0
+          }
+
+          #echo
+          _safeEcho_newline() {
+            _safeEcho "$@"
+            printf '\n'
+          }
+        
+          mkdir -p ./_local/analysis
+
+          #cp ./_local/micro-binReport.txt ./_local/analysis/micro-binReport.txt
+          #cp ./_local/micro-dpkg.txt ./_local/analysis/micro-dpkg.txt
+
+          cd ./_local/analysis
+
+          # Get the list of releases
+          RELEASES=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/soaringDistributions/ubDistBuild/releases?per_page=100&page=1)
+
+          # Download micro-binReport.txt file for the current release
+          curl -s -H "Authorization: token $GH_TOKEN" -L -o "micro-binReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/micro-binReport.txt"
+          curl -s -H "Authorization: token $GH_TOKEN" -L -o "micro-dpkg-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/micro-dpkg.txt"
+
+          # Loop through each release
+          #for RELEASE in $(_safeEcho_newline "$RELEASES" | jq -r '.[].tag_name' | sort --reverse); do
+          for RELEASE in $(_safeEcho_newline "$RELEASES" | jq -r 'sort_by(.published_at) | reverse | .[].tag_name' | tr -dc 'a-zA-Z0-9\-_.:\n'); do
+
+            # Compare the list of binaries in this release to the current release
+            if [ "$RELEASE" != "$currentReleaseTag" ]; then
+              
+              # Download the binReport file for this release
+              curl -s -H "Authorization: token $GH_TOKEN" -L -o "micro-binReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/micro-binReport.txt"
+              curl -s -H "Authorization: token $GH_TOKEN" -L -o "micro-dpkg-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/micro-dpkg.txt"
+              
+              echo | tee -a ./missing-micro-binReport.txt
+              echo "Binaries (filesystem) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-micro-binReport.txt
+              comm -23 <(sort "micro-binReport-$RELEASE") <(sort "micro-binReport-$currentReleaseTag") | tee -a ./missing-micro-binReport.txt
+              echo | tee -a ./missing-micro-dpkg.txt
+              echo "Binaries (dpkg) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-micro-dpkg.txt
+              comm -23 <(sort "micro-dpkg-$RELEASE") <(sort "micro-dpkg-$currentReleaseTag") | tee -a ./missing-micro-dpkg.txt
+            fi
+          done
+        env:
+          currentReleaseTag: build-${{ github.run_id }}-${{ github.run_attempt }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: release! analysis! missing-binaries
+        shell: bash
+        run: |
+            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-micro-binReport.txt
+            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-micro-dpkg.txt
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+
 
 
 
@@ -549,7 +680,7 @@ jobs:
       - name: _get_ingredientVM
         shell: bash
         run: |
-          ./_get_ingredientVM 
+          ./ubiquitous_bash.sh _get_ingredientVM 
           
       - name: _create_ubDistBuild-create
         shell: bash

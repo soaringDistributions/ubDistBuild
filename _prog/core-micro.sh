@@ -414,6 +414,35 @@ _create_ingredientVM_online() {
     return 0
 }
 
+_create_ingredientVM_report() {
+    type _if_cygwin > /dev/null 2>&1 && _if_cygwin && _messagePlain_warn 'warn: _if_cygwin' && _stop 1
+    _messageNormal '##### init: _create_ingredientVM_report'
+
+    mkdir -p "$scriptLocal"
+    export ubVirtImageOverride="$scriptLocal"/"vm-ingredient.img"
+    
+
+    _messagePlain_nominal '> _openChRoot'
+    ! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+
+
+    _chroot find /bin/ /usr/bin/ /sbin/ /usr/sbin/ | sudo -n tee "$globalVirtFS"/micro-binReport.txt > /dev/null
+    _chroot find /home/user/.nix-profile/bin | sudo -n tee -a "$globalVirtFS"/micro-binReport.txt > /dev/null 2>&1
+    _chroot find /home/user/.gcloud/google-cloud-sdk/bin | sudo -n tee -a "$globalVirtFS"/micro-binReport.txt > /dev/null
+    _chroot find /home/user/.ebcli-virtual-env/executables | sudo -n tee -a "$globalVirtFS"/micro-binReport.txt > /dev/null 2>&1
+    sudo -n cp -f "$globalVirtFS"/micro-binReport.txt "$scriptLocal"/micro-binReport.txt
+    sudo -n chown "$USER":"$USER" "$scriptLocal"/micro-binReport.txt
+
+    _chroot dpkg --get-selections | cut -f1 | sudo -n tee "$globalVirtFS"/micro-dpkg.txt > /dev/null
+    sudo -n cp -f "$globalVirtFS"/micro-dpkg.txt "$scriptLocal"/micro-dpkg.txt
+    sudo -n chown "$USER":"$USER" "$scriptLocal"/micro-dpkg.txt
+
+
+    _messagePlain_nominal '> _closeChRoot'
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+    return 0
+}
 
 
 
