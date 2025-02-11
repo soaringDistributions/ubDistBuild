@@ -307,11 +307,6 @@ jobs:
         run: |
           ./ubiquitous_bash.sh _split_ingredientVM
         timeout-minutes: 355
-      - name: _split_ingredientVM
-        shell: bash
-        run: |
-          ./ubiquitous_bash.sh _split_ingredientVM
-        timeout-minutes: 355
 
       - name: release! hash! ingredient
         shell: bash
