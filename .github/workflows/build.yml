@@ -218,9 +218,116 @@ jobs:
 
 
 
+
+
+
+
+
+
+
+  build_ingredient:
+    needs: [build_release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: RAND_SEED
+        shell: bash
+        run: |
+          echo "$RAND_SEED" | tee /dev/urandom > /dev/null
+          echo "$RAND_SEED" | tee /dev/random > /dev/null
+          echo "$RAND_SEED" | sudo -n tee /dev/urandom > /dev/null
+          echo "$RAND_SEED" | sudo -n tee /dev/random > /dev/null
+        env:
+          RAND_SEED: ${{ secrets.RAND_SEED }}
+      - name: _getCore_ub
+        shell: bash
+        run: |
+          mkdir -p ~/core/infrastructure
+          cd ~/core/infrastructure
+          git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
+          cd ubiquitous_bash
+          ./_setupUbiquitous.bat
+          ./ubiquitous_bash.sh _custom_splice_opensslConfig
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: mkdir _local
+        shell: bash
+        run: |
+          mkdir -p ./_local
+      - name: _getMinimal
+        shell: bash
+        run: |
+          if ! sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y gpg pigz curl gdisk lz4 mawk jq gawk build-essential autoconf pkg-config bsdutils findutils patch tar gzip bzip2 sed lua-lpeg axel aria2 gh rsync pv expect libfuse2 debootstrap dos2unix xxd debhelper p7zip btrfs-progs btrfs-compsize zstd zlib1g coreutils util-linux kpartx openssl udev gdisk parted bc e2fsprogs xz-utils libreadline8 squashfs-tools mtools dosfstools fdisk cloud-guest-utils
+          then
+            exit 1
+          fi
+          ! sudo -n apt-get -y clean && exit 1
+          true
+          df -h
+          df -h /
+        timeout-minutes: 355
+        
+      - name: _create_ingredientVM_image
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _create_ingredientVM_image
+        timeout-minutes: 355
+      - name: _create_ingredientVM_ubiquitous_bash-cp
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _create_ingredientVM_ubiquitous_bash-cp
+        timeout-minutes: 355
+      - name: _create_ingredientVM_online
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _create_ingredientVM_online
+        timeout-minutes: 355
+      - name: _create_ingredientVM_online
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _create_ingredientVM_zeroFill
+        timeout-minutes: 355
+        
+      - name: _package_ingredientVM
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _package_ingredientVM
+        timeout-minutes: 355
+      - name: _split_ingredientVM
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _split_ingredientVM
+        timeout-minutes: 355
+      - name: _split_ingredientVM
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _split_ingredientVM
+        timeout-minutes: 355
+
+      - name: release! hash! ingredient
+        shell: bash
+        run: |
+          gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/vm-ingredient.img.hash.txt
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: release! package_ingredientVM
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/vm-ingredient.img.flx.part*
+
+
+
+
+
+
+
+
+
+
         
   build_beforeBoot:
-    needs: [build_release]
+    needs: [build_release, build_ingredient]
     # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
     #  '7 GB of RAM memory'
     #  '14 GB of SSD disk space'
@@ -434,6 +541,12 @@ jobs:
         shell: bash
         run: |
           free -m
+
+      - name: _get_ingredientVM
+        shell: bash
+        run: |
+          ./_get_ingredientVM
+          
       - name: _create_ubDistBuild-create
         shell: bash
         run: |
