@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2444086732'
+export ub_setScriptChecksum_contents='920261428'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -11257,6 +11257,8 @@ _getMost_debian11_install() {
 	#_getMost_backend_aptGetInstall synergy quicksynergy
 	
 	_getMost_backend_aptGetInstall vim
+
+	_getMost_backend_aptGetInstall man-db
 	
 	# WARNING: Rust is not yet (2023-11-12) anywhere near as editable on the fly or pervasively available as bash .
 	#  Criteria for such are far more necessarily far more stringent than might be intuitively obvious.
@@ -50689,6 +50691,7 @@ _ubDistBuild_split-tail_procedure() {
 	do
 		[[ -s ./"$1" ]] && [[ -e ./"$1" ]] && tail -c 1997537280 "$1" > "$1".part"$currentIteration" && truncate -s -1997537280 "$1"
 	done
+	return 0
 }
 
 # Expected fastest.
@@ -50728,6 +50731,7 @@ _ubDistBuild_split-reflink_procedure() {
 
         ((currentIteration++))
     done
+	return 0
 }
 
 # Expected to avoid repeatedly reading most of file through 'tail', however, not as fast as near-instant sector mapping.
@@ -55500,7 +55504,107 @@ _upgrade_kernel() {
 
 # Intended to create an image solely for online installer steps , a small image ingredient to follow up with subsequent offline build from other more de-facto standard ingredients.
 
+# WARNING: May be untested.
+_package_ingredientVM() {
+    _messageNormal '##### init: _package_ingredientVM'
+
+
+	rm -f "$scriptLocal"/vm-ingredient.img.flx > /dev/null 2>&1
+
+    # Maybe ~15MB/2GB smaller.
+    #! cat "$scriptLocal"/vm-ingredient.img | tee >(openssl dgst -sha3-512 -binary | xxd -p -c 256 > "$scriptLocal"/vm-ingredient.img.hash.txt) | xz -9e -T1 -z - > "$scriptLocal"/vm-ingredient.img.flx && _messagePlain_bad 'bad: FAIL: xz' && _messageFAIL
+
+    ! cat "$scriptLocal"/vm-ingredient.img | tee >(openssl dgst -sha3-512 -binary | xxd -p -c 256 > "$scriptLocal"/vm-ingredient.img.hash.txt) | xz -9e -T6 -z - > "$scriptLocal"/vm-ingredient.img.flx && _messagePlain_bad 'bad: FAIL: xz' && _messageFAIL
+
+	#--fast=65537
+	#cat "$scriptLocal"/vm-ingredient.img | lz4 -z --fast=1 - "$scriptLocal"/vm-ingredient.img.flx
+
+    echo
+    cat "$scriptLocal"/vm-ingredient.img.hash.txt
+	
+	! [[ -e "$scriptLocal"/vm-ingredient.img.flx ]] && _messagePlain_bad 'bad: FAIL: missing: vm-ingredient.img.flx' && _messageFAIL
+	
+	return 0
+}
+_split_ingredientVM() {
+    _messageNormal '##### init: _split_ingredientVM'
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+
+	cd "$scriptLocal"
+
+    ! _ubDistBuild_split_procedure ./vm-ingredient.img.flx && _messagePlain_bad 'bad: FAIL: split' && _messageFAIL
+
+    rm -f ./vm-ingredient.img.flx > /dev/null 2>&1
+
+    cd "$functionEntryPWD"
+    return 0
+}
+_get_ingredientVM() {
+    _messageNormal '##### init: _get_ingredientVM'
+    rm -f "$scriptLocal"/vm-ingredient.img > /dev/null 2>&1
+    rm -f "$scriptLocal"/vm-ingredient.img.hash-download.txt > /dev/null 2>&1
+    rm -f "$scriptLocal"/vm-ingredient.img.hash-upstream.txt > /dev/null 2>&1
+    
+    local releaseLabel="$1"
+    #[[ "$releaseLabel" == "" ]] && releaseLabel=latest
+    [[ "$releaseLabel" == "" ]] && releaseLabel=internal
+    #-whirlpool
+    if ! _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-ingredient.img.flx" | xz -d | tee >(openssl dgst -sha3-512 -binary | xxd -p -c 256 > "$scriptLocal"/vm-ingredient.img.hash-download.txt) > "$scriptLocal"/vm-ingredient.img
+    then
+        _messagePlain_bad 'bad: FAIL: get'
+        _messageFAIL
+    fi
+
+    # Hash
+    echo
+    cat "$scriptLocal"/vm-ingredient.img.hash-download.txt
+
+    _wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-ingredient.img.hash.txt" > "$scriptLocal"/vm-ingredient.img.hash-upstream.txt
+    #$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$releaseLabel" "vm-ingredient.img.hash.txt" | tr -dc 'a-f0-9')
+    if [[ $(cat "$scriptLocal"/vm-ingredient.img.hash-upstream.txt | tr -dc 'a-f0-9') == $(cat "$scriptLocal"/vm-ingredient.img.hash-download.txt | tr -dc 'a-f0-9') ]]
+    then
+        _messagePlain_good 'good: hash'
+        return 0
+    fi
+    
+    _messagePlain_bad 'bad: FAIL: hash'
+    _messageFAIL
+}
+_join_ingredientVM() {
+    _messageNormal '##### init: _join_ingredientVM'
+
+    ! [[ -e "$scriptLocal"/"vm-ingredient.img.flx.part00" ]] && _messagePlain_bad 'bad: FAIL: missing: vm-ingredient.img.flx.part00' && _messageFAIL
+
+    rm -f "$scriptLocal"/vm-ingredient.img.hash-join.txt > /dev/null 2>&1
+
+    rm -f "$scriptLocal"/vm-ingredient.img > /dev/null 2>&1
+    ( local currentIteration=""
+    for currentIteration in $(seq -w 0 50 | sort -r)
+    do
+        #_messagePlain_probe_var currentIteration
+        [[ -e "$scriptLocal"/vm-ingredient.img.flx.part"$currentIteration" ]] && dd if="$scriptLocal"/vm-ingredient.img.flx.part"$currentIteration" bs=1M status=progress
+    done ) | xz -d > "$scriptLocal"/vm-ingredient.img
+
+    cat "$scriptLocal"/vm-ingredient.img | openssl dgst -sha3-512 -binary | xxd -p -c 256 > "$scriptLocal"/vm-ingredient.img.hash-join.txt
+
+    echo
+    cat "$scriptLocal"/vm-ingredient.img.hash-join.txt
+
+    # If hash-upstream.txt or hash.txt are available, assume these may have been downloaded along with the now joined vm-ingredient.img file, compare, and if match, report good.
+    if [[ $(cat "$scriptLocal"/vm-ingredient.img.hash-upstream.txt 2> /dev/null | tr -dc 'a-f0-9') == $(cat "$scriptLocal"/vm-ingredient.img.hash-join.txt | tr -dc 'a-f0-9') ]]
+    then
+        _messagePlain_good 'good: hash'
+        return 0
+    fi
+
+    return 0
+}
+
+
 _create_ingredientVM() {
+    type _if_cygwin > /dev/null 2>&1 && _if_cygwin && _messagePlain_warn 'warn: _if_cygwin' && _stop 1
+
     _create_ingredientVM_image "$@"
 
     if ! "$scriptAbsoluteLocation" _create_ingredientVM_ubiquitous_bash-cp "$@"
@@ -55519,6 +55623,7 @@ _create_ingredientVM() {
 }
 
 _create_ingredientVM_image() {
+    type _if_cygwin > /dev/null 2>&1 && _if_cygwin && _messagePlain_warn 'warn: _if_cygwin' && _stop 1
     _messageNormal '##### init: _create_ingredientVM_image'
 
 	mkdir -p "$scriptLocal"
@@ -55700,6 +55805,7 @@ CZXWXcRMTo8EmM8i4d
 }
 
 _create_ingredientVM_online() {
+    type _if_cygwin > /dev/null 2>&1 && _if_cygwin && _messagePlain_warn 'warn: _if_cygwin' && _stop 1
     _messageNormal '##### init: _create_ingredientVM_online'
 
     mkdir -p "$scriptLocal"
@@ -55816,6 +55922,7 @@ _create_ingredientVM_online() {
 
 
 _create_ingredientVM_zeroFill() {
+    type _if_cygwin > /dev/null 2>&1 && _if_cygwin && _messagePlain_warn 'warn: _if_cygwin' && _stop 1
     _messageNormal '##### init: _create_ingredientVM_zeroFill'
 
     mkdir -p "$scriptLocal"
@@ -55881,6 +55988,7 @@ _create_ingredientVM_ubiquitous_bash() {
 }
 
 _create_ingredientVM_ubiquitous_bash_sequence-cp() {
+    type _if_cygwin > /dev/null 2>&1 && _if_cygwin && _messagePlain_warn 'warn: _if_cygwin' && _stop 1
     _messageNormal '##### init: _create_ingredientVM_ubiquitous_bash-cp'
     _start
 	
@@ -55968,6 +56076,7 @@ _create_ingredientVM_ubiquitous_bash-cp() {
     return 0
 }
 _create_ingredientVM_ubiquitous_bash-rm() {
+    type _if_cygwin > /dev/null 2>&1 && _if_cygwin && _messagePlain_warn 'warn: _if_cygwin' && _stop 1
     _messageNormal '##### init: _create_ingredientVM_ubiquitous_bash-rm'
 	
 	local functionEntryPWD="$PWD"
@@ -56009,6 +56118,7 @@ _create_ingredientVM_ubiquitous_bash-rm() {
 
 
 _create_ingredientVM_experiment() {
+    type _if_cygwin > /dev/null 2>&1 && _if_cygwin && _messagePlain_warn 'warn: _if_cygwin' && _stop 1
     if [[ ! -e "$scriptLocal"/vm-ingredient.img ]]
     then
         if !_create_ingredientVM_image "$@"
@@ -57846,6 +57956,7 @@ _compile_bash_deps() {
 		_deps_dev_buildOps
 		
 		_deps_notLean
+		_deps_os_x11
 		
 		_deps_serial
 

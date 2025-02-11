@@ -2399,6 +2399,7 @@ _ubDistBuild_split-tail_procedure() {
 	do
 		[[ -s ./"$1" ]] && [[ -e ./"$1" ]] && tail -c 1997537280 "$1" > "$1".part"$currentIteration" && truncate -s -1997537280 "$1"
 	done
+	return 0
 }
 
 # Expected fastest.
@@ -2438,6 +2439,7 @@ _ubDistBuild_split-reflink_procedure() {
 
         ((currentIteration++))
     done
+	return 0
 }
 
 # Expected to avoid repeatedly reading most of file through 'tail', however, not as fast as near-instant sector mapping.
