@@ -352,11 +352,11 @@ _create_ingredientVM_online() {
 
     
     _messagePlain_nominal '_get_veracrypt'
-    _create_ingredientVM_ubiquitous_bash '_get_veracrypt'
+    _create_ingredientVM_ubiquitous_bash '_get_veracrypt' 2> >(tail -n 200 >&2)
 
     
     _messagePlain_nominal 'ollama install'
-    curl -fsSL https://ollama.com/install.sh | _chroot sudo -n -u user sh
+    curl -fsSL https://ollama.com/install.sh | _chroot sudo -n -u user sh 2> >(tail -n 150 >&2)
 
 
     _messagePlain_nominal 'nix package manager'
