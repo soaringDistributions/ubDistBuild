@@ -364,7 +364,7 @@ _create_ingredientVM_online() {
 
 
     _messagePlain_nominal 'nix package manager - packages'
-    _create_ingredientVM_ubiquitous_bash '_get_from_nix' 2> >(tail -n 30 >&2)
+    _create_ingredientVM_ubiquitous_bash '_get_from_nix'
 
 
     _messagePlain_nominal 'nix package manager - gc'
