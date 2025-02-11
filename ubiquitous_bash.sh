@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='82982186'
+export ub_setScriptChecksum_contents='579031175'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -31650,7 +31650,8 @@ _test_croc_upstream() {
 	! _wantSudo && return 1
 	
 	echo
-	curl https://getcroc.schollz.com | bash
+	#curl https://getcroc.schollz.com | bash
+	curl -fsSL 'https://getcroc.schollz.com' | bash
 	echo
 }
 
@@ -31666,6 +31667,8 @@ _test_croc() {
 	then
 		_messagePlain_request 'ignore: upstream progress ->'
 		
+		curl -fsSL 'https://getcroc.schollz.com' | head -n 30
+
 		_test_croc_upstream "$@"
 		#_test_croc_upstream_beta "$@"
 		
@@ -55855,11 +55858,11 @@ _create_ingredientVM_online() {
 
     
     _messagePlain_nominal '_get_veracrypt'
-    _create_ingredientVM_ubiquitous_bash '_get_veracrypt' 2> >(tail -n 200 >&2)
+    _create_ingredientVM_ubiquitous_bash '_get_veracrypt' 2> >(tail -n 30 >&2)
 
     
     _messagePlain_nominal 'ollama install'
-    curl -fsSL https://ollama.com/install.sh | _chroot sudo -n -u user sh 2> >(tail -n 150 >&2)
+    curl -fsSL https://ollama.com/install.sh | _chroot sudo -n -u user sh 2> >(tail -n 30 >&2)
 
 
     _messagePlain_nominal 'nix package manager'
@@ -56113,9 +56116,19 @@ _create_ingredientVM_ubiquitous_bash-rm() {
 
 
 
-
-
-
+_openChRoot_ingredient() {
+    # WARNING: Variable "$scriptLocal" will be defined differently, if at all, in an interactive shell outside the context of this script.
+    #  Thus, this function exists mostly to provide access to the "_openChRoot" command with the  'ubVirtImageOverride' variable coorrectly set, with the bonus of not changing with the user's 'ubVirtImageOverride' variable.
+    export ubVirtImageOverride="$scriptLocal"/"vm-ingredient.img"
+    "$scriptAbsoluteLocation" _openChRoot "$@"
+}
+#--force
+_closeChRoot_ingredient() {
+    # WARNING: Variable "$scriptLocal" will be defined differently, if at all, in an interactive shell outside the context of this script.
+    #  Thus, this function exists mostly to provide access to the "_openChRoot" command with the  'ubVirtImageOverride' variable coorrectly set, with the bonus of not changing with the user's 'ubVirtImageOverride' variable.
+    export ubVirtImageOverride="$scriptLocal"/"vm-ingredient.img"
+    "$scriptAbsoluteLocation" _closeChRoot "$@"
+}
 
 _create_ingredientVM_experiment() {
     type _if_cygwin > /dev/null 2>&1 && _if_cygwin && _messagePlain_warn 'warn: _if_cygwin' && _stop 1
