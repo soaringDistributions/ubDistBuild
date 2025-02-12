@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3795781702'
+export ub_setScriptChecksum_contents='2484553866'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -48614,13 +48614,12 @@ _create_ubDistBuild-create() {
 	
 		! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
 	else
-
-
 		mv -f "$scriptLocal"/vm-ingredient.img "$scriptLocal"/vm.img
 		[[ -e "$scriptLocal"/vm-ingredient.img ]] && _messagePlain_bad 'bad: fail: mv: vm-ingredient.img' && _messageFAIL
 		[[ ! -e "$scriptLocal"/vm.img ]] && _messagePlain_bad 'bad: fail: mv: vm-ingredient.img' && _messageFAIL
 
-
+		unset ubVirtImageOverride
+		_createVMimage-micro-expand
 	fi
 
 

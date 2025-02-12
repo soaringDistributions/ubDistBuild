@@ -319,13 +319,12 @@ _create_ubDistBuild-create() {
 	
 		! "$scriptAbsoluteLocation" _closeImage && _messagePlain_bad 'fail: _closeImage' && _messageFAIL
 	else
-
-
 		mv -f "$scriptLocal"/vm-ingredient.img "$scriptLocal"/vm.img
 		[[ -e "$scriptLocal"/vm-ingredient.img ]] && _messagePlain_bad 'bad: fail: mv: vm-ingredient.img' && _messageFAIL
 		[[ ! -e "$scriptLocal"/vm.img ]] && _messagePlain_bad 'bad: fail: mv: vm-ingredient.img' && _messageFAIL
 
-
+		unset ubVirtImageOverride
+		_createVMimage-micro-expand
 	fi
 
 
