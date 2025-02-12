@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2484553866'
+export ub_setScriptChecksum_contents='1305406043'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -55862,6 +55862,8 @@ _create_ingredientVM_online() {
     
     _messagePlain_nominal 'ollama install'
     curl -fsSL https://ollama.com/install.sh | _chroot sudo -n -u user sh 2> >(tail -n 30 >&2)
+    _chroot bash -c '(echo ; echo 'ollama install') | tee -a /report-micro-diskUsage'
+    _chroot bash -c 'df --block-size=1000000 --output=used / | tr -dc "0-9" | tee -a /report-micro-diskUsage'
 
 
     _messagePlain_nominal 'nix package manager'

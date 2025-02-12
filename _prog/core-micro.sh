@@ -357,6 +357,8 @@ _create_ingredientVM_online() {
     
     _messagePlain_nominal 'ollama install'
     curl -fsSL https://ollama.com/install.sh | _chroot sudo -n -u user sh 2> >(tail -n 30 >&2)
+    _chroot bash -c '(echo ; echo 'ollama install') | tee -a /report-micro-diskUsage'
+    _chroot bash -c 'df --block-size=1000000 --output=used / | tr -dc "0-9" | tee -a /report-micro-diskUsage'
 
 
     _messagePlain_nominal 'nix package manager'
