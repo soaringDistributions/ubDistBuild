@@ -650,7 +650,7 @@ jobs:
       - name: _get_ingredientVM
         shell: bash
         run: |
-          ./ubiquitous_bash.sh _get_ingredientVM 
+          ./ubiquitous_bash.sh _get_ingredientVM latest
           
       - name: _create_ubDistBuild-create
         shell: bash
