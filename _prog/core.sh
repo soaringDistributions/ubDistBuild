@@ -3149,7 +3149,7 @@ _chroot_test_sequence() {
 	                  print old_mode;
 	                  print new_mode;
 	                }' | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/' | tee /dev/stdout > "$safeTmp"/patch.txt
-	cat patch.txt | git apply
+	cat "$safeTmp"/patch.txt | git apply
 
 	sleep 9
 	git config core.fileMode "$currentConfig"
