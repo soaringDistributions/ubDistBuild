@@ -549,9 +549,6 @@ CZXWXcRMTo8EmM8i4d
 	echo 'deb http://deb.debian.org/debian bookworm-backports main contrib' | _getMost_backend tee /etc/apt/sources.list.d/ub_backports.list > /dev/null
 
 
-	echo 'deb [signed-by=/etc/apt/keyrings/apt-fast.gpg] http://ppa.launchpad.net/apt-fast/stable/ubuntu jammy main' | _getMost_backend tee /etc/apt/sources.list.d/apt-fast.list > /dev/null
-
-
 	_getMost_backend apt-get update
 	
 	
@@ -565,8 +562,11 @@ CZXWXcRMTo8EmM8i4d
 	_getMost_backend_aptGetInstall gnupg
 	_getMost_backend_aptGetInstall lsb-release
 	
+	echo 'deb [signed-by=/etc/apt/keyrings/apt-fast.gpg] http://ppa.launchpad.net/apt-fast/stable/ubuntu jammy main' | _getMost_backend tee /etc/apt/sources.list.d/apt-fast.list > /dev/null
 	_getMost_backend mkdir -p /etc/apt/keyrings
 	_getMost_backend curl -fsSL 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xA2166B8DE8BDC3367D1901C11EE2FF37CA8DA16B' | _getMost_backend gpg --dearmor -o /etc/apt/keyrings/apt-fast.gpg
+	# ATTRIBUTION-AI: ChatGPT o3-mini-high 2025-02-13
+	_getMost_backend apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 1E2824A7F22B44BD 1EE2FF37CA8DA16B
 	_getMost_backend apt-get update
 	_getMost_backend_aptGetInstall apt-fast
 
