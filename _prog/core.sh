@@ -1836,6 +1836,8 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	
 	# Up to 700s per kernel (ie. modules), plus 500s, total of 1147s for one kernel, 1749s to wait for three kernels.
 	#6200s ... had a track record of a few years
+	# Prefer 6200s, as this is normally sufficient for both the apparent ~1900s without compiling vbox kernel modules, and longer times if compiling under qemu virtualizaton.
+	# The longer 13500s wait is mostly only beneficial ONLY to make the exit status a clearly unambigious statement that FAIL actually happened, not merely timeout before compiling could complete.
 	_messagePlain_nominal 'wait: 13500s'
 	local currentIterationWait
 	currentIterationWait=0
@@ -2894,7 +2896,7 @@ _zSpecial_qemu_sequence_prog() {
 	echo '#!/usr/bin/env bash' >> "$hostToGuestFiles"/cmd.sh
 	echo 'date +"%Y-%m-%d" | sudo -n tee /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sudo -n update-grub' >> "$hostToGuestFiles"/cmd.sh
-	echo 'echo done: update-grub | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo "done: update-grub" | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo '_detect_process_compile() {
 	pgrep cc1 && return 0
 	pgrep apt && return 0
@@ -2908,29 +2910,29 @@ _zSpecial_qemu_sequence_prog() {
 	# If uncommented, any indefinite delay in '_detect_process_compile' may cause failure.
 	#echo 'while _detect_process_compile && sleep 27 && _detect_process_compile && sleep 27 && _detect_process_compile ; do sleep 27 ; done' >> "$hostToGuestFiles"/cmd.sh
 	
-	echo 'echo done: _detect_process_compile (if uncommented) | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo done: "_detect_process_compile (if uncommented)" | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sleep 15' >> "$hostToGuestFiles"/cmd.sh
 	echo '! sudo -n lsmod | grep -i vboxdrv && sudo -n /sbin/vboxconfig' >> "$hostToGuestFiles"/cmd.sh
-	echo 'echo done: vboxconfig | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo "done: vboxconfig" | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sleep 75' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sudo -n lsmod | cut -f1 -d\  | sudo -n tee /lsmodReport' >> "$hostToGuestFiles"/cmd.sh
 	echo 'cat /lsmodReport | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
-	echo 'echo done: lsmodReport | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo "done: lsmodReport" | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo '[[ ! -e /kded5-done ]] && kded5 --check' >> "$hostToGuestFiles"/cmd.sh
-	echo 'echo done: kded5 --check (1 of 2) | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo "done: kded5 --check (1 of 2)" | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo '[[ ! -e /kded5-done ]] && sleep 90' >> "$hostToGuestFiles"/cmd.sh
 
 	echo '[[ ! -e /FW-done ]] && cd /home/user/.ubcore/ubiquitous_bash ; ./ubiquitous_bash.sh _cfgFW-desktop | sudo -n tee /cfgFW.log ; cd' >> "$hostToGuestFiles"/cmd.sh
-	echo 'echo done: cfgFW-desktop (1 of 2) | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo "done: cfgFW-desktop (1 of 2)" | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo '[[ ! -e /FW-done ]] && cd /home/user/.ubcore/ubiquitous_bash ; ./ubiquitous_bash.sh _cfgFW-desktop | sudo -n tee /cfgFW.log ; cd' >> "$hostToGuestFiles"/cmd.sh
-	echo 'echo done: cfgFW-desktop (2 of 2) | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo "done: cfgFW-desktop (2 of 2)" | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 
 	echo '[[ ! -e /kded5-done ]] && kded5 --check' >> "$hostToGuestFiles"/cmd.sh
-	echo 'echo done: kded5 --check (2 of 2) | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo "done: kded5 --check (2 of 2)" | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo '( [[ ! -e /kded5-done ]] || [[ ! -e /FW-done ]] ) && sleep 420' >> "$hostToGuestFiles"/cmd.sh
 	echo 'echo | sudo -n tee /kded5-done' >> "$hostToGuestFiles"/cmd.sh
 	echo 'echo | sudo -n tee /FW-done' >> "$hostToGuestFiles"/cmd.sh
-	echo 'echo done: sleep , /kded5-done , /FW-done | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo "done: sleep , /kded5-done , /FW-done" | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sudo -n poweroff' >> "$hostToGuestFiles"/cmd.sh
 }
 

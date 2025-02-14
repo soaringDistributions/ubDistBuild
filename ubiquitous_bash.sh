@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3362015300'
+export ub_setScriptChecksum_contents='1053505133'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -50166,6 +50166,8 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	
 	# Up to 700s per kernel (ie. modules), plus 500s, total of 1147s for one kernel, 1749s to wait for three kernels.
 	#6200s ... had a track record of a few years
+	# Prefer 6200s, as this is normally sufficient for both the apparent ~1900s without compiling vbox kernel modules, and longer times if compiling under qemu virtualizaton.
+	# The longer 13500s wait is mostly only beneficial ONLY to make the exit status a clearly unambigious statement that FAIL actually happened, not merely timeout before compiling could complete.
 	_messagePlain_nominal 'wait: 13500s'
 	local currentIterationWait
 	currentIterationWait=0
@@ -51224,7 +51226,7 @@ _zSpecial_qemu_sequence_prog() {
 	echo '#!/usr/bin/env bash' >> "$hostToGuestFiles"/cmd.sh
 	echo 'date +"%Y-%m-%d" | sudo -n tee /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sudo -n update-grub' >> "$hostToGuestFiles"/cmd.sh
-	echo 'echo done: update-grub | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo "done: update-grub" | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo '_detect_process_compile() {
 	pgrep cc1 && return 0
 	pgrep apt && return 0
@@ -51238,29 +51240,29 @@ _zSpecial_qemu_sequence_prog() {
 	# If uncommented, any indefinite delay in '_detect_process_compile' may cause failure.
 	#echo 'while _detect_process_compile && sleep 27 && _detect_process_compile && sleep 27 && _detect_process_compile ; do sleep 27 ; done' >> "$hostToGuestFiles"/cmd.sh
 	
-	echo 'echo done: _detect_process_compile (if uncommented) | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo done: "_detect_process_compile (if uncommented)" | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sleep 15' >> "$hostToGuestFiles"/cmd.sh
 	echo '! sudo -n lsmod | grep -i vboxdrv && sudo -n /sbin/vboxconfig' >> "$hostToGuestFiles"/cmd.sh
-	echo 'echo done: vboxconfig | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo "done: vboxconfig" | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sleep 75' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sudo -n lsmod | cut -f1 -d\  | sudo -n tee /lsmodReport' >> "$hostToGuestFiles"/cmd.sh
 	echo 'cat /lsmodReport | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
-	echo 'echo done: lsmodReport | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo "done: lsmodReport" | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo '[[ ! -e /kded5-done ]] && kded5 --check' >> "$hostToGuestFiles"/cmd.sh
-	echo 'echo done: kded5 --check (1 of 2) | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo "done: kded5 --check (1 of 2)" | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo '[[ ! -e /kded5-done ]] && sleep 90' >> "$hostToGuestFiles"/cmd.sh
 
 	echo '[[ ! -e /FW-done ]] && cd /home/user/.ubcore/ubiquitous_bash ; ./ubiquitous_bash.sh _cfgFW-desktop | sudo -n tee /cfgFW.log ; cd' >> "$hostToGuestFiles"/cmd.sh
-	echo 'echo done: cfgFW-desktop (1 of 2) | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo "done: cfgFW-desktop (1 of 2)" | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo '[[ ! -e /FW-done ]] && cd /home/user/.ubcore/ubiquitous_bash ; ./ubiquitous_bash.sh _cfgFW-desktop | sudo -n tee /cfgFW.log ; cd' >> "$hostToGuestFiles"/cmd.sh
-	echo 'echo done: cfgFW-desktop (2 of 2) | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo "done: cfgFW-desktop (2 of 2)" | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 
 	echo '[[ ! -e /kded5-done ]] && kded5 --check' >> "$hostToGuestFiles"/cmd.sh
-	echo 'echo done: kded5 --check (2 of 2) | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo "done: kded5 --check (2 of 2)" | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo '( [[ ! -e /kded5-done ]] || [[ ! -e /FW-done ]] ) && sleep 420' >> "$hostToGuestFiles"/cmd.sh
 	echo 'echo | sudo -n tee /kded5-done' >> "$hostToGuestFiles"/cmd.sh
 	echo 'echo | sudo -n tee /FW-done' >> "$hostToGuestFiles"/cmd.sh
-	echo 'echo done: sleep , /kded5-done , /FW-done | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo "done: sleep , /kded5-done , /FW-done" | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sudo -n poweroff' >> "$hostToGuestFiles"/cmd.sh
 }
 
@@ -55707,16 +55709,73 @@ _create_ingredientVM_image() {
     #_createVMfstab
 
     _messagePlain_nominal 'os: globalVirtFS: write: fs'
-    cat << CZXWXcRMTo8EmM8i4d | sudo -n tee -a "$globalVirtFS"/etc/sudoers > /dev/null
+    # ATTENTION: Unusual. A complete sudoers file is written here largely for formality, in case 'sudo' has somehow already been installed and may somehow be needed. Later, before sudo is deliberately installed, the sudoers file is deleted, then after sudo is deliberately installed, only the necessary additions are appended.
+    #sudo -n rm -f "$globalVirtFS"/etc/sudoers
+    #tee -a
+    cat << CZXWXcRMTo8EmM8i4d | sudo -n tee "$globalVirtFS"/etc/sudoers > /dev/null
+#
+# This file MUST be edited with the 'visudo' command as root.
+#
+# Please consider adding local content in /etc/sudoers.d/ instead of
+# directly modifying this file.
+#
+# See the man page for details on how to write a sudoers file.
+#
+Defaults        env_reset
+Defaults        mail_badpass
+Defaults        secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+# This fixes CVE-2005-4890 and possibly breaks some versions of kdesu
+# (#1011624, https://bugs.kde.org/show_bug.cgi?id=452532)
+Defaults        use_pty
+
+# This preserves proxy settings from user environments of root
+# equivalent users (group sudo)
+#Defaults:%sudo env_keep += "http_proxy https_proxy ftp_proxy all_proxy no_proxy"
+
+# This allows running arbitrary commands, but so does ALL, and it means
+# different sudoers have their choice of editor respected.
+#Defaults:%sudo env_keep += "EDITOR"
+
+# Completely harmless preservation of a user preference.
+#Defaults:%sudo env_keep += "GREP_COLOR"
+
+# While you shouldn't normally run git as root, you need to with etckeeper
+#Defaults:%sudo env_keep += "GIT_AUTHOR_* GIT_COMMITTER_*"
+
+# Per-user preferences; root won't have sensible values for them.
+#Defaults:%sudo env_keep += "EMAIL DEBEMAIL DEBFULLNAME"
+
+# "sudo scp" or "sudo rsync" should be able to use your SSH agent.
+#Defaults:%sudo env_keep += "SSH_AGENT_PID SSH_AUTH_SOCK"
+
+# Ditto for GPG agent
+#Defaults:%sudo env_keep += "GPG_AGENT_INFO"
+
+# Host alias specification
+
+# User alias specification
+
+# Cmnd alias specification
+
+# User privilege specification
+root    ALL=(ALL:ALL) ALL
+
+# Allow members of group sudo to execute any command
+%sudo   ALL=(ALL:ALL) ALL
+
+# See sudoers(5) for more information on "@include" directives:
+
+@includedir /etc/sudoers.d
 #_____
-#Defaults	env_reset
-#Defaults	mail_badpass
-#Defaults	secure_path="/root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+#Defaults       env_reset
+#Defaults       mail_badpass
+#Defaults       secure_path="/root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 Defaults  env_keep += "currentChroot"
 Defaults  env_keep += "chrootName"
 
-root	ALL=(ALL:ALL) ALL
+root    ALL=(ALL:ALL) ALL
 #user   ALL=(ALL:ALL) NOPASSWD: ALL
 #pi ALL=(ALL:ALL) NOPASSWD: ALL
 
@@ -55725,9 +55784,10 @@ user ALL=(ALL:ALL) NOPASSWD: ALL
 %admin   ALL=(ALL:ALL) NOPASSWD: ALL
 %sudo   ALL=(ALL:ALL) NOPASSWD: ALL
 %wheel   ALL=(ALL:ALL) NOPASSWD: ALL
-#%sudo	ALL=(ALL:ALL) ALL
+#%sudo  ALL=(ALL:ALL) ALL
 
 # Important. Prevents possibility of appending to sudoers again by 'rotten_install.sh' .
+# End users may delete this long after dist/OS install is done.
 #noMoreRotten
 
 CZXWXcRMTo8EmM8i4d
@@ -55785,8 +55845,34 @@ CZXWXcRMTo8EmM8i4d
 	_getMost_backend_aptGetInstall btrfs-compsize
 	_getMost_backend_aptGetInstall zstd
     
+    # ATTENTION: Debian Bookworm sudoers default correctly changes the PATH for root user. Without this, 'cmd.sh', 'bootOnce', etc, will all FAIL - such commands as 'sudo -n poweroff' will FAIL .
+    sudo -n rm -f "$globalVirtFS"/etc/sudoers
 	_getMost_backend_aptGetInstall sudo
-    
+    cat << CZXWXcRMTo8EmM8i4d | sudo -n tee -a "$globalVirtFS"/etc/sudoers > /dev/null
+#_____
+#Defaults       env_reset
+#Defaults       mail_badpass
+#Defaults       secure_path="/root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+Defaults  env_keep += "currentChroot"
+Defaults  env_keep += "chrootName"
+
+root    ALL=(ALL:ALL) ALL
+#user   ALL=(ALL:ALL) NOPASSWD: ALL
+#pi ALL=(ALL:ALL) NOPASSWD: ALL
+
+user ALL=(ALL:ALL) NOPASSWD: ALL
+
+%admin   ALL=(ALL:ALL) NOPASSWD: ALL
+%sudo   ALL=(ALL:ALL) NOPASSWD: ALL
+%wheel   ALL=(ALL:ALL) NOPASSWD: ALL
+#%sudo  ALL=(ALL:ALL) ALL
+
+# Important. Prevents possibility of appending to sudoers again by 'rotten_install.sh' .
+# End users may delete this long after dist/OS install is done.
+#noMoreRotten
+
+CZXWXcRMTo8EmM8i4d
 
     _messagePlain_nominal 'hostnamectl'
 	_getMost_backend_aptGetInstall hostnamectl
