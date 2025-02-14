@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3043222026'
+export ub_setScriptChecksum_contents='3362015300'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -50165,13 +50165,14 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 	#disown -a -r
 	
 	# Up to 700s per kernel (ie. modules), plus 500s, total of 1147s for one kernel, 1749s to wait for three kernels.
-	_messagePlain_nominal 'wait: 6200s'
+	#6200s ... had a track record of a few years
+	_messagePlain_nominal 'wait: 13500s'
 	local currentIterationWait
 	currentIterationWait=0
 	pgrep qemu-system
 	pgrep qemu
 	ps -p "$currentPID"
-	while [[ "$currentIterationWait" -lt 6200 ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
+	while [[ "$currentIterationWait" -lt 13500 ]] && ( pgrep qemu-system > /dev/null 2>&1 || pgrep qemu > /dev/null 2>&1 || ps -p "$currentPID" > /dev/null 2>&1 )
 	do
 		if ( [[ "$qemuXvfb" == "true" ]] && ( [[ "$currentIterationWait" -le 320 ]] && [[ $(bc <<< "$currentIterationWait % 5") == 0 ]] ) || [[ $(bc <<< "$currentIterationWait % 30") == 0 ]] )
 		then
@@ -50187,7 +50188,7 @@ _create_ubDistBuild-bootOnce-qemu_sequence() {
 		let currentIterationWait=currentIterationWait+1
 	done
 	_messagePlain_probe_var currentIterationWait
-	[[ "$currentIterationWait" -ge 6200 ]] && _messagePlain_bad 'bad: fail: bootdisc: poweroff' && currentExitStatus=1
+	[[ "$currentIterationWait" -ge 13500 ]] && _messagePlain_bad 'bad: fail: bootdisc: poweroff' && currentExitStatus=1
 	sleep 27
 	
 	
@@ -51221,7 +51222,9 @@ _zSpecial_qemu_sequence_prog() {
 	
 	# sudo -n systemctl status vboxdrv
 	echo '#!/usr/bin/env bash' >> "$hostToGuestFiles"/cmd.sh
+	echo 'date +"%Y-%m-%d" | sudo -n tee /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sudo -n update-grub' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo done: update-grub | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo '_detect_process_compile() {
 	pgrep cc1 && return 0
 	pgrep apt && return 0
@@ -51235,20 +51238,29 @@ _zSpecial_qemu_sequence_prog() {
 	# If uncommented, any indefinite delay in '_detect_process_compile' may cause failure.
 	#echo 'while _detect_process_compile && sleep 27 && _detect_process_compile && sleep 27 && _detect_process_compile ; do sleep 27 ; done' >> "$hostToGuestFiles"/cmd.sh
 	
+	echo 'echo done: _detect_process_compile (if uncommented) | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sleep 15' >> "$hostToGuestFiles"/cmd.sh
 	echo '! sudo -n lsmod | grep -i vboxdrv && sudo -n /sbin/vboxconfig' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo done: vboxconfig | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sleep 75' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sudo -n lsmod | cut -f1 -d\  | sudo -n tee /lsmodReport' >> "$hostToGuestFiles"/cmd.sh
+	echo 'cat /lsmodReport | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo done: lsmodReport | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo '[[ ! -e /kded5-done ]] && kded5 --check' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo done: kded5 --check (1 of 2) | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo '[[ ! -e /kded5-done ]] && sleep 90' >> "$hostToGuestFiles"/cmd.sh
 
 	echo '[[ ! -e /FW-done ]] && cd /home/user/.ubcore/ubiquitous_bash ; ./ubiquitous_bash.sh _cfgFW-desktop | sudo -n tee /cfgFW.log ; cd' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo done: cfgFW-desktop (1 of 2) | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo '[[ ! -e /FW-done ]] && cd /home/user/.ubcore/ubiquitous_bash ; ./ubiquitous_bash.sh _cfgFW-desktop | sudo -n tee /cfgFW.log ; cd' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo done: cfgFW-desktop (2 of 2) | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 
 	echo '[[ ! -e /kded5-done ]] && kded5 --check' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo done: kded5 --check (2 of 2) | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo '( [[ ! -e /kded5-done ]] || [[ ! -e /FW-done ]] ) && sleep 420' >> "$hostToGuestFiles"/cmd.sh
 	echo 'echo | sudo -n tee /kded5-done' >> "$hostToGuestFiles"/cmd.sh
 	echo 'echo | sudo -n tee /FW-done' >> "$hostToGuestFiles"/cmd.sh
+	echo 'echo done: sleep , /kded5-done , /FW-done | sudo -n tee -a /var/log/bootOnce.log' >> "$hostToGuestFiles"/cmd.sh
 	echo 'sudo -n poweroff' >> "$hostToGuestFiles"/cmd.sh
 }
 
