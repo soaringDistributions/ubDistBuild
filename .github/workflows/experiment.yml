@@ -198,10 +198,10 @@ jobs:
         
           mkdir -p ./_local/analysis
 
-          #cp ./_local/lsmodReport ./_local/analysis/lsmodReport
-          cp ./_local/binReport ./_local/analysis/binReport
-          cp ./_local/coreReport ./_local/analysis/coreReport
-          cp ./_local/dpkg ./_local/analysis/dpkg
+          #cp ./_local/lsmodReport ./_local/analysis/lsmodReport-$currentReleaseTag"
+          cp ./_local/binReport ./_local/analysis/binReport-$currentReleaseTag"
+          cp ./_local/coreReport ./_local/analysis/coreReport-$currentReleaseTag"
+          cp ./_local/dpkg ./_local/analysis/dpkg-$currentReleaseTag"
 
           cd ./_local/analysis
 
