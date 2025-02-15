@@ -1226,7 +1226,7 @@ jobs:
           ! ./ubiquitous_bash.sh _openChRoot && exit 1
           ./ubiquitous_bash.sh _chroot cat /var/log/bootOnce.log | tee ./_local/bootOnce.log
           ! ./ubiquitous_bash.sh _closeChRoot && exit 1
-          gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/root_df.log
+          #gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/bootOnce.log
         env:
           GH_TOKEN: ${{ github.token }}
 
