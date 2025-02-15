@@ -886,6 +886,26 @@ jobs:
         run: |
           curl -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ""${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28"  https://api.github.com/rate_limit
           #curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/rate_limit | jq -r ".rate"
+
+      - name: Maximize build space
+        #if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 4125
+          #root-reserve-mb: 1625
+          temp-reserve-mb: 1950
+          #temp-reserve-mb: 50
+          swap-size-mb: 2
+          #remove-dotnet: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-dotnet: 'true'
+          #remove-android: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-android: 'true'
+          #remove-haskell: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-haskell: 'true'
+          #remove-codeql: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-codeql: 'true'
+          #remove-docker-images: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' }}
+          remove-docker-images: 'true'
       
       - name: _getCore_ub
         shell: bash
