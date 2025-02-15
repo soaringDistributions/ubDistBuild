@@ -162,10 +162,10 @@ jobs:
           ls -l ./_local/grub.cfg
           ls -l ./_local/grubenv
           ls -l ./_local/dpkg
-          ls -l ./_local/lsmodReport
+          #ls -l ./_local/lsmodReport
           ls -l ./_local/binReport
           ls -l ./_local/coreReport
-          ls -l ./_local/cfgFW.log
+          #ls -l ./_local/cfgFW.log
 
 
 
@@ -198,7 +198,7 @@ jobs:
         
           mkdir -p ./_local/analysis
 
-          cp ./_local/lsmodReport ./_local/analysis/lsmodReport
+          #cp ./_local/lsmodReport ./_local/analysis/lsmodReport
           cp ./_local/binReport ./_local/analysis/binReport
           cp ./_local/coreReport ./_local/analysis/coreReport
           cp ./_local/dpkg ./_local/analysis/dpkg
@@ -209,7 +209,7 @@ jobs:
           RELEASES=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/soaringDistributions/ubDistBuild/releases?per_page=100&page=1)
 
           # Download binReport file for the current release
-          #curl -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/lsmodReport"
+          ##curl -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/lsmodReport"
           #curl -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/binReport"
           #curl -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/coreReport"
           #curl -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/dpkg"
@@ -222,14 +222,14 @@ jobs:
             if [ "$RELEASE" != "$currentReleaseTag" ]; then
               
               # Download the binReport file for this release
-              curl -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/lsmodReport"
+              #curl -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/lsmodReport"
               curl -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/binReport"
               curl -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/coreReport"
               curl -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/dpkg"
               
-              echo | tee -a ./missing-lsmodReport
-              echo "Binaries (lsmod) loaded in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-lsmodReport
-              comm -23 <(sort "lsmodReport-$RELEASE") <(sort "lsmodReport-$currentReleaseTag") | tee -a ./missing-lsmodReport
+              #echo | tee -a ./missing-lsmodReport
+              #echo "Binaries (lsmod) loaded in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-lsmodReport
+              #comm -23 <(sort "lsmodReport-$RELEASE") <(sort "lsmodReport-$currentReleaseTag") | tee -a ./missing-lsmodReport
               echo | tee -a ./missing-binReport
               echo "Binaries (filesystem) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-binReport
               comm -23 <(sort "binReport-$RELEASE") <(sort "binReport-$currentReleaseTag") | tee -a ./missing-binReport
