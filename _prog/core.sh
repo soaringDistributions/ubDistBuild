@@ -940,7 +940,7 @@ _create_ubDistBuild-rotten_install() {
 	
 	
 	_chroot apt-get -y clean
-	_chroot sudo -n apt-get autoremove --purge
+	_chroot sudo -n apt-get autoremove -y --purge
 
 	# https://forum.manjaro.org/t/high-cpu-usage-from-plasmashell-kactivitymanagerd/114305
 	# Apparently prevents excessive CPU usage from plasmashell , etc .
