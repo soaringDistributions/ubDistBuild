@@ -99,7 +99,7 @@ else
 
 	#./ubiquitous_bash.sh _wget_githubRelease_join-stdout ""$owner"/"$repo"" "$rl" "package_image.tar.flx" | ./ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | sudo -n dd of="$dev" bs=1M status=progress
 
-	if [[ "$3" == "/dev/sr"* ]] || [[ "$3" == "/dev/dvd"* ]] || [[ "$3" == "/dev/cdrom"* ]]
+	if [[ "$dev" == "/dev/sr"* ]] || [[ "$dev" == "/dev/dvd"* ]] || [[ "$dev" == "/dev/cdrom"* ]]
 	then
 		if ! [[ $(df --block-size=1000000 --output=avail "$tmpSelf" | tr -dc '0-9') -gt "3880" ]]
 		then
@@ -113,7 +113,7 @@ else
 		( ./ubiquitous_bash.sh _wget_githubRelease_join-stdout ""$owner"/"$repo"" "$rl" "vm-live.iso" ) | sudo -n growisofs -speed=3 -Z "$dev"=/dev/stdin -use-the-force-luke=notray -use-the-force-luke=spare:min -use-the-force-luke=bufsize:128m
 	fi
 
-	if [[ "$3" == "/dev/sd"* ]] || [[ "$3" == "/dev/hd"* ]] || [[ "$3" == "/dev/disk/"* ]]
+	if [[ "$dev" == "/dev/sd"* ]] || [[ "$dev" == "/dev/hd"* ]] || [[ "$dev" == "/dev/disk/"* ]]
 	then
 		#( ./ubiquitous_bash.sh _wget_githubRelease_join-stdout ""$owner"/"$repo"" "$rl" "vm-live.iso" ; dd if=/dev/zero bs=2048 count=$(bc <<< '1000000000000 / 2048' ) ) | sudo -n dd of="$dev" bs=1M status=progress
 		( ./ubiquitous_bash.sh _wget_githubRelease_join-stdout ""$owner"/"$repo"" "$rl" "vm-live.iso" ) | sudo -n dd of="$dev" bs=1M status=progress
