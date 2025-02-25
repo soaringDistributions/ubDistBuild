@@ -899,6 +899,8 @@ jobs:
           ./ubiquitous_bash.sh _custom || true
         #timeout-minutes: customTimeout
         timeout-minutes: 300
+        env:
+          GH_TOKEN: ${{ github.token }}
       
       
       - name: _custom-bundle

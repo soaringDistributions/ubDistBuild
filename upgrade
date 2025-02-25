@@ -580,7 +580,8 @@ _upgrade_derive() {
 	cp -a ./_lib/ubDistBuild/_prog ./
 	
 	cp -a ./_lib/ubDistBuild/.github/workflows/zCustom.yml ./.github/workflows/zCustom.yml
-	cp -a ./_lib/ubDistBuild/.github/workflows/zCustom-monolithic.yml ./.github/workflows/ > /dev/null 2>&1
+	#cp -a ./_lib/ubDistBuild/.github/workflows/zCustom-monolithic.yml ./.github/workflows/ > /dev/null 2>&1
+	cp -a ./_lib/ubDistBuild/.github/workflows/zUpgrade.yml ./.github/workflows/zUpgrade.yml
 
 	cp -a ./_lib/ubDistBuild/.github/workflows/_renameTag-build_to_internal.yml ./.github/workflows/
 	cp -a ./_lib/ubDistBuild/.github/workflows/_renameTag-internal_to_internal-date.yml ./.github/workflows/

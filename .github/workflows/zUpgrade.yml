@@ -140,7 +140,7 @@ jobs:
           #curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/rate_limit | jq -r ".rate"
 
   build_installer:
-    if : ${{ github.event.inputs.DISABLE_RELEASE != 'true' }}
+    if : ${{ github.event.inputs.DISABLE_RELEASE != 'true' && github.repository == 'soaringDistributions/ubDistBuild' }}
     needs: [build_release]
     #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest' || github.event.inputs.runnerName }}
     #runs-on: 'ubuntu-latest'
@@ -926,6 +926,26 @@ jobs:
         timeout-minutes: ${{ github.event.inputs.upgradeTimeout == '300' && 300 || 45 }}
         env:
           GH_TOKEN: ${{ github.token }}
+
+
+      - name: _upgrade_custom
+        shell: bash
+        run: |
+          ! ./ubiquitous_bash.sh _bin type _upgrade_custom > /dev/null 2>&1 && exit 0
+          ./ubiquitous_bash.sh _upgrade_custom
+        timeout-minutes: ${{ github.event.inputs.upgradeTimeout == '300' && 300 || 45 }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: _upgrade_custom-repo
+        shell: bash
+        run: |
+          ! ./ubiquitous_bash.sh _bin type _upgrade_custom-repo > /dev/null 2>&1 && exit 0
+          ./ubiquitous_bash.sh _upgrade_custom-repo
+        timeout-minutes: ${{ github.event.inputs.upgradeTimeout == '300' && 300 || 45 }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          
 
       # Discouraged. Usually more useful and more standard to do this within '_custom' function.
       # ONLY enable if a replacement '_lib/custom/package_kde.tar.xz' is available and desired. This WILL fail if the file is not present, and this is NOT necessary unless a different customization is needed: it is better to rely on the upstream 'ubDistBuild' repository KDE configuration package installed for 'ubdist/OS' .
