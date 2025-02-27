@@ -900,6 +900,7 @@ jobs:
         #timeout-minutes: customTimeout
         timeout-minutes: 300
         env:
+          GH_TOKEN_publicEquiv_auto: ${{ secrets.TOKEN_publicEquiv_auto }}
           GH_TOKEN: ${{ github.token }}
       
       

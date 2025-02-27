@@ -928,14 +928,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
 
-      - name: _upgrade_custom
-        shell: bash
-        run: |
-          ! ./ubiquitous_bash.sh _bin type _upgrade_custom > /dev/null 2>&1 && exit 0
-          ./ubiquitous_bash.sh _upgrade_custom
-        timeout-minutes: ${{ github.event.inputs.upgradeTimeout == '300' && 300 || 45 }}
-        env:
-          GH_TOKEN: ${{ github.token }}
 
       - name: _upgrade_custom-repo
         shell: bash
@@ -945,7 +937,27 @@ jobs:
         timeout-minutes: ${{ github.event.inputs.upgradeTimeout == '300' && 300 || 45 }}
         env:
           GH_TOKEN: ${{ github.token }}
+
+      - name: _upgrade_custom
+        shell: bash
+        run: |
+          ! ./ubiquitous_bash.sh _bin type _upgrade_custom > /dev/null 2>&1 && exit 0
+          ./ubiquitous_bash.sh _upgrade_custom
+        timeout-minutes: ${{ github.event.inputs.upgradeTimeout == '300' && 300 || 45 }}
+        env:
+          GH_TOKEN_publicEquiv_auto: ${{ secrets.TOKEN_publicEquiv_auto }}
+          GH_TOKEN: ${{ github.token }}
+
+      - name: _upgrade_custom-bundle
+        shell: bash
+        run: |
+          ! ./ubiquitous_bash.sh _bin type _upgrade_custom-repo > /dev/null 2>&1 && exit 0
+          ./ubiquitous_bash.sh _upgrade_custom-repo
+        timeout-minutes: ${{ github.event.inputs.upgradeTimeout == '300' && 300 || 45 }}
+        env:
+          GH_TOKEN: ${{ github.token }}
           
+
 
       # Discouraged. Usually more useful and more standard to do this within '_custom' function.
       # ONLY enable if a replacement '_lib/custom/package_kde.tar.xz' is available and desired. This WILL fail if the file is not present, and this is NOT necessary unless a different customization is needed: it is better to rely on the upstream 'ubDistBuild' repository KDE configuration package installed for 'ubdist/OS' .
