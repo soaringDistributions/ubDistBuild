@@ -842,7 +842,7 @@ jobs:
           ./ubiquitous_bash.sh _upgrade_core
         timeout-minutes: 90
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
 
 
       
@@ -854,7 +854,7 @@ jobs:
           #./ubiquitous_bash.sh _upgrade_kernel
         timeout-minutes: 90
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
 
 
       #- name: upgrade_kernel-mainline-server
@@ -864,7 +864,7 @@ jobs:
           #./ubiquitous_bash.sh _upgrade_kernel_mainline_server
         #timeout-minutes: 90
         #env:
-          #GH_TOKEN: ${{ github.token }}
+          #GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
 
 
 
@@ -874,7 +874,7 @@ jobs:
           ./ubiquitous_bash.sh _upgrade_installers
         timeout-minutes: 180
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
 
 
       - name: _custom-expand
@@ -887,7 +887,7 @@ jobs:
         run: |
           ./ubiquitous_bash.sh _custom-repo || true
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
       
       
       - name: _custom
@@ -909,6 +909,7 @@ jobs:
         run: |
           ./ubiquitous_bash.sh _custom-bundle || true
         env:
+          GH_TOKEN_publicEquiv_auto: ${{ secrets.TOKEN_publicEquiv_auto }}
           GH_TOKEN: ${{ github.token }}
 
       # Discouraged. Usually more useful and more standard to do this within '_custom' function.
@@ -1502,10 +1503,10 @@ jobs:
           git clone https://github.com/mirage335-colossus/extendedInterface.git
           cd extendedInterface
           mkdir -p ../extendedInterface-accessories/integrations/ubcp
-          curl -L -o ../extendedInterface-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
+          curl -L -o ../extendedInterface-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.TOKEN_publicEquiv_auto }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
           ./ubiquitous_bash.sh _build_extendedInterface-fetch | sudo -n tee ../../_lib/_extendedInterface.log && exit ${PIPESTATUS[0]}
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
       - name: _fetchAccessories ubDistBuild
         shell: bash
         run: |
@@ -1513,10 +1514,10 @@ jobs:
           git clone https://github.com/soaringDistributions/ubDistBuild.git
           cd ubDistBuild
           mkdir -p ../ubDistBuild-accessories/integrations/ubcp
-          curl -L -o ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
+          curl -L -o ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.TOKEN_publicEquiv_auto }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
           ./ubiquitous_bash.sh _build_ubDistBuild-fetch | sudo -n tee ../../_lib/_ubDistBuild.log && exit ${PIPESTATUS[0]}
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
       
       - name: _convert-live _create_ubDistBuild_feedAccessories
         shell: bash

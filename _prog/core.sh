@@ -1114,7 +1114,7 @@ _create_ubDistBuild-rotten_install-core() {
 		! _chroot /rotten_install.sh _custom_core_drop && _messageFAIL
 		#sudo rm -f "$globalVirtFS"/in_chroot
 	else
-		_messagePlain_good 'good: core.tar.xz'
+		_messagePlain_good 'good: core.tar.xz  OR  "$scriptLocal"/ubDistFetch/_lib/core'
 		rm -f "$scriptLocal"/core.tar.xz
 	fi
 	

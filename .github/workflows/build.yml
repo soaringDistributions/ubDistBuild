@@ -670,6 +670,8 @@ jobs:
           export devfast=${{ github.event.inputs.devfast }}
           echo $devfast
           ./_create_ubDistBuild-rotten_install | sudo -n tee ./_local/_create_ubDistBuild-rotten_install.log && exit ${PIPESTATUS[0]}
+        env:
+          GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
       - name: _chroot_test
         shell: bash
         run: |
@@ -713,7 +715,7 @@ jobs:
           cd ubDistFetch
           ./_ubDistFetch.bat | sudo -n tee ../../_lib/_ubDistFetch.log && exit ${PIPESTATUS[0]}
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
       
       #- name: _fetchCore package
         #shell: bash
@@ -727,7 +729,7 @@ jobs:
         run: |
           ./_create_ubDistBuild-rotten_install-core | sudo -n tee ./_create_ubDistBuild-rotten_install-core.log && exit ${PIPESTATUS[0]}
         #env:
-          #GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          #GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
       
       # DANGER: GitHub Actions ONLY!
       - name: _fetchCore! rm
@@ -2205,7 +2207,7 @@ jobs:
           curl -L -o ../extendedInterface-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
           ./ubiquitous_bash.sh _build_extendedInterface-fetch | sudo -n tee ../../_lib/_extendedInterface.log && exit ${PIPESTATUS[0]}
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
       - name: _fetchAccessories ubDistBuild
         shell: bash
         run: |
@@ -2216,7 +2218,7 @@ jobs:
           curl -L -o ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
           ./ubiquitous_bash.sh _build_ubDistBuild-fetch | sudo -n tee ../../_lib/_ubDistBuild.log && exit ${PIPESTATUS[0]}
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
       
       - name: _convert-live _create_ubDistBuild_feedAccessories
         shell: bash

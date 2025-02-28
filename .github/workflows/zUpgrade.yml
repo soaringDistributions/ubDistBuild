@@ -895,7 +895,7 @@ jobs:
           ./ubiquitous_bash.sh _upgrade_core
         timeout-minutes: ${{ github.event.inputs.upgradeTimeout == '300' && 300 || 45 }}
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
 
 
       - name: upgrade_kernel-lts
@@ -906,7 +906,7 @@ jobs:
           #./ubiquitous_bash.sh _upgrade_kernel
         timeout-minutes: ${{ github.event.inputs.upgradeTimeout == '300' && 300 || 45 }}
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
 
 
       - name: upgrade_kernel-mainline-server
@@ -916,7 +916,7 @@ jobs:
           ./ubiquitous_bash.sh _upgrade_kernel_mainline_server
         timeout-minutes: ${{ github.event.inputs.upgradeTimeout == '300' && 300 || 45 }}
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
 
 
       - name: upgrade_installers
@@ -925,7 +925,7 @@ jobs:
           ./ubiquitous_bash.sh _upgrade_installers
         timeout-minutes: ${{ github.event.inputs.upgradeTimeout == '300' && 300 || 45 }}
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
 
 
 
@@ -936,6 +936,7 @@ jobs:
           ./ubiquitous_bash.sh _upgrade_custom-repo
         timeout-minutes: ${{ github.event.inputs.upgradeTimeout == '300' && 300 || 45 }}
         env:
+          GH_TOKEN_publicEquiv_auto: ${{ secrets.TOKEN_publicEquiv_auto }}
           GH_TOKEN: ${{ github.token }}
 
       - name: _upgrade_custom
@@ -955,6 +956,7 @@ jobs:
           ./ubiquitous_bash.sh _upgrade_custom-repo
         timeout-minutes: ${{ github.event.inputs.upgradeTimeout == '300' && 300 || 45 }}
         env:
+          GH_TOKEN_publicEquiv_auto: ${{ secrets.TOKEN_publicEquiv_auto }}
           GH_TOKEN: ${{ github.token }}
           
 
@@ -1576,7 +1578,7 @@ jobs:
           curl -L -o ../extendedInterface-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
           ./ubiquitous_bash.sh _build_extendedInterface-fetch | sudo -n tee ../../_lib/_extendedInterface.log && exit ${PIPESTATUS[0]}
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
       - name: _fetchAccessories ubDistBuild
         shell: bash
         run: |
@@ -1587,7 +1589,7 @@ jobs:
           curl -L -o ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
           ./ubiquitous_bash.sh _build_ubDistBuild-fetch | sudo -n tee ../../_lib/_ubDistBuild.log && exit ${PIPESTATUS[0]}
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
       
       - name: _convert-live _create_ubDistBuild_feedAccessories
         shell: bash
