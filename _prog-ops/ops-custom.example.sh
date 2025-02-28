@@ -3,6 +3,8 @@
 
 _custom() {
 	true
+
+	return 0
 }
 
 # ATTENTION: Actually SHRINKS disk image.
@@ -100,6 +102,8 @@ _custom-repo() {
 	_git-custom-repo variant org repo
 	
 	_git-custom-repo variant org repo_bundle
+
+	return 0
 }
 
 
@@ -118,5 +122,7 @@ _git-custom-repo() {
 	fi
 	
 	! _closeChRoot && _messageFAIL
+
+	return 0
 }
 

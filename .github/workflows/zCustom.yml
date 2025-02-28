@@ -885,7 +885,8 @@ jobs:
       - name: _custom-repo
         shell: bash
         run: |
-          ./ubiquitous_bash.sh _custom-repo || true
+          ./ubiquitous_bash.sh _custom-repo
+          # || true
         env:
           GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
       
@@ -896,7 +897,8 @@ jobs:
           # Using qemu within _custom is very strongly discouraged, unusual, and unwise.
           export qemuNoKVM=${{ inputs.qemuNoKVM }}
           echo qemuNoKVM $qemuNoKVM
-          ./ubiquitous_bash.sh _custom || true
+          ./ubiquitous_bash.sh _custom
+          # || true
         #timeout-minutes: customTimeout
         timeout-minutes: 300
         env:
@@ -907,7 +909,8 @@ jobs:
       - name: _custom-bundle
         shell: bash
         run: |
-          ./ubiquitous_bash.sh _custom-bundle || true
+          ./ubiquitous_bash.sh _custom-bundle
+          # || true
         env:
           GH_TOKEN_publicEquiv_auto: ${{ secrets.TOKEN_publicEquiv_auto }}
           GH_TOKEN: ${{ github.token }}
