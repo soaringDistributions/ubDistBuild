@@ -679,6 +679,8 @@ jobs:
           echo $devfast
           [[ "$devfast" == "" ]] && export devfast=true
           ./_chroot_test | sudo -n tee ./_local/_chroot_test.log && exit ${PIPESTATUS[0]}
+        env:
+          GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
 
       #- name: Force KVM group perms
         #if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' }}
