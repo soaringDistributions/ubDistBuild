@@ -296,7 +296,7 @@ jobs:
           cd ubiquitous_bash
           ./_setupUbiquitous.bat
       - uses: actions/checkout@v3
-        if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
+        #if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         with:
           submodules: recursive
       - name: mkdir _local
