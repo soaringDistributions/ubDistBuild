@@ -692,8 +692,8 @@ jobs:
 
   build:
     needs: [build_before_noBoot, build_release]
-    #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
-    runs-on: 'ubuntu-latest'
+    runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
+    #runs-on: 'ubuntu-latest'
     steps:
       - name: RAND_SEED
         shell: bash
@@ -1435,8 +1435,8 @@ jobs:
   build-convert-live:
     if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' }}
     needs: [build, build_release]
-    #runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
-    runs-on: 'ubuntu-latest'
+    runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
+    #runs-on: 'ubuntu-latest'
     steps:
       - name: RAND_SEED
         shell: bash
