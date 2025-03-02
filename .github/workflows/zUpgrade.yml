@@ -881,6 +881,7 @@ jobs:
           
           
       - name: scribe! info! github! upgrade
+        if : ${{ github.repository == 'soaringDistributions/ubDistBuild' }}
         shell: bash
         run: |
           ! ./ubiquitous_bash.sh _openChRoot && exit 1
@@ -889,6 +890,19 @@ jobs:
           ! date +"%Y-%m-%d" | ./ubiquitous_bash.sh _chroot tee -a /info-github-upgrade && exit 1
           #! echo from releaseOrigin= | ./ubiquitous_bash.sh _chroot tee -a /info-github-upgrade && exit 1
           ! echo from releaseLabel=${{ inputs.releaseLabel }} | ./ubiquitous_bash.sh _chroot tee -a /info-github-upgrade && exit 1
+          ! ./ubiquitous_bash.sh _closeChRoot && exit 1
+          true
+
+      - name: scribe! info! github! upgrade! custom
+        if : ${{ github.repository != 'soaringDistributions/ubDistBuild' }}
+        shell: bash
+        run: |
+          ! ./ubiquitous_bash.sh _openChRoot && exit 1
+          ! echo ${{ github.repository }} | ./ubiquitous_bash.sh _chroot tee /info-github-upgrade-custom && exit 1
+          ! echo build_upgrade-${{ github.run_id }}-${{ github.run_attempt }} | ./ubiquitous_bash.sh _chroot tee -a /info-github-upgrade-custom && exit 1
+          ! date +"%Y-%m-%d" | ./ubiquitous_bash.sh _chroot tee -a /info-github-upgrade-custom && exit 1
+          #! echo from releaseOrigin= | ./ubiquitous_bash.sh _chroot tee -a /info-github-upgrade-custom && exit 1
+          ! echo from releaseLabel=${{ inputs.releaseLabel }} | ./ubiquitous_bash.sh _chroot tee -a /info-github-upgrade-custom && exit 1
           ! ./ubiquitous_bash.sh _closeChRoot && exit 1
           true
       
