@@ -1975,7 +1975,7 @@ jobs:
               comm -23 <(sort "dpkg-$RELEASE") <(sort "dpkg-$currentReleaseTag") | tee -a ./missing-dpkg
               echo | tee -a ./missing-customReport
               echo "Binaries (filesystem: custom) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-customReport
-              comm -23 <(sort "customReport-$RELEASE" | grep -v '_local/h') <(sort "customReport-$currentReleaseTag" | grep -v '_local/h') | tee -a ./missing-customReport
+              comm -23 <(sort "customReport-$RELEASE" | grep -v '_local/h' | grep -v 'docker/fuse-overlayfs') <(sort "customReport-$currentReleaseTag" | grep -v '_local/h' | grep -v 'docker/fuse-overlayfs') | tee -a ./missing-customReport
             fi
           done
         env:
