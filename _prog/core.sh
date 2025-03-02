@@ -2660,7 +2660,7 @@ _custom_report() {
 
 	_messageNormal 'init: _custom_report: customReport, cronUserReport, cronRootReport'
 
-    _chroot find /etc /var/lib/docker | grep -v 'docker/fuse-overlayfs' | sudo -n tee "$globalVirtFS"/customReport > /dev/null
+    _chroot find /etc /var/lib/docker | grep -v 'docker/fuse-overlayfs' | grep -v 'docker/image/fuse-overlayfs' | sudo -n tee "$globalVirtFS"/customReport > /dev/null
     sudo -n cp -f "$globalVirtFS"/customReport "$scriptLocal"/customReport
     sudo -n chown "$USER":"$USER" "$scriptLocal"/customReport
 
