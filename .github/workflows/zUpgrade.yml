@@ -344,8 +344,7 @@ jobs:
         run: |
           mkdir -p ~/core/infrastructure
           cd ~/core/infrastructure
-          #git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
-          git clone --depth 1 https://github.com/mirage335-colossus/ubiquitous_bash.git
+          git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
           cd ubiquitous_bash
           ./_setupUbiquitous.bat
       - uses: actions/checkout@v3
