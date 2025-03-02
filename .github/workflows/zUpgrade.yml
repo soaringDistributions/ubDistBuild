@@ -731,19 +731,19 @@ jobs:
           remove-codeql: 'true'
           #remove-docker-images: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' && github.event.inputs.runnerName != 'ubuntu-latest-l' && github.event.inputs.runnerName != 'ubuntu-latest-h' }}
           remove-docker-images: 'true'
-      #- name: Maximize build space ! remove ONLY
-        #if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' || github.event.inputs.runnerName == 'ubuntu-latest-l' || github.event.inputs.runnerName == 'ubuntu-latest-h' }}
-        #uses: AdityaGarg8/remove-unwanted-software@v4.1
-        #with:
-          #remove-dotnet: 'true'
-          #remove-android: 'true'
-          #remove-haskell: 'true'
-          #remove-codeql: 'true'
-          #remove-docker-images: 'true'
-          #remove-large-packages: 'true'
-          #remove-cached-tools: 'true'
-          #remove-swapfile: 'true'
-          #verbose: 'false'
+      - name: Maximize build space ! remove ONLY
+        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' || github.event.inputs.runnerName == 'ubuntu-latest-l' || github.event.inputs.runnerName == 'ubuntu-latest-h' }}
+        uses: AdityaGarg8/remove-unwanted-software@v4.1
+        with:
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+          remove-docker-images: 'true'
+          remove-large-packages: 'true'
+          remove-cached-tools: 'true'
+          remove-swapfile: 'true'
+          verbose: 'false'
       - name: df
         shell: bash
         run: |
@@ -755,8 +755,7 @@ jobs:
         run: |
           mkdir -p ~/core/infrastructure
           cd ~/core/infrastructure
-          #git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
-          git clone --depth 1 https://github.com/mirage335-colossus/ubiquitous_bash.git
+          git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
           cd ubiquitous_bash
           ./_setupUbiquitous.bat
       #- name: _getMinimal_cloud
@@ -1234,7 +1233,7 @@ jobs:
           true
       # https://github.com/easimon/maximize-build-space
       - name: Maximize build space
-        if: ${{ github.event.inputs.DISABLE_ROOTFS == 'true' && github.event.inputs.runnerName != 'ubuntu-latest-m' && github.event.inputs.runnerName != 'ubuntu-latest-l' && github.event.inputs.runnerName != 'ubuntu-latest-h' }}
+        if: ${{ github.event.inputs.DISABLE_ROOTFS == 'false' && github.event.inputs.runnerName != 'ubuntu-latest-m' && github.event.inputs.runnerName != 'ubuntu-latest-l' && github.event.inputs.runnerName != 'ubuntu-latest-h' }}
         #if: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' && github.event.inputs.runnerName != 'ubuntu-latest-l' && github.event.inputs.runnerName != 'ubuntu-latest-h' }}
         uses: easimon/maximize-build-space@master
         with:
@@ -1253,20 +1252,20 @@ jobs:
           remove-codeql: 'true'
           #remove-docker-images: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' && github.event.inputs.runnerName != 'ubuntu-latest-l' && github.event.inputs.runnerName != 'ubuntu-latest-h' }}
           remove-docker-images: 'true'
-      #- name: Maximize build space ! remove ONLY
-        #if: ${{ github.event.inputs.DISABLE_ROOTFS == 'false' && ( github.event.inputs.runnerName == 'ubuntu-latest-m' || github.event.inputs.runnerName == 'ubuntu-latest-l' || github.event.inputs.runnerName == 'ubuntu-latest-h' ) }}
-        ##if: ${{ ( github.event.inputs.runnerName == 'ubuntu-latest-m' || github.event.inputs.runnerName == 'ubuntu-latest-l' || github.event.inputs.runnerName == 'ubuntu-latest-h' ) }}
-        #uses: AdityaGarg8/remove-unwanted-software@v4.1
-        #with:
-          #remove-dotnet: 'true'
-          #remove-android: 'true'
-          #remove-haskell: 'true'
-          #remove-codeql: 'true'
-          #remove-docker-images: 'true'
-          #remove-large-packages: 'true'
-          #remove-cached-tools: 'true'
-          #remove-swapfile: 'true'
-          #verbose: 'false'
+      - name: Maximize build space ! remove ONLY
+        if: ${{ github.event.inputs.DISABLE_ROOTFS == 'false' && ( github.event.inputs.runnerName == 'ubuntu-latest-m' || github.event.inputs.runnerName == 'ubuntu-latest-l' || github.event.inputs.runnerName == 'ubuntu-latest-h' ) }}
+        #if: ${{ ( github.event.inputs.runnerName == 'ubuntu-latest-m' || github.event.inputs.runnerName == 'ubuntu-latest-l' || github.event.inputs.runnerName == 'ubuntu-latest-h' ) }}
+        uses: AdityaGarg8/remove-unwanted-software@v4.1
+        with:
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+          remove-docker-images: 'true'
+          remove-large-packages: 'true'
+          remove-cached-tools: 'true'
+          remove-swapfile: 'true'
+          verbose: 'false'
       - name: df
         shell: bash
         run: |
@@ -1277,8 +1276,7 @@ jobs:
         run: |
           mkdir -p ~/core/infrastructure
           cd ~/core/infrastructure
-          #git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
-          git clone --depth 1 https://github.com/mirage335-colossus/ubiquitous_bash.git
+          git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
           cd ubiquitous_bash
           ./_setupUbiquitous.bat
           ./ubiquitous_bash.sh _custom_splice_opensslConfig
@@ -1374,16 +1372,16 @@ jobs:
       # ###
       
       # ###
-      #- name: DUMMY-rootfs
-        #if: ${{ github.event.inputs.DISABLE_ROOTFS != 'false' }}
-        #shell: bash
-        #run: |
-          #rm -f ./_local/package_rootfs.tar || true
-          #rm -f ./_local/package_rootfs.tar.flx || true
-          ##echo > ./_local/package_rootfs.tar
-          ##echo > ./_local/package_rootfs.tar.flx
-          #tar -cf - /dev/null > ./_local/package_rootfs.tar
-          #tar -cf - /dev/null | lz4 -z --fast=1 - ./_local/package_rootfs.tar.flx
+      - name: DUMMY-rootfs
+        if: ${{ github.event.inputs.DISABLE_ROOTFS != 'false' }}
+        shell: bash
+        run: |
+          rm -f ./_local/package_rootfs.tar || true
+          rm -f ./_local/package_rootfs.tar.flx || true
+          #echo > ./_local/package_rootfs.tar
+          #echo > ./_local/package_rootfs.tar.flx
+          tar -cf - /dev/null > ./_local/package_rootfs.tar
+          tar -cf - /dev/null | lz4 -z --fast=1 - ./_local/package_rootfs.tar.flx
       # ###
           
 
@@ -1436,7 +1434,6 @@ jobs:
     if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' }}
     needs: [build, build_release]
     runs-on: ${{ github.event.inputs.runnerName == '' && 'ubuntu-latest-m' || github.event.inputs.runnerName }}
-    #runs-on: 'ubuntu-latest'
     steps:
       - name: RAND_SEED
         shell: bash
@@ -1474,19 +1471,19 @@ jobs:
           remove-codeql: 'true'
           #remove-docker-images: ${{ github.event.inputs.runnerName != 'ubuntu-latest-m' && github.event.inputs.runnerName != 'ubuntu-latest-l' && github.event.inputs.runnerName != 'ubuntu-latest-h' }}
           remove-docker-images: 'true'
-      #- name: Maximize build space ! remove ONLY
-        #if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' || github.event.inputs.runnerName == 'ubuntu-latest-l' || github.event.inputs.runnerName == 'ubuntu-latest-h' }}
-        #uses: AdityaGarg8/remove-unwanted-software@v4.1
-        #with:
-          #remove-dotnet: 'true'
-          #remove-android: 'true'
-          #remove-haskell: 'true'
-          #remove-codeql: 'true'
-          #remove-docker-images: 'true'
-          #remove-large-packages: 'true'
-          #remove-cached-tools: 'true'
-          #remove-swapfile: 'true'
-          #verbose: 'false'
+      - name: Maximize build space ! remove ONLY
+        if: ${{ github.event.inputs.runnerName == 'ubuntu-latest-m' || github.event.inputs.runnerName == 'ubuntu-latest-l' || github.event.inputs.runnerName == 'ubuntu-latest-h' }}
+        uses: AdityaGarg8/remove-unwanted-software@v4.1
+        with:
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+          remove-docker-images: 'true'
+          remove-large-packages: 'true'
+          remove-cached-tools: 'true'
+          remove-swapfile: 'true'
+          verbose: 'false'
       - name: df
         shell: bash
         run: |
@@ -1501,8 +1498,7 @@ jobs:
         run: |
           mkdir -p ~/core/infrastructure
           cd ~/core/infrastructure
-          #git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
-          git clone --depth 1 https://github.com/mirage335-colossus/ubiquitous_bash.git
+          git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
           cd ubiquitous_bash
           ./_setupUbiquitous.bat
       - name: _getMinimal_cloud
@@ -1585,7 +1581,7 @@ jobs:
           git clone https://github.com/mirage335-colossus/extendedInterface.git
           cd extendedInterface
           mkdir -p ../extendedInterface-accessories/integrations/ubcp
-          curl -L -o ../extendedInterface-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
+          curl -L -o ../extendedInterface-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.TOKEN_publicEquiv_auto }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
           ./ubiquitous_bash.sh _build_extendedInterface-fetch | sudo -n tee ../../_lib/_extendedInterface.log && exit ${PIPESTATUS[0]}
         env:
           GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
@@ -1596,7 +1592,7 @@ jobs:
           git clone https://github.com/soaringDistributions/ubDistBuild.git
           cd ubDistBuild
           mkdir -p ../ubDistBuild-accessories/integrations/ubcp
-          curl -L -o ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
+          curl -L -o ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.TOKEN_publicEquiv_auto }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
           ./ubiquitous_bash.sh _build_ubDistBuild-fetch | sudo -n tee ../../_lib/_ubDistBuild.log && exit ${PIPESTATUS[0]}
         env:
           GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
@@ -1752,8 +1748,7 @@ jobs:
         run: |
           mkdir -p ~/core/infrastructure
           cd ~/core/infrastructure
-          #git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
-          git clone --depth 1 https://github.com/mirage335-colossus/ubiquitous_bash.git
+          git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
           cd ubiquitous_bash
           ./_setupUbiquitous.bat
           ./ubiquitous_bash.sh _custom_splice_opensslConfig
@@ -1766,6 +1761,14 @@ jobs:
           ##! sudo -n apt-get -y clean && exit 1
           #df -h
           #df -h /
+      
+      - name: _getMost-aria2
+        shell: bash
+        run: |
+          sudo -n apt-get -y clean
+          sudo -n apt-get update
+          sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y aria2
+        timeout-minutes: 355
       
       - name: _getMost-aria2
         shell: bash
