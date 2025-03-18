@@ -1,0 +1,20 @@
+
+DISCLAIMER:  These observations are NOT and MUST NOT BE CONSTRUED as professional or LEGAL ADVICE.
+
+
+# Retroactive changes to  Llama 3.1 Acceptable Use Policy
+
+Existence of differences between  Llama 3.1 Acceptable Use Policy  and  Llama 3.3 Acceptable Use Policy  suggest the statement from 'Meta' 'most recent copy' which may have been intended to allow changing the policy in the future, being part of a seemingly perpetual license per the terms of the license agreement which only permit termination 'if you are in breach', in fact is known to 'Meta' to not allow retroactive changes to the policy absent that termination. In other words, if 'Meta' believes the policy can be changed, then why have they not retroactively changed the older policy with terms that only give them more rights to terminate the license?
+
+Alternative explanation that their reputation could be affected is NOT plausible: the broadest interpretation differences observed as of 2025-03-14 would NOT seem to affect trust for the common Software-As-A-Service business model end-user interactive use cases.
+
+Since the differences in Acceptable Use Policy were not tied to new features, and the features common to both models are not different enough to need different terms of use, the other alternate explanation that these differences were needed for one model version but not the other, is also NOT plausible.
+
+Not changing these simple text documents simply for lack of effort is also NOT plausible - the effort and stakes to write and consider the implications of additional legalease are far greater than changing one file corresponding to the legal terms of use covering an expensive investment.
+
+The only plausible explanation is that 'Meta' does not believe the  'Llama 3.1 Acceptable Use Policy'  can be retroactively changed.
+
+
+
+
+

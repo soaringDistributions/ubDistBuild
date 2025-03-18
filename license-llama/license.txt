@@ -3,3 +3,10 @@
 #  NOTICE: ATTENTION: This license has been preserved as 'LICENSE-Llama-3.1.txt', but this license does NOT apply to any 'ubiquitous_bash' code or any other work that is not either a work by Meta or strictly a derivative of a work by Meta (such as a modified AI model GGUF or safetensors file) !
 
 # https://www.llama.com/llama3_1/use-policy/
+
+
+# https://www.llama.com/llama3_3/license/
+#  NOTICE: ATTENTION: This license has been preserved as 'LICENSE-Llama-3.3.txt', but this license does NOT apply to any 'ubiquitous_bash' code or any other work that is not either a work by Meta or strictly a derivative of a work by Meta (such as a modified AI model GGUF or safetensors file) !
+
+# https://www.llama.com/llama3_3/use-policy/
+
