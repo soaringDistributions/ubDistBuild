@@ -125,7 +125,7 @@ jobs:
       - name: release! create
         shell: bash
         run: |
-          gh release create build-${{ github.run_id }}-${{ github.run_attempt }} --title build --notes ""
+          gh release create build-${{ github.run_id }}-9999 --title build --notes ""
         env:
           GH_TOKEN: ${{ github.token }}
       - name: report! API Rate Limit
@@ -208,8 +208,8 @@ jobs:
       - name: release!
         shell: bash
         run: |
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ../ubDistBuild.exe
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/_hash-ubDistBuildExe.txt
+            gh release upload build-${{ github.run_id }}-9999 ../ubDistBuild.exe
+            gh release upload build-${{ github.run_id }}-9999 ./_local/_hash-ubDistBuildExe.txt
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -317,16 +317,16 @@ jobs:
       - name: release! ingredient! hash, reports
         shell: bash
         run: |
-          gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/vm-ingredient.img.hash.txt
-          gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/micro-dpkg.txt
-          gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/micro-binReport.txt
+          gh release upload build-${{ github.run_id }}-9999 ./_local/vm-ingredient.img.hash.txt
+          gh release upload build-${{ github.run_id }}-9999 ./_local/micro-dpkg.txt
+          gh release upload build-${{ github.run_id }}-9999 ./_local/micro-binReport.txt
         env:
           GH_TOKEN: ${{ github.token }}
 
       - name: release! ingredient! package_ingredientVM
         shell: bash
         run: |
-          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/vm-ingredient.img.flx.part*
+          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence build-${{ github.run_id }}-9999 ./_local/vm-ingredient.img.flx.part*
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -382,11 +382,11 @@ jobs:
           cd ./_local/analysis
 
           # Get the list of releases
-          RELEASES=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/soaringDistributions/ubDistBuild/releases?per_page=100&page=1)
+          RELEASES=$(curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/soaringDistributions/ubDistBuild/releases?per_page=100&page=1)
 
           # Download micro-binReport.txt file for the current release
-          curl -s -H "Authorization: token $GH_TOKEN" -L -o "micro-binReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/micro-binReport.txt"
-          curl -s -H "Authorization: token $GH_TOKEN" -L -o "micro-dpkg-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/micro-dpkg.txt"
+          curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "micro-binReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/micro-binReport.txt"
+          curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "micro-dpkg-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/micro-dpkg.txt"
 
           # Loop through each release
           #for RELEASE in $(_safeEcho_newline "$RELEASES" | jq -r '.[].tag_name' | sort --reverse); do
@@ -396,8 +396,8 @@ jobs:
             if [ "$RELEASE" != "$currentReleaseTag" ]; then
               
               # Download the binReport file for this release
-              curl -s -H "Authorization: token $GH_TOKEN" -L -o "micro-binReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/micro-binReport.txt"
-              curl -s -H "Authorization: token $GH_TOKEN" -L -o "micro-dpkg-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/micro-dpkg.txt"
+              curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "micro-binReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/micro-binReport.txt"
+              curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "micro-dpkg-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/micro-dpkg.txt"
               
               echo | tee -a ./missing-micro-binReport.txt
               echo "Binaries (filesystem) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-micro-binReport.txt
@@ -408,14 +408,14 @@ jobs:
             fi
           done
         env:
-          currentReleaseTag: build-${{ github.run_id }}-${{ github.run_attempt }}
+          currentReleaseTag: build-${{ github.run_id }}-9999
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: release! analysis! missing-binaries
         shell: bash
         run: |
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-micro-binReport.txt
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-micro-dpkg.txt
+            gh release upload build-${{ github.run_id }}-9999 ./_local/analysis/missing-micro-binReport.txt
+            gh release upload build-${{ github.run_id }}-9999 ./_local/analysis/missing-micro-dpkg.txt
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -766,7 +766,7 @@ jobs:
         run: |
           ! ./ubiquitous_bash.sh _openChRoot && exit 1
           ! echo ${{ github.repository }} | ./ubiquitous_bash.sh _chroot tee /info-github && exit 1
-          ! echo build-${{ github.run_id }}-${{ github.run_attempt }} | ./ubiquitous_bash.sh _chroot tee -a /info-github && exit 1
+          ! echo build-${{ github.run_id }}-9999 | ./ubiquitous_bash.sh _chroot tee -a /info-github && exit 1
           ! date +"%Y-%m-%d" | ./ubiquitous_bash.sh _chroot tee -a /info-github && exit 1
           ! ./ubiquitous_bash.sh _closeChRoot && exit 1
           true
@@ -817,7 +817,7 @@ jobs:
         shell: bash
         run: |
           mv -f ./_local/_hash-ubdist.txt ./_local/_hash-ubdist_beforeBoot.txt
-          gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/_hash-ubdist_beforeBoot.txt
+          gh release upload build-${{ github.run_id }}-9999 ./_local/_hash-ubdist_beforeBoot.txt
         env:
           GH_TOKEN: ${{ github.token }}
           
@@ -843,12 +843,12 @@ jobs:
       - name: release! package_image_beforeBoot
         shell: bash
         run: |
-          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/package_image_beforeBoot.tar.flx.part*
-          ##gh release create build-${{ github.run_id }}-${{ github.run_attempt }} --title build --notes ""
+          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence build-${{ github.run_id }}-9999 ./_local/package_image_beforeBoot.tar.flx.part*
+          ##gh release create build-${{ github.run_id }}-9999 --title build --notes ""
           #bash -c '
           #for currentFile in ./_local/package_image_beforeBoot.tar.flx.part*
           #do
-            #./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
+            #./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-9999 "$currentFile" &
             #while [[ $(jobs | wc -l) -ge 12 ]]
             #do
               #sleep 2
@@ -1043,13 +1043,13 @@ jobs:
           cd ./_local/analysis
 
           # Get the list of releases
-          RELEASES=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/soaringDistributions/ubDistBuild/releases?per_page=100&page=1)
+          RELEASES=$(curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/soaringDistributions/ubDistBuild/releases?per_page=100&page=1)
 
           # Download binReport file for the current release
-          ##curl -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/lsmodReport"
-          #curl -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/binReport"
-          #curl -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/coreReport"
-          #curl -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/dpkg"
+          ##curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/lsmodReport"
+          #curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/binReport"
+          #curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/coreReport"
+          #curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/dpkg"
 
           # Loop through each release
           #for RELEASE in $(_safeEcho_newline "$RELEASES" | jq -r '.[].tag_name' | sort --reverse); do
@@ -1059,10 +1059,10 @@ jobs:
             if [ "$RELEASE" != "$currentReleaseTag" ]; then
               
               # Download the binReport file for this release
-              #curl -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/lsmodReport"
-              curl -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/binReport"
-              curl -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/coreReport"
-              curl -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/dpkg"
+              #curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/lsmodReport"
+              curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/binReport"
+              curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/coreReport"
+              curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/dpkg"
               
               #echo | tee -a ./missing-lsmodReport
               #echo "Binaries (lsmod) loaded in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-lsmodReport
@@ -1079,17 +1079,17 @@ jobs:
             fi
           done
         env:
-          currentReleaseTag: build-${{ github.run_id }}-${{ github.run_attempt }}
+          currentReleaseTag: build-${{ github.run_id }}-9999
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # CAUTION: Do NOT upload this analysis. Build is not yet complete. This analysis exists solely for more rapid diagnostics.
       #- name: release! analysis! missing-binaries
         #shell: bash
         #run: |
-            #gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-lsmodReport
-            #gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-binReport
-            #gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-coreReport
-            #gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-dpkg
+            #gh release upload build-${{ github.run_id }}-9999 ./_local/analysis/missing-lsmodReport
+            #gh release upload build-${{ github.run_id }}-9999 ./_local/analysis/missing-binReport
+            #gh release upload build-${{ github.run_id }}-9999 ./_local/analysis/missing-coreReport
+            #gh release upload build-${{ github.run_id }}-9999 ./_local/analysis/missing-dpkg
         #env:
           #GH_TOKEN: ${{ github.token }}
 
@@ -1434,7 +1434,7 @@ jobs:
           ./ubiquitous_bash.sh _chroot df -h / | tee ./_local/root_df.log
           ! ./ubiquitous_bash.sh _closeChRoot && exit 1
           true
-          gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/root_df.log
+          gh release upload build-${{ github.run_id }}-9999 ./_local/root_df.log
           true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -1459,7 +1459,7 @@ jobs:
           ./ubiquitous_bash.sh _chroot cat /var/log/bootOnce.log | tee ./_local/bootOnce.log
           ! ./ubiquitous_bash.sh _closeChRoot && exit 1
           true
-          #gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/bootOnce.log
+          #gh release upload build-${{ github.run_id }}-9999 ./_local/bootOnce.log
           true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -1507,14 +1507,14 @@ jobs:
       - name: release! report! internal
         shell: bash
         run: |
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/grub.cfg
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/grubenv
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/dpkg
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/lsmodReport
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/binReport
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/coreReport
+            gh release upload build-${{ github.run_id }}-9999 ./_local/grub.cfg
+            gh release upload build-${{ github.run_id }}-9999 ./_local/grubenv
+            gh release upload build-${{ github.run_id }}-9999 ./_local/dpkg
+            gh release upload build-${{ github.run_id }}-9999 ./_local/lsmodReport
+            gh release upload build-${{ github.run_id }}-9999 ./_local/binReport
+            gh release upload build-${{ github.run_id }}-9999 ./_local/coreReport
             cat /proc/cpuinfo > ./_local/cpuinfo
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/cpuinfo
+            gh release upload build-${{ github.run_id }}-9999 ./_local/cpuinfo
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -1552,12 +1552,12 @@ jobs:
       - name: release! package_image
         shell: bash
         run: |
-          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/package_image.tar.flx.part*
-          ##gh release create build-${{ github.run_id }}-${{ github.run_attempt }} --title build --notes ""
+          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence build-${{ github.run_id }}-9999 ./_local/package_image.tar.flx.part*
+          ##gh release create build-${{ github.run_id }}-9999 --title build --notes ""
           #bash -c '
           #for currentFile in ./_local/package_image.tar.flx.part*
           #do
-            #./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
+            #./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-9999 "$currentFile" &
             #while [[ $(jobs | wc -l) -ge 12 ]]
             #do
               #sleep 2
@@ -1575,34 +1575,34 @@ jobs:
         shell: bash
         continue-on-error: true
         run: |
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part00 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part01 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part02 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part03 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part04 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part05 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part06 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part07 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part08 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part09 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part10 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part11 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part12 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part13 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part14 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part15 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part16 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part00 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part01 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part02 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part03 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part04 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part05 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part06 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part07 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part08 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part09 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part10 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part11 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part12 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part13 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part14 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part15 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part16 --yes || true
           #
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part17 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part18 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part19 --yes || true
-          gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part20 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part17 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part18 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part19 --yes || true
+          gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part20 --yes || true
           #
-          #gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part21 --yes || true
-          #gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part22 --yes || true
-          #gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part23 --yes || true
-          #gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part24 --yes || true
-          #gh release delete-asset build-${{ github.run_id }}-${{ github.run_attempt }} package_image_beforeBoot.tar.flx.part25 --yes || true
+          #gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part21 --yes || true
+          #gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part22 --yes || true
+          #gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part23 --yes || true
+          #gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part24 --yes || true
+          #gh release delete-asset build-${{ github.run_id }}-9999 package_image_beforeBoot.tar.flx.part25 --yes || true
           true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -1715,13 +1715,13 @@ jobs:
           cd ./_local/analysis
 
           # Get the list of releases
-          RELEASES=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/soaringDistributions/ubDistBuild/releases?per_page=100&page=1)
+          RELEASES=$(curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/soaringDistributions/ubDistBuild/releases?per_page=100&page=1)
 
           # Download binReport file for the current release
-          curl -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/lsmodReport"
-          curl -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/binReport"
-          curl -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/coreReport"
-          curl -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/dpkg"
+          curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/lsmodReport"
+          curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/binReport"
+          curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/coreReport"
+          curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/dpkg"
 
           # Loop through each release
           #for RELEASE in $(_safeEcho_newline "$RELEASES" | jq -r '.[].tag_name' | sort --reverse); do
@@ -1731,10 +1731,10 @@ jobs:
             if [ "$RELEASE" != "$currentReleaseTag" ]; then
               
               # Download the binReport file for this release
-              curl -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/lsmodReport"
-              curl -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/binReport"
-              curl -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/coreReport"
-              curl -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/dpkg"
+              curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/lsmodReport"
+              curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/binReport"
+              curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/coreReport"
+              curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/dpkg"
               
               echo | tee -a ./missing-lsmodReport
               echo "Binaries (lsmod) loaded in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-lsmodReport
@@ -1751,16 +1751,16 @@ jobs:
             fi
           done
         env:
-          currentReleaseTag: build-${{ github.run_id }}-${{ github.run_attempt }}
+          currentReleaseTag: build-${{ github.run_id }}-9999
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: release! analysis! missing-binaries
         shell: bash
         run: |
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-lsmodReport
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-binReport
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-coreReport
-            gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-dpkg
+            gh release upload build-${{ github.run_id }}-9999 ./_local/analysis/missing-lsmodReport
+            gh release upload build-${{ github.run_id }}-9999 ./_local/analysis/missing-binReport
+            gh release upload build-${{ github.run_id }}-9999 ./_local/analysis/missing-coreReport
+            gh release upload build-${{ github.run_id }}-9999 ./_local/analysis/missing-dpkg
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -2022,12 +2022,12 @@ jobs:
       - name: release! package_rootfs
         shell: bash
         run: |
-          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/package_rootfs.tar.flx.part*
-          ##gh release create build-${{ github.run_id }}-${{ github.run_attempt }} --title build --notes ""
+          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence build-${{ github.run_id }}-9999 ./_local/package_rootfs.tar.flx.part*
+          ##gh release create build-${{ github.run_id }}-9999 --title build --notes ""
           #bash -c '
           #for currentFile in ./_local/package_rootfs.tar.flx.part*
           #do
-            #./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
+            #./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-9999 "$currentFile" &
             #while [[ $(jobs | wc -l) -ge 3 ]]
             #do
               #sleep 2
@@ -2285,12 +2285,12 @@ jobs:
       - name: release! live
         shell: bash
         run: |
-          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/vm-live.iso.part*
-          ##gh release create build-${{ github.run_id }}-${{ github.run_attempt }} --title build --notes ""
+          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence build-${{ github.run_id }}-9999 ./_local/vm-live.iso.part*
+          ##gh release create build-${{ github.run_id }}-9999 --title build --notes ""
           #bash -c '
           #for currentFile in ./_local/vm-live.iso.part*
           #do
-            #./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
+            #./ubiquitous_bash.sh _stopwatch gh release upload build-${{ github.run_id }}-9999 "$currentFile" &
             #while [[ $(jobs | wc -l) -ge 3 ]]
             #do
               #sleep 2
@@ -2587,7 +2587,7 @@ jobs:
       - name: release! hash
         shell: bash
         run: |
-          gh release upload build-${{ github.run_id }}-${{ github.run_attempt }} ./_local/_hash-ubdist.txt
+          gh release upload build-${{ github.run_id }}-9999 ./_local/_hash-ubdist.txt
         env:
           GH_TOKEN: ${{ github.token }}
 

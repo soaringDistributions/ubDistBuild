@@ -168,7 +168,7 @@ jobs:
       - name: release! create
         shell: bash
         run: |
-          gh release create ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} --title ${{ inputs.DANGERfast_EXPERIMENT }} --notes ""
+          gh release create ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 --title ${{ inputs.DANGERfast_EXPERIMENT }} --notes ""
         env:
           GH_TOKEN: ${{ github.token }}
       - name: report! API Rate Limit
@@ -551,7 +551,7 @@ jobs:
         shell: bash
         run: |
           mv -f ./_local/_hash-ubdist.txt ./_local/_hash-ubdist_before_noBoot.txt
-          gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/_hash-ubdist_before_noBoot.txt
+          gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/_hash-ubdist_before_noBoot.txt
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -596,12 +596,12 @@ jobs:
         if: ${{ github.event.inputs.DISABLE_BOOT != 'true' }}
         shell: bash
         run: |
-          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/package_image_before_noBoot.tar.flx.part*
-          ##gh release create ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} --title build --notes ""
+          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/package_image_before_noBoot.tar.flx.part*
+          ##gh release create ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 --title build --notes ""
           #bash -c '
           #for currentFile in ./_local/package_image_before_noBoot.tar.flx.part*
           #do
-            #./ubiquitous_bash.sh _stopwatch gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
+            #./ubiquitous_bash.sh _stopwatch gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 "$currentFile" &
             #while [[ $(jobs | wc -l) -ge 12 ]]
             #do
               #sleep 2
@@ -820,7 +820,7 @@ jobs:
         run: |
           ! ./ubiquitous_bash.sh _openChRoot && exit 1
           ! echo ${{ github.repository }} | ./ubiquitous_bash.sh _chroot tee /info-github-custom && exit 1
-          ! echo ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} | ./ubiquitous_bash.sh _chroot tee -a /info-github-custom && exit 1
+          ! echo ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 | ./ubiquitous_bash.sh _chroot tee -a /info-github-custom && exit 1
           ! date +"%Y-%m-%d" | ./ubiquitous_bash.sh _chroot tee -a /info-github-custom && exit 1
           ! echo from releaseOrigin=${{ inputs.releaseOrigin }} | ./ubiquitous_bash.sh _chroot tee -a /info-github-custom && exit 1
           ! echo from releaseLabel=${{ inputs.releaseLabel }} | ./ubiquitous_bash.sh _chroot tee -a /info-github-custom && exit 1
@@ -937,7 +937,7 @@ jobs:
           ! ./ubiquitous_bash.sh _openChRoot && exit 1
           ./ubiquitous_bash.sh _chroot df -h / | tee ./_local/root_df.log
           ! ./ubiquitous_bash.sh _closeChRoot && exit 1
-          gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/root_df.log
+          gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/root_df.log
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -986,17 +986,17 @@ jobs:
       - name: release! report! internal
         shell: bash
         run: |
-            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/grub.cfg
-            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/grubenv
-            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/dpkg
-            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/lsmodReport
-            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/binReport
-            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/coreReport
+            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/grub.cfg
+            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/grubenv
+            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/dpkg
+            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/lsmodReport
+            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/binReport
+            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/coreReport
             cat /proc/cpuinfo > ./_local/cpuinfo
-            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/cpuinfo
-            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/customReport
-            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/cronUserReport
-            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/cronRootReport
+            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/cpuinfo
+            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/customReport
+            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/cronUserReport
+            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/cronRootReport
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -1044,12 +1044,12 @@ jobs:
         if : ${{ github.event.inputs.DISABLE_RELEASE == 'false' || github.event.inputs.DISABLE_BOOT == 'false' }}
         shell: bash
         run: |
-          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/package_image.tar.flx.part*
-          ##gh release create ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} --title build --notes ""
+          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/package_image.tar.flx.part*
+          ##gh release create ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 --title build --notes ""
           #bash -c '
           #for currentFile in ./_local/package_image.tar.flx.part*
           #do
-            #./ubiquitous_bash.sh _stopwatch gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
+            #./ubiquitous_bash.sh _stopwatch gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 "$currentFile" &
             #while [[ $(jobs | wc -l) -ge 12 ]]
             #do
               #sleep 2
@@ -1066,47 +1066,47 @@ jobs:
         shell: bash
         continue-on-error: true
         run: |
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part00 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part01 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part02 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part03 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part04 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part05 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part06 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part07 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part08 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part09 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part10 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part11 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part12 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part13 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part14 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part15 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part16 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part17 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part18 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part19 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part20 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part21 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part22 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part23 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part24 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part25 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part26 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part27 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part28 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part29 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part30 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part31 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part32 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part33 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part34 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part35 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part36 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part37 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part38 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part39 --yes || true
-          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} package_image_before_noBoot.tar.flx.part40 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part00 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part01 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part02 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part03 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part04 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part05 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part06 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part07 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part08 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part09 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part10 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part11 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part12 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part13 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part14 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part15 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part16 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part17 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part18 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part19 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part20 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part21 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part22 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part23 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part24 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part25 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part26 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part27 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part28 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part29 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part30 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part31 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part32 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part33 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part34 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part35 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part36 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part37 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part38 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part39 --yes || true
+          gh release delete-asset ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 package_image_before_noBoot.tar.flx.part40 --yes || true
           true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -1335,12 +1335,12 @@ jobs:
       - name: release! package_rootfs
         shell: bash
         run: |
-          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/package_rootfs.tar.flx.part*
-          ##gh release create ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} --title build --notes ""
+          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/package_rootfs.tar.flx.part*
+          ##gh release create ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 --title build --notes ""
           #bash -c '
           #for currentFile in ./_local/package_rootfs.tar.flx.part*
           #do
-            #./ubiquitous_bash.sh _stopwatch gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
+            #./ubiquitous_bash.sh _stopwatch gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 "$currentFile" &
             #while [[ $(jobs | wc -l) -ge 3 ]]
             #do
               #sleep 2
@@ -1587,12 +1587,12 @@ jobs:
       - name: release! live
         shell: bash
         run: |
-          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/vm-live.iso.part*
-          ##gh release create ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} --title build --notes ""
+          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/vm-live.iso.part*
+          ##gh release create ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 --title build --notes ""
           #bash -c '
           #for currentFile in ./_local/vm-live.iso.part*
           #do
-            #./ubiquitous_bash.sh _stopwatch gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} "$currentFile" &
+            #./ubiquitous_bash.sh _stopwatch gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 "$currentFile" &
             #while [[ $(jobs | wc -l) -ge 3 ]]
             #do
               #sleep 2
@@ -1795,7 +1795,7 @@ jobs:
       - name: release! hash
         shell: bash
         run: |
-          gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/_hash-ubdist.txt
+          gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/_hash-ubdist.txt
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -1876,7 +1876,7 @@ jobs:
           echo
           cat ./cronUserReport-$currentReleaseTag
         env:
-          currentReleaseTag: ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }}
+          currentReleaseTag: ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: report! cronRootReport
@@ -1895,7 +1895,7 @@ jobs:
           echo
           cat ./cronRootReport-$currentReleaseTag
         env:
-          currentReleaseTag: ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }}
+          currentReleaseTag: ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
@@ -1934,14 +1934,14 @@ jobs:
           cd ./_local/analysis
 
           # Get the list of releases
-          RELEASES=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/"${{ github.repository }}"/releases?per_page=100&page=1)
+          RELEASES=$(curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/"${{ github.repository }}"/releases?per_page=100&page=1)
 
           # Download binReport file for the current release
-          #curl -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/lsmodReport"
-          curl -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/binReport"
-          curl -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/coreReport"
-          curl -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/dpkg"
-          curl -s -H "Authorization: token $GH_TOKEN" -L -o "customReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/customReport"
+          #curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/lsmodReport"
+          curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/binReport"
+          curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/coreReport"
+          curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/dpkg"
+          curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "customReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/customReport"
 
           # Loop through each release
           #local currentIteration
@@ -1955,11 +1955,11 @@ jobs:
             if [ "$RELEASE" != "$currentReleaseTag" ]; then
               
               # Download the binReport file for this release
-              #[[ "$currentIteration" -lt "5" ]] && curl -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/lsmodReport"
-              [[ "$currentIteration" -lt "6" ]] && curl -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/binReport"
-              [[ "$currentIteration" -lt "7" ]] && curl -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/coreReport"
-              curl -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/dpkg"
-              curl -s -H "Authorization: token $GH_TOKEN" -L -o "customReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/customReport"
+              #[[ "$currentIteration" -lt "5" ]] && curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/lsmodReport"
+              [[ "$currentIteration" -lt "6" ]] && curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/binReport"
+              [[ "$currentIteration" -lt "7" ]] && curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/coreReport"
+              curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/dpkg"
+              curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "customReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/customReport"
               
               #[[ "$currentIteration" -lt "5" ]] && echo | tee -a ./missing-lsmodReport
               #[[ "$currentIteration" -lt "5" ]] && echo "Binaries (lsmod) loaded in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-lsmodReport
@@ -1979,17 +1979,17 @@ jobs:
             fi
           done
         env:
-          currentReleaseTag: ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }}
+          currentReleaseTag: ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: release! analysis! missing-binaries
         shell: bash
         run: |
-            #gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-lsmodReport
-            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-binReport
-            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-coreReport
-            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-dpkg
-            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-${{ github.run_attempt }} ./_local/analysis/missing-customReport
+            #gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/analysis/missing-lsmodReport
+            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/analysis/missing-binReport
+            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/analysis/missing-coreReport
+            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/analysis/missing-dpkg
+            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/analysis/missing-customReport
         env:
           GH_TOKEN: ${{ github.token }}
           
