@@ -2067,7 +2067,7 @@ jobs:
               comm -23 <(sort "dpkg-$RELEASE") <(sort "dpkg-$currentReleaseTag") | tee -a ./missing-dpkg
               echo | tee -a ./missing-customReport
               echo "Binaries (filesystem: custom) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-customReport
-              comm -23 <(sort "customReport-$RELEASE" | grep -v '_local/h' | grep -v 'docker/fuse-overlayfs' | grep -v 'docker/image/fuse-overlayfs') <(sort "customReport-$currentReleaseTag" | grep -v '_local/h' | grep -v 'docker/fuse-overlayfs' | grep -v 'docker/image/fuse-overlayfs') | tee -a ./missing-customReport
+              comm -23 <(sort "customReport-$RELEASE" | grep -v '_local/h' | grep -v 'docker/fuse-overlayfs' | grep -v 'docker/image/fuse-overlayfs' | grep -v 'docker/containerd' | grep -v 'docker/containers') <(sort "customReport-$currentReleaseTag" | grep -v '_local/h' | grep -v 'docker/fuse-overlayfs' | grep -v 'docker/image/fuse-overlayfs' | grep -v 'docker/containerd' | grep -v 'docker/containers') | tee -a ./missing-customReport
             fi
           done
         env:
