@@ -68,6 +68,37 @@ _get_ingredientVM() {
     _messagePlain_bad 'bad: FAIL: hash'
     _messageFAIL
 }
+_get_fromTag_ingredientVM() {
+    _messageNormal '##### init: _get_fromTag_ingredientVM'
+    rm -f "$scriptLocal"/vm-ingredient.img > /dev/null 2>&1
+    rm -f "$scriptLocal"/vm-ingredient.img.hash-download.txt > /dev/null 2>&1
+    rm -f "$scriptLocal"/vm-ingredient.img.hash-upstream.txt > /dev/null 2>&1
+    
+    local currentTag="$1"
+    #[[ "$currentTag" == "" ]] && currentTag=latest
+    #[[ "$currentTag" == "" ]] && currentTag=internal
+    #-whirlpool
+    if ! _wget_githubRelease-fromTag_join-stdout "soaringDistributions/ubDistBuild" "$currentTag" "vm-ingredient.img.flx" | xz -d | tee >(openssl dgst -sha3-512 -binary | xxd -p -c 256 > "$scriptLocal"/vm-ingredient.img.hash-download.txt) > "$scriptLocal"/vm-ingredient.img
+    then
+        _messagePlain_bad 'bad: FAIL: get'
+        _messageFAIL
+    fi
+
+    # Hash
+    echo
+    cat "$scriptLocal"/vm-ingredient.img.hash-download.txt
+
+    _wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$currentTag" "vm-ingredient.img.hash.txt" > "$scriptLocal"/vm-ingredient.img.hash-upstream.txt
+    #$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$currentTag" "vm-ingredient.img.hash.txt" | tr -dc 'a-f0-9')
+    if [[ $(cat "$scriptLocal"/vm-ingredient.img.hash-upstream.txt | tr -dc 'a-f0-9') == $(cat "$scriptLocal"/vm-ingredient.img.hash-download.txt | tr -dc 'a-f0-9') ]]
+    then
+        _messagePlain_good 'good: hash'
+        return 0
+    fi
+    
+    _messagePlain_bad 'bad: FAIL: hash'
+    _messageFAIL
+}
 _join_ingredientVM() {
     _messageNormal '##### init: _join_ingredientVM'
 

@@ -100,7 +100,7 @@ _hash_img-stream() {
     local currentFileName=vm.img
     local currentFilePath=/dev/stdin
     
-    _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$1" "package_image.tar.flx" 2> /dev/null | _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | \
+    _wget_githubRelease-fromTag_join-stdout "soaringDistributions/ubDistBuild" "$1" "package_image.tar.flx" 2> /dev/null | _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | \
 tee >( wc -c /dev/stdin | cut -f1 -d\ | tr -dc '0-9' > "$safeTmp"/.tmp-currentFileBytes ) | \
 tee >( openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpool ) | \
 ( [[ "$skimfast" != "true" ]] && openssl dgst -sha3-512 -binary | xxd -p -c 256 > "$safeTmp"/.tmp-sha3 )
@@ -149,7 +149,7 @@ _hash_rootfs-stream() {
     local currentFileName=package_rootfs.tar
     local currentFilePath=/dev/stdin
     
-    _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$1" "package_rootfs.tar.flx" 2> /dev/null | lz4 -d -c | \
+    _wget_githubRelease-fromTag_join-stdout "soaringDistributions/ubDistBuild" "$1" "package_rootfs.tar.flx" 2> /dev/null | lz4 -d -c | \
 tee >( wc -c /dev/stdin | cut -f1 -d\ | tr -dc '0-9' > "$safeTmp"/.tmp-currentFileBytes ) | \
 tee >( openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpool ) | \
 ( [[ "$skimfast" != "true" ]] && openssl dgst -sha3-512 -binary | xxd -p -c 256 > "$safeTmp"/.tmp-sha3 )
@@ -198,7 +198,7 @@ _hash_live-stream() {
     local currentFileName=vm-live.iso
     local currentFilePath=/dev/stdin
     
-    _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "$1" "vm-live.iso" 2> /dev/null | \
+    _wget_githubRelease-fromTag_join-stdout "soaringDistributions/ubDistBuild" "$1" "vm-live.iso" 2> /dev/null | \
 tee >( wc -c /dev/stdin | cut -f1 -d\ | tr -dc '0-9' > "$safeTmp"/.tmp-currentFileBytes ) | \
 tee >( openssl dgst -whirlpool -binary | xxd -p -c 256 > "$safeTmp"/.tmp-whirlpool ) | \
 ( [[ "$skimfast" != "true" ]] && openssl dgst -sha3-512 -binary | xxd -p -c 256 > "$safeTmp"/.tmp-sha3 )

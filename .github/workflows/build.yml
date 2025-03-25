@@ -191,7 +191,7 @@ jobs:
         timeout-minutes: 120
         run: |
           mkdir -p ../ubDistBuild-accessories/integrations/ubcp
-          curl -L -o ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
+          #curl -L -o ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
           ./ubiquitous_bash.sh _build_ubDistBuild-fetch
       - name: build-build
         shell: bash
@@ -348,77 +348,67 @@ jobs:
         with:
           fetch-depth: 1
           submodules: 'recursive'
-            
-      - name: analysis! missing-binaries
+      - name: _getMinimal_cloud-special
+        shell: bash
+        timeout-minutes: 120
+        run: |
+          mkdir -p ./_local
+          #sudo -n apt-get -y install jq gh curl coreutils p7zip findutils tar gzip bzip2 sed axel aria2 rsync pv dos2unix xxd util-linux openssl
+          sudo -n apt-get -y install jq gh curl coreutils findutils tar gzip bzip2 sed axel aria2 rsync pv dos2unix xxd util-linux
+
+      - name: fetch! micro-binReport.txt micro-dpkg.txt
         shell: bash
         run: |
-          #echo -n
-          _safeEcho() {
-            printf '%s' "$1"
-            shift
-            
-            [[ "$@" == "" ]] && return 0
-            
-            local currentArg
-            for currentArg in "$@"
-            do
-              printf '%s' " "
-              printf '%s' "$currentArg"
-            done
-            return 0
-          }
-
-          #echo
-          _safeEcho_newline() {
-            _safeEcho "$@"
-            printf '\n'
-          }
-        
-          mkdir -p ./_local/analysis
-
-          #cp ./_local/micro-binReport.txt ./_local/analysis/micro-binReport.txt
-          #cp ./_local/micro-dpkg.txt ./_local/analysis/micro-dpkg.txt
-
-          cd ./_local/analysis
-
-          # Get the list of releases
-          RELEASES=$(curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/soaringDistributions/ubDistBuild/releases?per_page=100&page=1)
-
-          # Download micro-binReport.txt file for the current release
-          curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "micro-binReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/micro-binReport.txt"
-          curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "micro-dpkg-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/micro-dpkg.txt"
-
-          # Loop through each release
-          #for RELEASE in $(_safeEcho_newline "$RELEASES" | jq -r '.[].tag_name' | sort --reverse); do
-          for RELEASE in $(_safeEcho_newline "$RELEASES" | jq -r 'sort_by(.published_at) | reverse | .[].tag_name' | tr -dc 'a-zA-Z0-9\-_.:\n'); do
-
-            # Compare the list of binaries in this release to the current release
-            if [ "$RELEASE" != "$currentReleaseTag" ]; then
-              
-              # Download the binReport file for this release
-              curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "micro-binReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/micro-binReport.txt"
-              curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "micro-dpkg-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/micro-dpkg.txt"
-              
-              echo | tee -a ./missing-micro-binReport.txt
-              echo "Binaries (filesystem) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-micro-binReport.txt
-              comm -23 <(sort "micro-binReport-$RELEASE") <(sort "micro-binReport-$currentReleaseTag") | tee -a ./missing-micro-binReport.txt
-              echo | tee -a ./missing-micro-dpkg.txt
-              echo "Binaries (dpkg) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-micro-dpkg.txt
-              comm -23 <(sort "micro-dpkg-$RELEASE") <(sort "micro-dpkg-$currentReleaseTag") | tee -a ./missing-micro-dpkg.txt
-            fi
-          done
+          ./ubiquitous_bash.sh _wget_githubRelease-fromTag-analysisReport-fetch 20 'micro-binReport.txt' 'micro-dpkg.txt'
         env:
+          currentRepository: ${{ github.repository }}
           currentReleaseTag: build-${{ github.run_id }}-9999
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: release! analysis! missing-binaries
+      - name: select! micro-binReport.txt micro-dpkg.txt
         shell: bash
         run: |
-            gh release upload build-${{ github.run_id }}-9999 ./_local/analysis/missing-micro-binReport.txt
-            gh release upload build-${{ github.run_id }}-9999 ./_local/analysis/missing-micro-dpkg.txt
+          ./ubiquitous_bash.sh _wget_githubRelease-fromTag-analysisReport-select 'micro-binReport.txt' 'micro-dpkg.txt'
+        env:
+          currentRepository: ${{ github.repository }}
+          currentReleaseTag: build-${{ github.run_id }}-9999
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: analysis! missing-micro-binReport.txt missing-micro-dpkg.txt
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _wget_githubRelease-fromTag-analysisReport-analysis 65 'micro-binReport.txt' 'micro-dpkg.txt'
+        env:
+          currentRepository: ${{ github.repository }}
+          currentReleaseTag: build-${{ github.run_id }}-9999
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      #- name: release! missing-micro-binReport.txt missing-micro-dpkg.txt
+        #uses: softprops/action-gh-release@v1
+        #with:
+          #tag_name: build-${{ github.run_id }}-9999
+          #name: build
+          #files: |
+            #./_local/analysisTmp/missing-micro-binReport.txt
+            #./_local/analysisTmp/missing-micro-dpkg.txt
+
+      - name: release! missing-micro-binReport.txt missing-micro-dpkg.txt
+        shell: bash
+        run: |
+          gh release upload build-${{ github.run_id }}-9999 ./_local/analysisTmp/missing-micro-binReport.txt
+          gh release upload build-${{ github.run_id }}-9999 ./_local/analysisTmp/missing-micro-dpkg.txt
         env:
           GH_TOKEN: ${{ github.token }}
 
+      - name: ls! release! missing-micro-binReport.txt missing-micro-dpkg.txt
+        shell: bash
+        run: |
+          ls ./_local/analysisTmp/missing-micro-binReport.txt ./_local/analysisTmp/missing-micro-dpkg.txt
+          ./ubiquitous_bash.sh _safeRMR-analysisTmp
+        env:
+          currentRepository: ${{ github.repository }}
+          currentReleaseTag: build-${{ github.run_id }}-9999
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
 
@@ -647,12 +637,14 @@ jobs:
         run: |
           free -m
 
-      - name: _get_ingredientVM
+      - name: _get_fromTag_ingredientVM
         shell: bash
         run: |
-          ./ubiquitous_bash.sh _get_ingredientVM latest
+          #./ubiquitous_bash.sh _get_ingredientVM latest
+          ./ubiquitous_bash.sh _get_fromTag_ingredientVM "$currentReleaseTag"
         env:
           GH_TOKEN: ${{ github.token }}
+          currentReleaseTag: build-${{ github.run_id }}-9999
           
       - name: _create_ubDistBuild-create
         shell: bash
@@ -962,8 +954,10 @@ jobs:
           mkdir -p ./_local
           cd ./_local
           rm -f hash-download.txt
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image_beforeBoot.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+          #../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image_beforeBoot.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+          ../ubiquitous_bash.sh _wget_githubRelease-fromTag_join-stdout "soaringDistributions/ubDistBuild" "$currentReleaseTag" "package_image_beforeBoot.tar.flx" | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         env:
+          currentReleaseTag: build-${{ github.run_id }}-9999
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: _build_fallback_staging-buildYML-build
@@ -1006,92 +1000,67 @@ jobs:
 
 
 
-
-            
-      - name: analysis! missing-binaries
+      - name: fetch! binReport coreReport dpkg
         shell: bash
         run: |
-          #echo -n
-          _safeEcho() {
-            printf '%s' "$1"
-            shift
-            
-            [[ "$@" == "" ]] && return 0
-            
-            local currentArg
-            for currentArg in "$@"
-            do
-              printf '%s' " "
-              printf '%s' "$currentArg"
-            done
-            return 0
-          }
-
-          #echo
-          _safeEcho_newline() {
-            _safeEcho "$@"
-            printf '\n'
-          }
-        
-          mkdir -p ./_local/analysis
-
-          #cp ./_local/lsmodReport ./_local/analysis/lsmodReport-"$currentReleaseTag"
-          cp ./_local/binReport ./_local/analysis/binReport-"$currentReleaseTag"
-          cp ./_local/coreReport ./_local/analysis/coreReport-"$currentReleaseTag"
-          cp ./_local/dpkg ./_local/analysis/dpkg-"$currentReleaseTag"
-
-          cd ./_local/analysis
-
-          # Get the list of releases
-          RELEASES=$(curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/soaringDistributions/ubDistBuild/releases?per_page=100&page=1)
-
-          # Download binReport file for the current release
-          ##curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/lsmodReport"
-          #curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/binReport"
-          #curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/coreReport"
-          #curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/dpkg"
-
-          # Loop through each release
-          #for RELEASE in $(_safeEcho_newline "$RELEASES" | jq -r '.[].tag_name' | sort --reverse); do
-          for RELEASE in $(_safeEcho_newline "$RELEASES" | jq -r 'sort_by(.published_at) | reverse | .[].tag_name' | tr -dc 'a-zA-Z0-9\-_.:\n'); do
-
-            # Compare the list of binaries in this release to the current release
-            if [ "$RELEASE" != "$currentReleaseTag" ]; then
-              
-              # Download the binReport file for this release
-              #curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/lsmodReport"
-              curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/binReport"
-              curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/coreReport"
-              curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/dpkg"
-              
-              #echo | tee -a ./missing-lsmodReport
-              #echo "Binaries (lsmod) loaded in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-lsmodReport
-              #comm -23 <(sort "lsmodReport-$RELEASE") <(sort "lsmodReport-$currentReleaseTag") | tee -a ./missing-lsmodReport
-              echo | tee -a ./missing-binReport
-              echo "Binaries (filesystem) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-binReport
-              comm -23 <(sort "binReport-$RELEASE") <(sort "binReport-$currentReleaseTag") | tee -a ./missing-binReport
-              echo | tee -a ./missing-coreReport
-              echo "Binaries (core) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-coreReport
-              comm -23 <(sort "coreReport-$RELEASE" | grep -v '_local/h') <(sort "coreReport-$currentReleaseTag" | grep -v '_local/h') | tee -a ./missing-coreReport
-              echo | tee -a ./missing-dpkg
-              echo "Binaries (dpkg) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-dpkg
-              comm -23 <(sort "dpkg-$RELEASE") <(sort "dpkg-$currentReleaseTag") | tee -a ./missing-dpkg
-            fi
-          done
+          ./ubiquitous_bash.sh _wget_githubRelease-fromTag-analysisReport-fetch 20 binReport coreReport dpkg
         env:
+          currentRepository: ${{ github.repository }}
           currentReleaseTag: build-${{ github.run_id }}-9999
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: select! local! binReport coreReport dpkg
+        shell: bash
+        run: |
+          #./ubiquitous_bash.sh _wget_githubRelease-fromTag-analysisReport-select binReport coreReport dpkg
+          cp ./_local/binReport ./_local/analysisTmp/binReport
+          cp ./_local/coreReport ./_local/analysisTmp/coreReport
+          cp ./_local/dpkg ./_local/analysisTmp/dpkg
+        env:
+          currentRepository: ${{ github.repository }}
+          currentReleaseTag: build-${{ github.run_id }}-9999
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: analysis! missing-binReport missing-coreReport missing-dpkg
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _wget_githubRelease-fromTag-analysisReport-analysis 65 binReport coreReport dpkg
+        env:
+          currentRepository: ${{ github.repository }}
+          currentReleaseTag: build-${{ github.run_id }}-9999
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # CAUTION: Do NOT upload this analysis. Build is not yet complete. This analysis exists solely for more rapid diagnostics.
+      #- name: release! missing-binReport missing-coreReport missing-dpkg
+        #uses: softprops/action-gh-release@v1
+        #with:
+          #tag_name: build-${{ github.run_id }}-9999
+          #name: build
+          #files: |
+            #./_local/analysisTmp/missing-binReport
+            #./_local/analysisTmp/missing-coreReport
+            #./_local/analysisTmp/missing-dpkg
 
       # CAUTION: Do NOT upload this analysis. Build is not yet complete. This analysis exists solely for more rapid diagnostics.
       #- name: release! analysis! missing-binaries
         #shell: bash
         #run: |
-            #gh release upload build-${{ github.run_id }}-9999 ./_local/analysis/missing-lsmodReport
-            #gh release upload build-${{ github.run_id }}-9999 ./_local/analysis/missing-binReport
-            #gh release upload build-${{ github.run_id }}-9999 ./_local/analysis/missing-coreReport
-            #gh release upload build-${{ github.run_id }}-9999 ./_local/analysis/missing-dpkg
+            #gh release upload build-${{ github.run_id }}-9999 ./_local/analysisTmp/missing-lsmodReport
+            #gh release upload build-${{ github.run_id }}-9999 ./_local/analysisTmp/missing-binReport
+            #gh release upload build-${{ github.run_id }}-9999 ./_local/analysisTmp/missing-coreReport
+            #gh release upload build-${{ github.run_id }}-9999 ./_local/analysisTmp/missing-dpkg
         #env:
           #GH_TOKEN: ${{ github.token }}
+
+      - name: ls! release! missing-binReport missing-coreReport missing-dpkg
+        shell: bash
+        run: |
+          ls ./_local/analysisTmp/missing-binReport ./_local/analysisTmp/missing-coreReport ./_local/analysisTmp/missing-dpkg
+          ./ubiquitous_bash.sh _safeRMR-analysisTmp
+        env:
+          currentRepository: ${{ github.repository }}
+          currentReleaseTag: build-${{ github.run_id }}-9999
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
 
@@ -1363,8 +1332,10 @@ jobs:
           mkdir -p ./_local
           cd ./_local
           rm -f hash-download.txt
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image_beforeBoot.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+          #../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image_beforeBoot.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+          ../ubiquitous_bash.sh _wget_githubRelease-fromTag_join-stdout "soaringDistributions/ubDistBuild" "$currentReleaseTag" "package_image_beforeBoot.tar.flx" | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         env:
+          currentReleaseTag: build-${{ github.run_id }}-9999
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: _build_fallback_staging-buildYML-build
@@ -1656,114 +1627,72 @@ jobs:
         with:
           fetch-depth: 1
           submodules: 'recursive'
-      - name: mkdir _local
+      - name: _getMinimal_cloud-special
         shell: bash
+        timeout-minutes: 120
         run: |
           mkdir -p ./_local
+          #sudo -n apt-get -y install jq gh curl coreutils p7zip findutils tar gzip bzip2 sed axel aria2 rsync pv dos2unix xxd util-linux openssl
+          sudo -n apt-get -y install jq gh curl coreutils findutils tar gzip bzip2 sed axel aria2 rsync pv dos2unix xxd util-linux
 
-      - name: _getMinimal_cloud
+      - name: fetch! lsmodReport binReport coreReport dpkg
         shell: bash
         run: |
-          ! ./ubiquitous_bash.sh _getMinimal_cloud && exit 1
-          true
-          #! sudo -n apt-get -y clean && exit 1
-          df -h
-          df -h /
-        timeout-minutes: 355
-      
-      - name: _getMost-aria2
-        shell: bash
-        run: |
-          sudo -n apt-get -y clean
-          sudo -n apt-get update
-          sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y aria2
-        timeout-minutes: 355
-
-            
-      - name: analysis! missing-binaries
-        shell: bash
-        run: |
-          #echo -n
-          _safeEcho() {
-            printf '%s' "$1"
-            shift
-            
-            [[ "$@" == "" ]] && return 0
-            
-            local currentArg
-            for currentArg in "$@"
-            do
-              printf '%s' " "
-              printf '%s' "$currentArg"
-            done
-            return 0
-          }
-
-          #echo
-          _safeEcho_newline() {
-            _safeEcho "$@"
-            printf '\n'
-          }
-        
-          mkdir -p ./_local/analysis
-
-          #cp ./_local/lsmodReport ./_local/analysis/lsmodReport
-          #cp ./_local/binReport ./_local/analysis/binReport
-          #cp ./_local/coreReport ./_local/analysis/coreReport
-          #cp ./_local/dpkg ./_local/analysis/dpkg
-
-          cd ./_local/analysis
-
-          # Get the list of releases
-          RELEASES=$(curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/soaringDistributions/ubDistBuild/releases?per_page=100&page=1)
-
-          # Download binReport file for the current release
-          curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/lsmodReport"
-          curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/binReport"
-          curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/coreReport"
-          curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$currentReleaseTag" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$currentReleaseTag/dpkg"
-
-          # Loop through each release
-          #for RELEASE in $(_safeEcho_newline "$RELEASES" | jq -r '.[].tag_name' | sort --reverse); do
-          for RELEASE in $(_safeEcho_newline "$RELEASES" | jq -r 'sort_by(.published_at) | reverse | .[].tag_name' | tr -dc 'a-zA-Z0-9\-_.:\n'); do
-
-            # Compare the list of binaries in this release to the current release
-            if [ "$RELEASE" != "$currentReleaseTag" ]; then
-              
-              # Download the binReport file for this release
-              curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/lsmodReport"
-              curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/binReport"
-              curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/coreReport"
-              curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$RELEASE" "https://github.com/soaringDistributions/ubDistBuild/releases/download/$RELEASE/dpkg"
-              
-              echo | tee -a ./missing-lsmodReport
-              echo "Binaries (lsmod) loaded in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-lsmodReport
-              comm -23 <(sort "lsmodReport-$RELEASE") <(sort "lsmodReport-$currentReleaseTag") | tee -a ./missing-lsmodReport
-              echo | tee -a ./missing-binReport
-              echo "Binaries (filesystem) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-binReport
-              comm -23 <(sort "binReport-$RELEASE") <(sort "binReport-$currentReleaseTag") | tee -a ./missing-binReport
-              echo | tee -a ./missing-coreReport
-              echo "Binaries (core) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-coreReport
-              comm -23 <(sort "coreReport-$RELEASE" | grep -v '_local/h') <(sort "coreReport-$currentReleaseTag" | grep -v '_local/h') | tee -a ./missing-coreReport
-              echo | tee -a ./missing-dpkg
-              echo "Binaries (dpkg) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-dpkg
-              comm -23 <(sort "dpkg-$RELEASE") <(sort "dpkg-$currentReleaseTag") | tee -a ./missing-dpkg
-            fi
-          done
+          ./ubiquitous_bash.sh _wget_githubRelease-fromTag-analysisReport-fetch 20 lsmodReport binReport coreReport dpkg
         env:
+          currentRepository: ${{ github.repository }}
           currentReleaseTag: build-${{ github.run_id }}-9999
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: release! analysis! missing-binaries
+      - name: select! lsmodReport binReport coreReport dpkg
         shell: bash
         run: |
-            gh release upload build-${{ github.run_id }}-9999 ./_local/analysis/missing-lsmodReport
-            gh release upload build-${{ github.run_id }}-9999 ./_local/analysis/missing-binReport
-            gh release upload build-${{ github.run_id }}-9999 ./_local/analysis/missing-coreReport
-            gh release upload build-${{ github.run_id }}-9999 ./_local/analysis/missing-dpkg
+          ./ubiquitous_bash.sh _wget_githubRelease-fromTag-analysisReport-select lsmodReport binReport coreReport dpkg
+        env:
+          currentRepository: ${{ github.repository }}
+          currentReleaseTag: build-${{ github.run_id }}-9999
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: analysis! missing-lsmodReport missing-binReport missing-coreReport missing-dpkg
+        shell: bash
+        run: |
+          ./ubiquitous_bash.sh _wget_githubRelease-fromTag-analysisReport-analysis 65 lsmodReport binReport coreReport dpkg
+        env:
+          currentRepository: ${{ github.repository }}
+          currentReleaseTag: build-${{ github.run_id }}-9999
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      #- name: release! missing-binReport missing-lsmodReport missing-binReport missing-coreReport missing-dpkg
+        #uses: softprops/action-gh-release@v1
+        #with:
+          #tag_name: build-${{ github.run_id }}-9999
+          #name: build
+          #files: |
+            #./_local/analysisTmp/missing-lsmodReport
+            #./_local/analysisTmp/missing-binReport 
+            #./_local/analysisTmp/missing-coreReport 
+            #./_local/analysisTmp/missing-dpkg
+
+      - name: release! analysis! missing-binReport missing-lsmodReport missing-binReport missing-coreReport missing-dpkg
+        shell: bash
+        run: |
+            gh release upload build-${{ github.run_id }}-9999 ./_local/analysisTmp/missing-lsmodReport
+            gh release upload build-${{ github.run_id }}-9999 ./_local/analysisTmp/missing-binReport
+            gh release upload build-${{ github.run_id }}-9999 ./_local/analysisTmp/missing-coreReport
+            gh release upload build-${{ github.run_id }}-9999 ./_local/analysisTmp/missing-dpkg
         env:
           GH_TOKEN: ${{ github.token }}
 
+
+      - name: ls! release! missing-binReport missing-lsmodReport missing-binReport missing-coreReport missing-dpkg
+        shell: bash
+        run: |
+          ls ./_local/analysisTmp/missing-lsmodReport ./_local/analysisTmp/missing-binReport ./_local/analysisTmp/missing-coreReport ./_local/analysisTmp/missing-dpkg
+          ./ubiquitous_bash.sh _safeRMR-analysisTmp
+        env:
+          currentRepository: ${{ github.repository }}
+          currentReleaseTag: build-${{ github.run_id }}-9999
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
 
@@ -1976,8 +1905,10 @@ jobs:
           mkdir -p ./_local
           cd ./_local
           rm -f hash-download.txt
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+          #../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+          ../ubiquitous_bash.sh _wget_githubRelease-fromTag_join-stdout "soaringDistributions/ubDistBuild" "$currentReleaseTag" "package_image.tar.flx" | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         env:
+          currentReleaseTag: build-${{ github.run_id }}-9999
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: fallocate --dig-holes
@@ -2179,8 +2110,10 @@ jobs:
           mkdir -p ./_local
           cd ./_local
           rm -f hash-download.txt
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+          #../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+          ../ubiquitous_bash.sh _wget_githubRelease-fromTag_join-stdout "soaringDistributions/ubDistBuild" "$currentReleaseTag" "package_image.tar.flx" | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         env:
+          currentReleaseTag: build-${{ github.run_id }}-9999
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: fallocate --dig-holes
@@ -2206,7 +2139,7 @@ jobs:
           git clone https://github.com/mirage335-colossus/extendedInterface.git
           cd extendedInterface
           mkdir -p ../extendedInterface-accessories/integrations/ubcp
-          curl -L -o ../extendedInterface-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
+          #curl -L -o ../extendedInterface-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
           ./ubiquitous_bash.sh _build_extendedInterface-fetch | sudo -n tee ../../_lib/_extendedInterface.log && exit ${PIPESTATUS[0]}
         env:
           GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
@@ -2217,7 +2150,7 @@ jobs:
           git clone https://github.com/soaringDistributions/ubDistBuild.git
           cd ubDistBuild
           mkdir -p ../ubDistBuild-accessories/integrations/ubcp
-          curl -L -o ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
+          #curl -L -o ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
           ./ubiquitous_bash.sh _build_ubDistBuild-fetch | sudo -n tee ../../_lib/_ubDistBuild.log && exit ${PIPESTATUS[0]}
         env:
           GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
@@ -2483,8 +2416,10 @@ jobs:
           ##export FORCE_AXEL=8
           #export MANDATORY_HASH="true"
           #cd ./_local
-          #../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image.tar.flx" 2> /dev/null | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+          ##../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_image.tar.flx" 2> /dev/null | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+          #../ubiquitous_bash.sh _wget_githubRelease-fromTag_join-stdout "soaringDistributions/ubDistBuild" "$currentReleaseTag" "package_image.tar.flx" 2> /dev/null | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         #env:
+          #currentReleaseTag: build-${{ github.run_id }}-9999
           #GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       #- name: _hash_img
@@ -2507,8 +2442,10 @@ jobs:
           ##export FORCE_AXEL=8
           #export MANDATORY_HASH="true"
           #cd ./_local
-          #../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_rootfs.tar.flx" 2> /dev/null > ./package_rootfs.tar.flx
+          ##../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "package_rootfs.tar.flx" 2> /dev/null > ./package_rootfs.tar.flx
+          #../ubiquitous_bash.sh _wget_githubRelease-fromTag_join-stdout "soaringDistributions/ubDistBuild" "$currentReleaseTag" "package_rootfs.tar.flx" 2> /dev/null > ./package_rootfs.tar.flx
         #env:
+          #currentReleaseTag: build-${{ github.run_id }}-9999
           #GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       #- name: _hash_rootfs
@@ -2531,8 +2468,10 @@ jobs:
           ##export FORCE_AXEL=8
           #export MANDATORY_HASH="true"
           #cd ./_local
-          #../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "vm-live.iso" 2> /dev/null > ./vm-live.iso
+          ##../ubiquitous_bash.sh _wget_githubRelease_join-stdout "soaringDistributions/ubDistBuild" "" "vm-live.iso" 2> /dev/null > ./vm-live.iso
+          #../ubiquitous_bash.sh _wget_githubRelease-fromTag_join-stdout "soaringDistributions/ubDistBuild" "$currentReleaseTag" "vm-live.iso" 2> /dev/null > ./vm-live.iso
         #env:
+          #currentReleaseTag: build-${{ github.run_id }}-9999
           #GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       #- name: _hash_live
@@ -2555,8 +2494,9 @@ jobs:
           echo $skimfast
           #export FORCE_AXEL=8
           export MANDATORY_HASH="true"
-          ./ubiquitous_bash.sh _hash_ubdist-fast
+          ./ubiquitous_bash.sh _hash_ubdist-fast "$currentReleaseTag"
         env:
+          currentReleaseTag: build-${{ github.run_id }}-9999
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
