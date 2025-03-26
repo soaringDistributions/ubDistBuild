@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='267392253'
+export ub_setScriptChecksum_contents='1116877096'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -58081,8 +58081,8 @@ _get_fromTag_ingredientVM() {
     echo
     cat "$scriptLocal"/vm-ingredient.img.hash-download.txt
 
-    _wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$currentTag" "vm-ingredient.img.hash.txt" > "$scriptLocal"/vm-ingredient.img.hash-upstream.txt
-    #$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$currentTag" "vm-ingredient.img.hash.txt" | tr -dc 'a-f0-9')
+    _wget_githubRelease-fromTag-stdout "soaringDistributions/ubDistBuild" "$currentTag" "vm-ingredient.img.hash.txt" > "$scriptLocal"/vm-ingredient.img.hash-upstream.txt
+    #$(_wget_githubRelease-fromTag-stdout "soaringDistributions/ubDistBuild" "$currentTag" "vm-ingredient.img.hash.txt" | tr -dc 'a-f0-9')
     if [[ $(cat "$scriptLocal"/vm-ingredient.img.hash-upstream.txt | tr -dc 'a-f0-9') == $(cat "$scriptLocal"/vm-ingredient.img.hash-download.txt | tr -dc 'a-f0-9') ]]
     then
         _messagePlain_good 'good: hash'

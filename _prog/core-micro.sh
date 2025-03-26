@@ -88,8 +88,8 @@ _get_fromTag_ingredientVM() {
     echo
     cat "$scriptLocal"/vm-ingredient.img.hash-download.txt
 
-    _wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$currentTag" "vm-ingredient.img.hash.txt" > "$scriptLocal"/vm-ingredient.img.hash-upstream.txt
-    #$(_wget_githubRelease-stdout "soaringDistributions/ubDistBuild" "$currentTag" "vm-ingredient.img.hash.txt" | tr -dc 'a-f0-9')
+    _wget_githubRelease-fromTag-stdout "soaringDistributions/ubDistBuild" "$currentTag" "vm-ingredient.img.hash.txt" > "$scriptLocal"/vm-ingredient.img.hash-upstream.txt
+    #$(_wget_githubRelease-fromTag-stdout "soaringDistributions/ubDistBuild" "$currentTag" "vm-ingredient.img.hash.txt" | tr -dc 'a-f0-9')
     if [[ $(cat "$scriptLocal"/vm-ingredient.img.hash-upstream.txt | tr -dc 'a-f0-9') == $(cat "$scriptLocal"/vm-ingredient.img.hash-download.txt | tr -dc 'a-f0-9') ]]
     then
         _messagePlain_good 'good: hash'
