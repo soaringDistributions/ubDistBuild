@@ -758,8 +758,10 @@ jobs:
           #export MANDATORY_HASH="true"
           cd ./_local
           rm -f hash-download.txt
-          ../ubiquitous_bash.sh _wget_githubRelease_join-stdout "${{ github.repository }}" "" "package_image_before_noBoot.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+          #../ubiquitous_bash.sh _wget_githubRelease_join-stdout "${{ github.repository }}" "" "package_image_before_noBoot.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
+          ../ubiquitous_bash.sh _wget_githubRelease-fromTag_join-stdout "${{ github.repository }}" "$currentReleaseTag" "package_image_before_noBoot.tar.flx" | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         env:
+          currentReleaseTag:  ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
@@ -1506,7 +1508,7 @@ jobs:
           git clone https://github.com/mirage335-colossus/extendedInterface.git
           cd extendedInterface
           mkdir -p ../extendedInterface-accessories/integrations/ubcp
-          curl -L -o ../extendedInterface-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.TOKEN_publicEquiv_auto }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
+          #curl -L -o ../extendedInterface-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.TOKEN_publicEquiv_auto }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
           ./ubiquitous_bash.sh _build_extendedInterface-fetch | sudo -n tee ../../_lib/_extendedInterface.log && exit ${PIPESTATUS[0]}
         env:
           GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
@@ -1517,7 +1519,7 @@ jobs:
           git clone https://github.com/soaringDistributions/ubDistBuild.git
           cd ubDistBuild
           mkdir -p ../ubDistBuild-accessories/integrations/ubcp
-          curl -L -o ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.TOKEN_publicEquiv_auto }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
+          #curl -L -o ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.TOKEN_publicEquiv_auto }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
           ./ubiquitous_bash.sh _build_ubDistBuild-fetch | sudo -n tee ../../_lib/_ubDistBuild.log && exit ${PIPESTATUS[0]}
         env:
           GH_TOKEN: ${{ secrets.TOKEN_publicEquiv_auto }}
@@ -1774,8 +1776,9 @@ jobs:
           echo $skimfast
           #export FORCE_AXEL=8
           #export MANDATORY_HASH="true"
-          ./ubiquitous_bash.sh _hash_ubdist-fast
+          ./ubiquitous_bash.sh _hash_ubdist-fast "$currentReleaseTag"
         env:
+          currentReleaseTag:  ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
@@ -1832,10 +1835,6 @@ jobs:
         with:
           fetch-depth: 1
           #submodules: 'recursive'
-      - name: mkdir _local
-        shell: bash
-        run: |
-          mkdir -p ./_local
 
       #- name: _getMinimal_cloud
         #shell: bash
@@ -1850,148 +1849,123 @@ jobs:
       - name: _getMinimal_cloud-analysis
         shell: bash
         run: |
+          mkdir -p ./_local
           sudo -n apt-get -y install jq gh curl coreutils
-      
-      #- name: _getMost-aria2
-        #shell: bash
-        #run: |
-          #sudo -n apt-get -y clean
-          #sudo -n apt-get update
-          #sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y aria2
-        #timeout-minutes: 355
+
+      - name: _getMinimal_cloud-special
+        shell: bash
+        timeout-minutes: 120
+        run: |
+          mkdir -p ./_local
+          #sudo -n apt-get -y install jq gh curl coreutils p7zip findutils tar gzip bzip2 sed axel aria2 rsync pv dos2unix xxd util-linux openssl
+          sudo -n apt-get -y install jq gh curl coreutils findutils tar gzip bzip2 sed axel aria2 rsync pv dos2unix xxd util-linux
 
       - name: report! cronUserReport
         shell: bash
         run: |
-          mkdir -p ./_local/analysis
-
-          cd ./_local/analysis
-
-          # Get the list of releases
-          RELEASES=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/"${{ github.repository }}"/releases)
-
-          # Download binReport file for the current release
-          curl -s -H "Authorization: token $GH_TOKEN" -L -o "cronUserReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/cronUserReport"
+          #mkdir -p ./_local/analysis
+          #cd ./_local/analysis
+          ## Download binReport file for the current release
+          #curl -s -H "Authorization: token $GH_TOKEN" -L -o "cronUserReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/cronUserReport"
+          #echo
+          #cat ./cronUserReport-$currentReleaseTag
 
           echo
-          cat ./cronUserReport-$currentReleaseTag
+          _wget_githubRelease-fromTag-fetchReport "$currentRepository" "$currentReleaseTag" "cronUserReport"
         env:
+          currentRepository: ${{ github.repository }}
           currentReleaseTag: ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: report! cronRootReport
         shell: bash
         run: |
-          mkdir -p ./_local/analysis
-
-          cd ./_local/analysis
-
-          # Get the list of releases
-          RELEASES=$(curl -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/"${{ github.repository }}"/releases)
-
-          # Download binReport file for the current release
-          curl -s -H "Authorization: token $GH_TOKEN" -L -o "cronRootReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/cronRootReport"
+          #mkdir -p ./_local/analysis
+          #cd ./_local/analysis
+          ## Download binReport file for the current release
+          #curl -s -H "Authorization: token $GH_TOKEN" -L -o "cronRootReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/cronRootReport"
+          #echo
+          #cat ./cronRootReport-$currentReleaseTag
 
           echo
-          cat ./cronRootReport-$currentReleaseTag
+          _wget_githubRelease-fromTag-fetchReport "$currentRepository" "$currentReleaseTag" "cronRootReport"
         env:
+          currentRepository: ${{ github.repository }}
           currentReleaseTag: ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
-      - name: analysis! missing-binaries
+
+      #lsmodReport
+      - name: fetch! binReport coreReport dpkg
         shell: bash
         run: |
-          #echo -n
-          _safeEcho() {
-            printf '%s' "$1"
-            shift
-            
-            [[ "$@" == "" ]] && return 0
-            
-            local currentArg
-            for currentArg in "$@"
-            do
-              printf '%s' " "
-              printf '%s' "$currentArg"
-            done
-            return 0
-          }
-
-          #echo
-          _safeEcho_newline() {
-            _safeEcho "$@"
-            printf '\n'
-          }
-        
-          mkdir -p ./_local/analysis
-
-          #cp ./_local/lsmodReport ./_local/analysis/lsmodReport
-          #cp ./_local/binReport ./_local/analysis/binReport
-          #cp ./_local/coreReport ./_local/analysis/coreReport
-          #cp ./_local/dpkg ./_local/analysis/dpkg
-
-          cd ./_local/analysis
-
-          # Get the list of releases
-          RELEASES=$(curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" https://api.github.com/repos/"${{ github.repository }}"/releases?per_page=100&page=1)
-
-          # Download binReport file for the current release
-          #curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/lsmodReport"
-          curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/binReport"
-          curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/coreReport"
-          curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/dpkg"
-          curl --fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "customReport-$currentReleaseTag" "https://github.com/"${{ github.repository }}"/releases/download/$currentReleaseTag/customReport"
-
-          # Loop through each release
-          #local currentIteration
-          currentIteration=0
-          #for RELEASE in $(_safeEcho_newline "$RELEASES" | jq -r '.[].tag_name' | sort --reverse); do
-          for RELEASE in $(_safeEcho_newline "$RELEASES" | jq -r 'sort_by(.published_at) | reverse | .[].tag_name' | head -n 20 | tr -dc 'a-zA-Z0-9\-_.:\n'); do
-
-            currentIteration=$((currentIteration+1))
-
-            # Compare the list of binaries in this release to the current release
-            if [ "$RELEASE" != "$currentReleaseTag" ]; then
-              
-              # Download the binReport file for this release
-              #[[ "$currentIteration" -lt "5" ]] && curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "lsmodReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/lsmodReport"
-              [[ "$currentIteration" -lt "6" ]] && curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "binReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/binReport"
-              [[ "$currentIteration" -lt "7" ]] && curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "coreReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/coreReport"
-              curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "dpkg-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/dpkg"
-              curl --no-fail --retry 5 --retry-delay 90 --connect-timeout 45 --max-time 600 -s -H "Authorization: token $GH_TOKEN" -L -o "customReport-$RELEASE" "https://github.com/"${{ github.repository }}"/releases/download/$RELEASE/customReport"
-              
-              #[[ "$currentIteration" -lt "5" ]] && echo | tee -a ./missing-lsmodReport
-              #[[ "$currentIteration" -lt "5" ]] && echo "Binaries (lsmod) loaded in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-lsmodReport
-              #[[ "$currentIteration" -lt "5" ]] && comm -23 <(sort "lsmodReport-$RELEASE") <(sort "lsmodReport-$currentReleaseTag") | tee -a ./missing-lsmodReport
-              [[ "$currentIteration" -lt "6" ]] && echo | tee -a ./missing-binReport
-              [[ "$currentIteration" -lt "6" ]] && echo "Binaries (filesystem) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-binReport
-              [[ "$currentIteration" -lt "6" ]] && comm -23 <(sort "binReport-$RELEASE") <(sort "binReport-$currentReleaseTag") | tee -a ./missing-binReport
-              [[ "$currentIteration" -lt "7" ]] && echo | tee -a ./missing-coreReport
-              [[ "$currentIteration" -lt "7" ]] && echo "Binaries (core) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-coreReport
-              [[ "$currentIteration" -lt "7" ]] && comm -23 <(sort "coreReport-$RELEASE" | grep -v '_local/h') <(sort "coreReport-$currentReleaseTag" | grep -v '_local/h') | tee -a ./missing-coreReport
-              echo | tee -a ./missing-dpkg
-              echo "Binaries (dpkg) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-dpkg
-              comm -23 <(sort "dpkg-$RELEASE") <(sort "dpkg-$currentReleaseTag") | tee -a ./missing-dpkg
-              echo | tee -a ./missing-customReport
-              echo "Binaries (filesystem: custom) in $RELEASE but not in currentRelease $currentReleaseTag:" | tee -a ./missing-customReport
-              comm -23 <(sort "customReport-$RELEASE" | grep -v '_local/h' | grep -v 'docker/fuse-overlayfs' | grep -v 'docker/image/fuse-overlayfs' | grep -v 'docker/containerd' | grep -v 'docker/containers') <(sort "customReport-$currentReleaseTag" | grep -v '_local/h' | grep -v 'docker/fuse-overlayfs' | grep -v 'docker/image/fuse-overlayfs' | grep -v 'docker/containerd' | grep -v 'docker/containers') | tee -a ./missing-customReport
-            fi
-          done
+          #lsmodReport
+          ./ubiquitous_bash.sh _wget_githubRelease-fromTag-analysisReport-fetch 20 binReport coreReport dpkg
         env:
+          currentRepository: ${{ github.repository }}
           currentReleaseTag: ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: release! analysis! missing-binaries
+      #lsmodReport
+      - name: select! binReport coreReport dpkg
         shell: bash
         run: |
-            #gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/analysis/missing-lsmodReport
-            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/analysis/missing-binReport
-            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/analysis/missing-coreReport
-            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/analysis/missing-dpkg
-            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/analysis/missing-customReport
+          #lsmodReport
+          ./ubiquitous_bash.sh _wget_githubRelease-fromTag-analysisReport-select binReport coreReport dpkg
+        env:
+          currentRepository: ${{ github.repository }}
+          currentReleaseTag: ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      #missing-lsmodReport
+      - name: analysis! missing-binReport missing-coreReport missing-dpkg
+        shell: bash
+        run: |
+          #lsmodReport
+          ./ubiquitous_bash.sh _wget_githubRelease-fromTag-analysisReport-analysis 65 binReport coreReport dpkg
+        env:
+          currentRepository: ${{ github.repository }}
+          currentReleaseTag: ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      #missing-lsmodReport`
+      #- name: release! missing-binReport missing-coreReport missing-dpkg missing-customReport
+        #uses: softprops/action-gh-release@v1
+        #with:
+          #tag_name: ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999
+          #name: build
+          #files: |
+            ##./_local/analysisTmp/missing-lsmodReport
+            #./_local/analysisTmp/missing-binReport 
+            #./_local/analysisTmp/missing-coreReport 
+            #./_local/analysisTmp/missing-dpkg
+            #./_local/analysisTmp/missing-customReport
+
+      #missing-lsmodReport
+      - name: release! analysis! missing-binReport missing-coreReport missing-dpkg missing-customReport
+        shell: bash
+        run: |
+            #gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/analysisTmp/missing-lsmodReport
+            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/analysisTmp/missing-binReport
+            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/analysisTmp/missing-coreReport
+            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/analysisTmp/missing-dpkg
+            gh release upload ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999 ./_local/analysisTmp/missing-customReport
         env:
           GH_TOKEN: ${{ github.token }}
+
+      #missing-lsmodReport
+      #./_local/analysisTmp/missing-lsmodReport
+      - name: ls! release! missing-binReport missing-coreReport missing-dpkg missing-customReport
+        shell: bash
+        run: |
+          ls ./_local/analysisTmp/missing-binReport ./_local/analysisTmp/missing-coreReport ./_local/analysisTmp/missing-dpkg ./_local/analysisTmp/missing-customReport
+          ./ubiquitous_bash.sh _safeRMR-analysisTmp
+        env:
+          currentRepository: ${{ github.repository }}
+          currentReleaseTag: ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
           
       - name: report! API Rate Limit
         shell: bash
