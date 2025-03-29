@@ -1871,7 +1871,7 @@ jobs:
           #cat ./cronUserReport-$currentReleaseTag
 
           echo
-          _wget_githubRelease-fromTag-fetchReport "$currentRepository" "$currentReleaseTag" "cronUserReport"
+          ./ubiquitous_bash.sh _wget_githubRelease-fromTag-fetchReport "$currentRepository" "$currentReleaseTag" "cronUserReport"
         env:
           currentRepository: ${{ github.repository }}
           currentReleaseTag: ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999
@@ -1888,7 +1888,7 @@ jobs:
           #cat ./cronRootReport-$currentReleaseTag
 
           echo
-          _wget_githubRelease-fromTag-fetchReport "$currentRepository" "$currentReleaseTag" "cronRootReport"
+          ./ubiquitous_bash.sh _wget_githubRelease-fromTag-fetchReport "$currentRepository" "$currentReleaseTag" "cronRootReport"
         env:
           currentRepository: ${{ github.repository }}
           currentReleaseTag: ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999
