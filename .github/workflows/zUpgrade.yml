@@ -821,7 +821,7 @@ jobs:
           #../ubiquitous_bash.sh _wget_githubRelease_join-stdout "${{ github.repository }}" "" "package_image_before_noBoot.tar.flx" 2> /dev/null | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
           ../ubiquitous_bash.sh _wget_githubRelease-fromTag_join-stdout "${{ github.repository }}" "$currentReleaseTag" "package_image_before_noBoot.tar.flx" | tee >(../ubiquitous_bash.sh _get_extract_ubDistBuild-tar --extract ./vm.img --to-stdout | env OPENSSL_CONF="/etc/ssl/openssl_legacy.cnf" openssl dgst -whirlpool -binary | xxd -p -c 256 > hash-download.txt) | ../ubiquitous_bash.sh _get_extract_ubDistBuild
         env:
-          currentReleaseTag: build-${{ github.run_id }}-9999
+          currentReleaseTag: build_upgrade-${{ github.run_id }}-9999
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
@@ -1876,7 +1876,7 @@ jobs:
           export FORCE_PARALLEL="5"
           ./ubiquitous_bash.sh _hash_ubdist-fast "$currentReleaseTag"
         env:
-          currentReleaseTag: build-${{ github.run_id }}-9999
+          currentReleaseTag: build_upgrade-${{ github.run_id }}-9999
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
