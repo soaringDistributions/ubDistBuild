@@ -1903,33 +1903,33 @@ jobs:
 
 
       #lsmodReport
-      - name: fetch! binReport coreReport dpkg
+      - name: fetch! binReport coreReport dpkg customReport
         shell: bash
         run: |
           #lsmodReport
-          ./ubiquitous_bash.sh _wget_githubRelease-fromTag-analysisReport-fetch 20 binReport coreReport dpkg
+          ./ubiquitous_bash.sh _wget_githubRelease-fromTag-analysisReport-fetch 20 binReport coreReport dpkg customReport
         env:
           currentRepository: ${{ github.repository }}
           currentReleaseTag: ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       #lsmodReport
-      - name: select! binReport coreReport dpkg
+      - name: select! binReport coreReport dpkg customReport
         shell: bash
         run: |
           #lsmodReport
-          ./ubiquitous_bash.sh _wget_githubRelease-fromTag-analysisReport-select binReport coreReport dpkg
+          ./ubiquitous_bash.sh _wget_githubRelease-fromTag-analysisReport-select binReport coreReport dpkg customReport
         env:
           currentRepository: ${{ github.repository }}
           currentReleaseTag: ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       #missing-lsmodReport
-      - name: analysis! missing-binReport missing-coreReport missing-dpkg
+      - name: analysis! missing-binReport missing-coreReport missing-dpkg missing-customReport
         shell: bash
         run: |
           #lsmodReport
-          ./ubiquitous_bash.sh _wget_githubRelease-fromTag-analysisReport-analysis 65 binReport coreReport dpkg
+          ./ubiquitous_bash.sh _wget_githubRelease-fromTag-analysisReport-analysis 65 binReport coreReport dpkg customReport
         env:
           currentRepository: ${{ github.repository }}
           currentReleaseTag: ${{ inputs.DANGERfast_EXPERIMENT }}-${{ github.run_id }}-9999
