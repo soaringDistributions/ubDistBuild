@@ -16,7 +16,12 @@ _knowledge-ubDistBuild() {
     mkdir -p "$scriptLocal"/knowledge/ubDistBuild/_lib
     cp -r "$scriptAbsoluteFolder"/_lib/install "$scriptLocal"/knowledge/ubDistBuild/_lib/
     cp -r "$scriptAbsoluteFolder"/_lib/nsis "$scriptLocal"/knowledge/ubDistBuild/_lib/
-    cp -r "$scriptAbsoluteFolder"/_lib/setup "$scriptLocal"/knowledge/ubDistBuild/_lib/
+    #cp -r "$scriptAbsoluteFolder"/_lib/setup "$scriptLocal"/knowledge/ubDistBuild/_lib/
+
+    mkdir -p "$scriptLocal"/knowledge/ubDistBuild/_lib/setup
+    cp -r "$scriptAbsoluteFolder"/_lib/setup/hardware "$scriptLocal"/knowledge/ubDistBuild/_lib/setup/
+    cp -r "$scriptAbsoluteFolder"/_lib/setup/nvidia "$scriptLocal"/knowledge/ubDistBuild/_lib/setup/
+    cp -r "$scriptAbsoluteFolder"/_lib/setup/rootGrab "$scriptLocal"/knowledge/ubDistBuild/_lib/setup/
 
     cp -r "$scriptAbsoluteFolder"/_lib/_build-staging-ops.sh "$scriptLocal"/knowledge/ubDistBuild/_lib/
 
