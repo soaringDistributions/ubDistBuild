@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3081927174'
+export ub_setScriptChecksum_contents='3483098928'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -25068,6 +25068,1944 @@ alias l=_l
 
 
 
+
+
+# ATTENTION: Indentation, commenting, etc, is intended to allow copy/paste to scratch text files for copy/paste to terminal.
+
+#. shortcuts/factory/factory.sh ; _factory_axolotl
+
+# ATTRIBUTION-AI: AI LLMs, may have suggested some parameters for some commands.
+
+_set_factory_dir() {
+
+
+
+# ###
+# PASTE
+# ###
+
+! type _getAbsoluteLocation > /dev/null 2>&1 && exit 1
+
+factory_projectDir=$(_getAbsoluteLocation .)
+#if [[ "$factory_projectDir" != '/cygdrive/c/q/p/zFactory/Llama-tech' ]] && [[ "$factory_projectDir" != "$HOME"/project/zFactory/Llama-tech ]]
+#then
+#_messagePlain_warn 'unexpected: factory_projectDir: '"$factory_projectDir"
+#_messagePlain_request 'request: Ctrl+C , close terminal, etc, NOW, if this is not what you intended !'
+#sleep 45
+#echo 'DANGER: proceeding! '
+#fi
+[[ "$factory_projectDir" == '/cygdrive'* ]] && factory_projectDir=$(cygpath -w "$factory_projectDir")
+
+factory_modelDir="$factory_projectDir"/model
+[[ -e ./_local/model ]] && factory_modelDir="$factory_projectDir"/_local/model
+factory_outputDir="$factory_projectDir"/output
+[[ -e ./_local/output ]] && factory_outputDir="$factory_projectDir"/_local/output
+
+factory_datasetDir='/c/q/p/zCore/infrastructure/ubiquitous_bash/_local/dataset'
+[[ -e ./dataset ]] && factory_datasetDir="$factory_projectDir"/dataset
+[[ -e ./_local/dataset ]] && factory_datasetDir="$factory_projectDir"/_local/dataset
+
+factory_knowledgeDir='/c/q/p/zCore/infrastructure/ubiquitous_bash/_local/knowledge'
+[[ -e ./knowledge ]] && factory_knowledgeDir="$factory_projectDir"/knowledge
+[[ -e ./_local/knowledge ]] && factory_knowledgeDir="$factory_projectDir"/_local/knowledge
+
+factory_knowledge_distillDir='/c/q/p/zCore/infrastructure/ubiquitous_bash/_local/knowledge_distill'
+[[ -e ./knowledge_distill ]] && factory_knowledge_distillDir="$factory_projectDir"/knowledge_distill
+[[ -e ./_local/knowledge_distill ]] && factory_knowledge_distillDir="$factory_projectDir"/_local/knowledge_distill
+
+# ###
+# PASTE
+# ###
+
+
+
+}
+
+
+
+_factory_axolotl() {
+
+! type _set_factory_dir > /dev/null 2>&1 && exit 1
+_set_factory_dir
+
+
+
+# ###
+
+_messagePlain_request 'request: paste ->'
+echo > ./._run-factory_axolotl
+_request_paste_factory-prepare_finetune | tee -a ./._run-factory_axolotl
+_request_paste_factory-install_ubiquitous_bash | tee -a ./._run-factory_axolotl
+_request_paste_factory-show_finetune | tee -a ./._run-factory_axolotl
+docker inspect --format='{{json .Config.Entrypoint}}' axolotlai/axolotl:main-latest | jq -r '.[]' | tee -a ./._run-factory_axolotl
+#echo 'bash -i' >> ./._run-factory_axolotl
+_messagePlain_request 'request: <- paste'
+
+# ###
+
+
+
+# ###
+# PASTE
+# ###
+
+! type _getAbsoluteLocation > /dev/null 2>&1 && exit 1
+
+#docker image inspect axolotlai/axolotl:main-latest --format '{{json .Config.Entrypoint}} {{json .Config.Cmd}}'
+
+dockerRunArgs=( bash /workspace/project/._run-factory_axolotl )
+[[ ! -e ./._run-factory_axolotl ]] && dockerRunArgs=( )
+
+if _if_cygwin
+then
+#--privileged
+#--ipc=host --ulimit memlock=-1 --ulimit stack=67108864
+#-v 'C:\q':/q -v 'C:\core':/core -v "$USERPROFILE"'\Downloads':/Downloads
+docker run --shm-size=20g --name axolotl-$(_uid 14) --gpus "all" -v 'C:\q':/q -v 'C:\core':/core -v "$USERPROFILE"'\Downloads':/Downloads -v "$factory_outputDir":/output -v "$factory_modelDir":/model -v "$factory_datasetDir":/dataset -v "$factory_knowledgeDir":/knowledge -v "$factory_knowledge_distillDir":/knowledge_distill -v "$factory_projectDir":/workspace/project --rm -it axolotlai/axolotl:main-latest "${dockerRunArgs[@]}"
+fi
+if ! _if_cygwin
+then
+# WARNING: May be untested.
+docker run --shm-size=20g --name axolotl-$(_uid 14) --gpus "all" -v '/home/user/___quick':/q -v '/home/user/core':/core -v "/home/user"'/Downloads':/Downloads -v "$factory_outputDir":/output -v "$factory_modelDir":/model -v "$factory_datasetDir":/dataset -v "$factory_projectDir":/workspace/project --rm -it axolotlai/axolotl:main-latest "${dockerRunArgs[@]}"
+fi
+
+# ###
+# PASTE
+# ###
+
+
+
+}
+
+
+
+_request_paste_factory-prepare_finetune() {
+cat << 'CZXWXcRMTo8EmM8i4d'
+
+# ###
+# PASTE
+# ###
+
+#pip3 install packaging ninja
+#pip3 install -e '.[flash-attn,deepspeed]'
+sleep 1
+
+# ###
+
+#export NCCL_DEBUG=INFO
+#export NCCL_DEBUG_SUBSYS=ALL
+#export TORCH_DISTRIBUTED_DEBUG=INFO
+#export TORCHELASTIC_ERROR_FILE=/PATH/TO/torcherror.log
+
+# ###
+false << 'doNotMatch'
+
+CZXWXcRMTo8EmM8i4d
+}
+_request_paste_factory-install_ubiquitous_bash() {
+cat << 'CZXWXcRMTo8EmM8i4d'
+
+doNotMatch
+# ###
+
+if [[ -e /core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh ]]
+then
+/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _setupUbiquitous_nonet
+export profileScriptLocation="/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh"
+export profileScriptFolder="/core/infrastructure/ubiquitous_bash"
+. "/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh" --profile _importShortcuts
+else
+! [[ -e /ubiquitous_bash.sh ]] && wget 'https://raw.githubusercontent.com/mirage335/ubiquitous_bash/master/ubiquitous_bash.sh'
+mv -f ./ubiquitous_bash.sh /ubiquitous_bash.sh
+chmod u+x /ubiquitous_bash.sh
+/ubiquitous_bash.sh _setupUbiquitous_nonet
+fi
+#clear
+
+# ###
+false << 'doNotMatch'
+
+CZXWXcRMTo8EmM8i4d
+}
+_request_paste_factory-show_finetune() {
+cat << 'CZXWXcRMTo8EmM8i4d'
+
+doNotMatch
+# ###
+
+find /model -maxdepth 1 | head -n 65
+find /output -maxdepth 1 | head
+find /dataset -maxdepth 1 | head -n 65
+find /workspace/project -maxdepth 1 | head -n 65
+
+nvidia-smi
+
+# ###
+# PASTE
+# ###
+
+CZXWXcRMTo8EmM8i4d
+}
+
+
+#./ubiquitous_bash.sh _format_bash ubiquitous_bash ./_local/dataset/ubiquitous_bash
+
+
+# You are an expert assistant that generates exemplary bash scripts according to best practices.
+# Ok, now you should know something about ubiquitous_bash . Please write a bash while loop in the new format .
+
+#--arg system_content "You are an expert assistant that generates exemplary bash scripts according to best practices."
+
+
+
+
+
+_format_bash() {
+    _format_bash-promptResponse "$@"
+    _format_bash-continuePromptResponse "$@"
+    _format_bash-continueText "$@"
+}
+
+
+
+
+
+# ATTRIBUTION-AI: ChatGPT 4.5-preview  2025-04-01  (partially)
+_format_bash-promptResponse() {
+    local current_objectName="$1"
+    [[ -z "$current_objectName" ]] && current_objectName="$objectName"
+
+    local current_directory="$2"
+    [[ -z "$current_directory" ]] && current_directory="$scriptLocal/dataset/$current_objectName"
+
+    local dataset="$current_directory"
+    local output_file="${current_directory}_finetuning-promptResponse.jsonl"
+
+    rm -f "$output_file" >/dev/null 2>&1
+
+    local segment_file prompt_file response_file prompt completion json_line
+
+    while IFS= read -r -d '' segment_file; do
+        prompt_file="$segment_file".prompt.txt
+        response_file="$segment_file".response.txt
+        
+        if [[ ! -e "$response_file" ]] || [[ ! -e "$prompt_file" ]]
+        then
+            ( _messagePlain_bad "bad: FAIL: missing: prompt/response files: $segment_file" >&2 ) > /dev/null
+            ( _messageError 'FAIL' >&2 ) > /dev/null
+            _stop 1
+            exit 1
+            return 1
+        fi
+
+        prompt=$(<"$prompt_file")
+        completion=$(<"$response_file")
+
+        # Now construct the correct "messages" object as required by OpenAI
+        #--arg system_content "You are an expert assistant that generates exemplary bash scripts according to best practices."
+        json_line=$(jq -cn \
+            --arg user_content "$prompt" \
+            --arg assistant_content "$completion" \
+            --arg system_content "" \
+            '{messages: [
+                {role: "system", content: $system_content},
+                {role: "user", content: $user_content},
+                {role: "assistant", content: $assistant_content}
+            ]}')
+
+        echo "$json_line" >> "$output_file"
+
+    done < <(find "$dataset" -maxdepth 1 -type f  ! -iname '*.prompt.txt' ! -iname '*.response.txt' ! -iname '*.continue_prompt.txt' ! -iname '*.continue_response.txt' ! -iname '*.description.txt' -print0 | sort -zV)
+
+    echo "JSONL file created successfully: $output_file" >&2
+}
+
+_format_bash_sequence-continuePromptResponse() {
+    #_start
+
+    local current_objectName="$1"
+    [[ -z "$current_objectName" ]] && current_objectName="$objectName"
+
+    local current_directory="$2"
+    [[ -z "$current_directory" ]] && current_directory="$scriptLocal/dataset/$current_objectName"
+
+    local dataset="$current_directory"
+    local output_file="${current_directory}_finetuning-continuePromptResponse.jsonl"
+
+    rm -f "$output_file" >/dev/null 2>&1
+
+    local prompt_file response_file prompt completion json_line
+
+    prompt_file="SKIP"
+    while IFS= read -r -d '' response_file; do
+        #rm -f "$safeTmp"/prompt_file >/dev/null 2>&1
+        #rm -f "$safeTmp"/response_file >/dev/null 2>&1
+
+        if [[ "$prompt_file" != "SKIP" ]]
+        then
+            ## WARNING: For essentially continued pre-training, this extra formatting may or may NOT be harmful!
+            ##  ATTENTION: CAUTION: EXPERIMENT DILIGENTLY!
+            #echo 'Continue the example bash shellcode.' >> "$safeTmp"/prompt_file
+            #echo >> "$safeTmp"/prompt_file
+            #echo '```bash' >> "$safeTmp"/prompt_file
+            #cat "$prompt_file" >> "$safeTmp"/prompt_file
+            #echo '```' >> "$safeTmp"/prompt_file
+            #echo >> "$safeTmp"/prompt_file
+
+            #echo 'Here is the continuation of the bash shellcode:' >> "$safeTmp"/response_file
+            #echo >> "$safeTmp"/response_file
+            #echo '```bash' >> "$safeTmp"/response_file
+            #cat "$response_file" >> "$safeTmp"/response_file
+            #echo '```' >> "$safeTmp"/response_file
+            #echo >> "$safeTmp"/response_file
+
+            #cat "$prompt_file".continue_prompt.txt > "$safeTmp"/prompt_file
+            #cat "$response_file".continue_response.txt > "$safeTmp"/response_file
+            
+
+            #prompt=$(<"$prompt_file")
+            #completion=$(<"$response_file")
+
+            #prompt=$(<"$safeTmp"/prompt_file)
+            #completion=$(<"$safeTmp"/response_file)
+
+            prompt=$(<"$prompt_file".continue_prompt.txt)
+            completion=$(<"$response_file".continue_response.txt)
+
+            # Now construct the correct "messages" object as required by OpenAI
+            json_line=$(jq -cn \
+                --arg user_content "$prompt" \
+                --arg assistant_content "$completion" \
+                --arg system_content "" \
+                '{messages: [
+                    {role: "system", content: $system_content},
+                    {role: "user", content: $user_content},
+                    {role: "assistant", content: $assistant_content}
+                ]}')
+
+            echo "$json_line" >> "$output_file"
+        fi
+
+        prompt_file="$response_file"
+
+    done < <(find "$dataset" -maxdepth 1 -type f  ! -iname '*.prompt.txt' ! -iname '*.response.txt' ! -iname '*.continue_prompt.txt' ! -iname '*.continue_response.txt' ! -iname '*.description.txt' -print0 | sort -zV)
+
+    echo "JSONL file created successfully: $output_file" >&2
+
+    #_stop
+}
+_format_bash-continuePromptResponse() {
+    #"$scriptAbsoluteLocation" _format_bash_sequence-continuePromptResponse "$@"
+    _format_bash_sequence-continuePromptResponse "$@"
+}
+
+
+
+
+# ATTRIBUTION-AI: ChatGPT 4.5-preview  2025-04-01  (partially)
+_format_bash-continueText() {
+    local current_objectName="$1"
+    [[ -z "$current_objectName" ]] && current_objectName="$objectName"
+
+    local current_directory="$2"
+    [[ -z "$current_directory" ]] && current_directory="$scriptLocal/dataset/$current_objectName"
+
+    local dataset="$current_directory"
+    local output_file="${current_directory}_finetuning-continueText.jsonl"
+
+    rm -f "$output_file" >/dev/null 2>&1
+
+    local segment_file prompt_file response_file prompt completion json_line
+
+    while IFS= read -r -d '' segment_file; do
+        segment=$(<"$segment_file")
+
+        # Now construct the correct "messages" object as required by OpenAI
+        #--arg system_content "You are an expert assistant that generates exemplary bash scripts according to best practices."
+        json_line=$(jq -cn \
+            --arg user_content "$prompt" \
+            --arg assistant_content "$completion" \
+            --arg system_content "" \
+            '{messages: [
+                {role: "system", content: $system_content},
+                {role: "user", content: $user_content},
+                {role: "assistant", content: $assistant_content}
+            ]}')
+        json_line=$(jq -cn \
+            --arg text "$segment" \
+            '{text: $text}')
+
+        echo "$json_line" >> "$output_file"
+
+    done < <(find "$dataset" -maxdepth 1 -type f  ! -iname '*.prompt.txt' ! -iname '*.response.txt' ! -iname '*.continue_prompt.txt' ! -iname '*.continue_response.txt' ! -iname '*.description.txt' -print0 | sort -zV)
+
+    echo "JSONL file created successfully: $output_file" >&2
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+_format_trial() {
+    local current_objectName="$1"
+    [[ -z "$current_objectName" ]] && current_objectName=$(basename "$PWD")
+
+    local current_directory="$2"
+    [[ -z "$current_directory" ]] && current_directory="$PWD"
+
+    local dataset="$current_directory"
+    local output_file="${current_directory}/"$objectName"_finetuning-promptResponse-instruct.jsonl"
+
+    rm -f "$output_file" >/dev/null 2>&1
+
+    local segment_file prompt_file response_file prompt completion json_line
+
+    while IFS= read -r -d '' segment_file; do
+        response_file="$segment_file"
+
+        prompt_file=$(echo "$response_file" | sed 's/response-solution-llama-3.1-405b-instruct\.md$/prompt-problem.md/')
+        
+        if [[ ! -e "$response_file" ]] || [[ ! -e "$prompt_file" ]]
+        then
+            ( _messagePlain_bad "bad: FAIL: missing: prompt/response files: $segment_file" >&2 ) > /dev/null
+            ( _messageError 'FAIL' >&2 ) > /dev/null
+            _stop 1
+            exit 1
+            return 1
+        fi
+
+        prompt=$(<"$prompt_file")
+        completion=$(<"$response_file")
+
+        # Now construct the correct "messages" object as required by OpenAI
+        #--arg system_content "You are an expert assistant that generates exemplary bash scripts according to best practices."
+        json_line=$(jq -cn \
+            --arg user_content "$prompt" \
+            --arg assistant_content "$completion" \
+            --arg system_content "" \
+            '{messages: [
+                {role: "system", content: $system_content},
+                {role: "user", content: $user_content},
+                {role: "assistant", content: $assistant_content}
+            ]}')
+
+        echo "$json_line" >> "$output_file"
+
+    done < <(find "$dataset" -type f -iname 'response-solution-llama-3.1-405b-instruct.md' -print0 | sort -zV)
+
+    echo "JSONL file created successfully: $output_file" >&2
+
+
+    output_file="${current_directory}/"$objectName"_finetuning-promptResponse-reasoning.jsonl"
+
+    while IFS= read -r -d '' segment_file; do
+        response_file="$segment_file"
+
+        prompt_file=$(echo "$response_file" | sed 's/response-solution-deepseek-r1-671b-reasoning\.md$/prompt-problem.md/')
+        
+        if [[ ! -e "$response_file" ]] || [[ ! -e "$prompt_file" ]]
+        then
+            ( _messagePlain_bad "bad: FAIL: missing: prompt/response files: $segment_file" >&2 ) > /dev/null
+            ( _messageError 'FAIL' >&2 ) > /dev/null
+            _stop 1
+            exit 1
+            return 1
+        fi
+
+        prompt=$(<"$prompt_file")
+        completion=$(<"$response_file")
+
+        # Now construct the correct "messages" object as required by OpenAI
+        #--arg system_content "You are an expert assistant that generates exemplary bash scripts according to best practices."
+        json_line=$(jq -cn \
+            --arg user_content "$prompt" \
+            --arg assistant_content "$completion" \
+            --arg system_content "" \
+            '{messages: [
+                {role: "system", content: $system_content},
+                {role: "user", content: $user_content},
+                {role: "assistant", content: $assistant_content}
+            ]}')
+
+        echo "$json_line" >> "$output_file"
+
+    done < <(find "$dataset" -type f -iname 'response-solution-deepseek-r1-671b-reasoning.md' -print0 | sort -zV)
+
+    echo "JSONL file created successfully: $output_file" >&2
+}
+
+
+# All prompts to generate AI training datasets used, if any, only outputs from those models with open licenses, such as the Llama 3.1 licensing, or the DeepSeek R1 MIT license, and thus, there can be no questions of encumberance of resulting datasets for training Llama 3.1, etc, AI models.
+
+# Prompts are written to guarantee good results with at least Llama 3.1 models, with the goal of ensuring both availability of adequately trained models using these datasets, and also of getting the best practical results from other SOTA models.
+#  If in doubt, try training Llama 3.1 models with resulting datasets for the most predictable results.
+
+# ATTRIBUTION-AI:
+#
+#DeepSeek R1
+#DeepSeek R1 14b
+#DeepSeek R1 32b
+#DeepSeek R1 Distill Llama 8b
+#DeepSeek R1 Distill Llama 70b
+#
+#Llama 3.1 Instruct 405b
+#Llama 3.1 Instruct 70b
+#
+#Llama-augment
+#
+
+
+
+
+_here_convert_bash_promptResponse-askDescription() {
+        cat << 'CZXWXcRMTo8EmM8i4d'
+
+Please describe, only what the bash shellcode segment does, if anything. Identify any code patterns, validation checks, or error-handling mechanisms, etc, already present in the script. Do not suggest improvements or speculate about hypothetical failure points or weaknesses - only call out implemented strategies.
+
+Please briefly yet thoroughly completely describe, evaluate, analyze, explain, the code in terms of only the implemented strategies that do exist to address each of these points:
+
+- Intended Functionality: Explain the intended purpose of the code, including any specific problems it aims to solve or tasks it performs.
+- Logical Flow: Outline the logical flow of the code, including any conditional statements, loops, or functions. Describe what happens step-by-step when it runs. Highlight any decisions (if/case), repetitions (for/while), or function calls.
+- Input-Processing-Output: What inputs does it require/accept? What final results or outputs does it produce?
+
+- Self-explanatory Naming Convention: Do variable/function names clearly describe their purpose (e.g., backup_dir vs bdir)?
+- Commenting: How and how thoroughly are comments used effectively to provide additional context or explanations, without being distractingly verbose? Are there comments explaining why complex operations occur (not just repeating what the code does)?
+
+- Resilience: Different logical paths automatically adapting to changes in the environment or inputs. Error handlers.
+- Robustness: Avoiding less stable program versions, provisions for quick changes to accommodate unstable APIs, programs changing their inputs/outputs with different versions.
+- Versatility: Avoiding special purpose tools, programs, APIs, in favor of general purpose tools, libraries, dependencies.
+- Portability: Programming languages, syntax, programs, dependencies chosen to run on different systems or platforms with minimal if any wrappers, different code paths, different code, or other changes.
+- Compatibility: More widely used instead of less common used programs or other dependencies chosen. Testing for and installing dependencies automatically.
+- Adaptability: Automatically assemble parameters in arrays with some parameters used in different situations?
+- Consistent Machine Readability: Keeping outputs consistently simply formatted if inputs or dependency versions change.
+- Maintainability: Choosing programs, APIs, code structures, numerical methods, with more sophisticated parameters and options so that minor changes to the code can workaround consistency or reliability issues.
+
+
+
+CZXWXcRMTo8EmM8i4d
+}
+
+_here_convert_bash_promptResponse-boilerplate_promptHeader() {
+    cat << 'CZXWXcRMTo8EmM8i4d'
+
+Please invent a self-contained fragment of exemplary well crafted very creative bash shellcode vaguely meeting the description with some, all, or more features, than described. Illustrate modern best practices.
+
+In this case, you may try to meet some plausibly intended goals of the description, ignoring logical inconsistencies or other errors in the description. Details of the description are more guidelines or mere suggestions created without adequate planning, and thus may need to change significantly. Sloppy incorrect pseudocode may have been the basis for an incompetent technical writer creating the description by stating mere guesses about what the code does not do as if fact. Occasionally the description may be incomprehensible gibberish.
+
+Preamble or trailing context may be omitted by truncating to demonstrate the core technique.
+
+
+You may treat this as an exercise and generate an essentially academic example.
+
+You may roleplay, that is pretend,
+to generate a bash shellscript response from a segment of an especially large and sophisticated shell script,
+that would be used with this prompt including the description, as a prompt/response pair,
+to teach an existing AI LLM model such as Llama 3.1 405b with already vast knowledge and logic from its original training,
+to know,
+correct bash shellcode commands and structures,
+from this subsequent fine-tuning using the segmented shell script as a vast set of more completely accurate correct examples.
+
+
+In this case, as a fragment, lines of code needed before and after this code may be missing. All lines of code needed within the middle of the fragment should be present.
+
+Individual bash commands must be useful, complete, accurate, perfected. Within the fragment, individual bash commands must exceed the highest practical standards for robustness, resilience, versatility, portability, compatibility, adaptability to changing inputs, consistent machine readable outputs, maintainability, etc.
+
+Inputs to individual bash commands may be assembled programmatically as arrays and variables to reach such high standards.
+
+
+
+CZXWXcRMTo8EmM8i4d
+}
+
+_here_convert_bash_promptResponse-ask_responseHeader() {
+    cat << 'CZXWXcRMTo8EmM8i4d'
+
+Please output only a brief one sentence statement appropriate to the above similar to 'here is a creative example of bash shellcode that meets the description' . Do not output any other information, statements or code. This is for automated processing, so the one sentence statement will be helpful but any other output will be harmful.
+
+CZXWXcRMTo8EmM8i4d
+}
+
+_here_convert_bash_promptResponse-ask_responseFooter() {
+    cat << 'CZXWXcRMTo8EmM8i4d'
+
+Please output only a thorough complete several sentences to several paragraphs report appropriate to the above similar to:
+
+- 'This code provides a self-contained, creative example of bash shellcode that demonstrates modern best practices.'
+- 'This code demonstrates the following best practices'
+- 'This example includes the following features'
+- 'Note that this script uses ... which is widely available... Please note that you should replace expected ... with actual values...' (preferred if the user must make changes in plausible use cases)
+
+Regardless of any previous instruction avoid jumbling, mashing, or otherwise creating a confusing mix of multiple styles - choose one of the styles and thoroughly completely generate the appropriate report. Preferably generate only one of these styles of report.
+
+Do not output any other statements or code. This is for automated processing, so the report will be helpful but any other output will be harmful.
+
+CZXWXcRMTo8EmM8i4d
+}
+
+
+_here_convert_bash_continuePromptResponse-boilerplate_promptHeader() {
+    cat << 'CZXWXcRMTo8EmM8i4d'
+Continue the example bash shellcode.
+
+CZXWXcRMTo8EmM8i4d
+}
+
+_here_convert_bash_continuePromptResponse-ask_responseHeader() {
+    cat << 'CZXWXcRMTo8EmM8i4d'
+
+Please output only a statement appropriate to the above similar to:
+
+- 'I'll continue the bash shellcode'
+- 'I can continue the bash shellcode for you'
+- 'I can help you continue the bash shellcode'
+- 'here is the continuation of the bash shellcode'
+- 'here is a possible continuation of the script'
+- 'here is the next part'
+- 'it appears you've provided a segment of a Bash script that includes'
+- 'please note that I'll add some comments and improvements to make the code more readable and maintainable'
+
+Slightly longer statements about possible improvements to the next segment of code, if appropriate, are preferred.
+
+Do not output any other suggestions or code. This is for automated processing, so the statement will be helpful but any other output will be harmful.
+
+CZXWXcRMTo8EmM8i4d
+}
+
+_here_convert_bash_continuePromptResponse-ask_responseFooter() {
+    cat << 'CZXWXcRMTo8EmM8i4d'
+
+Please output only a thorough complete several sentences to several paragraphs report appropriate to the above similar to:
+
+- ''
+- 'this appears to be a modified version of the bash shellcode, with additional functionality and checks'
+- 'the code defines several'
+- 'to ensure'
+- 'this continuation appeears to implement a mechanism which can be used'
+- 'checks then decides whether'
+- 'please note this is a continuation of the previous code, and some parts may not make sense on their own'
+- 'some parts of the code seem to be placeholders or debugging statements, so you may need to modify them according to your needs'
+- 'this continuation of the script includes'
+
+Regardless of any previous instruction avoid jumbling, mashing, or otherwise creating a confusing mix of multiple styles - choose appropriate styles and thoroughly completely generate the appropriate report. Preferably generate only one or a few of these styles of report.
+
+Do not output any other statements or code. This is for automated processing, so the report will be helpful but any other output will be harmful.
+
+CZXWXcRMTo8EmM8i4d
+}
+
+
+
+#./ubiquitous_bash.sh _convert_bash ./_local/dataset/ubiquitous_bash
+
+
+
+# ATTENTION: Override with 'ops.sh' or similar if appropriate.
+# ollama binary
+#_convert_bash-backend() {
+    # DANGER: CAUTION: Although this is apparently standard practice for the 'ollama' program, and '/clear', etc, are apparently not interpreted from the input pipe, reliable safe input handling may not be guaranteed
+    #ollama run --verbose Llama-augment
+#}
+# ollama API (localhost)
+_convert_bash-backend() {
+    jq -Rs '{model:"Llama-augment", prompt:., stream: false}' | curl -fsS --max-time 120 -X POST -H "Content-Type: application/json" --data-binary @- http://localhost:11434/api/generate | jq -r '.response'
+}
+# openrouter API
+#_convert_bash-backend() {
+    ##provider: { "order": ["SambaNova", "Fireworks", "Hyperbolic"]
+    ##provider: { "order": ["Lambda", "Fireworks"], "sort": "latency" }
+    ##provider: { "order": ["Fireworks"], "sort": "throughput" }
+    #jq -Rs '{ model: "meta-llama/llama-3.1-405b-instruct", provider: { "order": ["Fireworks"], "sort": "throughput" }, messages: [{"role": "user", "content": .}] }' | curl -fsS --max-time 120 --keepalive-time 300 --compressed --tcp-fastopen --http2 -X POST https://openrouter.ai/api/v1/chat/completions -H "Content-Type: application/json" -H "Authorization: Bearer $OPENROUTER_API_KEY" --data-binary @- | jq -r '.choices[0].message.content'
+#}
+
+# ATTENTION: Override with 'ops.sh' or similar if appropriate.
+_convert_bash-backend-lowLatency() {
+    _convert_bash-backend "$@"
+}
+
+# ATTENTION: Override with 'ops.sh' or similar if appropriate.
+# (ie. usually to change parallelization for high-latency APIs, providers, etc)
+_convert_bash-dispatch() {
+    [[ "$1" == "" ]] && return 1
+    [[ ! -e "$1" ]] && return 1
+    echo 'quick brown fox' | _convert_bash-backend > /dev/null
+    
+    #-s 4096
+    #-P $(nproc)
+    find "$1" -maxdepth 1 -type f ! -iname '*.prompt.txt' ! -iname '*.response.txt' ! -iname '*.continue_prompt.txt' ! -iname '*.continue_response.txt' ! -iname '*.description.txt' -print0 | xargs -0 -x -L 1 -P 1 bash -c '"'"$scriptAbsoluteLocation"'"'' --embed _convert_bash_procedure "$@"' _
+}
+
+
+# "$1" == original file
+# "$2" == backend function (optional)
+# "$safeTmp"/"$inputName".tmp_input.txt
+# "$safeTmp"/"$inputName".tmp_output.txt
+_convert_loop() {
+    rm -f "$safeTmp"/"$inputName".tmp_output.txt
+
+    local currentBackendFunction="$2"
+    [[ "$currentBackendFunction" == "" ]] && currentBackendFunction="_convert_bash-backend"
+
+    local currentIteration=0
+    local currentExitStatus=1
+    while [[ "$currentExitStatus" != "0" ]] && ! [[ -s "$safeTmp"/"$inputName".tmp_output.txt ]] && [[ "$currentIteration" -lt 5 ]]
+    do
+        [[ "$currentIteration" -gt 0 ]] && ( _messagePlain_probe ' retry: '"$1" >&2 ) > /dev/null
+        [[ "$currentIteration" -gt 0 ]] && sleep 7
+        [[ "$currentIteration" -gt 1 ]] && sleep 90
+
+        ( set -o pipefail ; cat "$safeTmp"/"$inputName".tmp_input.txt | "$currentBackendFunction" >> "$safeTmp"/"$inputName".tmp_output.txt )
+        currentExitStatus="$?"
+        sleep 1
+
+        currentIteration=$(( currentIteration + 1 ))
+    done
+}
+
+
+_convert_bash_procedure() {
+    local inputName
+    inputName=$(basename "$1")
+
+
+
+    # ### Creates "$1".prompt.txt .
+    ( _messagePlain_nominal '.prompt.txt: '"$1" >&2 ) > /dev/null
+    rm -f "$1".prompt.txt > /dev/null 2>&1
+
+    # Prompt header (boilerplate, please generate code from description).
+    _here_convert_bash_promptResponse-boilerplate_promptHeader >> "$1".prompt.txt
+
+    # Prompt description (to generate code from).
+    rm -f "$safeTmp"/"$inputName".tmp_input.txt > /dev/null 2>&1
+    rm -f "$safeTmp"/"$inputName".tmp_output.txt > /dev/null 2>&1
+    _here_convert_bash_promptResponse-askDescription > "$safeTmp"/"$inputName".tmp_input.txt
+    echo '```bash' >> "$safeTmp"/"$inputName".tmp_input.txt
+    cat "$1" >> "$safeTmp"/"$inputName".tmp_input.txt
+    echo '```' >> "$safeTmp"/"$inputName".tmp_input.txt
+    _convert_loop "$1"
+    cat "$safeTmp"/"$inputName".tmp_output.txt >> "$1".prompt.txt
+
+
+
+    # ### Creates "$1".response.txt .
+    ( _messagePlain_nominal '.response.txt: '"$1" >&2 ) > /dev/null
+    rm -f "$1".response.txt > /dev/null 2>&1
+    
+    # Response header.
+    rm -f "$safeTmp"/"$inputName".tmp_input.txt > /dev/null 2>&1
+    rm -f "$safeTmp"/"$inputName".tmp_output.txt > /dev/null 2>&1
+    cat "$1".prompt.txt > "$safeTmp"/"$inputName".tmp_input.txt
+    echo '' >> "$safeTmp"/"$inputName".tmp_input.txt
+    echo '```bash' >> "$safeTmp"/"$inputName".tmp_input.txt
+    cat "$1" > "$safeTmp"/"$inputName".tmp_input.txt
+    echo '```' >> "$safeTmp"/"$inputName".tmp_input.txt
+    echo '' >> "$safeTmp"/"$inputName".tmp_input.txt
+    _here_convert_bash_promptResponse-ask_responseHeader >> "$safeTmp"/"$inputName".tmp_input.txt
+    _convert_loop "$1" "_convert_bash-backend-lowLatency"
+    cat "$safeTmp"/"$inputName".tmp_output.txt >> "$1".response.txt
+
+    # Response (ie. original code as example to generate from explanation).
+    #echo '' >> "$1".response.txt
+    echo '```bash' >> "$1".response.txt
+    cat "$1" >> "$1".response.txt
+    echo '```' >> "$1".response.txt
+    #echo '' >> "$1".response.txt
+
+    # Response footer.
+    rm -f "$safeTmp"/"$inputName".tmp_input.txt > /dev/null 2>&1
+    rm -f "$safeTmp"/"$inputName".tmp_output.txt > /dev/null 2>&1
+    cat "$1".prompt.txt > "$safeTmp"/"$inputName".tmp_input.txt
+    echo '' >> "$safeTmp"/"$inputName".tmp_input.txt
+    echo '```bash' >> "$safeTmp"/"$inputName".tmp_input.txt
+    cat "$1" > "$safeTmp"/"$inputName".tmp_input.txt
+    echo '```' >> "$safeTmp"/"$inputName".tmp_input.txt
+    echo '' >> "$safeTmp"/"$inputName".tmp_input.txt
+    _here_convert_bash_promptResponse-ask_responseFooter >> "$safeTmp"/"$inputName".tmp_input.txt
+    _convert_loop "$1" "_convert_bash-backend-lowLatency"
+    cat "$safeTmp"/"$inputName".tmp_output.txt >> "$1".response.txt
+
+
+
+    # ### Creates "$1".continue_prompt.txt .
+    ( _messagePlain_nominal '.continue_prompt.txt: '"$1" >&2 ) > /dev/null
+    rm -f "$1".continue_prompt.txt > /dev/null 2>&1
+
+    # Continue Prompt header (boilerplate, continue the shellcode).
+    _here_convert_bash_continuePromptResponse-boilerplate_promptHeader >> "$1".continue_prompt.txt
+
+    # Continue Prompt (shellcode to continue)
+    #echo >> "$1".continue_prompt.txt
+    echo '```bash' >> "$1".continue_prompt.txt
+    cat "$1" >> "$1".continue_prompt.txt
+    echo '```' >> "$1".continue_prompt.txt
+    #echo >> "$1".continue_prompt.txt
+
+
+
+    # ### Creates "$1".continue_response.txt .
+    ( _messagePlain_nominal '.continue_response.txt: '"$1" >&2 ) > /dev/null
+    rm -f "$1".continue_response.txt > /dev/null 2>&1
+
+    # Continue Response header.
+    rm -f "$safeTmp"/"$inputName".tmp_input.txt > /dev/null 2>&1
+    rm -f "$safeTmp"/"$inputName".tmp_output.txt > /dev/null 2>&1
+    cat "$1".continue_prompt.txt > "$safeTmp"/"$inputName".tmp_input.txt
+    #echo '' >> "$safeTmp"/"$inputName".tmp_input.txt
+    _here_convert_bash_continuePromptResponse-ask_responseHeader >> "$safeTmp"/"$inputName".tmp_input.txt
+    _convert_loop "$1" "_convert_bash-backend-lowLatency"
+    cat "$safeTmp"/"$inputName".tmp_output.txt >> "$1".continue_response.txt
+
+    # Continue Response (segment of original code as example of continuing previous code)
+    #echo >> "$1".continue_response.txt
+    echo '```bash' >> "$1".continue_response.txt
+    cat "$1" >> "$1".continue_response.txt
+    echo '```' >> "$1".continue_response.txt
+    #echo >> "$1".continue_response.txt
+
+    # Continue Response footer.
+    rm -f "$safeTmp"/"$inputName".tmp_input.txt > /dev/null 2>&1
+    rm -f "$safeTmp"/"$inputName".tmp_output.txt > /dev/null 2>&1
+    cat "$1".continue_prompt.txt > "$safeTmp"/"$inputName".tmp_input.txt
+    #echo '' >> "$safeTmp"/"$inputName".tmp_input.txt
+    _here_convert_bash_continuePromptResponse-ask_responseFooter >> "$safeTmp"/"$inputName".tmp_input.txt
+    _convert_loop "$1" "_convert_bash-backend-lowLatency"
+    cat "$safeTmp"/"$inputName".tmp_output.txt >> "$1".continue_response.txt
+
+
+
+    rm -f "$safeTmp"/"$inputName".tmp_input.txt
+    rm -f "$safeTmp"/"$inputName".tmp_output.txt
+}
+_convert_bash_procedure_procedure() {
+    #export -f _convert_bash-backend
+    #export -f _convert_bash-backend-lowLatency
+    #export -f _convert_loop
+
+    #export -f _here_convert_bash_promptResponse-askDescription
+    #export -f _here_convert_bash_promptResponse-boilerplate_promptHeader
+    #export -f _here_convert_bash_promptResponse-ask_responseHeader
+    #export -f _here_convert_bash_promptResponse-ask_responseFooter
+    #export -f _here_convert_bash_continuePromptResponse-boilerplate_promptHeader
+    #export -f _here_convert_bash_continuePromptResponse-ask_responseHeader
+    #export -f _here_convert_bash_continuePromptResponse-ask_responseFooter
+
+    #export -f _convert_bash_procedure
+
+	#export -f "_messagePlain_nominal"
+	#export -f "_color_begin_nominal"
+	#export -f "_color_end"
+	#export -f "_getAbsoluteLocation"
+	#export -f "_realpath_L_s"
+    #export -f "_realpath_L"
+	#export -f "_compat_realpath_run"
+	#export -f "_compat_realpath"
+	#export -f "_messagePlain_probe_var"
+	#export -f "_color_begin_probe"
+	#export -f "_messagePlain_probe"
+
+    local currentDirectory="$1"
+    [[ "$currentDirectory" == "" ]] && currentDirectory="$scriptLocal"/dataset/"$objectName"
+
+    
+    _convert_bash-dispatch "$currentDirectory"
+    sleep 0.1
+
+    ( _messagePlain_probe 'done: _convert_bash ...' >&2 ) > /dev/null
+}
+_convert_bash_sequence() {
+    _start
+
+    _convert_bash_procedure_procedure "$@"
+
+    _stop
+}
+_convert_bash() {
+    "$scriptAbsoluteLocation" _convert_bash_sequence "$@"
+}
+
+
+
+
+
+
+
+_dataset_bash_from_lines() {
+    export current_dataset_totalLines
+    current_dataset_totalLines=$(wc -l < "$corpus_script")
+
+    export current_dataset_functionBounds
+
+    current_dataset_functionBounds=()
+
+    ## ATTRIBUTION-AI: ChatGPT o1-pro  2025-03-30
+    ##local -a current_dataset_functionBounds
+    #mapfile -t current_dataset_functionBounds < <(
+        #grep -nE '^[[:space:]]*(function[[:space:]]+[_[:alnum:]]+|[_[:alnum:]]+\(\))' "$corpus_script" \
+        #| cut -d: -f1
+    #)
+
+    # ATTRIBUTION-AI: ChatGPT 4.5-preview  2025-03-30
+    # ATTRIBUTION-AI: ChatGPT 4.5-preview 2025-04-06
+    mapfile -t current_dataset_functionBounds < <(
+    awk '
+        # Function to check if this line marks a function declaration
+        function is_func(line) {
+            #return line ~ /^[[:space:]]*(function[[:space:]]+[_[:alnum:]]+|[_[:alnum:]]+\(\))/;
+            return line ~ /^[[:space:]]*(function[[:space:]]+[_[:alnum:]-]+|[_[:alnum:]-]+\(\))/;
+        }
+
+        # Store all lines in array "lines"
+        { lines[NR] = $0; }
+
+        # After processing all lines, iterate over them again
+        END {
+            for (i = 1; i <= NR; i++) {
+                if (is_func(lines[i])) {
+                    start_line = i;
+                    # Move upward to collect preceding comment block, stop at empty or non-comment lines
+                    j = i - 1;
+                    while (j > 0 && lines[j] ~ /^[[:space:]]*#/) { j--; }
+                    # Check if there are no empty lines between comment and function
+                    if (j == i-1 || (j < i-1 && lines[j+1] ~ /^[[:space:]]*#/)) {
+                        start_line = j + 1;
+                    }
+                    print start_line;
+                }
+            }
+        }
+    ' "$corpus_script"
+)
+
+    current_dataset_functionBounds+=( "$(( current_dataset_totalLines + 1 ))" )
+}
+
+#./ubiquitous_bash.sh _dataset_bash_from_lines-echo ./metaengine/typical/typical_metaengine_buffer.sh
+#./ubiquitous_bash.sh _dataset_bash_from_lines-echo | sed 's/\ /\n/g' | wc -l
+_dataset_bash_from_lines-echo() {
+    _set_corpus_default "$1"
+
+    _dataset_bash_from_lines
+    echo "${current_dataset_functionBounds[@]}"
+
+    #sleep 3
+    #( echo >&2 ) > /dev/null
+    #( echo "$current_dataset_totalLines" >&2 ) > /dev/null
+}
+
+# Helper: find the line on which the *current* function starts (largest boundary <= X).
+#current_dataset_functionBounds=( # ... ## ... ##### #####)
+# ATTRIBUTION-AI: ChatGPT o1-pro  2025-03-31
+_dataset_bash_from_lines_functionBegin() {
+    local currentLineWanted="$1"
+    local i
+    for (( i=${#current_dataset_functionBounds[@]} - 1; i>=0; i-- )); do
+        if (( current_dataset_functionBounds[i] <= currentLineWanted )); then
+            echo "${current_dataset_functionBounds[i]}"
+            return
+        fi
+    done
+    # Fallback to line 1 if none found
+    echo 1
+}
+
+# Helper: find the last line that belongs to the function containing or just before X
+# i.e., we find the next function boundary > X, then subtract 1.
+#current_dataset_functionBounds=( # ... ## ... ##### #####)
+#current_dataset_totalLines=#####
+# ATTRIBUTION-AI: ChatGPT o1-pro  2025-03-31
+_dataset_bash_from_lines_functionEnd() {
+    local currentLineWanted="$1"
+    local i
+    for (( i=0; i<${#current_dataset_functionBounds[@]}; i++ )); do
+    if (( current_dataset_functionBounds[i] > currentLineWanted )); then
+        echo "$(( current_dataset_functionBounds[i] - 1 ))"
+        return
+    fi
+    done
+    # If none found, end at current_dataset_totalLines
+    echo "$current_dataset_totalLines"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#./ubiquitous_bash.sh _corpus_bash-write "./ubiquitous_bash.sh" ".sh" "ubiquitous_bash" 75 30 "./_local/dataset/ubiquitous_bash"
+
+
+
+# Default chunk should be large enough to usually put at least two functions in a segment, but small enough such that a trailing run-on function does not add enough past the chunk size for the segment to either absolutely exceed a reasonable context window or convert to much to more of a needle-in-haystack problem.
+#
+# Chunk is minimum lines, since ending a segment before the next function is unhelpful.
+#  Segments will be between the function declaration preceeding the 'cursor' to the next function declaration after already adding chunk to the 'cursor' position.
+# More than ~150 lines, ~1k tokens, tends to compound whatever problem an AI LLM is otherwise given into a simultaneous needle-in-haystack problem.
+#  Adequately large datasets may train an AI LLM during earlier epochs on simpler problems sufficiently to reduce the compounded sensitivity with needle-in-haystack problem.
+#  c $(head -n 150 ./ubiquitous_bash.sh | wc -c) / 5
+#  ~1000 (ie. 1k tokens)
+_set_corpus() {
+    export corpus_script=$(_getAbsoluteLocation "$1")
+    [[ "$1" == "" ]] && corpus_script="$scriptAbsoluteLocation"
+    [[ "$corpus_script" == "" ]] && corpus_script="$scriptAbsoluteLocation"
+
+    export corpus_script_name=$(basename "$corpus_script")
+
+
+    export corpus_script_extension="$2"
+    [[ "$corpus_script_extension" == "" ]] && corpus_script_extension=".""${corpus_script_name##*.}"
+    [[ "$corpus_script_extension" == "" ]] && corpus_script_extension=".txt"
+
+    export corpus_script_name=$(basename -s ".""${corpus_script_name##*.}" "$corpus_script")
+
+
+    export corpus_script_object="$3"
+    local corpus_script_folder=$(_getAbsoluteFolder "$corpus_script")
+    [[ "$corpus_script_object" == "" ]] && export corpus_script_object=$(basename "$corpus_script_folder")
+
+
+    export corpus_chunk="$4"
+    [[ "$corpus_chunk" == "" ]] && corpus_chunk=75
+    corpus_chunk=$(( corpus_chunk - 1 ))
+
+
+    export corpus_overlap="$5"
+    [[ "$corpus_overlap" == "" ]] && corpus_overlap=30
+}
+
+_set_corpus_default() {
+    [[ "$corpus_script" != "" ]] && [[ "$corpus_script_extension" != "" ]] && [[ "$corpus_script_name" != "" ]] && [[ "$corpus_script_object" != "" ]] && [[ "$corpus_chunk" != "" ]] && [[ "$corpus_overlap" != "" ]] && return 0
+    _set_corpus "$@"
+}
+
+
+#./ubiquitous_bash.sh _corpus_bash "" "" "" 75 30
+_corpus_bash() {
+    "$scriptAbsoluteLocation" _corpus_bash_sequence "$@"
+}
+_corpus_bash_sequence() {
+    _start
+
+    local current_corpus_script="$1"
+    local current_corpus_script_extension="$2"
+    [[ "$current_corpus_script_extension" == "" ]] && current_corpus_script_extension=".sh"
+    local current_corpus_object="$3"
+    local current_corpus_chunk="$4"
+    local current_corpus_overlap="$5"
+    shift ; shift ; shift ; shift ; shift
+    _set_corpus_default "$current_corpus_script" "$current_corpus_script_extension" "$current_corpus_object" "$current_corpus_chunk" "$current_corpus_overlap" "$@"
+    mkdir -p "$safeTmp"/dataset/corpus/"$corpus_script_object"
+
+    _dataset_from_lines() { _dataset_bash_from_lines "$@" ; }
+    export -f _dataset_from_lines
+    
+    _dataset_from_lines_functionBegin() { _dataset_bash_from_lines_functionBegin "$@" ; }
+    export -f _dataset_from_lines_functionBegin
+
+    _dataset_from_lines_functionEnd() { _dataset_bash_from_lines_functionEnd "$@" ; }
+    export -f _dataset_from_lines_functionEnd
+
+    local corpusSegments=$(_corpus_procedure "$@")
+    #"$safeTmp"/dataset/corpus/"$corpus_script_object"/"$corpus_script_name"."$current_file_iteration""$corpus_script_extension"
+
+    #_corpus_procedure-read "$@"
+
+    _stop
+}
+
+#./ubiquitous_bash.sh _corpus_bash-read "" "" "" 75 30
+_corpus_bash-read() {
+    "$scriptAbsoluteLocation" _corpus_bash_sequence-read "$@"
+}
+_corpus_bash_sequence-read() {
+    _start
+
+    local current_corpus_script="$1"
+    local current_corpus_script_extension="$2"
+    [[ "$current_corpus_script_extension" == "" ]] && current_corpus_script_extension=".sh"
+    local current_corpus_object="$3"
+    local current_corpus_chunk="$4"
+    local current_corpus_overlap="$5"
+    shift ; shift ; shift ; shift ; shift
+    _set_corpus_default "$current_corpus_script" "$current_corpus_script_extension" "$current_corpus_object" "$current_corpus_chunk" "$current_corpus_overlap" "$@"
+    mkdir -p "$safeTmp"/dataset/corpus/"$corpus_script_object"
+
+    _dataset_from_lines() { _dataset_bash_from_lines "$@" ; }
+    export -f _dataset_from_lines
+    
+    _dataset_from_lines_functionBegin() { _dataset_bash_from_lines_functionBegin "$@" ; }
+    export -f _dataset_from_lines_functionBegin
+
+    _dataset_from_lines_functionEnd() { _dataset_bash_from_lines_functionEnd "$@" ; }
+    export -f _dataset_from_lines_functionEnd
+
+    local corpusSegments=$(_corpus_procedure "$@")
+    #"$safeTmp"/dataset/corpus/"$corpus_script_object"/"$corpus_script_name"."$current_file_iteration""$corpus_script_extension"
+    
+    _corpus_procedure-read "$corpusSegments"
+
+    _stop
+}
+
+#./ubiquitous_bash.sh _corpus_bash-write "./ubiquitous_bash.sh" ".sh" "ubiquitous_bash" 75 30 "./_local/dataset/ubiquitous_bash"
+_corpus_bash-write() {
+    "$scriptAbsoluteLocation" _corpus_bash_sequence-write "$@"
+}
+_corpus_bash_sequence-write() {
+    _start
+
+    local current_corpus_script="$1"
+    local current_corpus_script_extension="$2"
+    [[ "$current_corpus_script_extension" == "" ]] && current_corpus_script_extension=".sh"
+    local current_corpus_object="$3"
+    local current_corpus_chunk="$4"
+    local current_corpus_overlap="$5"
+    shift ; shift ; shift ; shift ; shift
+    _set_corpus_default "$current_corpus_script" "$current_corpus_script_extension" "$current_corpus_object" "$current_corpus_chunk" "$current_corpus_overlap" "$@"
+    mkdir -p "$safeTmp"/dataset/corpus/"$corpus_script_object"
+
+    local current_out_dir="$6"
+    [[ "$current_out_dir" == "" ]] && current_out_dir="$scriptLocal"/dataset/"$corpus_script_object"
+    mkdir -p "$current_out_dir"
+
+    _dataset_from_lines() { _dataset_bash_from_lines "$@" ; }
+    export -f _dataset_from_lines
+    
+    _dataset_from_lines_functionBegin() { _dataset_bash_from_lines_functionBegin "$@" ; }
+    export -f _dataset_from_lines_functionBegin
+
+    _dataset_from_lines_functionEnd() { _dataset_bash_from_lines_functionEnd "$@" ; }
+    export -f _dataset_from_lines_functionEnd
+
+    local corpusSegments=$(_corpus_procedure "$@")
+    #"$safeTmp"/dataset/corpus/"$corpus_script_object"/"$corpus_script_name"."$current_file_iteration""$corpus_script_extension"
+    
+    #_corpus_procedure-read "$corpusSegments"
+
+
+    if [[ "$current_out_dir" == "" ]] || [[ "$corpus_script_name" == "" ]] || [[ "$corpus_script_extension" == "" ]]
+    then
+        ( _messageError 'FAIL' >&2 ) > /dev/null
+        _stop 1
+        exit 1
+    fi
+    rm -f "$current_out_dir"/"$corpus_script_name".*"$corpus_script_extension"
+
+    if [[ -e "$current_out_dir"/"$corpus_script_name"."1""$corpus_script_extension" ]]
+    then
+        ( _messagePlain_bad 'FAIL: exists: '"$current_out_dir"/"$corpus_script_name"."1""$corpus_script_extension" >&2 ) > /dev/null
+        ( _messageError 'FAIL' >&2 ) > /dev/null
+        ( _messagePlain_request 'request: delete existing dataset' >&2 ) > /dev/null
+        _stop 1
+    fi
+
+    mv -f "$safeTmp"/dataset/corpus/"$corpus_script_object"/"$corpus_script_name".*"$corpus_script_extension" "$current_out_dir"/
+
+    _stop
+}
+
+
+_corpus_procedure() {
+    _dataset_from_lines
+
+    local current_chunkBegin=1
+    local current_chunkEnd
+    current_chunkEnd=$(( current_chunkBegin + corpus_chunk ))
+
+    local current_segmentBegin=1
+    local current_segmentEnd
+
+    local current_segment_iteration=0
+    while [[ "$current_chunkBegin" -lt "$current_dataset_totalLines" ]]
+    do
+        (( current_segment_iteration++ ))
+
+        current_chunkBegin=$(( current_chunkBegin - corpus_overlap ))
+        [[ "$current_chunkBegin" -lt "$current_segmentBegin" ]] && current_chunkBegin=$(( current_segmentBegin + 1 ))
+        
+        current_chunkEnd=$(( current_chunkBegin + corpus_chunk ))
+        
+        current_segmentBegin=$(_dataset_from_lines_functionBegin "$current_chunkBegin")
+        current_segmentEnd=$(_dataset_from_lines_functionEnd "$current_chunkEnd")
+        [[ "$current_segmentBegin" -gt "$current_segmentEnd" ]] && ( _messageError 'FAIL' >&2 ) > /dev/null && _stop 1
+
+        echo "#===== Segment $current_segment_iteration: ""$corpus_script_object"": ""lines $current_segmentBegin to $current_segmentEnd =====" > "$safeTmp"/dataset/corpus/"$corpus_script_object"/"$corpus_script_name"."$current_segment_iteration""$corpus_script_extension"
+        sed -n "${current_segmentBegin},${current_segmentEnd}p" "$corpus_script" >> "$safeTmp"/dataset/corpus/"$corpus_script_object"/"$corpus_script_name"."$current_segment_iteration""$corpus_script_extension"
+
+        current_chunkBegin=$(( current_segmentEnd + 1 ))
+    done
+
+    echo "$current_segment_iteration"
+
+    return 0
+}
+
+# "$1" == current_segment_iteration
+# "$safeTmp"/dataset/corpus/"$corpus_script_object"/"$corpus_script_name"."$current_file_iteration""$corpus_script_extension"
+_corpus_procedure-read() {
+    local current_segment_iteration="$1"
+    [[ "$current_segment_iteration" == "" ]] && current_segment_iteration=0
+
+    current_file_iteration=1
+    while [[ "$current_file_iteration" -le "$current_segment_iteration" ]]
+    do
+        if [[ ! -e "$safeTmp"/dataset/corpus/"$corpus_script_object"/"$corpus_script_name"."$current_file_iteration""$corpus_script_extension" ]]
+        then
+            ( _messagePlain_bad 'FAIL: missing: '"$safeTmp"/dataset/corpus/"$corpus_script_object"/"$corpus_script_name"."$current_file_iteration""$corpus_script_extension" >&2 ) > /dev/null
+            ( _messageError 'FAIL' >&2 ) > /dev/null
+            _stop 1
+        fi
+        cat "$safeTmp"/dataset/corpus/"$corpus_script_object"/"$corpus_script_name"."$current_file_iteration""$corpus_script_extension"
+        rm -f "$safeTmp"/dataset/corpus/"$corpus_script_object"/"$corpus_script_name"."$current_file_iteration""$corpus_script_extension"
+        (( current_file_iteration++ ))
+    done
+}
+
+
+
+# Cheap way to salvage generated keywords. The alternative is to separate the 'gibberish' from 'keywords' nuisance detection, and subsequently filter only outputs that have 'keywords' nuisance but not 'gibberish' .
+_filter_semanticAssist_nuisance() {
+    grep -v -i 'Here are the relevant keywords for the code' | \
+grep -v -i 'Here are the keywords extracted from the code' | \
+grep -v -i 'Here are the relevant keywords for the features implemented in this code' | \
+grep -v -i 'Here are the keywords for the code' | \
+grep -v -i 'Here are the relevant keywords for each feature' | \
+grep -v -i 'Here are the suggested keywords for each feature implemented in this blockquoted code' | \
+grep -v -i 'Here are the relevant keywords for the given code' | \
+grep -v -i 'Here are the relevant keywords for each functionblock of code' | \
+grep -v -i 'Here are the keywords for features implemented in the code' | \
+grep -v -i 'Here are the keywords for the provided code' | \
+grep -v -i 'Here are the keywords Ive extracted from this code block' | \
+grep -v -i 'Here are the keywords I suggest' | \
+grep -v -i 'Here are the keywords for the features implemented in this code' | \
+grep -v -i 'Here are the keywords that can be added as comments to the code for automated search' | \
+grep -v -i 'Here are the keywords that I suggest' | \
+grep -v -i 'Here are the keywords for the features implemented in this blockquoted code' | \
+grep -v -i 'Here are the keywords for this block of code' | \
+grep -v -i 'Here are the keywords for this code' | \
+grep -v -i 'Here is a suggested list of keywords that can be used to describe this code' | \
+grep -v -i 'Here are the suggested keywords for the provided block of code' | \
+grep -v -i 'Here are the suggested keywords' | \
+grep -v -i 'Here are the relevant keywords' | \
+grep -v -i 'Here are the keywords' | \
+grep -v -i 'Here are the keyword' | \
+grep -v -i 'Keywords'
+}
+
+_here_semanticAssist-askKeywords-ONLY() {
+    cat << 'CZXWXcRMTo8EmM8i4d'
+
+Output only the keywords. Do not output any other text. Since these keywords will be added as comments to code for an automated search to detect relevant files, only the keywords will be helpful, any other output will be unhelpful.
+
+CZXWXcRMTo8EmM8i4d
+}
+
+
+
+
+
+
+_here_semanticAssist-askDescription() {
+    _here_convert_bash_promptResponse-askDescription "$@"
+}
+
+
+# Effective, but too verbose, generating keywords for content only in the description, not in the code.
+#_here_semanticAssist-askKeywords() {
+    #cat << 'CZXWXcRMTo8EmM8i4d'
+
+#Please invent very creative illustrative relevant keywords vaguely reminiscent of the plausibly intended goals and features of these following several lines of code in the context of the previously described codebase. Prefer technical terminology, search terms, etc, keywords. Add plausible synonyms. These keywords will be matched by user queries doing a relevance percentile search for what these lines of code exemplify.
+
+#In this case, you may ignore logical inconsistencies or other errors in the description and code.
+
+#Details of the description are more guidelines or mere suggestions created without adequate planning, and thus may need to change significantly. Sloppy incorrect pseudocode may have been the basis for an incompetent technical writer creating the description by stating mere guesses about what the code does not do as if fact. Occasionally the description may be incomprehensible gibberish.
+
+#You may treat this as an exercise and generate an essentially academic example.
+
+#Only output keywords. Since these keywords will be added as comments to code for an automated search to detect relevant files, only the keywords will be helpful, any other output will be unhelpful.
+
+#CZXWXcRMTo8EmM8i4d
+#}
+
+# DANGER: May generate AI LLM gibberish.
+# ATTENTION: Although 'add synonyms' may be a useful instruction to ensure more reliable keyword matches, semantic search may be a better approach to avoid raising the 'noise floor' on the search with equivalent concepts. Also, 'add synonyms' may cause phrases instead of single-words, with the same disadvantages.
+#  Ideally, the keywords should be rather technical, to convey as much conceptually disparate information as possible to a semantic search.
+_here_semanticAssist-askKeywords() {
+    cat << 'CZXWXcRMTo8EmM8i4d'
+
+For features implemented in the following blockquoted code please suggest relevant keywords. Prefer single-word technical terms, search terms, etc, keywords. These keywords will be matched by user queries doing a relevance percentile search for what these lines of code exemplify.
+
+Preceding description is provided only for context.
+
+Do not discuss incorrectness of the description or incompleteness of the code.
+
+Do not generate keywords for the description, only keywords for features implemented in the code. If the code has few features, provide appropriately fewer keywords. If the code has only a few comments, provide appropriately fewer keywords, including such appropriate keywords as 'comments'.
+
+Only output keywords. Since these keywords will be added as comments to code for an automated search to detect relevant files, only the keywords will be helpful, any other output will be unhelpful. Do not state 'here are the keywords' or similar.
+
+CZXWXcRMTo8EmM8i4d
+}
+
+# CAUTION: DANGER: NOT reliable for all AI LLM models.
+# correct (at least as far as tested)
+#  Llama 3.1 405b INSTRUCT
+#  DeepSeek-R1
+# broken
+#  Llama-4 Scout (unusually often recognizes valid output as gibberish)
+#  Llama 3.1 70b INSTRUCT
+#  Llama-augment
+#  Llama-4 Maverick
+#  DeepSeek-R1 14b
+#  DeepSeek-R1 32b
+#  DeepSeek-R1 Distill Llama 70b
+#  DeepSeek-R1 Distill Llama 8b
+# DANGER: Yes, you read that list correctly. Llama-4 Maverick , Llama 3.1 70b INSTRUCT , have incorrectly failed to recognize gibberish, whereas Llama-4 Scout and Llama 3.1 405b INSTRUCT have recognized gibberish correctly.
+#  Full DeepSeek-R1 is on the list for producing correct gibberish detection, but this relies on REASONING working around the inherent unpredictability of the input generating many extra tokens, which is much slower and much more expensive for a one-word answer with a very short input prompt.
+_here_semanticAssist-askGibberish() {
+    cat << 'CZXWXcRMTo8EmM8i4d'
+
+Should be AI autogenerated keywords here, intended to summarize concept from code for keyword search. Are these valid keywords, or did the AI LLM model apparently begin outputting gibberish?
+
+Keywords 'empty', 'blank', etc, for situations not applicable to search terms, may be valid.
+
+Contradictory keywords such as 'empty', 'blank', 'lack', etc, with 'terminal' and 'codeblock' are gibberish.
+
+Always err on the side of assuming the output is gibberish. Typos and misspellings are gibberish.
+
+If there is a phrase 'here are the keywords for the code', or similar, that is gibberish.
+
+If there is anything a reasonable person might be at least slightly offended by, that is gibberish.
+
+Please only output one word gibberish or valid. Do not output any other statements. Response will be processed automatically, so the one word answer either gibberish or valid will be helpful, any other output will be unhelpful.
+
+CZXWXcRMTo8EmM8i4d
+}
+
+_here_semanticAssist-askPolite() {
+    cat << 'CZXWXcRMTo8EmM8i4d'
+
+Might a reasonable person be at least slightly offended by this preceding text? Output only offended or safe, one word answer is needed for automation, one word offended or safe will be helpful, any other output will be unhelpful.
+
+CZXWXcRMTo8EmM8i4d
+}
+
+
+
+
+
+
+
+
+
+#export distill_projectDir=$(_getAbsoluteLocation ./_local/experiment) ; export distill_distillDir=$(_getAbsoluteLocation ./_local/experiment_distill) ; cp -f ./os/override/override_cygwin.sh ./_local/experiment/override_cygwin.sh ; ./ubiquitous_bash.sh _semanticAssist ./_local/experiment
+
+#./ubiquitous_bash.sh _distill_semanticAssist $(_getAbsoluteLocation ./_local/experiment/override_cygwin.sh) .prompt_description.md $(_getAbsoluteLocation ./_local)/experiment $(_getAbsoluteLocation ./_local)/experiment_distill $(_getAbsoluteLocation ./_local/experiment/override_cygwin.sh)
+# "$1" == origFile (eg. "$1" )
+# "$2" == outputExtension (eg. .special-$(uid).txt )
+# "$3" == projectDir (eg. "$scriptLocal"/knowledge/"$objectName" )
+# "$4" == distillDir (eg. "$scriptLocal"/knowledge_distill/"$objectName" )
+# "$5" == distillFile (eg. "$safeTmp"/"$inputName".special.txt )
+_distill_semanticAssist() {
+    [[ "$3" == "" ]] && return 0
+    [[ "$4" == "" ]] && return 0
+
+    local current_origFile_absoluteLocation=$(_getAbsoluteLocation "$1")
+    local current_origFile_absoluteFolder=$(_getAbsoluteFolder "$1")
+
+    local current_origFile_name=$(basename "$1")
+
+    local current_outputExtension="$2"
+
+    # CAUTION: Obviously these file parameters must be given as absolute locations .
+    local current_projectDir_absoluteLocation="$3"
+    local current_distillDir_absoluteLocation="$4"
+
+    local current_distillFile_absoluteFolder=${current_origFile_absoluteFolder/#$current_projectDir_absoluteLocation/$current_distillDir_absoluteLocation}
+    mkdir -p "$current_distillFile_absoluteFolder"
+
+    local current_distillFile_write_absoluteLocation="$current_distillFile_absoluteFolder"/"$current_origFile_name""$current_outputExtension"
+
+    local current_distillFile_read_absoluteLocation=$(_getAbsoluteLocation "$5")
+
+
+    rm -f "$current_distillFile_write_absoluteLocation" > /dev/null 2>&1
+    cp -f "$current_distillFile_read_absoluteLocation" "$current_distillFile_write_absoluteLocation" > /dev/null 2>&1
+}
+
+
+#./ubiquitous_bash.sh _format_distill_bash-promptResponse semanticAssist-ubiquitous_bash ./_local/experiment_distill
+
+_format_distill_bash-promptResponse() {
+    local current_objectName="$1"
+    [[ -z "$current_objectName" ]] && current_objectName="$objectName"
+
+    local current_directory="$2"
+    [[ -z "$current_directory" ]] && current_directory="$scriptLocal/knowledge_distill/$current_objectName"
+
+    local dataset="$current_directory"
+    local output_file="${current_directory}_finetuning-promptResponse.jsonl"
+
+    rm -f "$output_file" >/dev/null 2>&1
+
+    local segment_file prompt_file response_file prompt completion json_line
+
+    while IFS= read -r -d '' segment_file; do
+        prompt_file="$segment_file"
+
+        if [[ "$prompt_file" == *"prompt.md" ]]
+        then
+            response_file=$(echo "$prompt_file" | sed 's/\prompt\.md$/response.md/')
+            [[ ! -e "$response_file" ]] && response_file=$(echo "$prompt_file" | sed 's/\prompt\.md$/response.txt/')
+        fi
+        
+        if [[ ! -e "$response_file" ]] || [[ ! -e "$prompt_file" ]]
+        then
+            ( _messagePlain_bad "bad: FAIL: missing: prompt/response files: $segment_file" >&2 ) > /dev/null
+            ( _messageError 'FAIL' >&2 ) > /dev/null
+            _stop 1
+            exit 1
+            return 1
+        fi
+
+        prompt=$(<"$prompt_file")
+        completion=$(<"$response_file")
+
+        # Now construct the correct "messages" object as required by OpenAI
+        #--arg system_content "You are an expert assistant that generates exemplary bash scripts according to best practices."
+        json_line=$(jq -cn \
+            --arg user_content "$prompt" \
+            --arg assistant_content "$completion" \
+            --arg system_content "" \
+            '{messages: [
+                {role: "system", content: $system_content},
+                {role: "user", content: $user_content},
+                {role: "assistant", content: $assistant_content}
+            ]}')
+
+        echo "$json_line" >> "$output_file"
+
+    done < <(find "$dataset" -type f -iname '*prompt.md' -print0 | sort -zV)
+
+    echo "JSONL file created successfully: $output_file" >&2
+}
+
+
+
+
+
+
+#export distill_projectDir=$(_getAbsoluteLocation ./_local/experiment) ; export distill_distillDir=$(_getAbsoluteLocation ./_local/experiment_distill) ; mkdir -p ./_local/experiment ; cp -f ./generic/findInfrastructure.sh ./_local/experiment/ ; ./ubiquitous_bash.sh _semanticAssist ./_local/experiment
+
+#export distill_projectDir=$(_getAbsoluteLocation ./_local/experiment) ; export distill_distillDir=$(_getAbsoluteLocation ./_local/experiment_distill) ; mkdir -p ./_local/experiment ; cp -f ./os/override/override_cygwin.sh ./_local/experiment/ ; ./ubiquitous_bash.sh _semanticAssist ./_local/experiment
+
+#export distill_projectDir=$(_getAbsoluteLocation ./_local/experiment) ; export distill_distillDir=$(_getAbsoluteLocation ./_local/experiment_distill) ; mkdir -p ./_local/experiment ; cp -f ./metaengine/typical/typical_metaengine_buffer.sh ./_local/experiment/ ; ./ubiquitous_bash.sh _semanticAssist ./_local/experiment
+
+_semanticAssist_bash_procedure() {
+    [[ "$1" == "" ]] && return 0
+    [[ ! -e "$1" ]] && return 0
+    local inputName=$(basename "$1")
+    local currentFileID=$(_uid)
+
+    # Enable during development to re-generate the semanticAssist comments for the same files repeatedly.
+    ( _messagePlain_nominal 'filter: '"$1" >&2 ) > /dev/null
+    cat "$1" | grep -v '########## semanticAssist:' > "$safeTmp"/"$inputName"-"$currentFileID".filtered.txt
+    mv -f "$safeTmp"/"$inputName"-"$currentFileID".filtered.txt "$1" > /dev/null
+
+
+    if cat "$1" | grep '########## semanticAssist:' > /dev/null 2>&1
+    then
+        ( _messagePlain_nominal 'skip: '"$1" >&2 ) > /dev/null
+        return 0
+    fi
+
+
+    ( _messagePlain_nominal 'boundaries: '"$1" >&2 ) > /dev/null
+    export corpus_script=$(_getAbsoluteLocation "$1")
+    _dataset_bash_from_lines "$1"
+
+
+    ( _messagePlain_nominal 'description: '"$1" >&2 ) > /dev/null
+    rm -f "$safeTmp"/"$inputName"-"$currentFileID".description.txt > /dev/null 2>&1
+    rm -f "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt > /dev/null 2>&1
+    rm -f "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt > /dev/null 2>&1
+    _here_semanticAssist-askDescription >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+    echo '```bash' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+    cat "$1" >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+    echo '```' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+    echo '' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+    _distill_semanticAssist "$1" .description_prompt.md "$distill_projectDir" "$distill_distillDir" "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+    _semanticAssist_loop "$1"
+    cat "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt >> "$safeTmp"/"$inputName"-"$currentFileID".description.txt
+    _distill_semanticAssist "$1" .description_response.md "$distill_projectDir" "$distill_distillDir" "$safeTmp"/"$inputName"-"$currentFileID".description.txt
+
+
+    ( _messagePlain_nominal 'keywords-function-iteration: '"$1" >&2 ) > /dev/null
+    rm -f "$safeTmp"/"$inputName"-"$currentFileID".replacement.sh > /dev/null 2>&1
+    local currentIteration=-1
+    local currentIterationNext=0
+    local currentIterationNextNext=1
+    local currentLineBegin
+    local currentLineEnd
+    local currentLineBegin_next
+    local currentLineEnd_next
+    local currentGibberish
+    local currentIteration_gibberish
+    if [[ "${current_dataset_functionBounds[0]}" == "1" ]] # Skip iterating over 'currentLineBegin=1' case if the next iteration will also begin at 'currentLineBegin=1'.
+    then
+        let currentIteration++
+        let currentIterationNext++
+        let currentIterationNextNext++
+    fi
+    while ( [[ "$currentIteration" == "-1" ]] ) || ( [[ ${current_dataset_functionBounds[$currentIteration]} -lt "$current_dataset_totalLines" ]] && [[ "$currentIteration" -lt 30000 ]] && [[ ${current_dataset_functionBounds[$currentIteration]} != "" ]] ) # ( [[ "${current_dataset_functionBounds[0]}" == "1" ]] && [[ "$currentIteration" == 0 ]] )
+    do
+        currentLineBegin=$(( ${current_dataset_functionBounds[$currentIteration]} ))
+        [[ "$currentIteration" -lt 0 ]] && currentLineBegin=1
+
+        currentLineEnd=$(( ${current_dataset_functionBounds[$currentIterationNext]} - 1 ))
+        ! [[ ${current_dataset_functionBounds[$currentIterationNext]} -lt "$current_dataset_totalLines" ]] && currentLineEnd="$current_dataset_totalLines"
+        
+        currentGibberish=""
+        currentIteration_gibberish=0
+        while [[ "$currentGibberish" != "valid" ]]
+        do
+            currentGibberish=""
+            rm -f "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt > /dev/null 2>&1
+            rm -f "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt > /dev/null 2>&1
+            rm -f "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt > /dev/null 2>&1
+            
+            #echo '```description' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+            cat "$safeTmp"/"$inputName"-"$currentFileID".description.txt >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+            #echo '```' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+            echo '' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+            
+            _here_semanticAssist-askKeywords >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+            
+            echo '```bash' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+            sed -n "${currentLineBegin},${currentLineEnd}p" "$1" >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+            echo '```' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+            echo '' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+            _distill_semanticAssist "$1" .keywords"$currentIterationNext"_functionLine"$currentLineBegin"_prompt.md "$distill_projectDir" "$distill_distillDir" "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+            _semanticAssist_loop "$1" "_semanticAssist_bash-backend-lowLatency"
+            cat "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt | tr ':\n\,;' '\ \ \ \ ' | tr -dc 'a-zA-Z0-9\-_\ ' | _filter_semanticAssist_nuisance | head -c 2500 > "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt
+
+            [[ $(cat "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt | wc -c | tr -dc '0-9') -lt 7 ]] && currentGibberish="deficient"
+
+            if [[ "$currentGibberish" != "deficient" ]]
+            then
+                if [[ "$ai_safety" != "inherent" ]] || [[ "$ai_safety" == "guard" ]]
+                then
+                    ( _messagePlain_probe 'guard: '"$1" >&2 ) > /dev/null
+                    rm -f "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt > /dev/null 2>&1
+                    rm -f "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt > /dev/null 2>&1
+                    echo '' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                    #echo '```keywords' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                    cat "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                    echo '' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                    #echo '```' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                    #echo '' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                    _here_semanticAssist-askPolite >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                    _semanticAssist_loop "$1" "_semanticAssist_bash-backend-lowLatency-special"
+                    [[ "$currentGibberish" != "offended" ]] && [[ "$currentGibberish" != "gibberish" ]] && cat "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt | tr -dc 'a-zA-Z0-9' | grep -i 'safe' > /dev/null 2>&1 && currentGibberish="valid"
+                    cat "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt | tr -dc 'a-zA-Z0-9' | grep -i 'offended' > /dev/null 2>&1 && currentGibberish="offended"
+                fi
+
+                rm -f "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt > /dev/null 2>&1
+                rm -f "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt > /dev/null 2>&1
+                _here_semanticAssist-askGibberish >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                echo '' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                echo '```keywords' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                cat "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                echo '' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                echo '```' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                echo '' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                _semanticAssist_loop "$1" "_semanticAssist_bash-backend-lowLatency-special"
+                [[ "$currentGibberish" != "offended" ]] && [[ "$currentGibberish" != "gibberish" ]] && cat "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt | tr -dc 'a-zA-Z0-9' | grep -i 'valid' > /dev/null 2>&1 && currentGibberish="valid"
+                cat "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt | tr -dc 'a-zA-Z0-9' | grep -i 'gibberish' > /dev/null 2>&1 && currentGibberish="gibberish"
+
+                if [[ "$currentGibberish" == "gibberish" ]]
+                then
+                    _distill_semanticAssist "$1" .gibberish"$currentIteration"_functionLine"$currentLineBegin"_gibberishDetect"$currentIteration_gibberish"_prompt.md "$distill_projectDir" "$distill_distillDir" "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                    _distill_semanticAssist "$1" .gibberish"$currentIteration"_functionLine"$currentLineBegin"_gibberishDetect"$currentIteration_gibberish"_response.md "$distill_projectDir" "$distill_distillDir" "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt
+                fi
+            fi
+
+            if [[ "$currentGibberish" == "deficient" ]]
+            then
+                ( _messagePlain_warn 'warn: deficient: '"$1"': '"$currentLineBegin"':' | tr -d '\n' | cat - "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt >&2 ; echo >&2 ) > /dev/null
+            fi
+            if [[ "$currentGibberish" == "offended" ]]
+            then
+                ( _messagePlain_bad 'bad: offended: '"$1"': '"$currentLineBegin" >&2 ) > /dev/null
+                sleep 2
+            fi
+            if [[ "$currentGibberish" == "gibberish" ]]
+            then
+                ( _messagePlain_warn 'warn: gibberish: '"$1"': '"$currentLineBegin"':' | tr -d '\n' | cat - "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt >&2 ; echo >&2 ) > /dev/null
+            fi
+
+            currentIteration_gibberish=$(( currentIteration_gibberish + 1 ))
+            if [[ "$currentIteration_gibberish" -gt 25 ]]
+            then
+                #( _messageError 'FAIL: gibberish: '"$1": "$currentLineBegin" >&2 ) > /dev/null
+                #return 1
+                #exit 1
+                _messagePlain_bad 'bad: gibberish: '"$1"': '"$currentLineBegin" >&2
+                rm -f "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt > /dev/null 2>&1
+                echo > "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt
+                currentGibberish="valid"
+            fi
+        done
+
+        [[ "$currentGibberish" == "valid" ]] && _distill_semanticAssist "$1" .keywords"$currentIterationNext"_functionLine"$currentLineBegin"_response.md "$distill_projectDir" "$distill_distillDir" "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt
+
+        if [[ "$currentLineBegin" == "1" ]] && head -n1 "$1" | grep '^#!/' > /dev/null 2>&1
+        then
+            head -n1 "$1" >> "$safeTmp"/"$inputName"-"$currentFileID".replacement.sh
+            currentLineBegin=2
+            #currentLineEnd="$currentLineEnd"
+            echo -n '########## semanticAssist: ' >> "$safeTmp"/"$inputName"-"$currentFileID".replacement.sh
+            cat "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt | tr ':\n\,;' '\ \ \ \ ' | tr -dc 'a-zA-Z0-9\-_\ ' | head -c 2500 >> "$safeTmp"/"$inputName"-"$currentFileID".replacement.sh
+            echo '' >> "$safeTmp"/"$inputName"-"$currentFileID".replacement.sh
+            sed -n "${currentLineBegin},${currentLineEnd}p" "$1" >> "$safeTmp"/"$inputName"-"$currentFileID".replacement.sh
+        else
+            echo -n '########## semanticAssist: ' >> "$safeTmp"/"$inputName"-"$currentFileID".replacement.sh
+            cat "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt | tr ':\n\,;' '\ \ \ \ ' | tr -dc 'a-zA-Z0-9\-_\ ' | head -c 2500 >> "$safeTmp"/"$inputName"-"$currentFileID".replacement.sh
+            echo '' >> "$safeTmp"/"$inputName"-"$currentFileID".replacement.sh
+            sed -n "${currentLineBegin},${currentLineEnd}p" "$1" >> "$safeTmp"/"$inputName"-"$currentFileID".replacement.sh
+        fi
+
+        let currentIteration++
+        let currentIterationNext++
+        let currentIterationNextNext++
+    done
+    mv -f "$safeTmp"/"$inputName"-"$currentFileID".replacement.sh "$1" > /dev/null
+
+
+    ( _messagePlain_nominal 'keywords-lines-iteration: '"$1" >&2 ) > /dev/null
+
+    rm -f "$safeTmp"/"$inputName"-"$currentFileID".replacement.sh > /dev/null 2>&1
+    local currentTotalLines=$(wc -l < "$1")
+    # ATTENTION: Suggest advancing ~150lines or ~4000chars before adding next comment.
+    local currentRegionLines_advance=150
+    local currentRegionLines_overlap=100
+    local currentRegionLines=$(( currentRegionLines_advance + currentRegionLines_overlap ))
+    currentLineBegin=1
+    while [[ "$currentLineBegin" -lt "$currentTotalLines" ]]
+    do
+        #currentLineBegin
+        currentLineEnd=$(( currentLineBegin + currentRegionLines_advance - 1))
+        #currentLineEnd=$(( currentLineBegin + currentRegionLines ))
+        [[ "$currentLineEnd" -gt "$currentTotalLines" ]] && currentLineEnd="$currentTotalLines"
+
+        currentGibberish=""
+        currentIteration_gibberish=0
+        while [[ "$currentGibberish" != "valid" ]]
+        do
+            currentGibberish=""
+            rm -f "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt > /dev/null 2>&1
+            rm -f "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt > /dev/null 2>&1
+            rm -f "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt > /dev/null 2>&1
+
+            #echo '```description' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+            cat "$safeTmp"/"$inputName"-"$currentFileID".description.txt >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+            #echo '```' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+            echo '' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+            
+            _here_semanticAssist-askKeywords >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+            
+            echo '```bash' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+            #sed -n "${currentLineBegin},${currentLineEnd}p" "$1" | grep -v '########## semanticAssist:' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+            sed -n "${currentLineBegin},"$(( currentLineBegin + currentRegionLines ))"p" "$1" | grep -v '########## semanticAssist:' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+            echo '```' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+            echo '' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+            _distill_semanticAssist "$1" .keywords"$currentIterationNext"_line"$currentLineBegin"_prompt.md "$distill_projectDir" "$distill_distillDir" "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+            _semanticAssist_loop "$1" "_semanticAssist_bash-backend-lowLatency"
+            cat "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt | tr ':\n\,;' '\ \ \ \ ' | tr -dc 'a-zA-Z0-9\-_\ ' | _filter_semanticAssist_nuisance | head -c 2500 > "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt
+
+            [[ $(cat "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt | wc -c | tr -dc '0-9') -lt 7 ]] && currentGibberish="deficient"
+
+            if [[ "$currentGibberish" != "deficient" ]]
+            then
+                if [[ "$ai_safety" != "inherent" ]] || [[ "$ai_safety" == "guard" ]]
+                then
+                    ( _messagePlain_probe 'guard: '"$1" >&2 ) > /dev/null
+                    rm -f "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt > /dev/null 2>&1
+                    rm -f "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt > /dev/null 2>&1
+                    echo '' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                    #echo '```keywords' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                    cat "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                    echo '' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                    #echo '```' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                    #echo '' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                    _here_semanticAssist-askPolite >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                    _semanticAssist_loop "$1" "_semanticAssist_bash-backend-lowLatency-special"
+                    [[ "$currentGibberish" != "offended" ]] && [[ "$currentGibberish" != "gibberish" ]] && cat "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt | tr -dc 'a-zA-Z0-9' | grep -i 'safe' > /dev/null 2>&1 && currentGibberish="valid"
+                    cat "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt | tr -dc 'a-zA-Z0-9' | grep -i 'offended' > /dev/null 2>&1 && currentGibberish="offended"
+                fi
+
+                rm -f "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt > /dev/null 2>&1
+                rm -f "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt > /dev/null 2>&1
+                _here_semanticAssist-askGibberish >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                echo '' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                echo '```keywords' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                cat "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                echo '' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                echo '```' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                echo '' >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                _semanticAssist_loop "$1" "_semanticAssist_bash-backend-lowLatency-special"
+                [[ "$currentGibberish" != "offended" ]] && [[ "$currentGibberish" != "gibberish" ]] && cat "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt | tr -dc 'a-zA-Z0-9' | grep -i 'valid' > /dev/null 2>&1 && currentGibberish="valid"
+                cat "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt | tr -dc 'a-zA-Z0-9' | grep -i 'gibberish' > /dev/null 2>&1 && currentGibberish="gibberish"
+
+                if [[ "$currentGibberish" == "gibberish" ]]
+                then
+                    _distill_semanticAssist "$1" .gibberish"$currentIteration"_line"$currentLineBegin"_gibberishDetect"$currentIteration_gibberish"_prompt.md "$distill_projectDir" "$distill_distillDir" "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+                    _distill_semanticAssist "$1" .gibberish"$currentIteration"_line"$currentLineBegin"_gibberishDetect"$currentIteration_gibberish"_response.md "$distill_projectDir" "$distill_distillDir" "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt
+                fi
+            fi
+
+            if [[ "$currentGibberish" == "deficient" ]]
+            then
+                ( _messagePlain_warn 'warn: deficient: '"$1"': '"$currentLineBegin"':' | tr -d '\n' | cat - "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt >&2 ; echo >&2 ) > /dev/null
+            fi
+            if [[ "$currentGibberish" == "offended" ]]
+            then
+                ( _messagePlain_bad 'bad: offended: '"$1"': '"$currentLineBegin" >&2 ) > /dev/null
+                sleep 2
+            fi
+            if [[ "$currentGibberish" == "gibberish" ]]
+            then
+                ( _messagePlain_warn 'warn: gibberish: '"$1"': '"$currentLineBegin"':' | tr -d '\n' | cat - "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt >&2 ; echo >&2 ) > /dev/null
+            fi
+
+            currentIteration_gibberish=$(( currentIteration_gibberish + 1 ))
+            if [[ "$currentIteration_gibberish" -gt 25 ]]
+            then
+                #( _messageError 'FAIL: gibberish: '"$1": "$currentLineBegin" >&2 ) > /dev/null
+                #return 1
+                #exit 1
+                rm -f "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt > /dev/null 2>&1
+                echo > "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt
+                currentGibberish="valid"
+            fi
+        done
+
+        [[ "$currentGibberish" == "valid" ]] && _distill_semanticAssist "$1" .keywords"$currentIterationNext"_line"$currentLineBegin"_response.md "$distill_projectDir" "$distill_distillDir" "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt
+
+        if [[ "$currentLineBegin" == "1" ]] && head -n1 "$1" | grep '^#!/' > /dev/null 2>&1
+        then
+            head -n1 "$1" >> "$safeTmp"/"$inputName"-"$currentFileID".replacement.sh
+            currentLineBegin=2
+            #currentLineEnd="$currentLineEnd"
+            echo -n '########## semanticAssist: ' >> "$safeTmp"/"$inputName"-"$currentFileID".replacement.sh
+            cat "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt | tr ':\n\,;' '\ \ \ \ ' | tr -dc 'a-zA-Z0-9\-_\ ' | head -c 2500 >> "$safeTmp"/"$inputName"-"$currentFileID".replacement.sh
+            echo '' >> "$safeTmp"/"$inputName"-"$currentFileID".replacement.sh
+            sed -n "${currentLineBegin},${currentLineEnd}p" "$1" >> "$safeTmp"/"$inputName"-"$currentFileID".replacement.sh
+        else
+            echo -n '########## semanticAssist: ' >> "$safeTmp"/"$inputName"-"$currentFileID".replacement.sh
+            cat "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt | tr ':\n\,;' '\ \ \ \ ' | tr -dc 'a-zA-Z0-9\-_\ ' | head -c 2500 >> "$safeTmp"/"$inputName"-"$currentFileID".replacement.sh
+            echo '' >> "$safeTmp"/"$inputName"-"$currentFileID".replacement.sh
+            sed -n "${currentLineBegin},${currentLineEnd}p" "$1" >> "$safeTmp"/"$inputName"-"$currentFileID".replacement.sh
+        fi
+
+
+        currentLineBegin=$(( currentLineBegin + currentRegionLines_advance ))
+    done
+    mv -f "$safeTmp"/"$inputName"-"$currentFileID".replacement.sh "$1" > /dev/null
+
+
+
+
+
+
+    rm -f "$safeTmp"/"$inputName"-"$currentFileID".keywords.txt > /dev/null 2>&1
+    rm -f "$safeTmp"/"$inputName"-"$currentFileID".replacement.sh > /dev/null 2>&1
+    rm -f "$safeTmp"/"$inputName"-"$currentFileID".description.txt > /dev/null 2>&1
+    rm -f "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt > /dev/null 2>&1
+    rm -f "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt > /dev/null 2>&1
+}
+
+
+
+#./ubiquitous_bash.sh _semanticAssist
+
+
+# ATTENTION: Override with 'ops.sh' or similar if appropriate.
+#export ai_safety="guard"
+##export ai_safety="inherent"
+
+_semanticAssist_bash-backend() {
+   _convert_bash-backend "$@"
+}
+
+_semanticAssist_bash-backend-lowLatency() {
+    _convert_bash-backend-lowLatency "$@"
+}
+
+# ATTENTION: Override with 'ops.sh' or similar if appropriate.
+# CAUTION: DANGER: Keywords generation is more prone to gibberish, special choice of AI LLM model may be required to detect. See documentation for the '_here_semanticAssist-askGibberish' prompt.
+_semanticAssist_bash-backend-lowLatency-special() {
+    _convert_bash-backend-lowLatency "$@"
+
+    ##provider: { "order": ["SambaNova", "Fireworks", "Hyperbolic"]
+    #jq -Rs '{ model: "meta-llama/llama-3.1-405b-instruct", provider: { "order": ["Lambda", "Fireworks"], "sort": "latency" }, messages: [{"role": "user", "content": .}] }' | curl -fsS --max-time 120 --keepalive-time 300 --compressed --tcp-fastopen --http2 -X POST https://openrouter.ai/api/v1/chat/completions -H "Content-Type: application/json" -H "Authorization: Bearer $OPENROUTER_API_KEY" --data-binary @- | jq -r '.choices[0].message.content'
+}
+
+# ATTENTION: Override with 'ops.sh' or similar if appropriate.
+# (ie. usually to change parallelization for high-latency APIs, providers, etc)
+_semanticAssist-dispatch() {
+    [[ "$1" == "" ]] && return 1
+    [[ ! -e "$1" ]] && return 1
+    echo 'quick brown fox' | _semanticAssist_bash-backend > /dev/null
+    
+    #-s 4096
+    #-P $(nproc)
+    find "$1" -type f -name '*.sh' -print0 | xargs -0 -x -L 1 -P 1 bash -c '"'"$scriptAbsoluteLocation"'"'' --embed _semanticAssist_bash_procedure "$@"' _
+}
+
+
+# "$1" == original file
+# "$2" == backend function (optional)
+# "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt
+# "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt
+_semanticAssist_loop() {
+    rm -f "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt
+
+    local currentBackendFunction="$2"
+    [[ "$currentBackendFunction" == "" ]] && currentBackendFunction="_semanticAssist_bash-backend"
+
+    local currentIteration=0
+    local currentExitStatus=1
+    while [[ "$currentExitStatus" != "0" ]] && ! [[ -s "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt ]] && [[ "$currentIteration" -lt 5 ]]
+    do
+        [[ "$currentIteration" -gt 0 ]] && ( _messagePlain_probe ' retry: '"$1" >&2 ) > /dev/null
+        [[ "$currentIteration" -gt 0 ]] && sleep 7
+        [[ "$currentIteration" -gt 1 ]] && sleep 90
+
+        ( set -o pipefail ; cat "$safeTmp"/"$inputName"-"$currentFileID".tmp_input.txt | "$currentBackendFunction" >> "$safeTmp"/"$inputName"-"$currentFileID".tmp_output.txt )
+        currentExitStatus="$?"
+        sleep 1
+
+        currentIteration=$(( currentIteration + 1 ))
+    done
+}
+
+
+_semanticAssist_procedure_procedure() {
+    local currentDirectory="$1"
+    if [[ "$currentDirectory" == "" ]]
+    then
+        currentDirectory="$scriptLocal"/knowledge/"$objectName"
+
+        export distill_projectDir="$scriptLocal"/knowledge/"$objectName"
+        export distill_distillDir="$scriptLocal"/knowledge_distill/"$objectName"
+
+        type _knowledge-"$objectName" > /dev/null 2>&1 && _knowledge-"$objectName"
+        #[[ "$objectName" == "ubiquitous_bash" ]] && _knowledge-ubiquitous_bash
+        _safeRMR "$scriptLocal"/knowledge_distill/"$objectName"
+    fi
+    #[[ "$distill_distillDir" != "" ]] && [[ -e "$distill_distillDir" ]] && _safeRMR "$distill_distillDir"
+
+    currentDirectory=$(_getAbsoluteLocation "$currentDirectory")
+    [[ ! -e "$currentDirectory" ]] && ( _messageError 'FAIL' >&2 ) > /dev/null && return 1
+
+    cd "$scriptLocal"
+    if ! cd "$currentDirectory"
+    then
+        ( _messageError 'FAIL' >&2 ) > /dev/null && return 1
+    fi
+    
+    _semanticAssist-dispatch "$currentDirectory"
+    sleep 0.1
+
+    ( _messagePlain_probe 'done: _semanticAssist ...' >&2 ) > /dev/null
+}
+_semanticAssist_sequence() {
+    _start
+
+    _semanticAssist_procedure_procedure "$@"
+
+    _stop
+}
+_semanticAssist() {
+    "$scriptAbsoluteLocation" _semanticAssist_sequence "$@"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# NOTICE: Strongly recommended to subsequently add autogenerated annotation to improve Retrieval-Augmented-Generation (RAG) with _semanticAssist .
+
+_knowledge-ubDistBuild() {
+    [[ "$objectName" != "ubDistBuild" ]] && _stop 1
+
+    _safeRMR "$scriptLocal"/knowledge/ubDistBuild
+    mkdir -p "$scriptLocal"/knowledge/ubDistBuild
+
+
+    mkdir -p "$scriptLocal"/knowledge/ubDistBuild/_lib/custom
+    cp -r "$scriptAbsoluteFolder"/_lib/custom/ubdist_hardening "$scriptLocal"/knowledge/ubDistBuild/_lib/custom/
+    cp -r "$scriptAbsoluteFolder"/_lib/custom/ubdist_unattended "$scriptLocal"/knowledge/ubDistBuild/_lib/custom/
+
+
+    mkdir -p "$scriptLocal"/knowledge/ubDistBuild/_lib
+    cp -r "$scriptAbsoluteFolder"/_lib/install "$scriptLocal"/knowledge/ubDistBuild/_lib/
+    cp -r "$scriptAbsoluteFolder"/_lib/nsis "$scriptLocal"/knowledge/ubDistBuild/_lib/
+    cp -r "$scriptAbsoluteFolder"/_lib/setup "$scriptLocal"/knowledge/ubDistBuild/_lib/
+
+    cp -r "$scriptAbsoluteFolder"/_lib/_build-staging-ops.sh "$scriptLocal"/knowledge/ubDistBuild/_lib/
+
+    cp -r "$scriptAbsoluteFolder"/_prog "$scriptLocal"/knowledge/ubDistBuild/
+    cp -r "$scriptAbsoluteFolder"/_prog-ops "$scriptLocal"/knowledge/ubDistBuild/
+
+    cp -r "$scriptAbsoluteFolder"/.devops "$scriptLocal"/knowledge/ubDistBuild/
+    cp -r "$scriptAbsoluteFolder"/.github "$scriptLocal"/knowledge/ubDistBuild/
+
+    cp -r "$scriptAbsoluteFolder"/ops "$scriptLocal"/knowledge/ubDistBuild/
+
+    cp -r "$scriptAbsoluteFolder"/license-llama "$scriptLocal"/knowledge/ubDistBuild/
+    cp "$scriptAbsoluteFolder"/Notice.txt "$scriptLocal"/knowledge/ubDistBuild/
+    cp "$scriptAbsoluteFolder"/license.txt "$scriptLocal"/knowledge/ubDistBuild/
+    cp "$scriptAbsoluteFolder"/license-installer.txt "$scriptLocal"/knowledge/ubDistBuild/
+    cp "$scriptAbsoluteFolder"/agpl-3.0.txt "$scriptLocal"/knowledge/ubDistBuild/
+
+    cp "$scriptAbsoluteFolder"/README.sh.out.txt "$scriptLocal"/knowledge/ubDistBuild/
+    cp "$scriptAbsoluteFolder"/README-installer.pdf "$scriptLocal"/knowledge/ubDistBuild/
+    cp "$scriptAbsoluteFolder"/README-live.pdf "$scriptLocal"/knowledge/ubDistBuild/
+}
 
 #https://stackoverflow.com/questions/15432156/display-filename-before-matching-line-grep
 _grepFileLine() {
@@ -60145,6 +62083,8 @@ _init_deps() {
 	export enUb_dev_heavy_atom=""
 	
 	export enUb_generic=""
+
+	export enUb_dev_buildOps=""
 	
 	export enUb_cloud_heavy=""
 	
@@ -60159,15 +62099,24 @@ _init_deps() {
 	export enUb_cloud_self=""
 	export enUb_cloud_build=""
 	export enUb_notLean=""
+	export enUb_github=""
 	export enUb_distro=""
+	export enUb_getMinimal=""
+	export enUb_getMost_special_veracrypt=""
 	export enUb_build=""
 	export enUb_buildBash=""
 	export enUb_os_x11=""
 	export enUb_proxy=""
 	export enUb_proxy_special=""
+	export enUb_serial=""
 	export enUb_fw=""
 	export enUb_clog=""
 	export enUb_x11=""
+	export enUb_researchEngine=""
+	export enUb_ollama=""
+	export enUb_ai_dataset=""
+	export enUb_ai_semanticAssist=""
+	export enUb_ai_knowledge=""
 	export enUb_blockchain=""
 	export enUb_java=""
 	export enUb_image=""
@@ -60176,6 +62125,7 @@ _init_deps() {
 	export enUb_virt_thick=""
 	export enUb_virt_translation=""
 	export enUb_ChRoot=""
+	export enUb_bios=""
 	export enUb_QEMU=""
 	export enUb_vbox=""
 	export enUb_docker=""
@@ -60193,8 +62143,10 @@ _init_deps() {
 	export enUb_synergy=""
 	
 	export enUb_hardware=""
+	export enUb_measurement=""
 	export enUb_enUb_x220t=""
 	export enUb_enUb_w540=""
+	export enUb_enUb_gpd=""
 	export enUb_enUb_peripherial=""
 	
 	export enUb_user=""
@@ -60211,6 +62163,10 @@ _init_deps() {
 	export enUb_haskell=""
 	
 	export enUb_calculators=""
+
+	export enUb_ai_shortcuts=""
+	export enUb_ollama_shortcuts=""
+	export enUb_factory_shortcuts=""
 }
 
 _deps_generic() {
@@ -60372,6 +62328,18 @@ _deps_ai() {
 	_deps_notLean
 	export enUb_researchEngine="true"
 	export enUb_ollama="true"
+}
+_deps_ai_dataset() {
+	_deps_ai
+	_deps_ai_shortcuts
+	export enUb_ai_dataset="true"
+}
+_deps_ai_semanticAssist() {
+	_deps_ai_dataset
+	export enUb_ai_semanticAssist="true"
+}
+_deps_ai_knowledge() {
+	export enUb_ai_knowledge="true"
 }
 
 _deps_blockchain() {
@@ -60595,10 +62563,17 @@ _deps_calculators() {
 	export enUb_calculators="true"
 }
 
-_deps_ai_shortuts() {
+_deps_ai_shortcuts() {
 	_deps_generic
 	
+	export enUb_ai_shortcuts="true"
 	export enUb_ollama_shortcuts="true"
+}
+
+_deps_factory_shortcuts() {
+	_deps_generic
+	
+	export enUb_factory_shortcuts="true"
 }
 
 #placeholder, define under "queue/build"
@@ -61159,7 +63134,14 @@ _compile_bash_deps() {
 		_deps_haskell
 		
 		_deps_ai
-		_deps_ai_shortuts
+		_deps_ai_shortcuts
+
+		#_deps_ai
+		_deps_ai_dataset
+		_deps_ai_semanticAssist
+		_deps_ai_knowledge
+
+		_deps_factory_shortcuts
 		
 		_deps_calculators
 		
@@ -61224,7 +63206,14 @@ _compile_bash_deps() {
 		_deps_haskell
 		
 		_deps_ai
-		_deps_ai_shortuts
+		_deps_ai_shortcuts
+
+		#_deps_ai
+		_deps_ai_dataset
+		_deps_ai_semanticAssist
+		_deps_ai_knowledge
+
+		_deps_factory_shortcuts
 		
 		_deps_calculators
 		
@@ -61248,7 +63237,13 @@ _compile_bash_deps() {
 		_deps_python
 		_deps_haskell
 		
-		_deps_ai_shortuts
+		_deps_ai
+		_deps_ai_shortcuts
+
+		#_deps_ai
+		_deps_ai_dataset
+		_deps_ai_semanticAssist
+		_deps_ai_knowledge
 		
 		_deps_calculators
 		
@@ -61275,7 +63270,13 @@ _compile_bash_deps() {
 		_deps_python
 		_deps_haskell
 		
-		_deps_ai_shortuts
+		_deps_ai
+		_deps_ai_shortcuts
+
+		#_deps_ai
+		_deps_ai_dataset
+		_deps_ai_semanticAssist
+		_deps_ai_knowledge
 		
 		_deps_calculators
 		
@@ -61338,7 +63339,14 @@ _compile_bash_deps() {
 		_deps_haskell
 		
 		_deps_ai
-		_deps_ai_shortuts
+		_deps_ai_shortcuts
+
+		#_deps_ai
+		_deps_ai_dataset
+		_deps_ai_semanticAssist
+		_deps_ai_knowledge
+
+		_deps_factory_shortcuts
 		
 		_deps_calculators
 		
@@ -61443,8 +63451,15 @@ _compile_bash_deps() {
 		_deps_python
 		_deps_haskell
 		
+		_deps_ai
+		_deps_ai_shortcuts
+
 		#_deps_ai
-		_deps_ai_shortuts
+		_deps_ai_dataset
+		_deps_ai_semanticAssist
+		_deps_ai_knowledge
+
+		_deps_factory_shortcuts
 		
 		_deps_calculators
 		
@@ -61506,10 +63521,19 @@ _compile_bash_deps() {
 		return 0
 	fi
 
+	# In practice, 'core' now includes '_deps_ai' by default to support '_deps_ai_dataset' .
 	if [[ "$1" == "core_ai" ]]
 	then
 		_deps_ai
+		_deps_ai_shortcuts
 		_compile_bash_deps 'core'
+
+		#_deps_ai
+		_deps_ai_dataset
+		_deps_ai_semanticAssist
+		_deps_ai_knowledge
+
+		_deps_factory_shortcuts
 	fi
 	
 	if [[ "$1" == "" ]] || [[ "$1" == "ubiquitous_bash" ]] || [[ "$1" == "ubiquitous_bash.sh" ]] || [[ "$1" == "complete" ]]
@@ -61556,7 +63580,14 @@ _compile_bash_deps() {
 		_deps_haskell
 		
 		_deps_ai
-		_deps_ai_shortuts
+		_deps_ai_shortcuts
+
+		#_deps_ai
+		_deps_ai_dataset
+		_deps_ai_semanticAssist
+		_deps_ai_knowledge
+
+		_deps_factory_shortcuts
 		
 		_deps_calculators
 		
@@ -61904,8 +63935,25 @@ _compile_bash_shortcuts() {
 	[[ "$enUb_ollama" == "true" ]] && includeScriptList+=( "ai/ollama"/ollama.sh )
 	
 	( ( [[ "$enUb_dev_heavy" == "true" ]] ) || [[ "$enUb_ollama_shortcuts" == "true" ]] ) && includeScriptList+=( "shortcuts/ai/ollama"/ollama.sh )
+
+	[[ "$enUb_factory_shortcuts" ]] && includeScriptList+=( "shortcuts/factory"/factory.sh )
 	
-	
+
+	[[ "$enUb_ai_dataset" == "true" ]] && includeScriptList+=( "ai/dataset"/format.sh )
+	( [[ "$enUb_ai_dataset" == "true" ]] || [[ "$enUb_ai_shortcuts" == "true" ]] ) && includeScriptList+=( "ai/dataset"/format-special.sh )
+
+	[[ "$enUb_ai_dataset" == "true" ]] && includeScriptList+=( "ai/dataset"/here_convert.sh )
+	[[ "$enUb_ai_dataset" == "true" ]] && includeScriptList+=( "ai/dataset"/convert.sh )
+
+	[[ "$enUb_ai_dataset" == "true" ]] && includeScriptList+=( "ai/dataset"/corpus_bash.sh )
+	[[ "$enUb_ai_dataset" == "true" ]] && includeScriptList+=( "ai/dataset"/corpus.sh )
+
+	[[ "$enUb_ai_semanticAssist" == "true" ]] && includeScriptList+=( "ai/semanticAssist"/here_semanticAssist.sh )
+	[[ "$enUb_ai_semanticAssist" == "true" ]] && includeScriptList+=( "ai/semanticAssist"/distill_semanticAssist.sh )
+	[[ "$enUb_ai_semanticAssist" == "true" ]] && includeScriptList+=( "ai/semanticAssist"/semanticAssist_bash.sh )
+	[[ "$enUb_ai_semanticAssist" == "true" ]] && includeScriptList+=( "ai/semanticAssist"/semanticAssist.sh )
+
+	[[ "$enUb_ai_knowledge" == "true" ]] && includeScriptList+=( "ai"/knowledge.sh )
 	
 	#[[ "$enUb_dev_heavy" == "true" ]] && 
 	includeScriptList+=( "shortcuts/dev"/devsearch.sh )
@@ -62829,6 +64877,12 @@ fi
 # DANGER: Implemented to prevent 'compile.sh' from attempting to run functions from 'ops.sh'. No other valid use currently known or anticipated!
 if [[ "$ub_ops_disable" != 'true' ]]
 then
+	# WARNING: CAUTION: Use sparingly and carefully . Allows a user to globally override functions for all 'ubiquitous_bash' scripts, projects, etc.
+	if [[ -e "$HOME"/_bashrc ]]
+	then
+		. "$HOME"/_bashrc
+	fi
+	
 	#Override functions with external definitions from a separate file if available.
 	#if [[ -e "./ops" ]]
 	#then
