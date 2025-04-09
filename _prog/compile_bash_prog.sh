@@ -143,6 +143,11 @@ _compile_bash_program_prog() {
 
 
 	includeScriptList+=( core-micro.sh )
+
+
+
+
+	includeScriptList+=( knowledge.sh )
 	
 	true
 }
