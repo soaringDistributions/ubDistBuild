@@ -257,6 +257,7 @@ jobs:
       - name: _getMinimal
         shell: bash
         run: |
+          sudo -n apt-get update -y
           if ! sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y gpg pigz curl gdisk lz4 mawk jq gawk build-essential autoconf pkg-config bsdutils findutils patch tar gzip bzip2 sed lua-lpeg axel aria2 gh rsync pv expect libfuse2 debootstrap dos2unix xxd debhelper p7zip btrfs-progs btrfs-compsize zstd zlib1g coreutils util-linux kpartx openssl udev gdisk parted bc e2fsprogs xz-utils libreadline8 squashfs-tools mtools dosfstools fdisk cloud-guest-utils
           then
             exit 1
@@ -353,6 +354,7 @@ jobs:
         timeout-minutes: 120
         run: |
           mkdir -p ./_local
+          sudo -n apt-get update -y
           #sudo -n apt-get -y install jq gh curl coreutils p7zip findutils tar gzip bzip2 sed axel aria2 rsync pv dos2unix xxd util-linux openssl
           sudo -n apt-get -y install jq gh curl coreutils findutils tar gzip bzip2 sed axel aria2 rsync pv dos2unix xxd util-linux
 
@@ -583,7 +585,7 @@ jobs:
           #true
           #! sudo -n apt-get -y clean && exit 1
           #! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
-          #sudo -n apt-get update
+          sudo -n apt-get update -y
           #! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
           #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu24-VBoxManage && exit 1
           sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y xvfb
@@ -1237,7 +1239,7 @@ jobs:
           #true
           #! sudo -n apt-get -y clean && exit 1
           #! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
-          #sudo -n apt-get update
+          sudo -n apt-get update -y
           #! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
           #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu24-VBoxManage && exit 1
           sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y xvfb
@@ -1632,6 +1634,7 @@ jobs:
         timeout-minutes: 120
         run: |
           mkdir -p ./_local
+          sudo -n apt-get update -y
           #sudo -n apt-get -y install jq gh curl coreutils p7zip findutils tar gzip bzip2 sed axel aria2 rsync pv dos2unix xxd util-linux openssl
           sudo -n apt-get -y install jq gh curl coreutils findutils tar gzip bzip2 sed axel aria2 rsync pv dos2unix xxd util-linux
 

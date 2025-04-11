@@ -322,7 +322,7 @@ jobs:
           #true
           #! sudo -n apt-get -y clean && exit 1
           #! ./ubiquitous_bash.sh _getMost_debian11_aptSources && exit 1
-          #sudo -n apt-get update
+          sudo -n apt-get update -y
           #! sudo -n apt-get -d install -y virtualbox-7.0 && exit 1
           #! sudo -n ./ubiquitous_bash.sh _getMost_ubuntu24-VBoxManage && exit 1
           sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --install-recommends -y xvfb
