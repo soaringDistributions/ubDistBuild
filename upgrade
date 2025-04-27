@@ -600,7 +600,7 @@ _upgrade_derive() {
 
 _upgrade_ubDistBuild() {
 	cd "$scriptAbsoluteFolder"
-	if ! git diff-index --quiet HEAD --
+	if ! git diff-index HEAD --
 	then
 		echo 'CONFLICT'
 		exit 1
