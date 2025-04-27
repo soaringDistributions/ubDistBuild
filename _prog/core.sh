@@ -1418,6 +1418,11 @@ _create_ubDistBuild-rotten_install-core() {
 	#_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure ; rmdir WSL2-Linux-Kernel ; git config --global checkout.workers -1 ; git clone --depth 1 --no-checkout "https://github.com/microsoft/WSL2-Linux-Kernel.git"'
 	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure ; rmdir WSL2-Linux-Kernel ; git config --global checkout.workers -1 ; git clone --depth 1 --no-checkout --branch $(git ls-remote --tags https://github.com/microsoft/WSL2-Linux-Kernel.git | cut -f2 | sed "s/refs\/tags\///g" | grep linux-msft-wsl | sort -V -r | head -n1 | tr -dc "a-zA-Z0-9.:\-_") "https://github.com/microsoft/WSL2-Linux-Kernel.git"'
 
+
+
+	_chroot sudo -n -u user bash -c 'cd /home/user/core/installations/huggingface_cli ; chmod 755 ./ubiquitous_bash.sh ; ./ubiquitous_bash.sh _huggingface_cli -h'
+	
+
 	
 	# WARNING: May be untested.
 	# Eventually, a custom function may be necessary. Despite the name, the 'ubuntu-22.04' install script may have a better chance with recent versions of debian.
