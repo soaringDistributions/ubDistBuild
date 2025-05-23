@@ -1400,6 +1400,10 @@ _create_ubDistBuild-rotten_install-core() {
 	_getMost_backend_aptGetInstall yakuake
 	
 	
+	
+	_getMost_backend_aptGetInstall asciinema
+	
+	
 	# Recommend 'pv' , 'stdbuf' , etc, instead, available for both ubdist/OS (ie. UNIX/Linux), as well as Cygwin/MSW .
 	#_getMost_backend_aptGetInstall buffer
 	#_getMost_backend_aptGetInstall mbuffer
