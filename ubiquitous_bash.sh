@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='938522116'
+export ub_setScriptChecksum_contents='3907011704'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -56726,6 +56726,10 @@ _create_ubDistBuild-rotten_install-core() {
 	_getMost_backend_aptGetInstall yakuake
 	
 	
+	
+	_getMost_backend_aptGetInstall asciinema
+	
+	
 	# Recommend 'pv' , 'stdbuf' , etc, instead, available for both ubdist/OS (ie. UNIX/Linux), as well as Cygwin/MSW .
 	#_getMost_backend_aptGetInstall buffer
 	#_getMost_backend_aptGetInstall mbuffer
@@ -56734,6 +56738,11 @@ _create_ubDistBuild-rotten_install-core() {
 	
 	
 	_getMost_backend apt-get -y clean
+
+
+	#codex
+	#claude
+	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistBuild ; chmod 755 ./ubiquitous_bash.sh ; ./ubiquitous_bash.sh _gitBest pull ; chmod 755 ./ubiquitous_bash.sh ; ./ubiquitous_bash.sh _gitBest submodule update --recursive ; ./ubiquitous_bash.sh _setup_codex ; ./ubiquitous_bash.sh _setup_claude_code'
 
 	
 
@@ -59130,6 +59139,8 @@ _refresh_anchors() {
 	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_install_vm-wsl2.bat
 	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_uninstall_vm-wsl2.bat
 	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_install_vm-wsl2-kernel.bat
+	
+	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_install_vm-wsl2-portForward.bat
 
 	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_sshid-import-wsl2.bat
 	cp -a "$scriptAbsoluteFolder"/_anchor.bat "$scriptAbsoluteFolder"/_sshid-export-wsl2.bat
@@ -60927,6 +60938,10 @@ _setup_vm-wsl2_sequence() {
         fi
         rm -rf /cygdrive/c/core/infrastructure/uwsl-h-b-uninstalled
     fi
+
+
+
+    _install_vm-wsl2-portForward ubdist
     
 
 
@@ -61359,6 +61374,24 @@ _install_vm-wsl2-kernel() {
         rm -rf "$currentKernelLocationUNIX"-"$currentPreviousKernelID"
     fi
     return 0
+}
+
+
+
+_install_vm-wsl2-portForward() {
+    if ! wsl -d ubdist echo available | grep available > /dev/null 2>&1
+    then
+        _messagePlain_warn 'warn: _install_vm-wsl2-portForward: wsl: ubdist: missing'
+        #_messageFAIL
+        #_stop 1
+        return 1
+    fi
+
+    _setup_wsl2_procedure-fw
+
+    _setup_wsl2_procedure-portproxy ubdist
+
+    _setup_wsl2_guest-portForward ubdist
 }
 
 

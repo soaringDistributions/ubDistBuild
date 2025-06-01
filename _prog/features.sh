@@ -884,6 +884,14 @@ _install_vm-wsl2-kernel() {
 
 
 _install_vm-wsl2-portForward() {
+    if ! wsl -d ubdist echo available | grep available > /dev/null 2>&1
+    then
+        _messagePlain_warn 'warn: _install_vm-wsl2-portForward: wsl: ubdist: missing'
+        #_messageFAIL
+        #_stop 1
+        return 1
+    fi
+
     _setup_wsl2_procedure-fw
 
     _setup_wsl2_procedure-portproxy ubdist
