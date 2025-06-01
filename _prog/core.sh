@@ -2292,6 +2292,21 @@ _package_ubDistBuild_rootfs() {
 	_set_ubDistBuild
 	
 	rm -f "$scriptLocal"/package_rootfs.tar.flx > /dev/null 2>&1
+
+	
+	cd "$scriptLocal"
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+
+	# If systemctl is usable when 'booting' an instance of 'rootfs', this is usually WSL2, and some services (eg. ollama) could conflict with the host.
+	# Else, if systemctl is not usable, this is usually Docker containers, etc, and such services can be started as needed (ie. _service_ollama_augment ).
+
+	_chroot sudo -n systemctl disable ollama
+	_chroot systemctl disable ollama.service
+	_chroot sudo -n systemctl stop ollama
+	_chroot systemctl stop ollama.service
+
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
 	
 	cd "$scriptLocal"
 	! "$scriptAbsoluteLocation" _openImage && _messagePlain_bad 'fail: _openImage' && _messageFAIL

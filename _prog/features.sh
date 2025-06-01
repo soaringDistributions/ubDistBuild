@@ -318,7 +318,8 @@ _setup_vm-wsl2_sequence() {
     mkdir -p '/cygdrive/c/core/infrastructure/ubdist_wsl'
     _userMSW _messagePlain_probe wsl --import ubdist '/cygdrive/c/core/infrastructure/ubdist_wsl' "$scriptLocal"/package_rootfs.tar --version 2
     _userMSW wsl --import ubdist '/cygdrive/c/core/infrastructure/ubdist_wsl' "$scriptLocal"/package_rootfs.tar --version 2
-
+    wsl -d "ubdist" sudo -n systemctl disable ollama.service
+    wsl -d "ubdist" sudo -n systemctl stop ollama.service
 
     # Preserve fallback and rootfs if automatic test is successful. Expected to suffice for rebuilding 'ubdist' or other dist/OS from an MSW host if necessary.
     if wsl -d "ubdist" /bin/true > /dev/null 2>&1 && ! wsl -d "ubdist" /bin/false > /dev/null 2>&1 && wsl -d ubdist /home/user/ubiquitous_bash.sh _true && ! wsl -d ubdist /home/user/ubiquitous_bash.sh _false
@@ -331,6 +332,8 @@ _setup_vm-wsl2_sequence() {
         mkdir -p '/cygdrive/c/core/infrastructure/ubdist_wsl_fallback'
         _userMSW _messagePlain_probe wsl --import ubdist_fallback '/cygdrive/c/core/infrastructure/ubdist_wsl_fallback' "$scriptLocal"/package_rootfs.tar --version 2
         _userMSW wsl --import ubdist_fallback '/cygdrive/c/core/infrastructure/ubdist_wsl_fallback' "$scriptLocal"/package_rootfs.tar --version 2
+        wsl -d "ubdist_fallback" sudo -n systemctl disable ollama.service
+        wsl -d "ubdist_fallback" sudo -n systemctl stop ollama.service
 
         if wsl -d "ubdist" /bin/true > /dev/null 2>&1 && ! wsl -d "ubdist" /bin/false > /dev/null 2>&1 && wsl -d ubdist /home/user/ubiquitous_bash.sh _true && ! wsl -d ubdist /home/user/ubiquitous_bash.sh _false
         then
@@ -445,6 +448,11 @@ _setup_vm-wsl2_sequence() {
     fi
 
 
+    wsl -d "ubdist" sudo -n systemctl disable ollama.service
+    wsl -d "ubdist" sudo -n systemctl stop ollama.service
+    wsl -d "ubdist_fallback" sudo -n systemctl disable ollama.service
+    wsl -d "ubdist_fallback" sudo -n systemctl stop ollama.service
+    
 
     _install_vm-wsl2-portForward ubdist
     
