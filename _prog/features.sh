@@ -443,6 +443,10 @@ _setup_vm-wsl2_sequence() {
         fi
         rm -rf /cygdrive/c/core/infrastructure/uwsl-h-b-uninstalled
     fi
+
+
+
+    _install_vm-wsl2-portForward ubdist
     
 
 
@@ -875,6 +879,16 @@ _install_vm-wsl2-kernel() {
         rm -rf "$currentKernelLocationUNIX"-"$currentPreviousKernelID"
     fi
     return 0
+}
+
+
+
+_install_vm-wsl2-portForward() {
+    _setup_wsl2_procedure-fw
+
+    _setup_wsl2_procedure-portproxy ubdist
+
+    _setup_wsl2_guest-portForward ubdist
 }
 
 
