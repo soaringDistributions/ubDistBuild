@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1192242702'
+export ub_setScriptChecksum_contents='2435906616'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -678,9 +678,10 @@ fi
 # ATTENTION: Workaround - Cygwin Portable - append MSW PATH if reasonable.
 # NOTICE: Also see '_test-shell-cygwin' .
 # MSWEXTPATH lengths up to 33, 38, are known reasonable values.
+# As of 2025-05-20 , a development system, VSCode PowerShell terminal, has been known to impose 45 such lines on MSWEXTPATH , other PowerShell terminal imposed 41 such lines. Limit of 44 lines at the time was exceeded.
 if [[ "$MSWEXTPATH" != "" ]] && ( [[ "$PATH" == *"/cygdrive"* ]] || [[ "$PATH" == "/cygdrive"* ]] ) && [[ "$convertedMSWEXTPATH" == "" ]] && _if_cygwin
 then
-	if [[ $(echo "$MSWEXTPATH" | grep -o ';\|:' | wc -l | tr -dc '0-9') -le 44 ]] && [[ $(echo "$PATH" | grep -o ':' | wc -l | tr -dc '0-9') -le 44 ]]
+	if [[ $(echo "$MSWEXTPATH" | grep -o ';\|:' | wc -l | tr -dc '0-9') -le 60 ]] && [[ $(echo "$PATH" | grep -o ':' | wc -l | tr -dc '0-9') -le 60 ]]
 	then
 		export convertedMSWEXTPATH=$(cygpath -p "$MSWEXTPATH")
 		export PATH=/usr/bin:"$convertedMSWEXTPATH":"$PATH"
@@ -1026,6 +1027,8 @@ then
 	#}
 	#alias l='_wsl'
 	alias u='_wsl'
+
+	alias codex='wsl -d ubdist codex'
 fi
 	
 _sudo_cygwin-if_parameter-skip2() {
@@ -1213,6 +1216,11 @@ _powershell() {
     [[ "$currentPowershellBinary" == "" ]] && currentPowershellBinary=$(find /cygdrive/d/Windows/System32/WindowsPowerShell/ -name powershell.exe 2>/dev/null | head -n 1)
     [[ "$currentPowershellBinary" == "" ]] && currentPowershellBinary=$(find /cygdrive/e/Windows/System32/WindowsPowerShell/ -name powershell.exe 2>/dev/null | head -n 1)
     [[ "$currentPowershellBinary" == "" ]] && currentPowershellBinary=$(find /cygdrive/f/Windows/System32/WindowsPowerShell/ -name powershell.exe 2>/dev/null | head -n 1)
+	
+    [[ "$currentPowershellBinary" == "" ]] && currentPowershellBinary=$(find /mnt/c/Windows/System32/WindowsPowerShell/ -name powershell.exe 2>/dev/null | head -n 1)
+    [[ "$currentPowershellBinary" == "" ]] && currentPowershellBinary=$(find /mnt/d/Windows/System32/WindowsPowerShell/ -name powershell.exe 2>/dev/null | head -n 1)
+    [[ "$currentPowershellBinary" == "" ]] && currentPowershellBinary=$(find /mnt/e/Windows/System32/WindowsPowerShell/ -name powershell.exe 2>/dev/null | head -n 1)
+    [[ "$currentPowershellBinary" == "" ]] && currentPowershellBinary=$(find /mnt/f/Windows/System32/WindowsPowerShell/ -name powershell.exe 2>/dev/null | head -n 1)
 
 	#_userMSW "$currentPowershellBinary" "$@"
     "$currentPowershellBinary" "$@"
@@ -1565,6 +1573,7 @@ _setup_ubiquitousBash_cygwin_procedure_root() {
 }
 
 _setup_ubiquitousBash_cygwin_procedure() {
+	#/cygdrive/c/q/p/zCore/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _setupUbiquitous
 	[[ "$scriptAbsoluteFolder" != '/cygdrive'* ]] && _stop 1
 	
 	_messagePlain_nominal 'init: _setup_ubiquitousBash_cygwin'
@@ -1997,7 +2006,7 @@ _mitigate-ubcp_rewrite_sequence() {
 	# https://serverfault.com/questions/193319/a-better-unix-find-with-parallel-processing
 	# https://stackoverflow.com/questions/11003418/calling-shell-functions-with-xargs
 	export -f "_mitigate-ubcp_rewrite_parallel"
-	find "$2" -type l -print0 | xargs -0 -x -s 4096 -L 6 -P $(nproc) bash -c '_mitigate-ubcp_rewrite_parallel "$@"' _
+	find "$2" -type l -print0 | xargs -0 -x -s 3072 -L 6 -P $(nproc) bash -c '_mitigate-ubcp_rewrite_parallel "$@"' _
 	#find "$2" -type l -print0 | xargs -0 -n 1 -P 4 -I {} bash -c '_mitigate-ubcp_rewrite_parallel "$@"' _ {}
 	#find "$2" -type l -print0 | xargs -0 -n 1 -P 4 -I {} bash -c '_mitigate-ubcp_rewrite_procedure "$@"' _ {}
 	
@@ -2189,6 +2198,18 @@ _package-cygwin() {
 _if_wsl() {
     uname -a | grep -i 'microsoft' > /dev/null 2>&1 || uname -a | grep -i 'WSL2' > /dev/null 2>&1
 }
+
+if [[ "$WSL_DISTRO_NAME" != "" ]] && _if_wsl
+then
+    
+    # WARNING: CAUTION: Adding some native MSWindows programs from MSWindows path (eg. python) may cause conflicts with native WSL/Linux equivalent programs, etc.
+    
+    # NOTICE: Native ubdist/OS, WSL/Linux, etc, equivalent, is 'xdg-open', etc .
+    #! type explorer > /dev/null 2>&1 && [[ -e /mnt/c/Windows/System32/explorer.exe ]] && explorer() { /mnt/c/Windows/System32/explorer.exe "$@"; }
+    ! type explorer > /dev/null 2>&1 && [[ -e /mnt/c/Windows/explorer.exe ]] && explorer() { /mnt/c/Windows/explorer.exe "$@"; }
+    #! type explorer > /dev/null 2>&1 && [[ -e /mnt/d/Windows/System32/explorer.exe ]] && explorer() { /mnt/d/Windows/System32/explorer.exe "$@"; }
+    ! type explorer > /dev/null 2>&1 && [[ -e /mnt/d/Windows/explorer.exe ]] && explorer() { /mnt/d/Windows/explorer.exe "$@"; }
+fi
 
 
 
@@ -3232,9 +3253,9 @@ _terminateAll_procedure() {
 	while read -r currentPID
 	do
 		pkill -P "$currentPID"
-		sudo -n pkill -P "$currentPID"
+		! _if_cygwin && sudo -n pkill -P "$currentPID"
 		kill "$currentPID"
-		sudo -n kill "$currentPID"
+		! _if_cygwin && sudo -n kill "$currentPID"
 	done < "$processListFile"
 	
 	if [[ "$ub_kill" == "true" ]]
@@ -3243,9 +3264,9 @@ _terminateAll_procedure() {
 		while read -r currentPID
 		do
 			pkill -KILL -P "$currentPID"
-			sudo -n pkill -KILL -P "$currentPID"
+			! _if_cygwin && sudo -n pkill -KILL -P "$currentPID"
 			kill -KILL "$currentPID"
-			sudo -n kill -KILL "$currentPID"
+			! _if_cygwin && sudo -n kill -KILL "$currentPID"
 		done < "$processListFile"
 	fi
 	
@@ -6463,6 +6484,8 @@ _init_deps() {
 	export enUb_generic=""
 
 	export enUb_dev_buildOps=""
+
+	export enUb_dev_ai=""
 	
 	export enUb_cloud_heavy=""
 	
@@ -6481,6 +6504,7 @@ _init_deps() {
 	export enUb_distro=""
 	export enUb_getMinimal=""
 	export enUb_getMost_special_veracrypt=""
+	export enUb_getMost_special_npm=""
 	export enUb_build=""
 	export enUb_buildBash=""
 	export enUb_os_x11=""
@@ -6547,7 +6571,11 @@ _init_deps() {
 
 	export enUb_ai_shortcuts=""
 	export enUb_ollama_shortcuts=""
+	export enUb_ai_augment=""
 	export enUb_factory_shortcuts=""
+	export enUb_factory_shortcuts_ops=""
+
+	export enUb_server=""
 }
 
 _deps_generic() {
@@ -6575,6 +6603,10 @@ _deps_dev_buildOps() {
 	_deps_generic
 	
 	export enUb_dev_buildOps="true"
+}
+
+_deps_dev_ai() {
+	export enUb_dev_ai="true"
 }
 
 _deps_cloud_heavy() {
@@ -6652,6 +6684,10 @@ _deps_distro() {
 
 _deps_getMinimal() {
 	export enUb_getMinimal="true"
+}
+
+_deps_get_npm() {
+	export enUb_getMost_special_npm="true"
 }
 
 _deps_getVeracrypt() {
@@ -6955,15 +6991,38 @@ _deps_calculators() {
 
 _deps_ai_shortcuts() {
 	_deps_generic
+
+	_deps_ai
 	
 	export enUb_ai_shortcuts="true"
 	export enUb_ollama_shortcuts="true"
+}
+_deps_ai_augment() {
+	_deps_ai_shortcuts
+
+	export enUb_ai_augment="true"
 }
 
 _deps_factory_shortcuts() {
 	_deps_generic
 	
 	export enUb_factory_shortcuts="true"
+}
+_deps_factory_shortcuts_ops() {
+	_deps_generic
+	
+	export enUb_factory_shortcuts_ops="true"
+}
+
+_deps_server() {
+	_deps_generic
+
+	_deps_fw
+
+	_deps_factory_shortcuts
+	_deps_factory_shortcuts_ops
+	
+	export enUb_server="true"
 }
 
 #placeholder, define under "queue/build"
@@ -7456,6 +7515,8 @@ _compile_bash_deps() {
 	
 	if [[ "$1" == "lean" ]]
 	then
+		_deps_dev_ai
+		
 		_deps_dev_buildOps
 		
 		#_deps_git
@@ -7478,6 +7539,8 @@ _compile_bash_deps() {
 	# Specifically intended to be imported into user profile.
 	if [[ "$1" == "ubcore" ]]
 	then
+		_deps_dev_ai
+		
 		_deps_dev_buildOps
 		
 		_deps_notLean
@@ -7513,6 +7576,7 @@ _compile_bash_deps() {
 		
 		_deps_distro
 		_deps_getMinimal
+		_deps_get_npm
 		_deps_getVeracrypt
 		_deps_linux
 		
@@ -7529,6 +7593,7 @@ _compile_bash_deps() {
 		
 		_deps_ai
 		_deps_ai_shortcuts
+		_deps_ai_augment
 
 		#_deps_ai
 		_deps_ai_dataset
@@ -7536,6 +7601,9 @@ _compile_bash_deps() {
 		_deps_ai_knowledge
 
 		_deps_factory_shortcuts
+		_deps_factory_shortcuts_ops
+
+		_deps_server
 		
 		_deps_calculators
 		
@@ -7591,6 +7659,8 @@ _compile_bash_deps() {
 	
 	if [[ "$1" == "processor" ]]
 	then
+		_deps_dev_ai
+		
 		_deps_dev
 		_deps_dev_buildOps
 		
@@ -7601,6 +7671,7 @@ _compile_bash_deps() {
 		
 		_deps_ai
 		_deps_ai_shortcuts
+		_deps_ai_augment
 
 		#_deps_ai
 		_deps_ai_dataset
@@ -7608,6 +7679,8 @@ _compile_bash_deps() {
 		_deps_ai_knowledge
 
 		_deps_factory_shortcuts
+
+		_deps_server
 		
 		_deps_calculators
 		
@@ -7627,6 +7700,8 @@ _compile_bash_deps() {
 	
 	if [[ "$1" == "abstract" ]] || [[ "$1" == "abstractfs" ]]
 	then
+		_deps_dev_ai
+		
 		_deps_dev
 		_deps_dev_buildOps
 		
@@ -7635,6 +7710,7 @@ _compile_bash_deps() {
 		
 		_deps_ai
 		_deps_ai_shortcuts
+		_deps_ai_augment
 
 		#_deps_ai
 		_deps_ai_dataset
@@ -7662,6 +7738,8 @@ _compile_bash_deps() {
 	# Beware most uses of fakehome will benefit from full virtualization fallback.
 	if [[ "$1" == "fakehome" ]]
 	then
+		_deps_dev_ai
+		
 		_deps_dev
 		_deps_dev_buildOps
 		
@@ -7670,6 +7748,7 @@ _compile_bash_deps() {
 		
 		_deps_ai
 		_deps_ai_shortcuts
+		_deps_ai_augment
 
 		#_deps_ai
 		_deps_ai_dataset
@@ -7697,6 +7776,8 @@ _compile_bash_deps() {
 	
 	if [[ "$1" == "monolithic" ]]
 	then
+		_deps_dev_ai
+		
 		_deps_dev_heavy
 		#_deps_dev_heavy_atom
 		_deps_dev
@@ -7742,6 +7823,7 @@ _compile_bash_deps() {
 		
 		_deps_ai
 		_deps_ai_shortcuts
+		_deps_ai_augment
 
 		#_deps_ai
 		_deps_ai_dataset
@@ -7749,6 +7831,8 @@ _compile_bash_deps() {
 		_deps_ai_knowledge
 
 		_deps_factory_shortcuts
+
+		_deps_server
 		
 		_deps_calculators
 		
@@ -7771,6 +7855,7 @@ _compile_bash_deps() {
 		
 		_deps_distro
 		_deps_getMinimal
+		_deps_get_npm
 		_deps_getVeracrypt
 		
 		#_deps_blockchain
@@ -7812,6 +7897,8 @@ _compile_bash_deps() {
 	
 	if [[ "$1" == "core" ]]
 	then
+		_deps_dev_ai
+		
 		_deps_dev_heavy
 		#_deps_dev_heavy_atom
 		_deps_dev
@@ -7857,6 +7944,7 @@ _compile_bash_deps() {
 		
 		_deps_ai
 		_deps_ai_shortcuts
+		_deps_ai_augment
 
 		#_deps_ai
 		_deps_ai_dataset
@@ -7864,6 +7952,8 @@ _compile_bash_deps() {
 		_deps_ai_knowledge
 
 		_deps_factory_shortcuts
+
+		_deps_server
 		
 		_deps_calculators
 		
@@ -7886,6 +7976,7 @@ _compile_bash_deps() {
 		
 		_deps_distro
 		_deps_getMinimal
+		_deps_get_npm
 		_deps_getVeracrypt
 		
 		#_deps_blockchain
@@ -7928,10 +8019,13 @@ _compile_bash_deps() {
 	# In practice, 'core' now includes '_deps_ai' by default to support '_deps_ai_dataset' .
 	if [[ "$1" == "core_ai" ]]
 	then
+		_deps_dev_ai
+		
 		_deps_virtPython
 		
 		_deps_ai
 		_deps_ai_shortcuts
+		_deps_ai_augment
 		_compile_bash_deps 'core'
 
 		#_deps_ai
@@ -7940,10 +8034,14 @@ _compile_bash_deps() {
 		_deps_ai_knowledge
 
 		_deps_factory_shortcuts
+
+		_deps_server
 	fi
 	
 	if [[ "$1" == "" ]] || [[ "$1" == "ubiquitous_bash" ]] || [[ "$1" == "ubiquitous_bash.sh" ]] || [[ "$1" == "complete" ]]
 	then
+		_deps_dev_ai
+		
 		_deps_dev_heavy
 		#_deps_dev_heavy_atom
 		_deps_dev
@@ -7989,6 +8087,7 @@ _compile_bash_deps() {
 		
 		_deps_ai
 		_deps_ai_shortcuts
+		_deps_ai_augment
 
 		#_deps_ai
 		_deps_ai_dataset
@@ -7996,6 +8095,9 @@ _compile_bash_deps() {
 		_deps_ai_knowledge
 
 		_deps_factory_shortcuts
+		_deps_factory_shortcuts_ops
+
+		_deps_server
 		
 		_deps_calculators
 		
@@ -8018,6 +8120,7 @@ _compile_bash_deps() {
 		
 		_deps_distro
 		_deps_getMinimal
+		_deps_get_npm
 		_deps_getVeracrypt
 		
 		_deps_blockchain
@@ -8204,6 +8307,8 @@ _compile_bash_utilities() {
 	( [[ "$enUb_notLean" == "true" ]] || [[ "$enUb_getMinimal" == "true" ]] ) && includeScriptList+=( "os/distro/unix/openssl"/splice_openssl.sh )
 	
 	( [[ "$enUb_notLean" == "true" ]] || [[ "$enUb_getMinimal" == "true" ]] ) && includeScriptList+=( "os/distro"/getMost_special_zWorkarounds.sh )
+
+	( [[ "$enUb_notLean" == "true" ]] || [[ "$enUb_getMinimal" == "true" ]] || [[ "$enUb_getMost_special_npm" == "true" ]] ) && includeScriptList+=( "os/distro"/getMost_special_npm.sh )
 	
 	( [[ "$enUb_notLean" == "true" ]] || [[ "$enUb_getMinimal" == "true" ]] || [[ "$enUb_getMost_special_veracrypt" == "true" ]] ) && includeScriptList+=( "os/distro"/getMost_special_veracrypt.sh )
 	
@@ -8348,7 +8453,10 @@ _compile_bash_shortcuts() {
 	[[ "$enUb_ollama" == "true" ]] && includeScriptList+=( "ai/ollama"/ollama.sh )
 	
 	( ( [[ "$enUb_dev_heavy" == "true" ]] ) || [[ "$enUb_ollama_shortcuts" == "true" ]] ) && includeScriptList+=( "shortcuts/ai/ollama"/ollama.sh )
+	
+	( ( [[ "$enUb_dev_heavy" == "true" ]] ) || [[ "$enUb_ai_augment" == "true" ]] ) && includeScriptList+=( "shortcuts/ai/augment"/augment.sh )
 
+	[[ "$enUb_factory_shortcuts" ]] && includeScriptList+=( "shortcuts/factory"/factoryCreate_here.sh )
 	[[ "$enUb_factory_shortcuts" ]] && includeScriptList+=( "shortcuts/factory"/factoryCreate.sh )
 	[[ "$enUb_factory_shortcuts" ]] && includeScriptList+=( "shortcuts/factory"/factory.sh )
 	
@@ -8424,6 +8532,10 @@ _compile_bash_shortcuts() {
 	
 	( [[ "$enUb_dev_heavy" == "true" ]] || [[ "$enUb_search" == "true" ]] ) && includeScriptList+=( "shortcuts/dev/app/search"/search.sh )
 	( [[ "$enUb_dev_heavy" == "true" ]] || [[ "$enUb_search" == "true" ]] ) && includeScriptList+=( "shortcuts/dev/app/search/recoll"/recoll.sh )
+	
+	
+	( [[ "$enUb_dev_ai" == "true" ]] ) && includeScriptList+=( "shortcuts/dev/ai"/claude_code.sh )
+	( [[ "$enUb_dev_ai" == "true" ]] ) && includeScriptList+=( "shortcuts/dev/ai"/codex.sh )
 	
 	
 	( [[ "$enUb_cloud_heavy" == "true" ]] || [[ "$enUb_cloud" == "true" ]] ) && includeScriptList+=( "shortcuts/cloud/self/screenScraper"/screenScraper-nix.sh )
@@ -8509,6 +8621,11 @@ _compile_bash_shortcuts() {
 	[[ "$enUb_linux" == "true" ]] && includeScriptList+=( "shortcuts/linux"/kernelConfig_platform.sh )
 	
 	[[ "$enUb_linux" == "true" ]] && includeScriptList+=( "shortcuts/linux"/bfq.sh )
+
+	
+	[[ "$enUb_server" ]] && includeScriptList+=( "server"/coordinatorWorker.sh )
+
+	[[ "$enUb_server" ]] && includeScriptList+=( "server"/wireguard.sh )
 }
 
 _compile_bash_shortcuts_setup() {
@@ -8703,6 +8820,8 @@ _compile_bash_selfHost() {
 
 _compile_bash_overrides() {
 	export includeScriptList
+	
+	[[ "$enUb_factory_shortcuts_ops" ]] && includeScriptList+=( "shortcuts/factory"/factory-ops.sh )
 	
 	[[ "$enUb_dev_buildOps" == "true" ]] && includeScriptList+=( "build/zSpecial"/build-ops.sh )
 	
@@ -9422,6 +9541,22 @@ _bash() {
 	[[ "$ub_scope_name" != "" ]] && _scopePrompt
 	
 	_safe_declare_uid
+
+
+	## CAUTION: Usually STUPID AND DANGEROUS . No production use. Exclusively for 'ubiquitous_bash' itself development.
+	## Proper use of embedded scripts, '--embed', etc, is provided by the '_scope' functions, etc, intended for such purposes in almost all cases.
+	##
+	## WARNING: May be untested. May break 'python', 'bash', 'octave', etc. May break any '.bashrc', '.ubcorerc', python hooks, other hooks, etc. May break '_setupUbiquitous'.
+	## Bad idea. Very specialized. Broken inheritance.
+	##
+	## No known use.
+	## Functions, etc, are NOT inherited by bash terminal from script.
+	##
+	#if [[ "$1" == "--norc" ]] && [[ "$2" == "-i" ]] && [[ "$scriptAbsoluteLocation" == *"ubcore.sh" ]]
+	#then
+		#bash "$@"
+		#return
+	#fi
 	
 	
 	[[ "$1" == '-i' ]] && shift

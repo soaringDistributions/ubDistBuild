@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3907011704'
+export ub_setScriptChecksum_contents='1131744211'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -678,9 +678,10 @@ fi
 # ATTENTION: Workaround - Cygwin Portable - append MSW PATH if reasonable.
 # NOTICE: Also see '_test-shell-cygwin' .
 # MSWEXTPATH lengths up to 33, 38, are known reasonable values.
+# As of 2025-05-20 , a development system, VSCode PowerShell terminal, has been known to impose 45 such lines on MSWEXTPATH , other PowerShell terminal imposed 41 such lines. Limit of 44 lines at the time was exceeded.
 if [[ "$MSWEXTPATH" != "" ]] && ( [[ "$PATH" == *"/cygdrive"* ]] || [[ "$PATH" == "/cygdrive"* ]] ) && [[ "$convertedMSWEXTPATH" == "" ]] && _if_cygwin
 then
-	if [[ $(echo "$MSWEXTPATH" | grep -o ';\|:' | wc -l | tr -dc '0-9') -le 44 ]] && [[ $(echo "$PATH" | grep -o ':' | wc -l | tr -dc '0-9') -le 44 ]]
+	if [[ $(echo "$MSWEXTPATH" | grep -o ';\|:' | wc -l | tr -dc '0-9') -le 60 ]] && [[ $(echo "$PATH" | grep -o ':' | wc -l | tr -dc '0-9') -le 60 ]]
 	then
 		export convertedMSWEXTPATH=$(cygpath -p "$MSWEXTPATH")
 		export PATH=/usr/bin:"$convertedMSWEXTPATH":"$PATH"
@@ -1026,6 +1027,8 @@ then
 	#}
 	#alias l='_wsl'
 	alias u='_wsl'
+
+	alias codex='wsl -d ubdist codex'
 fi
 	
 _sudo_cygwin-if_parameter-skip2() {
@@ -1213,6 +1216,11 @@ _powershell() {
     [[ "$currentPowershellBinary" == "" ]] && currentPowershellBinary=$(find /cygdrive/d/Windows/System32/WindowsPowerShell/ -name powershell.exe 2>/dev/null | head -n 1)
     [[ "$currentPowershellBinary" == "" ]] && currentPowershellBinary=$(find /cygdrive/e/Windows/System32/WindowsPowerShell/ -name powershell.exe 2>/dev/null | head -n 1)
     [[ "$currentPowershellBinary" == "" ]] && currentPowershellBinary=$(find /cygdrive/f/Windows/System32/WindowsPowerShell/ -name powershell.exe 2>/dev/null | head -n 1)
+	
+    [[ "$currentPowershellBinary" == "" ]] && currentPowershellBinary=$(find /mnt/c/Windows/System32/WindowsPowerShell/ -name powershell.exe 2>/dev/null | head -n 1)
+    [[ "$currentPowershellBinary" == "" ]] && currentPowershellBinary=$(find /mnt/d/Windows/System32/WindowsPowerShell/ -name powershell.exe 2>/dev/null | head -n 1)
+    [[ "$currentPowershellBinary" == "" ]] && currentPowershellBinary=$(find /mnt/e/Windows/System32/WindowsPowerShell/ -name powershell.exe 2>/dev/null | head -n 1)
+    [[ "$currentPowershellBinary" == "" ]] && currentPowershellBinary=$(find /mnt/f/Windows/System32/WindowsPowerShell/ -name powershell.exe 2>/dev/null | head -n 1)
 
 	#_userMSW "$currentPowershellBinary" "$@"
     "$currentPowershellBinary" "$@"
@@ -1565,6 +1573,7 @@ _setup_ubiquitousBash_cygwin_procedure_root() {
 }
 
 _setup_ubiquitousBash_cygwin_procedure() {
+	#/cygdrive/c/q/p/zCore/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _setupUbiquitous
 	[[ "$scriptAbsoluteFolder" != '/cygdrive'* ]] && _stop 1
 	
 	_messagePlain_nominal 'init: _setup_ubiquitousBash_cygwin'
@@ -1997,7 +2006,7 @@ _mitigate-ubcp_rewrite_sequence() {
 	# https://serverfault.com/questions/193319/a-better-unix-find-with-parallel-processing
 	# https://stackoverflow.com/questions/11003418/calling-shell-functions-with-xargs
 	export -f "_mitigate-ubcp_rewrite_parallel"
-	find "$2" -type l -print0 | xargs -0 -x -s 4096 -L 6 -P $(nproc) bash -c '_mitigate-ubcp_rewrite_parallel "$@"' _
+	find "$2" -type l -print0 | xargs -0 -x -s 3072 -L 6 -P $(nproc) bash -c '_mitigate-ubcp_rewrite_parallel "$@"' _
 	#find "$2" -type l -print0 | xargs -0 -n 1 -P 4 -I {} bash -c '_mitigate-ubcp_rewrite_parallel "$@"' _ {}
 	#find "$2" -type l -print0 | xargs -0 -n 1 -P 4 -I {} bash -c '_mitigate-ubcp_rewrite_procedure "$@"' _ {}
 	
@@ -2189,6 +2198,18 @@ _package-cygwin() {
 _if_wsl() {
     uname -a | grep -i 'microsoft' > /dev/null 2>&1 || uname -a | grep -i 'WSL2' > /dev/null 2>&1
 }
+
+if [[ "$WSL_DISTRO_NAME" != "" ]] && _if_wsl
+then
+    
+    # WARNING: CAUTION: Adding some native MSWindows programs from MSWindows path (eg. python) may cause conflicts with native WSL/Linux equivalent programs, etc.
+    
+    # NOTICE: Native ubdist/OS, WSL/Linux, etc, equivalent, is 'xdg-open', etc .
+    #! type explorer > /dev/null 2>&1 && [[ -e /mnt/c/Windows/System32/explorer.exe ]] && explorer() { /mnt/c/Windows/System32/explorer.exe "$@"; }
+    ! type explorer > /dev/null 2>&1 && [[ -e /mnt/c/Windows/explorer.exe ]] && explorer() { /mnt/c/Windows/explorer.exe "$@"; }
+    #! type explorer > /dev/null 2>&1 && [[ -e /mnt/d/Windows/System32/explorer.exe ]] && explorer() { /mnt/d/Windows/System32/explorer.exe "$@"; }
+    ! type explorer > /dev/null 2>&1 && [[ -e /mnt/d/Windows/explorer.exe ]] && explorer() { /mnt/d/Windows/explorer.exe "$@"; }
+fi
 
 
 
@@ -3232,9 +3253,9 @@ _terminateAll_procedure() {
 	while read -r currentPID
 	do
 		pkill -P "$currentPID"
-		sudo -n pkill -P "$currentPID"
+		! _if_cygwin && sudo -n pkill -P "$currentPID"
 		kill "$currentPID"
-		sudo -n kill "$currentPID"
+		! _if_cygwin && sudo -n kill "$currentPID"
 	done < "$processListFile"
 	
 	if [[ "$ub_kill" == "true" ]]
@@ -3243,9 +3264,9 @@ _terminateAll_procedure() {
 		while read -r currentPID
 		do
 			pkill -KILL -P "$currentPID"
-			sudo -n pkill -KILL -P "$currentPID"
+			! _if_cygwin && sudo -n pkill -KILL -P "$currentPID"
 			kill -KILL "$currentPID"
-			sudo -n kill -KILL "$currentPID"
+			! _if_cygwin && sudo -n kill -KILL "$currentPID"
 		done < "$processListFile"
 	fi
 	
@@ -11528,6 +11549,7 @@ _getMost_debian11_install() {
 
 	_getMost_backend_aptGetInstall bup
 	
+	# ATTENTION: WSL2 distribution instances may also need 'socat' for internal network port forwarding.
 	_getMost_backend_aptGetInstall bc autossh nmap socat sockstat rsync net-tools
 	_getMost_backend_aptGetInstall bc nmap autossh socat sshfs tor
 	_getMost_backend_aptGetInstall sockstat
@@ -13597,6 +13619,31 @@ _get_workarounds() {
 	_get_workarounds_ghostscript_policyXML_write "$@"
 	
 	
+}
+
+
+
+
+
+# https://github.com/nodesource/distributions?tab=readme-ov-file#debian-versions
+#codex
+#claude
+_get_npm() {
+    _mustGetSudo
+
+    ##sudo -n env DEBIAN_FRONTEND=noninteractive apt-get install -y curl
+    _getDep curl
+
+    #sudo -n curl -fsSL https://deb.nodesource.com/setup_23.x -o /nodesource_setup.sh
+    #sudo -n bash /nodesource_setup.sh
+    sudo -n curl -fsSL https://deb.nodesource.com/setup_23.x -o - | sudo -n bash
+
+    sudo -n env DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs
+
+
+    #sudo -n npm install -g @openai/codex
+    ##npm install -g @anthropic-ai/claude-code
+    #sudo -n npm install -g @anthropic-ai/claude-code
 }
 
 
@@ -25554,10 +25601,274 @@ _write_wslconfig() {
     ! _if_cygwin && _messagePlain_bad 'fail: Cygwin/MSW only' && return 1
     if _if_cygwin
     then
+        [[ -e /cygdrive/c/Windows/System32 ]] && _here_wsl_config "$1" > /cygdrive/c/Windows/System32/config/systemprofile/.wslconfig
+        [[ -e /cygdrive/c/Windows/ServiceProfiles/LocalService ]] && _here_wsl_config "$1" > /cygdrive/c/Windows/ServiceProfiles/LocalService/.wslconfig
         _here_wsl_config "$1" > "$USERPROFILE"/.wslconfig
         return
     fi
 }
+
+
+
+
+
+
+_setup_wsl2_guest-portForward() {
+    _messagePlain_nominal 'setup: guest: portForward'
+
+    local current_wsldist
+    current_wsldist="$1"
+    [[ "$current_wsldist" == "" ]] && current_wsldist="ubdist"
+
+    echo "$current_wsldist"
+
+    local current_wsl_scriptAbsoluteLocation
+    current_wsl_scriptAbsoluteLocation=$(cygpath -m "$scriptAbsoluteLocation")
+    current_wsl_scriptAbsoluteLocation=$(wsl -d "$current_wsldist" wslpath "$current_wsl_scriptAbsoluteLocation")
+
+    _messagePlain_probe '_getDep socat'
+    wsl -d "$current_wsldist" "$current_wsl_scriptAbsoluteLocation" _getDep socat
+
+    # ATTRIBUTION-AI: ChatGPT o3  2025-06-01  (partially)
+
+
+    _messagePlain_probe 'write: /usr/local/bin/hostport-proxy.sh'
+    cat << 'CZXWXcRMTo8EmM8i4d' | wsl -d "$current_wsldist" sudo -n tee /usr/local/bin/hostport-proxy.sh > /dev/null
+#!/usr/bin/env bash
+set -euo pipefail
+
+PORT=${PORT:-11434}               # default; override in the service if you like
+HOST_IP_FILE="/net-hostip"
+
+while true; do
+  # Bail out quickly if the helper file doesn't exist (yet)
+  [[ -r "$HOST_IP_FILE" ]] || { sleep 2; continue; }
+
+  HOST_IP=$(<"$HOST_IP_FILE")
+  [[ -n "$HOST_IP" ]] || { sleep 2; continue; }
+
+  echo "$(date '+%F %T') 127.0.0.1:$PORT → $HOST_IP:$PORT"
+  # --fork lets a single socat instance serve many clients in parallel
+  socat TCP-LISTEN:"$PORT",fork,reuseaddr TCP4:"$HOST_IP":"$PORT" || true
+  # If socat exits (network flap, etc.) loop and start again
+  sleep 1
+done
+CZXWXcRMTo8EmM8i4d
+    wsl -d "$current_wsldist" sudo -n chmod +x /usr/local/bin/hostport-proxy.sh
+    #wsl -d "$current_wsldist" sudo -n cat /usr/local/bin/hostport-proxy.sh
+
+
+    #_messagePlain_probe 'write: /etc/wsl.conf'
+    # "$current_wsldist" /etc/wsl.conf already enables systemd by default
+    #_here_wsl_conf
+    #printf "[boot]\nsystemd=true\n" | sudo tee /etc/wsl.conf
+    ## then from Windows:
+    #wsl --shutdown <your-distro>
+
+
+    _messagePlain_probe 'write: /etc/systemd/system/hostport-proxy.service'
+    cat << 'CZXWXcRMTo8EmM8i4d' | wsl -d "$current_wsldist" sudo -n tee /etc/systemd/system/hostport-proxy.service > /dev/null
+[Unit]
+Description=Forward 127.0.0.1:11434 to Windows host (WSL2)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+Environment=PORT=11434      # edit or duplicate the unit to forward more ports
+ExecStart=/usr/local/bin/hostport-proxy.sh
+Restart=always
+RestartSec=1
+
+# Hardening (optional but nice)
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+
+CZXWXcRMTo8EmM8i4d
+    #wsl -d "$current_wsldist" sudo -n cat /etc/systemd/system/hostport-proxy.service
+
+    _messagePlain_probe 'systemctl'
+    wsl -d "$current_wsldist" sudo -n systemctl daemon-reload
+    wsl -d "$current_wsldist" sudo -n systemctl enable --now hostport-proxy.service
+
+    wsl -d "$current_wsldist" sudo -n systemctl restart hostport-proxy.service
+
+}
+
+
+
+
+
+
+
+
+
+
+
+_setup_wsl2_procedure-fw() {
+    _messagePlain_nominal 'setup: write: fw'
+
+    #_powershell
+    #powershell
+    #powershell.exe
+    
+    # ATTRIBUTION-AI: ChatGPT o3 Deep Research  2025-06-01
+    cat << 'CZXWXcRMTo8EmM8i4d' > /dev/null 2>&1
+New-NetFirewallRule -Name "AllowWSL2-11434" -DisplayName "Allow WSL2 Port 11434 (TCP)" `
+    -Description "Allows inbound TCP port 11434 from WSL2 virtual network only (for NAT port proxy)" `
+    -Protocol TCP -Direction Inbound -Action Allow -LocalPort 11434 `
+    -InterfaceAlias "vEthernet (WSL)"
+CZXWXcRMTo8EmM8i4d
+
+    # ATTRIBUTION-AI: Llama 3.1 Nemotron Ultra 253b v1  2025-06-01  (translation from PowerShell interactive terminal to powershell command call under Cygwin/MSW bash shell)
+    # ATTENTION: Not all of these named interfaces usually exist. Cosmetic errors usually occur.
+    powershell -Command "New-NetFirewallRule -Name 'AllowWSL2-11434 - vEthernet (WSL (Hyper-V firewall))' -DisplayName 'Allow WSL2 Port 11434 (TCP) - vEthernet (WSL (Hyper-V firewall))' -Description 'Allows inbound TCP port 11434 from WSL2 virtual network only (for NAT port proxy)' -Protocol TCP -Direction Inbound -Action Allow -LocalPort 11434 -InterfaceAlias 'vEthernet (WSL (Hyper-V firewall))'"
+    powershell -Command "New-NetFirewallRule -Name 'AllowWSL2-11434 - vEthernet (Default Switch)' -DisplayName 'Allow WSL2 Port 11434 (TCP) - vEthernet (Default Switch)' -Description 'Allows inbound TCP port 11434 from WSL2 virtual network only (for NAT port proxy)' -Protocol TCP -Direction Inbound -Action Allow -LocalPort 11434 -InterfaceAlias 'vEthernet (Default Switch)'"
+    powershell -Command "New-NetFirewallRule -Name 'AllowWSL2-11434 - vEthernet (WSL)' -DisplayName 'Allow WSL2 Port 11434 (TCP) - vEthernet (WSL)' -Description 'Allows inbound TCP port 11434 from WSL2 virtual network only (for NAT port proxy)' -Protocol TCP -Direction Inbound -Action Allow -LocalPort 11434 -InterfaceAlias 'vEthernet (WSL)'"
+}
+
+# ATTENTION: NOTICE: Add to 'startup' of MSWindows host, etc, if necessary.
+_setup_wsl2_procedure-portproxy() {
+    _messagePlain_nominal 'setup: write: portproxy'
+
+    local current_wsldist
+    current_wsldist="$1"
+    [[ "$current_wsldist" == "" ]] && current_wsldist="ubdist"
+
+    echo "$current_wsldist"
+
+    wsl -d "$current_wsldist" -u root -- sh -c "rm -f /net-hostip"
+
+    # ATTRIBUTION-AI: Llama 3.1 Nemotron Ultra 253b v1  2025-06-01
+    powershell.exe -Command - <<CZXWXcRMTo8EmM8i4d
+    # ATTRIBUTION-AI: ChatGPT o3 Deep Research  2025-06-01  (partially)
+    # Ensure running as Admin for registry and netsh access if needed.
+    # Step 1: Try reading WSL NAT info from registry (requires recent WSL).
+    \$wslKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Lxss'
+    try {
+        \$reg = Get-ItemProperty -Path \$wslKey -ErrorAction Stop
+        \$HostIP = \$reg.NatGatewayIpAddress
+    } catch {
+        \$HostIP = \$null
+    }
+
+    # Step 2: If not found in registry, use WSL to query the default gateway.
+    if (-not \$HostIP) {
+        try {
+            \$routeInfo = wsl -e sh -c "ip route show default 2>/dev/null || route -n"
+        } catch {
+            \$routeInfo = ""
+        }
+        if (\$routeInfo) {
+            if (\$routeInfo -match 'default via\s+([0-9\.]+)') {
+                \$HostIP = \$Matches[1]
+            } elseif (\$routeInfo -match '0\.0\.0\.0\s+0\.0\.0\.0\s+([0-9\.]+)') {
+                \$HostIP = \$Matches[1]
+            }
+        }
+    }
+
+    # Step 3: If still not found, fall back to scanning network adapters.
+    if (-not \$HostIP) {
+        \$allIPs = Get-NetIPAddress -AddressFamily IPv4 | Where-Object { 
+            \$_.IPAddress -notlike '127.*' -and \$_.IPAddress -notlike '169.254*' 
+        }
+        \$wslAdapterIP = \$allIPs | Where-Object { \$_.InterfaceAlias -match 'WSL' } | Select-Object -First 1
+        if (\$wslAdapterIP) {
+            \$HostIP = \$wslAdapterIP.IPAddress
+        } else {
+            \$defSwitchIP = \$allIPs | Where-Object { \$_.InterfaceAlias -match 'Default Switch' } | Select-Object -First 1
+            if (\$defSwitchIP) {
+                \$HostIP = \$defSwitchIP.IPAddress
+            } else {
+                \$hvAdapters = Get-NetAdapter | Where-Object { 
+                    \$_.InterfaceDescription -like '*Hyper-V Virtual Ethernet*' -and \$_.Status -eq 'Up' 
+                }
+                foreach (\$adapter in \$hvAdapters) {
+                    \$ip = \$allIPs | Where-Object { 
+                        \$_.InterfaceIndex -eq \$adapter.InterfaceIndex -and 
+                        \$_.IPAddress -match '^(10\.|172\.(1[6-9]|2\d|3[0-1])\.|192\.168\.)' 
+                    }
+                    if (\$ip) {
+                        \$HostIP = \$ip.IPAddress
+                        break
+                    }
+                }
+            }
+        }
+    }
+
+    # Step 4: Output result or error.
+    if (\$HostIP) {
+        Write-Output \$HostIP
+    } else {
+        Write-Error "WSL2 host IP could not be determined. Ensure WSL2 is installed and running (NAT mode)."
+    }
+
+    
+    #netsh interface portproxy delete v4tov4 listenport=11434
+    #netsh interface portproxy delete v4tov4 listenport=11434 listenaddress=\$HostIP
+    #netsh interface portproxy add v4tov4 listenaddress=\$HostIP listenport=11434 connectaddress=127.0.0.1 connectport=11434
+    #sc query iphlpsvc
+    #sc start iphlpsvc
+    #netsh interface portproxy show v4tov4
+
+
+    # ATTRIBUTION-AI: ChatGPT o3  2025-06-01
+    # --- Native tools -------------------------------------------------
+    \$netsh = "\$env:SystemRoot\System32\netsh.exe"   # avoids “nets” typo
+    \$sc    = "\$env:SystemRoot\System32\sc.exe"      # avoids Set-Content alias
+
+    # make sure the helper service is running
+    & \$sc   query iphlpsvc
+    & \$sc   start iphlpsvc
+
+    \$delArgs = @(
+    'interface','portproxy','delete','v4tov4',
+    "listenaddress=\$HostIP",
+    'listenport=11434'
+    )
+    & \$netsh  @delArgs  2>\$null   # suppress harmless “not found”
+
+    # (re-)create the port-proxy rule
+    \$addArgs = @(
+    'interface','portproxy','add','v4tov4',
+    "listenaddress=\$HostIP",
+    'listenport=11434',
+    'connectaddress=127.0.0.1',
+    'connectport=11434'
+    )
+    & \$netsh  @addArgs          # ← “@” splats the array as arguments
+
+    # show the table so you can verify
+    & \$netsh  interface portproxy show v4tov4
+
+
+
+    # ATTRIBUTION-AI: Llama 3.1 Nemotron Ultra 253b v1  2025-06-01
+    # Step 5: Output result or error.
+    if (\$HostIP) {
+        #Write-Output \$HostIP
+        # Write \$HostIP to /net-hostip in WSL
+        wsl -d "$current_wsldist" -u root -- sh -c "echo '\$(\$HostIP)' > /net-hostip"
+    } else {
+        wsl -d "$current_wsldist" -u root -- sh -c "echo '...' > /net-hostip"
+    }
+
+CZXWXcRMTo8EmM8i4d
+
+    sleep 3
+}
+
+
+
+
+
 
 
 
@@ -25619,6 +25930,10 @@ _setup_wsl2_procedure() {
     
     sleep 5
     wsl --set-default-version 2
+
+    sleep 5
+    _setup_wsl2_procedure-fw
+    _setup_wsl2_procedure-portproxy
 }
 _setup_wsl2() {
     "$scriptAbsoluteLocation" _setup_wsl2_procedure "$@"
@@ -25636,9 +25951,14 @@ _setup_wsl() {
 
 
 _here_wsl_config() {
+# ATTENTION: If nested virtualization configuration is necessary (ie. the apparently now default 'nestedVirtualization=true' directive is somehow not already in effect), this may be a better place for that directive (normally writing a '.wslconfig' file).
+#[wsl2]
+#nestedVirtualization=true
     cat << 'CZXWXcRMTo8EmM8i4d'
 [wsl2]
 memory=999GB
+kernelCommandLine = "sysctl.net.core.bpf_jit_harden=1"
+
 CZXWXcRMTo8EmM8i4d
 
     if [[ -e /cygdrive/c/core/infrastructure/ubdist-kernel/ubdist-kernel ]] && [[ "$1" != "ub_ignore_kernel_wsl" ]]
@@ -25651,6 +25971,9 @@ CZXWXcRMTo8EmM8i4d
 
 
 _here_wsl_conf() {
+# ATTENTION: Directive for nested virtualization may have moved to being more appropriate for a host '.wslconfig' file than a guest '/etc/wsl.conf' file .
+#[wsl2]
+#nestedVirtualization=true
     cat << 'CZXWXcRMTo8EmM8i4d'
 
 [boot]
@@ -25659,9 +25982,6 @@ command = /bin/bash -c 'systemctl stop sddm ; rm -f /root/_rootGrab.sh ; usermod
 
 [user]
 default = user
-
-[wsl2]
-nestedVirtualization=true
 
 [automount]
 options = "metadata"
@@ -26068,6 +26388,27 @@ _visualPrompt() {
 	currentHostname="$HOSTNAME"
 	
 	[[ -e /etc/hostname ]] && export currentHostname=$(cat /etc/hostname)
+
+	local currentHostname_concatenate
+
+	[[ "$RUNPOD_POD_ID" != "" ]] && currentHostname_concatenate='runpod--'
+
+	if [[ -e /info_factoryName.txt ]]
+	then
+		currentHostname_concatenate=$(cat /info_factoryName.txt)
+		currentHostname_concatenate="$currentHostname_concatenate"'--'
+	fi
+
+	[[ "$RUNPOD_POD_ID" != "" ]] && currentHostname_concatenate="$currentHostname_concatenate""$RUNPOD_POD_ID"'--'
+
+	[[ "$RUNPOD_PUBLIC_IP" != "" ]] && currentHostname_concatenate="$currentHostname_concatenate""$RUNPOD_PUBLIC_IP"'--'
+	#if [[ "$RUNPOD_PUBLIC_IP" != "" ]]
+	#then
+		#export currentHostname_concatenate="$currentHostname_concatenate"$(wget -qO- https://icanhazip.com/ | tr -dc '0-9a-fA-F:.')'--'
+	#fi
+	
+	export currentHostname="$currentHostname_concatenate""$currentHostname"
+	
 	
 	
 	export currentChroot=
@@ -26102,11 +26443,67 @@ _visualPrompt() {
 	#export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${debian_chroot:+($debian_chroot)}\[\033[01;33m\]\u\[\033[01;32m\]@\h\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[37m\][\w]\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$PS1_lineNumberText\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '
 	
 	
+	export prompt_specialInfo=""
+
+	# ATTRIBUTION-AI: ChatGPT o3 (high)  2025-05-06
+	#We want to see 'RTX 2000 Ada 16GB' and 'RTX 4090 16GB' , not just 'RTX 2000 16GB' . Please revise.
+	#
+	# RTX 2000 Ada 16GB
+	# RTX 2000 16GB
+	#
+	_filter_nvidia_smi_gpuInfo() {
+		# write the capacities any way you like:
+		#             ↓ commas, spaces or a mixture ↓
+		local sizes='2,3,4,6,8,10,11,12,16,20,24,32,40,48,56,64,80,94,96,128,141,180,192,256,320,384,512,640,768,896,1024,1280,1536,1792,2048'
+
+		awk -F', *' -v sizes="$sizes" '
+			BEGIN {
+				# accept both commas and blanks as separators
+				n = split(sizes, S, /[ ,]+/)
+			}
+			{
+				# ----- tidy up the model name -----
+				name = $1
+				gsub(/NVIDIA |GeForce |Laptop GPU|[[:space:]]+Generation/, "", name)
+				gsub(/  +/, " ", name)
+				sub(/^ +| +$/, "", name)
+
+				# ----- MiB -> decimal GB -----
+				mib   = $2 + 0
+				bytes = mib * 1048576
+				decGB = bytes / 1e9     # decimal gigabytes
+
+				# pick the nearest marketing size
+				best = S[1]
+				diff = (decGB > S[1] ? decGB - S[1] : S[1] - decGB)
+
+				for (i = 2; i <= n; i++) {
+					d = (decGB > S[i] ? decGB - S[i] : S[i] - decGB)
+					if (d < diff) { diff = d; best = S[i] }
+				}
+
+				printf "%s %dGB\n", name, best
+			}'
+	}
+
+
+	if type nvidia-smi > /dev/null 2>&1
+	then
+		export prompt_specialInfo=$(
+			nvidia-smi --query-gpu=name,memory.total --format=csv,noheader,nounits | _filter_nvidia_smi_gpuInfo
+		)
+	fi
+
+	if _if_wsl && [[ -e "/mnt/c/Windows/System32/cmd.exe" ]] && /mnt/c/Windows/System32/cmd.exe /C where nvidia-smi > /dev/null 2>&1
+	then
+		export prompt_specialInfo=$(
+			/mnt/c/Windows/System32/cmd.exe /C nvidia-smi --query-gpu=name,memory.total --format=csv,noheader,nounits | _filter_nvidia_smi_gpuInfo
+		)
+	fi
+
 	if [[ "$SHELL" == *"/nix/store/"*"/bin/bash"* ]]
 	then
-		export prompt_nixShell="nixShell"
-	else
-		export prompt_nixShell=""
+		export prompt_specialInfo="nixShell"
 	fi
 	
 	#export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${debian_chroot:+($debian_chroot)}\[\033[01;33m\]\u\[\033[01;32m\]@\h\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]'"$prompt_nixShell"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[37m\][\w]\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '
@@ -26125,15 +26522,15 @@ _visualPrompt() {
 	
 	if _if_cygwin
 	then
-		export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${currentChroot:+($currentChroot)}\[\033[01;33m\]\u\[\033[01;32m\]@'"$currentHostname"'\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(([[ "$VIRTUAL_ENV_PROMPT" != "" ]] && echo -n "$VIRTUAL_ENV_PROMPT") || date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]'"$prompt_nixShell"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]\[\033[37m\]\w\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '
+		export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${currentChroot:+($currentChroot)}\[\033[01;33m\]\u\[\033[01;32m\]@'"$currentHostname"'\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(([[ "$VIRTUAL_ENV_PROMPT" != "" ]] && echo -n "$VIRTUAL_ENV_PROMPT") || date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]'"$prompt_specialInfo"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]\[\033[37m\]\w\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '
 	elif ( uname -a | grep -i 'microsoft' > /dev/null 2>&1 || uname -a | grep -i 'WSL2' > /dev/null 2>&1 )
 	then
-		export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${currentChroot:+($currentChroot)}\[\033[01;33m\]\u\[\033[01;32m\]@'"$currentHostname"-wsl2'\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(([[ "$VIRTUAL_ENV_PROMPT" != "" ]] && echo -n "$VIRTUAL_ENV_PROMPT") || date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]'"$prompt_nixShell"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]\[\033[37m\]\w\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '
+		export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${currentChroot:+($currentChroot)}\[\033[01;33m\]\u\[\033[01;32m\]@'"$currentHostname"-wsl2'\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(([[ "$VIRTUAL_ENV_PROMPT" != "" ]] && echo -n "$VIRTUAL_ENV_PROMPT") || date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]'"$prompt_specialInfo"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]\[\033[37m\]\w\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '
 	else
-		export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${currentChroot:+($currentChroot)}\[\033[01;33m\]\u\[\033[01;32m\]@'"$currentHostname"'\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(([[ "$VIRTUAL_ENV_PROMPT" != "" ]] && echo -n "$VIRTUAL_ENV_PROMPT") || date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]'"$prompt_nixShell"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[37m\][\w]\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '	
+		export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${currentChroot:+($currentChroot)}\[\033[01;33m\]\u\[\033[01;32m\]@'"$currentHostname"'\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(([[ "$VIRTUAL_ENV_PROMPT" != "" ]] && echo -n "$VIRTUAL_ENV_PROMPT") || date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]'"$prompt_specialInfo"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[37m\][\w]\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '	
 	fi
 	
-	#export PS1="$prompt_nixShell""$PS1"
+	#export PS1="$prompt_specialInfo""$PS1"
 }
 
 
@@ -26211,6 +26608,26 @@ _upgrade_researchEngine-nvidia() {
 }
 
 
+# WARNING: May be untested.
+# Avoids attempting to upgrade services more likely to break (ie. 'searxng'). 
+_upgrade_researchEngine-safe() {
+	_setup_researchEngine _service_researchEngine-docker-chroot-start
+
+	#_setup_researchEngine _upgrade_researchEngine_searxng "$@"
+	_setup_researchEngine _upgrade_researchEngine_openwebui "$@"
+
+	_setup_researchEngine _service_researchEngine-docker-chroot-stop
+}
+_upgrade_researchEngine-safe-nvidia() {
+	_setup_researchEngine _service_researchEngine-docker-chroot-start
+	
+	#_setup_researchEngine _upgrade_researchEngine_searxng "$@"
+	_setup_researchEngine _upgrade_researchEngine_openwebui-nvidia "$@"
+
+	_setup_researchEngine _service_researchEngine-docker-chroot-stop
+}
+
+
 
 
 # ATTENTION: NOTICE: WIP: AI models bring such efficient and effective natural language processing, reasoning, parsing, summarization, API/documentation understanding, and code generation, as to backport an essential yet unusually new capability to some of the oldest (ie. >20years old) computer CPUs (even without a GPU). ATTENTION: Unusually, all 'ai' functions (including those here), may be very interdependent on the 'shortcut' functions. This has two consequences:
@@ -26222,7 +26639,7 @@ _upgrade_researchEngine-nvidia() {
 
 
 
-
+# NOTICE: You are obtaining the 'Llama-augment' model, or an upstream model used as a 'Llama-augment' model, by using this function: the 'Llama-augment' model is not, through this code itself, distributed to you (ie. you are likely receiving the 'Llama-augment' model from Soaring Distributions LLC regardless of where you obtained this code from).
 _setup_ollama_model_augment_sequence() {
 	# NOTICE: WARNING: Normally, any redistribution of a 'Llama', similar AI model, or other AI model, would be from an authoratative corporation, such as "Soaring Distributions LLC" .
 	
@@ -26704,10 +27121,10 @@ _service_ollama() {
 		return 1
 	fi
 	
-	if ! wget --timeout=1 --tries=3 127.0.0.1:11434 > /dev/null -q -O - > /dev/null
+	if ! wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O - > /dev/null
 	then
 		sudo -n -u ollama ollama serve &
-		while ! wget --timeout=1 --tries=3 127.0.0.1:11434 > /dev/null -q -O - > /dev/null
+		while ! wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O - > /dev/null
 		do
 			echo "wait: ollama: service"
 			sleep 1
@@ -26716,7 +27133,7 @@ _service_ollama() {
 	fi
 	
 	
-	if ! wget --timeout=1 --tries=3 127.0.0.1:11434 > /dev/null -q -O - > /dev/null
+	if ! wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O - > /dev/null 
 	then
 		echo 'fail: _service_ollama: ollama: 127.0.0.1:11434'
 		return 1
@@ -26725,6 +27142,91 @@ _service_ollama() {
 	return 0
 }
 
+# Very unusual. Ensures service is available, if normal systemd service is not.
+# WARNING: Should NOT run standalone service if systemd service is available. Thus, it is important to check if the service is already available (as would normally always be the case when booted with systemd available).
+# Mostly, this is used to workaround very unusual dist/OS build and custom situations (ie. ChRoot, GitHub Actions, etc).
+# CAUTION: This leaves a background process running, which must continue running (ie. not hangup) while other programs use it, and which must terminate upon shutdown , _closeChRoot , etc .
+_service_ollama_augment() {
+	if _if_cygwin && ! wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O - > /dev/null 2>&1
+	then
+		return 1
+	fi
+	_if_cygwin && return 0
+
+	if _if_wsl && ! wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O - > /dev/null 2>&1
+	then
+		#/mnt/c/Windows/System32/cmd.exe /C 'C:\q\p\zCore\infrastructure\ubiquitous_bash\_bin.bat' '/cygdrive/c/q/p/zCore/infrastructure/ubiquitous_bash/ubiquitous_bash.sh' '_bin' 'sleep' '45'
+		#/mnt/c/Windows/System32/cmd.exe /C 'C:\q\p\zCore\infrastructure\ubiquitous_bash\_bin.bat' '/cygdrive/c/q/p/zCore/infrastructure/ubiquitous_bash/ubiquitous_bash.sh' '_bin' '_setup_wsl2_procedure-portproxy' > /dev/null 2>&1
+
+		# ATTRIBUTION-AI: ChatGPT o3  2025-06-01
+#powershell -NoProfile -Command "Start-Process cmd.exe \
+  #-ArgumentList '/C','C:\q\p\zCore\infrastructure\ubiquitous_bash\_bin.bat',\
+#'/cygdrive/c/q/p/zCore/infrastructure/ubiquitous_bash/ubiquitous_bash.sh',\
+#'_bin','_setup_wsl2_procedure-portproxy' -Verb RunAs -Wait"
+		#'C:\Windows\System32\cmd.exe'
+		# ATTRIBUTION-AI: OpRt_.mistralai/devstral-small:nitro  2025-06-01  (translation to one-liner)
+		#_powershell -NoProfile -Command "Start-Process cmd.exe -ArgumentList '/C','C:\q\p\zCore\infrastructure\ubiquitous_bash\_bin.bat','/cygdrive/c/q/p/zCore/infrastructure/ubiquitous_bash/ubiquitous_bash.sh','_bin','_setup_wsl2_procedure-portproxy' -Verb RunAs -Wait"
+
+		_powershell -NoProfile -Command "Start-Process cmd.exe -ArgumentList '/C','C:\q\p\zCore\infrastructure\ubiquitous_bash\_bin.bat','/cygdrive/c/q/p/zCore/infrastructure/ubiquitous_bash/ubiquitous_bash.sh','_bin','_setup_wsl2_procedure-portproxy','$WSL_DISTRO_NAME' -Verb RunAs -Wait"
+		#_powershell -NoProfile -Command "Start-Process cmd.exe -ArgumentList '/C','C:\q\p\zCore\infrastructure\ubiquitous_bash\_bin.bat','/cygdrive/c/q/p/zCore/infrastructure/ubiquitous_bash/ubiquitous_bash.sh','_bin','_setup_wsl2_procedure-portproxy','""$WSL_DISTRO_NAME""' -Verb RunAs -Wait"
+		#
+		# DUBIOUS
+		#_powershell -NoProfile -Command "Start-Process cmd.exe -ArgumentList '/C','C:\q\p\zCore\infrastructure\ubiquitous_bash\_bin.bat','/cygdrive/c/q/p/zCore/infrastructure/ubiquitous_bash/ubiquitous_bash.sh','_bin','_setup_wsl2_procedure-portproxy','\"$WSL_DISTRO_NAME\"' -Verb RunAs -Wait"
+
+		#./ubiquitous_bash.sh _setup_wsl2_guest-portForward > /dev/null 2>&1
+		#_powershell -NoProfile -Command "Start-Process cmd.exe -ArgumentList '/C','C:\q\p\zCore\infrastructure\ubiquitous_bash\_bin.bat','/cygdrive/c/q/p/zCore/infrastructure/ubiquitous_bash/ubiquitous_bash.sh','_bin','_setup_wsl2_guest-portForward' -Verb RunAs -Wait"
+		#/mnt/c/Windows/System32/cmd.exe /C 'C:\q\p\zCore\infrastructure\ubiquitous_bash\_bin.bat' '/cygdrive/c/q/p/zCore/infrastructure/ubiquitous_bash/ubiquitous_bash.sh' '_bin' '_setup_wsl2_guest-portForward' > /dev/null 2>&1
+
+		sudo -n systemctl restart hostport-proxy.service > /dev/null 2>&1
+
+		sleep 5
+	fi
+
+	if _if_wsl && ! wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O - > /dev/null 2>&1
+	then
+		return 1
+	fi
+	_if_wsl && return 0
+
+	_mustGetSudo
+	if ! sudo -n -u ollama bash -c 'type -p ollama' > /dev/null 2>&1
+	then
+		#echo 'warn: _service_ollama: missing: ollama'
+		return 1
+	fi
+	
+	if ! wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O - > /dev/null 2>&1
+	then
+		# ATTENTION: This is basically how to not cause interactive bash shell issues starting a background service at Docker container runtime.
+		# WARNING: May not be adequately tested.
+		# ATTRIBUTION-AI: ChatGPT o3  2025-05-05  (partially)
+		( echo | sudo -n -u ollama nohup ollama serve </dev/null >>/var/log/ollama.log 2>&1 & ) &> /dev/null
+		while ! wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O - > /dev/null 2>&1
+		do
+			sleep 1
+		done
+		stty echo
+		stty sane
+		stty echo
+		
+		#sudo -n -u ollama ollama serve &
+		#while ! wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O - > /dev/null 2>&1
+		#do
+			#echo "wait: ollama: service"
+			#sleep 1
+		#done
+		sleep 3
+	fi
+	
+	
+	if ! wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O - > /dev/null 2>&1
+	then
+		#echo 'fail: _service_ollama: ollama: 127.0.0.1:11434'
+		return 1
+	fi
+
+	return 0
+}
 
 
 
@@ -26785,6 +27287,7 @@ _ollama_set-augment-lowRAM() {
 }
 
 
+
 _ollama_stop_augment() {
 	ollama stop Llama-augment
 }
@@ -26801,6 +27304,13 @@ _ollama_run_augment() {
 	# ATTENTION: Nevertheless, it is very possible a non-'Llama' model will eventually be used, especially as science and technology (eg. plasma recombination EUV physics) related datasets (eg. relevant Wikipedia articles) are increasingly gathered.
 	
 	# https://www.llama.com/llama3_1/use-policy/
+
+	! _service_ollama_augment && return 1
+
+	if ! ollama show Llama-augment > /dev/null 2>&1
+	then
+		"$scriptAbsoluteLocation" _setup_ollama_model_augment_sequence > /dev/null 2>&1
+	fi
 	
 	ollama run Llama-augment "$@"
 }
@@ -26825,40 +27335,1544 @@ alias l=_l
 
 
 
+# Built with Llama
+# May use 'Llama-augment' model, possibly derived from 'Llama-3.1-8b' .
+
+
+
+
+
+
+# ATTENTION: NOTICE: Example code using augment to convert an SSH command (as often given by 'RunPod') to domain/IP, port, username, and automatically upload files, with just one command.
+
+#if false
+#then
+#_uploadFiles_procedure() {
+	#_messageNormal 'Parse'
+	
+	#echo 'Please state the domain name or IP address, from this bash shellcode command: ' > "$safeTmp"/input_prompt.txt
+	#echo >> "$safeTmp"/input_prompt.txt
+	#echo '```bash' >> "$safeTmp"/input_prompt.txt
+	#_safeEcho_newline "$@" >> "$safeTmp"/input_prompt.txt
+	#echo '```' >> "$safeTmp"/input_prompt.txt
+	
+	#local currentAddress=$(cat "$safeTmp"/input_prompt.txt | _augment | tr -dc 'a-zA-Z0-9\.')
+
+
+
+	#echo 'Please state the port number, or port 22 if not explicitly specified, from this bash shellcode command: ' > "$safeTmp"/input_prompt.txt
+	#echo >> "$safeTmp"/input_prompt.txt
+	#echo '```bash' >> "$safeTmp"/input_prompt.txt
+	#_safeEcho_newline "$@" >> "$safeTmp"/input_prompt.txt
+	#echo '```' >> "$safeTmp"/input_prompt.txt
+	
+	#local currentPort=$(cat "$safeTmp"/input_prompt.txt | _augment | tr -dc '0-9')
+
+
+
+	#echo 'Please state the username, or root if not explicitly specified, from this bash shellcode command: ' > "$safeTmp"/input_prompt.txt
+	#echo >> "$safeTmp"/input_prompt.txt
+	#echo '```bash' >> "$safeTmp"/input_prompt.txt
+	#_safeEcho_newline "$@" >> "$safeTmp"/input_prompt.txt
+	#echo '```' >> "$safeTmp"/input_prompt.txt
+	
+	#local currentUsername=$(cat "$safeTmp"/input_prompt.txt | _augment | tr -dc 'a-zA-Z0-9')
+
+	#_messagePlain_probe "$currentUsername"'@'"$currentAddress":"$currentPort"
+
+
+
+	#_messageNormal 'Volume'
+	#mkdir -p "$safeTmp"/upload
+	#cp -a "$HOME"/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh "$safeTmp"/upload/ 2>/dev/null
+	#cp -a -f /cygdrive/c/q/p/zCore/infrastructure/ubiquitous_bash/ubiquitous_bash.sh "$safeTmp"/upload/ 2>/dev/null
+	#cp -a "$scriptAbsoluteFolder"/*.yml "$safeTmp"/upload/
+	#( cd "$safeTmp"/upload && env XZ_OPT="-5 -T0" tar -cJv --owner=0 --group=0 -f "$safeTmp"/volume_upload.tar.xz . )
+
+
+	#_messageNormal 'Upload'
+	## ; wget 'https://huggingface.co/unsloth/Llama-3.1-8B-Instruct-GGUF/resolve/main/Llama-3.1-8B-Instruct-Q4_K_M.gguf' ; bash -c 'echo huggingface-cli download unsloth...llama... ; huggingface-cli download unsloth/Llama-3.1-8B-Instruct-GGUF Llama-3.1-8B-Instruct-UD-IQ3_XXS.gguf --local-dir ./'
+	#cat "$safeTmp"/volume_upload.tar.xz | base64 | _sshf "$currentUsername"'@'"$currentAddress" -p "$currentPort" "mkdir -p /workspace/data && cd /workspace/data && base64 -d | tar -xJv --no-same-owner --overwrite -f - -C /workspace/data"
+
+#}
+#_uploadFiles_sequence() {
+	#_start
+
+	#_uploadFiles_procedure "$@"
+
+	#_stop
+#}
+#_uploadFiles() {
+	#"$scriptAbsoluteLocation" _uploadFiles_sequence "$@"
+#}
+
+#_experiment() {
+	#_uploadFiles 'ssh abc-123abc@ssh.runpod.io -i ~/.ssh/id_ed25519'
+	#_uploadFiles 'ssh root@203.0.113.123 -p 12345 -i ~/.ssh/id_ed25519'
+#}
+#fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Accepts stdin/stdout .
+_augment-backend() {
+    # Placeholder. Discouraged. Prefer '_l' function .
+	#jq -Rs '{model:"Llama-augment", prompt:., stream: false}' | curl -fsS --max-time 120 -X POST -H "Content-Type: application/json" --data-binary @- http://localhost:11434/api/generate | jq -r '.response'
+
+	# STRONGLY PREFERRED . Will automatically call '_service_ollama_augment' as necessary!
+	#_ollama_run_augment "$@"
+	_l "$@"
+}
+
+
+
+_here_bashTool-askCommand-ONLY() {
+    cat << 'CZXWXcRMTo8EmM8i4d'
+
+Output only the one line command or parameter. Do not output any other text. Since this is zero-shot tool use, only the one line will be helpful, any other output will be unhelpful.
+
+CZXWXcRMTo8EmM8i4d
+}
+
+# foundationalModel (ie.  Llama 3.1 Nemotron Ultra 253b v1  (REASONING ON)  )
+_here_bashTool-askGibberish-foundationalModel() {
+	# valid: nc -l 0.0.0.0 -p 1234
+	# gibberish: echo test ; nc -l 0.0.0.0 -p 1234
+
+	# WARNING: Llama 3.1 8b, Llama 3.1 405b, may NOT detect potentially dangerous commands such as 'echo test ; nc -l 0.0.0.0 -p 1234' as gibberish.
+	# WARNING: Llama 3.1 Nemotron Ultra 253b v1, REASONING ON, may NOT detect potentially dangerous commands such as 'echo test ; nc -l 0.0.0.0 -p 1234' (particularly with less comprehensive askGibberish prompt), although REASONING OFF may detect correctly as gibberish. Conversely, more comprehensive askGibberish prompt may or may not invert this situation, and REASONING ON may then be preferable for better adaptability to inputs.
+	#  WARNING: Do NOT assume REASONING models are better than INSTRUCT models. REASONING may only safely detect dangerous gibberish if usingthe absolutely most capable models, such as  Llama 3.1 Nemotron Ultra 253b v1  .
+
+	# DANGER: DANGER: Production use of 'askGibberish' with externally provided input for safety will require careful maintenance by curating extensive examples, training datasets, etc! Frequent fine-tuning may be necessary.
+	#
+	#Semicolon characters, etc, which may escape to create a backdoor or other harm, are suspicious of being gibberish. If semicolon or other command escape characters are followed by a command that may be used for good but is often associated with bad such as an interactive shell terminal, reading files, or network listening, etc, assume the worst, this is gibberish.
+	#
+	#Dangerous bash shellcode commands such as rm , passwd , etc , are gibberish.
+	#
+	#Suggesting dangerous commands such as rm is a bannable offense in many communities, dangerous commands are gibberish.
+
+	# CAUTION: DANGER: Datasets autogenerated by  LLama 3.1 Nemotron Ultra 253b v1  , etc, must be very carefully curated to avoid serious pitfalls from unexpected REASONING ON/OFF (ie. REASONING/INSTRUCT) behaviors. Also, intentionally not filtering out thinking tokens from the dataset, to intentionally distill REASONING evaluation of a tool use askGibberish prompt, may be cause worse results from models too small for reasoning (eg. 8b parameter models).
+
+    cat << 'CZXWXcRMTo8EmM8i4d'
+
+Should be AI autogenerated text either, a brief parameter value less than several dozen characters, numbers, etc, (some datum extracted from some input such as an address or number), or a single-line bash shellcode command .
+
+A bash shellcode command that is correct is valid.
+
+Somewhat random seeming letters, numbers, etc, may be valid if brief. If plausible, such as an address, definitely valid.
+
+A string of random alphanumeric characters less than 56 characters is considered brief, is often a unique identifier, definitely valid.
+
+Keywords 'empty', 'blank', 'fail', etc, for infeasible situations, may be valid.
+
+Contradictory keywords such as 'empty', 'blank', 'lack', etc, with 'terminal' and 'codeblock' are gibberish.
+
+Always err on the side of assuming the output is gibberish. Typos and misspellings are gibberish.
+
+Non-portable, unreliable, commands and parameters are gibberish.
+
+Dangerous bash shellcode commands such as rm , passwd , etc , are gibberish.
+
+Semicolon characters, etc, which may escape to create a backdoor or other harm, are suspicious of being gibberish. If semicolon or other command escape characters are followed by a command that may be used for good but is often associated with bad such as an interactive shell terminal, reading files, or network listening, etc, assume the worst, this is gibberish.
+
+If there is a phrase 'here is the code', or similar, that is gibberish.
+
+If there is anything a reasonable person might be at least slightly offended by, that is gibberish.
+
+Suggesting dangerous commands such as rm is a bannable offense in many communities, dangerous commands are gibberish.
+
+If the given information seems valid, say 'valid'. Otherwise, say 'gibberish'. If the given information follows a recognizable format, do not summarize, only output the word 'valid' in that case.
+
+Please only output one word gibberish or valid. Do not output any other statements. Response will be processed automatically, so the one word answer either gibberish or valid will be helpful, any other output will be unhelpful.
+
+CZXWXcRMTo8EmM8i4d
+}
+
+
+# Llama 3.1 8b, etc .
+_here_bashTool-askGibberish() {
+    cat << 'CZXWXcRMTo8EmM8i4d'
+
+Should be AI autogenerated text either, a brief parameter value less than several dozen characters, numbers, etc, (some datum extracted from some input such as an address or number), or a single-line bash shellcode command .
+
+Somewhat random seeming letters, numbers, etc, may be valid if brief. If plausible, such as an address, definitely valid.
+
+A string of random alphanumeric characters less than 56 characters is considered brief, is often a unique identifier, definitely valid.
+
+A bash shellcode command other than 'rm', etc, is definitely valid.
+
+Always err on the side of assuming the output is valid.
+
+If the given information seems or could be valid, say 'valid'. Otherwise, say 'gibberish'. If the given information follows a recognizable format, do not summarize, only output the word 'valid' in that case. 
+
+Please only output one word gibberish or valid. Do not output any other statements. Response will be processed automatically, so the one word answer either gibberish or valid will be helpful, any other output will be unhelpful.
+
+CZXWXcRMTo8EmM8i4d
+}
+
+
+_augment_procedure() {
+	( _messageNormal ' ... augment' >&2 ) > /dev/null
+	
+	cat > "$safeTmp"/input_prompt.txt
+
+	_here_bashTool-askCommand-ONLY > "$safeTmp"/processing-bashTool-askCommand-ONLY.txt
+
+
+	local currentIteration=0
+	while [[ $(cat "$safeTmp"/processing-bashTool-isGibberish.txt 2>/dev/null | tr -dc 'a-zA-Z0-9' | tr 'A-Z' 'a-z' | tail -c 5 ) != 'valid' ]] && [[ "$currentIteration" -lt 85 ]]
+	do
+		( _messagePlain_nominal ' ... augment: '"$currentIteration" >&2 ) > /dev/null
+		cat "$safeTmp"/input_prompt.txt "$safeTmp"/processing-bashTool-askCommand-ONLY.txt | _augment-backend "$@" > "$safeTmp"/output_prompt.txt
+
+		_here_bashTool-askGibberish > "$safeTmp"/processing-bashTool-askGibberish.txt
+		cat "$safeTmp"/output_prompt.txt "$safeTmp"/processing-bashTool-askGibberish.txt | _augment-backend "$@" > "$safeTmp"/processing-bashTool-isGibberish.txt
+
+		if [[ $(cat "$safeTmp"/processing-bashTool-isGibberish.txt | tr -dc 'a-zA-Z0-9' | tr 'A-Z' 'a-z' | tail -c 5 ) != 'valid' ]]
+		then
+			( _messagePlain_warn 'warn: gibberish: ' >&2 ) > /dev/null
+			( cat "$safeTmp"/output_prompt.txt | tr -dc 'a-zA-Z0-9\-_\ \=\+\/\.' >&2 ) > /dev/null
+			( echo >&2 ) > /dev/null
+			( _messagePlain_probe 'currentGibberish= '$(cat "$safeTmp"/processing-bashTool-isGibberish.txt | head -c 192 | tr -dc 'a-zA-Z0-9') >&2 ) > /dev/null
+			( echo  >&2 ) > /dev/null
+		fi
+		
+		let currentIteration++
+	done
+
+
+	cat "$safeTmp"/output_prompt.txt
+}
+_augment_sequence() {
+	_start
+
+	_augment_procedure "$@"
+
+	_stop
+}
+_augment() {
+    "$scriptAbsoluteLocation" _augment_sequence "$@"
+}
+
+
+
+
+_here_dockerfile-ubiquitous() {
+
+# DANGER: ONLY in Docker container in CI environment !
+if [[ "$CI" != "" ]] && ( [[ ! -e "$safeTmp"/repo/ubiquitous_bash ]] && [[ -e "$safeTmp" ]] )
+then
+    _messagePlain_bad "$safeTmp"/repo >&2
+    _messageError 'FAIL' >&2
+    _stop 1
+fi
+#if [[ "$CI" != "" ]] && [[ "$objectName" == "ubiquitous_bash" ]]
+if [[ "$CI" != "" ]] && [[ -e "$safeTmp"/repo/ubiquitous_bash ]]
+then
+
+#local currentDirectory=$(realpath --relative-to="$PWD" "$scriptAbsoluteFolder")
+local currentDirectory=$(realpath --relative-to="$PWD" "$safeTmp"/repo/ubiquitous_bash)
+
+cat << CZXWXcRMTo8EmM8i4d
+
+RUN rm -rf /workspace/ubiquitous_bash ;\ 
+mkdir -p /workspace
+COPY $currentDirectory /workspace/ubiquitous_bash
+
+CZXWXcRMTo8EmM8i4d
+
+fi
+
+cat << 'CZXWXcRMTo8EmM8i4d'
+
+# https://www.docker.com/blog/introduction-to-heredocs-in-dockerfiles/
+COPY <<EOFSPECIAL /install_ub.sh
+#!/usr/bin/env bash
+
+# ###
+# PASTE
+# ###
+
+if [[ -e /workspace/ubiquitous_bash/ubiquitous_bash.sh ]]
+then
+mkdir -p ~/.ubcore && cp -a /workspace/ubiquitous_bash ~/.ubcore/
+( cd /workspace/ubiquitous_bash ; /workspace/ubiquitous_bash/ubiquitous_bash.sh _gitBest pull ; git submodule update ; true )
+/workspace/ubiquitous_bash/ubiquitous_bash.sh _setupUbiquitous_nonet
+export profileScriptLocation="/workspace/ubiquitous_bash/ubiquitous_bash.sh"
+export profileScriptFolder="/workspace/ubiquitous_bash"
+. "/workspace/ubiquitous_bash/ubiquitous_bash.sh" --profile _importShortcuts
+else
+mkdir -p /workspace
+! [[ -e /workspace/ubiquitous_bash.sh ]] && wget 'https://raw.githubusercontent.com/mirage335/ubiquitous_bash/master/ubiquitous_bash.sh'
+mv -f ./ubiquitous_bash.sh /workspace/ubiquitous_bash.sh
+chmod u+x /workspace/ubiquitous_bash.sh
+rmdir /workspace/ubiquitous_bash > /dev/null 2>&1
+/workspace/ubiquitous_bash.sh _gitBest clone --depth 1 --recursive git@github.com:mirage335-colossus/ubiquitous_bash.git
+mv -f ./ubiquitous_bash /workspace/ubiquitous_bash
+[[ -e /workspace/ubiquitous_bash/ubiquitous_bash.sh ]] && mkdir -p ~/.ubcore && cp -a /workspace/ubiquitous_bash ~/.ubcore/
+mkdir -p /workspace/ubiquitous_bash
+! [[ -e /workspace/ubiquitous_bash/ubiquitous_bash.sh ]] && wget 'https://raw.githubusercontent.com/mirage335/ubiquitous_bash/master/ubiquitous_bash.sh'
+mv -f ./ubiquitous_bash.sh /workspace/ubiquitous_bash/ubiquitous_bash.sh
+chmod u+x /workspace/ubiquitous_bash/ubiquitous_bash.sh
+/workspace/ubiquitous_bash/ubiquitous_bash.sh _setupUbiquitous_nonet
+( cd ~/.ubcore/ubiquitous_bash ; ~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh _gitBest pull ; git submodule update ; true )
+fi
+#clear
+
+# ###
+# PASTE
+# ###
+
+EOFSPECIAL
+RUN chmod u+x /install_ub.sh ;\ 
+bash /install_ub.sh
+
+
+# ###
+# PASTE
+# ###
+
+# nohup - _service_ollama , _service_ollama_augment
+#... coreutils
+#
+#env DEBIAN_FRONTEND=noninteractive apt-get install xz -y ;\ 
+#
+# https://www.hostinger.com/tutorials/how-to-install-ollama
+#... python3 python3-pip git
+# install llama.cpp from unsloth
+#... libcurl4-openssl-dev
+# possible nvidia_nemo dependency
+#... ffmpeg
+RUN env DEBIAN_FRONTEND=noninteractive apt-get update ;\ 
+env DEBIAN_FRONTEND=noninteractive apt upgrade -y ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get install sudo -y ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get install less -y ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get install pv -y ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get install socat -y ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get install bc -y ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get install xxd -y ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get install php -y ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get install jq -y ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get install gh -y ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get install aria2 -y ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get install curl wget -y ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get install xz-utils -y ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get install tar bzip2 gzip -y ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get install sed patch expect -y ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get install dos2unix -y ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get install coreutils -y ;\ 
+env DEBIAN_FRONTEND=noninteractive apt install python3 python3-pip git -y ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get install libcurl4-openssl-dev -y ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get install ffmpeg -y ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get install asciinema -y
+
+
+RUN env DEBIAN_FRONTEND=noninteractive apt-get install sudo -y ;\ 
+/workspace/ubiquitous_bash/ubiquitous_bash.sh _getMinimal_cloud
+
+
+# DISCOURAGED. Better to benefit from 'ubiquitous_bash' maintenance identifying the most recent ollama installation commands. 
+#RUN curl -fsSL https://ollama.com/install.sh | sh
+# DISCOURAGED. Does NOT install Llama-augment model.
+RUN /workspace/ubiquitous_bash/ubiquitous_bash.sh _setup_ollama_sequence ;\ 
+/workspace/ubiquitous_bash/ubiquitous_bash.sh _service_ollama
+# PREFERRED. Normally robust, resilient, maintained, and adds the 'Llama-augment' model for automation, etc.
+#RUN /workspace/ubiquitous_bash/ubiquitous_bash.sh _setup_ollama
+
+
+# https://blog.runpod.io/how-to-achieve-true-ssh-on-runpod/
+RUN apt-get install ssh -y
+#RUN echo 'PasswordAuthentication no' >> /etc/ssh/sshd_config
+#RUN echo 'PermitRootLogin prohibit-password' >> /etc/ssh/sshd_config
+
+
+RUN env DEBIAN_FRONTEND=noninteractive apt-get remove linux-image-* linux-headers-* -y ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get -y clean
+#RUN env DEBIAN_FRONTEND=noninteractive apt-get remove --autoremove -y
+
+RUN echo 'net.core.bpf_jit_harden=1' | sudo -n tee /etc/sysctl.d/99-nvidia-workaround-bpf_jit_harden.conf
+#RUN sysctl -p /etc/sysctl.d/99-nvidia-workaround-bpf_jit_harden.conf
+
+#codex
+#claude
+RUN env DEBIAN_FRONTEND=noninteractive apt-get install -y curl ;\ 
+curl -fsSL https://deb.nodesource.com/setup_23.x -o /nodesource_setup.sh ;\ 
+bash /nodesource_setup.sh ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs ;\ 
+npm install -g @openai/codex ;\ 
+npm install -g @anthropic-ai/claude-code
+
+
+
+# ###
+# PASTE
+# ###
+
+CZXWXcRMTo8EmM8i4d
+}
+
+
+
+
+
+_here_dockerfile-libcudadev_stub() {
+cat << 'CZXWXcRMTo8EmM8i4d'
+
+COPY <<EOFSPECIAL /install_libcudadev_stub.sh
+#!/usr/bin/env bash
+
+# ###
+# PASTE
+# ###
+
+
+# ### NOTICE: Uninstall .
+#rm -f /usr/lib/x86_64-linux-gnu/nvidia/current/libcuda.so*
+
+
+echo ' install: libcudadev_stub'
+
+# Forces upgrade.
+#rm -f /opt/libcudadev_stub-stubOnly/libcuda*.so*
+
+if ls -1 /opt/libcudadev_stub-stubOnly/libcuda*.so*
+then
+    exit 0
+fi
+
+
+_prepare_install_libcudadev_stub-stubOnly() {
+    
+    mkdir -p /opt/libcudadev_stub-stubOnly
+    cd /opt/libcudadev_stub-stubOnly
+
+    # find . -type f
+    #rm -f ./libcuda1_535.216.01-1~deb12u1_amd64.deb
+    #rm -f ./usr/lib/x86_64-linux-gnu/nvidia/current/libcuda.so.535.216.01
+    rm -f ./usr/share/bug/libcuda1/control
+    rm -f ./usr/share/bug/libcuda1/script
+    rm -f ./usr/share/doc/libcuda1/changelog.Debian.gz
+    rm -f ./usr/share/doc/libcuda1/changelog.gz
+    #rm -f ./usr/share/doc/libcuda1/copyright
+    rm -f ./usr/share/lintian/overrides/libcuda1
+
+    # find . -type l
+    #rm -f ./usr/lib/x86_64-linux-gnu/nvidia/current/libcuda.so
+    #rm -f ./usr/lib/x86_64-linux-gnu/nvidia/current/libcuda.so.1
+
+    # find . -type d
+    rmdir ./usr > /dev/null 2>&1
+    rmdir ./usr/lib > /dev/null 2>&1
+    rmdir ./usr/lib/x86_64-linux-gnu > /dev/null 2>&1
+    rmdir ./usr/lib/x86_64-linux-gnu/nvidia > /dev/null 2>&1
+    rmdir ./usr/lib/x86_64-linux-gnu/nvidia/current > /dev/null 2>&1
+    rmdir ./usr/share > /dev/null 2>&1
+    rmdir ./usr/share/bug > /dev/null 2>&1
+    rmdir ./usr/share/bug/libcuda1 > /dev/null 2>&1
+    rmdir ./usr/share/doc > /dev/null 2>&1
+    rmdir ./usr/share/doc/libcuda1 > /dev/null 2>&1
+    rmdir ./usr/share/lintian > /dev/null 2>&1
+    rmdir ./usr/share/lintian/overrides > /dev/null 2>&1
+
+}
+_rm_install_libcudadev_stub-stubOnly() {
+    rm -f /opt/libcudadev_stub-stubOnly/*.deb
+    rm -f /opt/libcudadev_stub-stubOnly/usr/share/doc/libcuda1/copyright
+    rm -f /opt/libcudadev_stub-stubOnly/usr/lib/x86_64-linux-gnu/nvidia/current/libcuda*.so*
+    _prepare_install_libcudadev_stub-stubOnly "$@"
+}
+
+_rm_install_libcudadev_stub-stubOnly
+
+wget 'http://ftp.nl.debian.org/debian/pool/non-free/n/nvidia-graphics-drivers/libcuda1_535.216.01-1~deb12u1_amd64.deb'
+
+if [[ $(sha256sum *.deb | cut -f1 -d' ' | tr -dc 'a-fA-F0-9') != '99512da037ce851c81607fa5398e208aec6f17e3af9be68e3db8c7d459122575' ]]
+then
+    rm -f ./*.deb
+    rm -f /opt/libcudadev_stub-stubOnly/*.deb
+    _rm_install_libcudadev_stub-stubOnly
+    echo ' FAIL: DANGER: HASH MISMATCH ! '
+    exit 1
+fi
+
+dpkg-deb -x ./*.deb .
+
+mkdir -p /usr/lib/x86_64-linux-gnu/nvidia/current/
+
+cp -f /opt/libcudadev_stub-stubOnly/usr/lib/x86_64-linux-gnu/nvidia/current/libcuda*.so* /usr/lib/x86_64-linux-gnu/nvidia/current/
+chmod 644 /usr/lib/x86_64-linux-gnu/nvidia/current/libcuda*.so*
+
+mkdir -p /usr/share/doc/libcuda1/
+cp -f /opt/libcudadev_stub-stubOnly/usr/share/doc/libcuda1/copyright /usr/share/doc/libcuda1/
+
+
+#rm ...
+#_rm_install_libcudadev_stub-stubOnly
+_prepare_install_libcudadev_stub-stubOnly
+
+ldconfig
+
+# ###
+# PASTE
+# ###
+
+EOFSPECIAL
+RUN chmod u+x /install_libcudadev_stub.sh ;\ 
+bash /install_libcudadev_stub.sh
+
+CZXWXcRMTo8EmM8i4d
+}
+
+
+# WARNING: May require NVIDIA CUDA toolkit (ie. maybe begin with FROM Docker image with CUDA toolkit installed).
+_here_dockerfile-llamacpp() {
+# Expects _here_dockerfile-ubiquitous .
+cat << 'CZXWXcRMTo8EmM8i4d'
+
+# ###
+# PASTE
+# ###
+
+RUN env DEBIAN_FRONTEND=noninteractive apt-get install --install-recommends -y coreutils
+
+
+# https://github.com/ggml-org/llama.cpp/blob/master/docs/install.md
+
+# https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md
+#echo $( [[ $(( $(taskset -p $$ | awk '{print $NF}' | tr -dc 'f' | wc -c)/1 )) -le $(( $(nproc)/1 )) ]] && echo $(( $(taskset -p $$ | awk '{print $NF}' | tr -dc 'f' | wc -c)/1 )) || $(( $(nproc)/1 )) )
+#RUN ( cd /opt/llama.cpp ; cmake --build build --config Release -j 3 )
+#RUN ( cd /opt/llama.cpp ; cmake --build build --config Release -j $( [[ $(( $(taskset -p $$ | awk '{print $NF}' | tr -dc 'f' | wc -c)/1 )) -le $(( $(nproc)/1 )) ]] && echo $(( $(taskset -p $$ | awk '{print $NF}' | tr -dc 'f' | wc -c)/1 )) || $(( $(nproc)/1 )) ) )
+RUN mkdir -p /opt ;\ 
+( cd /opt ; git clone https://github.com/ggml-org/llama.cpp ) ;\ 
+( cd /opt/llama.cpp ; cmake -B build -DGGML_CUDA=ON ) ;\ 
+( cd /opt/llama.cpp ; cmake --build build --config Release -j $( nproc ) )
+
+
+# ###
+# PASTE
+# ###
+
+CZXWXcRMTo8EmM8i4d
+}
+
+
+_here_dockerfile-unsloth() {
+# Expects _here_dockerfile-ubiquitous .
+cat << 'CZXWXcRMTo8EmM8i4d'
+
+# ###
+# PASTE
+# ###
+
+RUN env DEBIAN_FRONTEND=noninteractive apt-get update -y
+
+# install llama.cpp from unsloth
+RUN env DEBIAN_FRONTEND=noninteractive apt-get install libcurl4-openssl-dev -y
+
+
+# https://github.com/unslothai/unsloth   (2025-05-07)
+#  'Python 3.12'
+RUN python -m pip uninstall -y torch torchvision torchaudio triton unsloth unsloth_zoo xformers sympy mpmath
+RUN env DEBIAN_FRONTEND=noninteractive apt-get update -y
+RUN env DEBIAN_FRONTEND=noninteractive apt-get install libcurl4-openssl-dev -y
+RUN env DEBIAN_FRONTEND=noninteractive apt-get install python3.12 -y
+RUN env DEBIAN_FRONTEND=noninteractive apt-get install python3.12-dev -y
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1
+RUN update-alternatives --config python3
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1
+RUN update-alternatives --config python
+RUN curl -sS https://bootstrap.pypa.io/get-pip.py -o - | python3
+RUN python3 -m pip install --upgrade pip
+RUN python -m pip uninstall -y torch torchvision torchaudio triton unsloth unsloth_zoo xformers sympy mpmath
+#
+#RUN pip install "unsloth"
+#RUN pip install --upgrade --force-reinstall --no-cache-dir unsloth unsloth_zoo
+
+# https://github.com/unslothai/unsloth/releases
+RUN pip install --upgrade --force-reinstall "unsloth==2025.4.7" unsloth_zoo
+
+# ###
+# PASTE
+# ###
+
+CZXWXcRMTo8EmM8i4d
+}
+
+
+
+
+
+_here_dockerfile-ubiquitous-documentation() {
+    #cat << 'CZXWXcRMTo8EmM8i4d'
+
+# Normally expected redundant. Copyleft license files are normally already preserved at several filesystem locations.
+
+#python3 -m site
+# /usr/local/lib/python*/dist-packages
+#find /usr/local/lib/python*/dist-packages -iname '*.dist-info'
+# /usr/lib/python3/dist-packages
+# /usr/share/licenses
+# /usr/share/doc
+#
+#--ignore-packages broken_pkg
+#pip-licenses --with-license-file --format=markdown > /licenses/PYTHON_THIRD_PARTY.md
+#
+#RUN mkdir -p /licenses ;\ 
+#pip install -U --no-cache-dir --quiet pip-licenses ;\ 
+#pip-licenses --user --with-license-file --format=markdown > /licenses/PYTHON_THIRD_PARTY.md
+
+#CZXWXcRMTo8EmM8i4d
+
+
+
+
+# ATTRIBUTION-AI: codex  model: codex-mini-latest  provider: openai  approval: full-auto  2025-05-31
+
+echo 'COPY <<EOFSPECIAL /install_licenses.py'
+cat << 'CZXWXcRMTo8EmM8i4d'
+import json, subprocess, glob, os
+# 1) get the pip-managed packages
+pkgs = json.loads(subprocess.run(
+    ['pip','list','--format=json'],
+    capture_output=True, text=True
+).stdout)
+# 2) print a Markdown table header
+print('| Name | Version | License | License file |')
+print('| ---- | ------- | ------- | ------------ |')
+# 3) for each, run `pip show`, parse License+Location, glob for LICENSE*
+for pkg in pkgs:
+    name, ver = pkg['name'], pkg['version']
+    info = subprocess.run(['pip','show', name],
+                            capture_output=True, text=True).stdout.splitlines()
+    meta = dict(line.split(':',1) for line in info if ':' in line)
+    lic = meta.get('License','UNKNOWN').strip()
+    loc = meta.get('Location','').strip()
+    # look for a LICENSE* file under the package's directory
+    pattern = os.path.join(loc, name.replace('-','_')+'*', 'LICEN[CS]E*')
+    matches = glob.glob(pattern)
+    lic_fp = matches[0] if matches else 'N/A'
+    print(f'| {name} | {ver} | {lic} | {lic_fp} |')
+CZXWXcRMTo8EmM8i4d
+echo 'EOFSPECIAL'
+
+echo 'RUN mkdir -p /licenses ;\ '
+echo 'python3 /install_licenses.py > /licenses/PYTHON_THIRD_PARTY.md'
+
+}
+
+
+_here_dockerfile-ubiquitous-licenses() {
+
+    ! mkdir -p "$scriptLocal"/licenses && ( _messageError 'FAIL' >&2 ) > /dev/null && _stop 1
+
+    [[ ! -e "$scriptLocal"/licenses/gpl-2.0.txt ]] && wget -qO "$scriptLocal"/licenses/gpl-2.0.txt 'https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt'
+    [[ ! -e "$scriptLocal"/licenses/gpl-3.0.txt ]] && wget -qO "$scriptLocal"/licenses/gpl-3.0.txt 'https://www.gnu.org/licenses/gpl-3.0.txt'
+    [[ ! -e "$scriptLocal"/licenses/agpl-3.0.txt ]] && wget -qO "$scriptLocal"/licenses/agpl-3.0.txt 'https://www.gnu.org/licenses/agpl-3.0.txt'
+
+
+
+    #echo
+    #echo 'RUN mkdir -p /licenses'
+    #echo
+
+    #echo 'COPY <<EOFSPECIAL /licenses/gpl-2.0.txt'
+#cat "$scriptLocal"/licenses/gpl-2.0.txt
+#echo 'EOFSPECIAL'
+
+    #echo 'COPY <<EOFSPECIAL /licenses/gpl-3.0.txt'
+#cat "$scriptLocal"/licenses/gpl-3.0.txt
+#echo 'EOFSPECIAL'
+
+    #echo 'COPY <<EOFSPECIAL /licenses/agpl-3.0.txt'
+#cat "$scriptLocal"/licenses/agpl-3.0.txt
+#echo 'EOFSPECIAL'
+
+    #echo
+
+
+    echo
+    echo 'RUN mkdir -p /licenses'
+    echo 'COPY <<EOFSPECIAL /licenses/gpl-2.0__gpl-3.0__agpl-3.0.txt'
+cat "$scriptLocal"/licenses/gpl-2.0.txt
+echo
+echo
+echo '------------------------------'
+echo
+echo
+cat "$scriptLocal"/licenses/gpl-3.0.txt
+echo
+echo
+echo '------------------------------'
+echo
+echo
+cat "$scriptLocal"/licenses/agpl-3.0.txt
+echo 'EOFSPECIAL'
+
+}
+
+
+
 # Unusual. Please keep these custom Docker containers to a minimum: essential factories (eg. fine-tuning) only, not application specific dependency containers (eg. databases). Use derivative 'fork' projects of ubiquitous_bash instead.
 
 
+# WARNING: May be WIP .
 _here_dockerfile_runpod-pytorch-heavy() {
+if [[ "$recursionGuard_factory_ops" == "" ]]
+then
+_factory_ops_recursion "$@"
+return
+fi
 
 cat << 'CZXWXcRMTo8EmM8i4d'
 #docker build -t runpod-pytorch-heavy .
-FROM runpod/pytorch:2.2.0-py3.10-cuda12.1.1-devel-ubuntu22.04
+# https://hub.docker.com/r/runpod/pytorch/tags
+# https://www.runpod.io/console/deploy
+# https://www.runpod.io/console/explore/runpod-torch-v240
+# runpod/pytorch:2.2.0-py3.10-cuda12.1.1-devel-ubuntu22.04
+# runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
+# runpod/pytorch:2.8.0-py3.11-cuda12.8.1-cudnn-devel-ubuntu22.04
+# runpod/pytorch:2.1.0-py3.10-cuda11.8.0-devel-ubuntu22.04
+FROM runpod/pytorch:2.8.0-py3.11-cuda12.8.1-cudnn-devel-ubuntu22.04
 
-#https://huggingface.co/blog/mlabonne/sft-llama3
-#https://huggingface.co/blog/mlabonne/merge-models
+RUN echo 'runpod-pytorch-heavy' > /info_factoryName.txt
+
+CZXWXcRMTo8EmM8i4d
+
+_here_dockerfile-ubiquitous "$@"
+
+cat << 'CZXWXcRMTo8EmM8i4d'
+
+# ###
+# PASTE
+# ###
+
+# https://huggingface.co/blog/mlabonne/sft-llama3
+# https://huggingface.co/blog/mlabonne/merge-models
 
 RUN python -m pip install --upgrade pip
-RUN pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
-RUN pip install --no-deps "xformers<0.0.27" "trl<0.9.0" peft accelerate bitsandbytes
+
+# ATTRIBUTION-AI: ChatGPT o3 (high)  2025-04-29-...
+# ATTRIBUTION-AI: Llama 3.1 Nemotron Utra 253b v1  2025-04-30-...
+
+#RUN apt-get install python3.10 python3.10-dev python3.10-distutils -y
+#RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
+#RUN update-alternatives --config python3
+
+#RUN curl -sS https://bootstrap.pypa.io/get-pip.py | sudo python3
+#RUN python -m pip install --upgrade pip
+#RUN python -m pip install --upgrade pip setuptools wheel
+
+
+#RUN python -m pip uninstall -y torch torchvision torchaudio triton unsloth unsloth_zoo xformers sympy mpmath
+
+#RUN pip install "sympy>=1.13.3" "mpmath>=1.3"
+
+## ATTENTION: Up/Down-grades torch , etc , to version 2.3.0 , as is apparently expected by  https://huggingface.co/blog/mlabonne/sft-llama3  .
+#RUN pip install torch==2.3.0 torchvision==0.18.0+cu121 torchaudio==2.3.0+cu121 triton==2.3.0 --index-url https://download.pytorch.org/whl/cu121
+
+#RUN python -m pip install --upgrade pip
+
+
+
+#RUN pip install unsloth_zoo==2025.3.12
+#RUN pip install --no-deps unsloth_zoo==2025.3.12
+
+#"unsloth @ git+https://github.com/unslothai/unsloth.git"
+#RUN pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
+#RUN PIP_PREFER_BINARY=1 pip install --prefer-binary --no-build-isolation "unsloth[cu121-torch230]"
+#RUN pip install "unsloth"
+
+#RUN pip install --no-deps "xformers<0.0.27" "trl<0.9.0" peft accelerate bitsandbytes
+#RUN pip install torch torchvision torchaudio
+
+#RUN pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
+
+# ###
+# PASTE
+# ###
+
+CZXWXcRMTo8EmM8i4d
+
+_here_dockerfile-libcudadev_stub "$@"
+_here_dockerfile-llamacpp "$@"
+
+#_here_dockerfile-unsloth "$@"
+
+_here_dockerfile-ubiquitous-documentation "$@"
+
+_here_dockerfile-ubiquitous-licenses "$@"
+
+
+cat << 'CZXWXcRMTo8EmM8i4d'
 
 WORKDIR /
 
-#docker image inspect runpod/pytorch:2.2.0-py3.10-cuda12.1.1-devel-ubuntu22.04 --format '{{json .Config.Entrypoint}} {{json .Config.Cmd}}'
-CMD ["/opt/nvidia/nvidia_entrypoint.sh"]
+#docker image inspect ...FROM... --format '{{json .Config.Entrypoint}} {{json .Config.Cmd}}'
+ENTRYPOINT ["/opt/nvidia/nvidia_entrypoint.sh"]
+CMD ["/start.sh"]
+
 CZXWXcRMTo8EmM8i4d
 
 }
+__factoryCreate_sequence_runpod-pytorch-heavy() {
+    if [[ "$recursionGuard_factory_ops" == "" ]]
+    then
+        _factory_ops_recursion "$@"
+        return
+    fi
 
-
-__factoryCreate_runpod-pytorch-heavy() {
     _start
 
+    # ATTRIBUTION-AI Llama 3.1 Nemotron Ultra 253b v1
+    docker stop $(docker ps -aq --filter ancestor=runpod-pytorch-heavy 2>/dev/null) > /dev/null 2>&1
+    #docker rm $(docker ps -aq --filter ancestor=runpod-pytorch-heavy 2>/dev/null) > /dev/null 2>&1
+
+    _messagePlain_probe 'docker rmi --force'
+    docker rmi --force runpod-pytorch-heavy > /dev/null 2>&1
+
     cd "$safeTmp"
+
+    if [[ "$CI" != "" ]] && [[ "$objectName" == "ubiquitous_bash" ]]
+    then
+        _messagePlain_probe 'mkdir -p '"$safeTmp"/repo
+        mkdir -p "$safeTmp"/repo
+        #mkdir -p "$safeTmp"/repo/"$objectName"
+        #cp -a "$scriptAbsoluteFolder"/.git "$safeTmp"/repo/"$objectName"/
+        #( cd "$safeTmp"/repo/"$objectName" ; "$scriptAbsoluteLocation" _gitBest reset --hard ; git submodule update --init --recursive ; find .git -iname 'config' -exec sed -i '/extraheader = AUTHORIZATION:/d' {} \; )
+        ( cd "$safeTmp"/repo ; git config --global checkout.workers -1 ; _gitBest clone --depth 1 git@github.com:mirage335-colossus/"$objectName".git ; cd "$safeTmp"/repo/"$objectName" ; _gitBest submodule update --init --depth 1 --recursive )
+        export safeToDeleteGit="true"
+    fi
+
+
+    
+    _messagePlain_probe 'docker build -t'
     _here_dockerfile_runpod-pytorch-heavy > Dockerfile
-    docker build -t runpod-pytorch-heavy .
+
+    # WARNING: CAUTION: DANGER: Docker is yet another third-party service dependency. Do NOT regard Docker's repository as archival preservation, and do NOT rely on Docker itself for archival preservation. Also, it is not clear whether a Docker 'image' based on 'Dockerfile' can be directly preserved without environment dependencies or unintentional updates, at best a root filesystem may be possible to obtain from a Docker 'image'.
+    # https://en.wikipedia.org/w/index.php?title=Docker,_Inc.&oldid=1285260999#History
+    # https://en.wikipedia.org/w/index.php?title=Docker_(software)&oldid=1286977923#History
+    
+
+    # ATTENTION: Add to '~/_bashrc' or similar .
+    #  Indeed '_bashrc' , NOT '.bashrc' .
+    # ATTRIBUTION-AI ChatGPT o3 (high)  2025-04-30
+    #
+    ##docker buildx rm cloud-user-default
+    ##docker buildx prune --builder cloud-user-default
+    #
+    #export DOCKER_USER="user"
+    #DOCKER_RAW_NAME="$DOCKER_USER""/default"          # what you type
+    #DOCKER_BUILDER_NAME="cloud-$(echo "$DOCKER_RAW_NAME" | tr '/:' '-')"
+    #if docker buildx ls --format '{{.Name}}' | grep -qx "$DOCKER_BUILDER_NAME"; then
+        #docker buildx use "$DOCKER_BUILDER_NAME"        # reuse
+    #else
+        #docker buildx create --driver cloud "$DOCKER_RAW_NAME" --use
+    #fi
+
+
+    #if [[ "$DOCKER_BUILDER_NAME" == "" ]]
+    #then
+        docker build -t runpod-pytorch-heavy .
+        docker tag runpod-pytorch-heavy "$DOCKER_USER"/runpod-pytorch-heavy:latest
+    #else
+        #if [[ "$DOCKER_BUILDER_NAME" != "" ]]
+        #then
+            # https://docs.docker.com/build-cloud/usage/
+            #docker buildx build --builder "$DOCKER_BUILDER_NAME" -t runpod-pytorch-heavy . --push
+        #fi
+    #fi
+
+    #docker push user/runpod-pytorch-heavy:latest
+
+    #export safeToDeleteGit="true"
+    _safeRMR "$safeTmp"/repo
 
     _stop
 }
+__factoryCreate_runpod-pytorch-heavy() {
+    if [[ "$recursionGuard_factory_ops" == "" ]]
+    then
+        _factory_ops_recursion "$@"
+        return
+    fi
+
+    "$scriptAbsoluteLocation" __factoryCreate_sequence_runpod-pytorch-heavy "$@"
+}
+
+
+
+
+
+
+
+
+_here_dockerfile_runpod-pytorch-unsloth() {
+if [[ "$recursionGuard_factory_ops" == "" ]]
+then
+_factory_ops_recursion "$@"
+return
+fi
+
+cat << 'CZXWXcRMTo8EmM8i4d'
+#docker build -t runpod-pytorch-unsloth .
+# https://hub.docker.com/r/runpod/pytorch/tags
+# https://www.runpod.io/console/deploy
+# https://www.runpod.io/console/explore/runpod-torch-v240
+# runpod/pytorch:2.2.0-py3.10-cuda12.1.1-devel-ubuntu22.04
+# runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
+# runpod/pytorch:2.8.0-py3.11-cuda12.8.1-cudnn-devel-ubuntu22.04
+# runpod/pytorch:2.1.0-py3.10-cuda11.8.0-devel-ubuntu22.04
+FROM runpod/pytorch:2.8.0-py3.11-cuda12.8.1-cudnn-devel-ubuntu22.04
+
+RUN echo 'runpod-pytorch-unsloth' > /info_factoryName.txt
+RUN echo '# Please read researchEngine documentation for (hopefully) stabilized examples .' >> /info_factoryMOTD.txt
+RUN echo 'ubiquitous_bash=~/.ubcore/ubiquitous_bash ; vim -R "'"\$ubiquitous_bash"'"/_lib/kit/app/researchEngine/_dev/README-FACTORY-unsloth.md' >> /info_factoryMOTD.txt
+RUN chmod 755 /info_factoryMOTD.txt
+
+CZXWXcRMTo8EmM8i4d
+
+_here_dockerfile-ubiquitous "$@"
+
+cat << 'CZXWXcRMTo8EmM8i4d'
+
+# ###
+# PASTE
+# ###
+
+# https://huggingface.co/blog/mlabonne/sft-llama3
+# https://huggingface.co/blog/mlabonne/merge-models
+
+RUN python -m pip install --upgrade pip
+
+# ATTRIBUTION-AI: ChatGPT o3 (high)  2025-04-29-...
+# ATTRIBUTION-AI: Llama 3.1 Nemotron Utra 253b v1  2025-04-30-...
+
+#RUN apt-get install python3.10 python3.10-dev python3.10-distutils -y
+#RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
+#RUN update-alternatives --config python3
+
+#RUN curl -sS https://bootstrap.pypa.io/get-pip.py | sudo python3
+#RUN python -m pip install --upgrade pip
+#RUN python -m pip install --upgrade pip setuptools wheel
+
+
+#RUN python -m pip uninstall -y torch torchvision torchaudio triton unsloth unsloth_zoo xformers sympy mpmath
+
+#RUN pip install "sympy>=1.13.3" "mpmath>=1.3"
+
+## ATTENTION: Up/Down-grades torch , etc , to version 2.3.0 , as is apparently expected by  https://huggingface.co/blog/mlabonne/sft-llama3  .
+#RUN pip install torch==2.3.0 torchvision==0.18.0+cu121 torchaudio==2.3.0+cu121 triton==2.3.0 --index-url https://download.pytorch.org/whl/cu121
+
+#RUN python -m pip install --upgrade pip
+
+
+
+#RUN pip install unsloth_zoo==2025.3.12
+#RUN pip install --no-deps unsloth_zoo==2025.3.12
+
+#"unsloth @ git+https://github.com/unslothai/unsloth.git"
+#RUN pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
+#RUN PIP_PREFER_BINARY=1 pip install --prefer-binary --no-build-isolation "unsloth[cu121-torch230]"
+#RUN pip install "unsloth"
+
+#RUN pip install --no-deps "xformers<0.0.27" "trl<0.9.0" peft accelerate bitsandbytes
+#RUN pip install torch torchvision torchaudio
+
+#RUN pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
+
+# ###
+# PASTE
+# ###
+
+CZXWXcRMTo8EmM8i4d
+
+_here_dockerfile-libcudadev_stub "$@"
+_here_dockerfile-llamacpp "$@"
+
+_here_dockerfile-unsloth "$@"
+
+_here_dockerfile-ubiquitous-documentation "$@"
+
+_here_dockerfile-ubiquitous-licenses "$@"
+
+
+cat << 'CZXWXcRMTo8EmM8i4d'
+
+WORKDIR /
+
+#docker image inspect ...FROM... --format '{{json .Config.Entrypoint}} {{json .Config.Cmd}}'
+ENTRYPOINT ["/opt/nvidia/nvidia_entrypoint.sh"]
+CMD ["/start.sh"]
+
+CZXWXcRMTo8EmM8i4d
+
+}
+__factoryCreate_sequence_runpod-pytorch-unsloth() {
+    if [[ "$recursionGuard_factory_ops" == "" ]]
+    then
+        _factory_ops_recursion "$@"
+        return
+    fi
+
+    _start
+
+    # ATTRIBUTION-AI Llama 3.1 Nemotron Ultra 253b v1
+    docker stop $(docker ps -aq --filter ancestor=runpod-pytorch-unsloth 2>/dev/null) > /dev/null 2>&1
+    #docker rm $(docker ps -aq --filter ancestor=runpod-pytorch-unsloth 2>/dev/null) > /dev/null 2>&1
+
+    _messagePlain_probe 'docker rmi --force'
+    docker rmi --force runpod-pytorch-unsloth > /dev/null 2>&1
+
+    cd "$safeTmp"
+
+    if [[ "$CI" != "" ]] && [[ "$objectName" == "ubiquitous_bash" ]]
+    then
+        _messagePlain_probe 'mkdir -p '"$safeTmp"/repo
+        mkdir -p "$safeTmp"/repo
+        #mkdir -p "$safeTmp"/repo/"$objectName"
+        #cp -a "$scriptAbsoluteFolder"/.git "$safeTmp"/repo/"$objectName"/
+        #( cd "$safeTmp"/repo/"$objectName" ; "$scriptAbsoluteLocation" _gitBest reset --hard ; git submodule update --init --recursive ; find .git -iname 'config' -exec sed -i '/extraheader = AUTHORIZATION:/d' {} \; )
+        ( cd "$safeTmp"/repo ; git config --global checkout.workers -1 ; _gitBest clone --depth 1 git@github.com:mirage335-colossus/"$objectName".git ; cd "$safeTmp"/repo/"$objectName" ; _gitBest submodule update --init --depth 1 --recursive )
+        export safeToDeleteGit="true"
+    fi
+
+
+    
+    _messagePlain_probe 'docker build -t'
+    _here_dockerfile_runpod-pytorch-unsloth > Dockerfile
+
+    # WARNING: CAUTION: DANGER: Docker is yet another third-party service dependency. Do NOT regard Docker's repository as archival preservation, and do NOT rely on Docker itself for archival preservation. Also, it is not clear whether a Docker 'image' based on 'Dockerfile' can be directly preserved without environment dependencies or unintentional updates, at best a root filesystem may be possible to obtain from a Docker 'image'.
+    # https://en.wikipedia.org/w/index.php?title=Docker,_Inc.&oldid=1285260999#History
+    # https://en.wikipedia.org/w/index.php?title=Docker_(software)&oldid=1286977923#History
+    
+
+    # ATTENTION: Add to '~/_bashrc' or similar .
+    #  Indeed '_bashrc' , NOT '.bashrc' .
+    # ATTRIBUTION-AI ChatGPT o3 (high)  2025-04-30
+    #
+    ##docker buildx rm cloud-user-default
+    ##docker buildx prune --builder cloud-user-default
+    #
+    #export DOCKER_USER="user"
+    #DOCKER_RAW_NAME="$DOCKER_USER""/default"          # what you type
+    #DOCKER_BUILDER_NAME="cloud-$(echo "$DOCKER_RAW_NAME" | tr '/:' '-')"
+    #if docker buildx ls --format '{{.Name}}' | grep -qx "$DOCKER_BUILDER_NAME"; then
+        #docker buildx use "$DOCKER_BUILDER_NAME"        # reuse
+    #else
+        #docker buildx create --driver cloud "$DOCKER_RAW_NAME" --use
+    #fi
+
+
+    #if [[ "$DOCKER_BUILDER_NAME" == "" ]]
+    #then
+        docker build -t runpod-pytorch-unsloth .
+        docker tag runpod-pytorch-unsloth "$DOCKER_USER"/runpod-pytorch-unsloth:latest
+    #else
+        #if [[ "$DOCKER_BUILDER_NAME" != "" ]]
+        #then
+            # https://docs.docker.com/build-cloud/usage/
+            #docker buildx build --builder "$DOCKER_BUILDER_NAME" -t runpod-pytorch-unsloth . --push
+        #fi
+    #fi
+
+    #docker push user/runpod-pytorch-unsloth:latest
+
+    #export safeToDeleteGit="true"
+    _safeRMR "$safeTmp"/repo
+
+    _stop
+}
+__factoryCreate_runpod-pytorch-unsloth() {
+    if [[ "$recursionGuard_factory_ops" == "" ]]
+    then
+        _factory_ops_recursion "$@"
+        return
+    fi
+
+    "$scriptAbsoluteLocation" __factoryCreate_sequence_runpod-pytorch-unsloth "$@"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+_here_dockerfile_runpod-heavy() {
+if [[ "$recursionGuard_factory_ops" == "" ]]
+then
+_factory_ops_recursion "$@"
+return
+fi
+
+cat << 'CZXWXcRMTo8EmM8i4d'
+#docker build -t runpod-heavy .
+# https://hub.docker.com/r/runpod/base/tags?name=cpu
+# https://www.runpod.io/console/deploy
+# https://www.runpod.io/console/explore/runpod-ubuntu
+# runpod/base:0.5.1-cpu
+FROM runpod/base:0.6.2-cpu
+
+RUN echo 'runpod-heavy' > /info_factoryName.txt
+
+
+
+# ATTRIBUTION-AI: ChatGPT 4o  2025-05-06
+
+RUN apt-get update -y
+RUN apt install wget -y
+
+RUN mkdir -p -m 755 /etc/apt/keyrings
+
+RUN wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null
+RUN chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+
+RUN apt update
+RUN apt install gh
+
+
+
+CZXWXcRMTo8EmM8i4d
+
+_here_dockerfile-ubiquitous "$@"
+
+cat << 'CZXWXcRMTo8EmM8i4d'
+
+# ###
+# PASTE
+# ###
+
+# https://huggingface.co/blog/mlabonne/sft-llama3
+# https://huggingface.co/blog/mlabonne/merge-models
+
+#RUN python -m pip install --upgrade pip
+
+
+# ###
+# PASTE
+# ###
+
+CZXWXcRMTo8EmM8i4d
+
+#_here_dockerfile-libcudadev_stub "$@"
+
+# DUBIOUS.
+#_here_dockerfile-llamacpp "$@"
+
+# DUBIOUS.
+#_here_dockerfile-unsloth "$@"
+
+# No Python, etc, added .
+#_here_dockerfile-ubiquitous-documentation "$@"
+
+_here_dockerfile-ubiquitous-licenses "$@"
+
+
+cat << 'CZXWXcRMTo8EmM8i4d'
+
+WORKDIR /
+
+#docker image inspect ...FROM... --format '{{json .Config.Entrypoint}} {{json .Config.Cmd}}'
+ENTRYPOINT [""]
+CMD ["/start.sh"]
+
+CZXWXcRMTo8EmM8i4d
+
+}
+__factoryCreate_sequence_runpod-heavy() {
+    if [[ "$recursionGuard_factory_ops" == "" ]]
+    then
+        _factory_ops_recursion "$@"
+        return
+    fi
+
+    _start
+
+    # ATTRIBUTION-AI Llama 3.1 Nemotron Ultra 253b v1
+    docker stop $(docker ps -aq --filter ancestor=runpod-heavy 2>/dev/null) > /dev/null 2>&1
+    #docker rm $(docker ps -aq --filter ancestor=runpod-heavy 2>/dev/null) > /dev/null 2>&1
+
+    _messagePlain_probe 'docker rmi --force'
+    docker rmi --force runpod-heavy > /dev/null 2>&1
+
+    cd "$safeTmp"
+
+    if [[ "$CI" != "" ]] && [[ "$objectName" == "ubiquitous_bash" ]]
+    then
+        _messagePlain_probe 'mkdir -p '"$safeTmp"/repo
+        mkdir -p "$safeTmp"/repo
+        #mkdir -p "$safeTmp"/repo/"$objectName"
+        #cp -a "$scriptAbsoluteFolder"/.git "$safeTmp"/repo/"$objectName"/
+        #( cd "$safeTmp"/repo/"$objectName" ; "$scriptAbsoluteLocation" _gitBest reset --hard ; git submodule update --init --recursive ; find .git -iname 'config' -exec sed -i '/extraheader = AUTHORIZATION:/d' {} \; )
+        ( cd "$safeTmp"/repo ; git config --global checkout.workers -1 ; _gitBest clone --depth 1 git@github.com:mirage335-colossus/"$objectName".git ; cd "$safeTmp"/repo/"$objectName" ; _gitBest submodule update --init --depth 1 --recursive )
+        export safeToDeleteGit="true"
+    fi
+
+
+    _messagePlain_probe 'docker build -t'
+    _here_dockerfile_runpod-heavy > Dockerfile
+
+    # WARNING: CAUTION: DANGER: Docker is yet another third-party service dependency. Do NOT regard Docker's repository as archival preservation, and do NOT rely on Docker itself for archival preservation. Also, it is not clear whether a Docker 'image' based on 'Dockerfile' can be directly preserved without environment dependencies or unintentional updates, at best a root filesystem may be possible to obtain from a Docker 'image'.
+    # https://en.wikipedia.org/w/index.php?title=Docker,_Inc.&oldid=1285260999#History
+    # https://en.wikipedia.org/w/index.php?title=Docker_(software)&oldid=1286977923#History
+
+    docker build -t runpod-heavy .
+    docker tag runpod-heavy "$DOCKER_USER"/runpod-heavy:latest
+
+    #docker push user/runpod-heavy:latest
+
+    #export safeToDeleteGit="true"
+    _safeRMR "$safeTmp"/repo
+
+    _stop
+}
+__factoryCreate_runpod-heavy() {
+    if [[ "$recursionGuard_factory_ops" == "" ]]
+    then
+        _factory_ops_recursion "$@"
+        return
+    fi
+
+    "$scriptAbsoluteLocation" __factoryCreate_sequence_runpod-heavy "$@"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+_here_dockerfile_axolotl-heavy() {
+if [[ "$recursionGuard_factory_ops" == "" ]]
+then
+_factory_ops_recursion "$@"
+return
+fi
+
+cat << 'CZXWXcRMTo8EmM8i4d'
+#docker build -t axolotl-heavy .
+FROM axolotlai/axolotl:main-latest
+
+RUN echo 'axolotl-heavy' > /info_factoryName.txt
+RUN echo '# Please read researchEngine documentation for (hopefully) stabilized examples .' >> /info_factoryMOTD.txt
+RUN echo 'ubiquitous_bash=~/.ubcore/ubiquitous_bash ; vim -R "'"\$ubiquitous_bash"'"/_lib/kit/app/researchEngine/_dev/README-FACTORY-axolotl.md' >> /info_factoryMOTD.txt
+RUN chmod 755 /info_factoryMOTD.txt
+
+CZXWXcRMTo8EmM8i4d
+
+_here_dockerfile-ubiquitous "$@"
+
+cat << 'CZXWXcRMTo8EmM8i4d'
+
+# ###
+# PASTE
+# ###
+
+
+RUN python -m pip install --upgrade pip
+
+#RUN apt-get install python3.10 python3.10-dev python3.10-distutils -y
+#RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
+#RUN update-alternatives --config python3
+
+#RUN curl -sS https://bootstrap.pypa.io/get-pip.py | sudo python3
+#RUN python -m pip install --upgrade pip
+#RUN python -m pip install --upgrade pip setuptools wheel
+
+
+#RUN python -m pip uninstall -y torch torchvision torchaudio triton unsloth unsloth_zoo xformers sympy mpmath
+
+#RUN pip install "sympy>=1.13.3" "mpmath>=1.3"
+
+## ATTENTION: Up/Down-grades torch , etc , to version 2.3.0 , as is apparently expected by  https://huggingface.co/blog/mlabonne/sft-llama3  .
+#RUN pip install torch==2.3.0 torchvision==0.18.0+cu121 torchaudio==2.3.0+cu121 triton==2.3.0 --index-url https://download.pytorch.org/whl/cu121
+
+#RUN python -m pip install --upgrade pip
+
+
+
+# ###
+# PASTE
+# ###
+
+CZXWXcRMTo8EmM8i4d
+
+_here_dockerfile-libcudadev_stub "$@"
+_here_dockerfile-llamacpp "$@"
+
+# DUBIOUS.
+#_here_dockerfile-unsloth "$@"
+
+_here_dockerfile-ubiquitous-documentation "$@"
+
+_here_dockerfile-ubiquitous-licenses "$@"
+
+
+cat << 'CZXWXcRMTo8EmM8i4d'
+
+WORKDIR /
+
+#docker image inspect ...FROM... --format '{{json .Config.Entrypoint}} {{json .Config.Cmd}}'
+ENTRYPOINT ["/opt/nvidia/nvidia_entrypoint.sh"]
+#CMD ["/start.sh"]
+
+CZXWXcRMTo8EmM8i4d
+
+}
+__factoryCreate_sequence_axolotl-heavy() {
+    if [[ "$recursionGuard_factory_ops" == "" ]]
+    then
+        _factory_ops_recursion "$@"
+        return
+    fi
+
+    _start
+
+    # ATTRIBUTION-AI Llama 3.1 Nemotron Ultra 253b v1
+    docker stop $(docker ps -aq --filter ancestor=axolotl-heavy 2>/dev/null) > /dev/null 2>&1
+    #docker rm $(docker ps -aq --filter ancestor=axolotl-heavy 2>/dev/null) > /dev/null 2>&1
+
+    _messagePlain_probe 'docker rmi --force'
+    docker rmi --force axolotl-heavy > /dev/null 2>&1
+
+    cd "$safeTmp"
+
+    if [[ "$CI" != "" ]] && [[ "$objectName" == "ubiquitous_bash" ]]
+    then
+        _messagePlain_probe 'mkdir -p '"$safeTmp"/repo
+        mkdir -p "$safeTmp"/repo
+        #mkdir -p "$safeTmp"/repo/"$objectName"
+        #cp -a "$scriptAbsoluteFolder"/.git "$safeTmp"/repo/"$objectName"/
+        #( cd "$safeTmp"/repo/"$objectName" ; "$scriptAbsoluteLocation" _gitBest reset --hard ; git submodule update --init --recursive ; find .git -iname 'config' -exec sed -i '/extraheader = AUTHORIZATION:/d' {} \; )
+        ( cd "$safeTmp"/repo ; git config --global checkout.workers -1 ; _gitBest clone --depth 1 git@github.com:mirage335-colossus/"$objectName".git ; cd "$safeTmp"/repo/"$objectName" ; _gitBest submodule update --init --depth 1 --recursive )
+        export safeToDeleteGit="true"
+    fi
+
+
+    
+    _messagePlain_probe 'docker build -t'
+    _here_dockerfile_axolotl-heavy > Dockerfile
+
+    # WARNING: CAUTION: DANGER: Docker is yet another third-party service dependency. Do NOT regard Docker's repository as archival preservation, and do NOT rely on Docker itself for archival preservation. Also, it is not clear whether a Docker 'image' based on 'Dockerfile' can be directly preserved without environment dependencies or unintentional updates, at best a root filesystem may be possible to obtain from a Docker 'image'.
+    # https://en.wikipedia.org/w/index.php?title=Docker,_Inc.&oldid=1285260999#History
+    # https://en.wikipedia.org/w/index.php?title=Docker_(software)&oldid=1286977923#History
+    
+    docker build -t axolotl-heavy .
+    docker tag axolotl-heavy "$DOCKER_USER"/axolotl-heavy:latest
+
+    #docker push user/axolotl-heavy:latest
+
+    #export safeToDeleteGit="true"
+    _safeRMR "$safeTmp"/repo
+
+    _stop
+}
+__factoryCreate_axolotl-heavy() {
+    if [[ "$recursionGuard_factory_ops" == "" ]]
+    then
+        _factory_ops_recursion "$@"
+        return
+    fi
+
+    "$scriptAbsoluteLocation" __factoryCreate_sequence_axolotl-heavy "$@"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# https://docs.nvidia.com/nemo-framework/user-guide/latest/llms/llama_nemotron.html
+
+# https://github.com/dominodatalab/nvidia-nemotron-finetuning
+
+# https://catalog.ngc.nvidia.com/orgs/nvidia/containers/nemo
+# https://catalog.ngc.nvidia.com/orgs/nvidia/containers/nemo/tags
+
+_here_dockerfile_nvidia_nemo-heavy() {
+if [[ "$recursionGuard_factory_ops" == "" ]]
+then
+_factory_ops_recursion "$@"
+return
+fi
+
+cat << 'CZXWXcRMTo8EmM8i4d'
+#docker build -t nvidia_nemo-heavy .
+FROM nvcr.io/nvidia/nemo:25.04
+#nvcr.io/nvidia/nemo:dev
+#nvcr.io/nvidia/nemo:25.04
+#nvcr.io/nvidia/nemo:24.01.framework
+
+
+RUN echo 'nvidia_nemo-heavy' > /info_factoryName.txt ;\ 
+echo '# Please read researchEngine documentation for (hopefully) stabilized examples .' >> /info_factoryMOTD.txt ;\ 
+echo 'ubiquitous_bash=~/.ubcore/ubiquitous_bash ; vim -R "'"\$ubiquitous_bash"'"/_lib/kit/app/researchEngine/_dev/README-FACTORY-nvidia_nemo.md' >> /info_factoryMOTD.txt ;\ 
+chmod 755 /info_factoryMOTD.txt
+
+CZXWXcRMTo8EmM8i4d
+
+_here_dockerfile-ubiquitous "$@"
+
+cat << 'CZXWXcRMTo8EmM8i4d'
+
+# ###
+# PASTE
+# ###
+
+
+RUN python -m pip install --upgrade pip
+
+#RUN pip3 install --upgrade git+https://github.com/huggingface/transformers.git
+
+
+# ###
+# PASTE
+# ###
+
+CZXWXcRMTo8EmM8i4d
+
+# ATTENTION: TODO: Desirable if not already present !
+#_here_dockerfile-libcudadev_stub "$@"
+#_here_dockerfile-llamacpp "$@"
+
+# DUBIOUS.
+#_here_dockerfile-unsloth "$@"
+
+_here_dockerfile-ubiquitous-documentation "$@"
+
+_here_dockerfile-ubiquitous-licenses "$@"
+
+
+cat << 'CZXWXcRMTo8EmM8i4d'
+
+WORKDIR /
+
+#docker image inspect ...FROM... --format '{{json .Config.Entrypoint}} {{json .Config.Cmd}}'
+ENTRYPOINT ["/opt/nvidia/nvidia_entrypoint.sh"]
+#CMD ["/start.sh"]
+
+CZXWXcRMTo8EmM8i4d
+
+}
+__factoryCreate_sequence_nvidia_nemo-heavy() {
+    if [[ "$recursionGuard_factory_ops" == "" ]]
+    then
+        _factory_ops_recursion "$@"
+        return
+    fi
+
+    _start
+
+    # ATTRIBUTION-AI Llama 3.1 Nemotron Ultra 253b v1
+    docker stop $(docker ps -aq --filter ancestor=nvidia_nemo-heavy 2>/dev/null) > /dev/null 2>&1
+    #docker rm $(docker ps -aq --filter ancestor=nvidia_nemo-heavy 2>/dev/null) > /dev/null 2>&1
+
+    _messagePlain_probe 'docker rmi --force'
+    docker rmi --force nvidia_nemo-heavy > /dev/null 2>&1
+
+    cd "$safeTmp"
+
+    if [[ "$CI" != "" ]] && [[ "$objectName" == "ubiquitous_bash" ]]
+    then
+        _messagePlain_probe 'mkdir -p '"$safeTmp"/repo
+        mkdir -p "$safeTmp"/repo
+        #mkdir -p "$safeTmp"/repo/"$objectName"
+        #cp -a "$scriptAbsoluteFolder"/.git "$safeTmp"/repo/"$objectName"/
+        #( cd "$safeTmp"/repo/"$objectName" ; "$scriptAbsoluteLocation" _gitBest reset --hard ; git submodule update --init --recursive ; find .git -iname 'config' -exec sed -i '/extraheader = AUTHORIZATION:/d' {} \; )
+        ( cd "$safeTmp"/repo ; git config --global checkout.workers -1 ; _gitBest clone --depth 1 git@github.com:mirage335-colossus/"$objectName".git ; cd "$safeTmp"/repo/"$objectName" ; _gitBest submodule update --init --depth 1 --recursive )
+        export safeToDeleteGit="true"
+    fi
+
+
+    
+    _messagePlain_probe 'docker build -t'
+    _here_dockerfile_nvidia_nemo-heavy > Dockerfile
+
+    # WARNING: CAUTION: DANGER: Docker is yet another third-party service dependency. Do NOT regard Docker's repository as archival preservation, and do NOT rely on Docker itself for archival preservation. Also, it is not clear whether a Docker 'image' based on 'Dockerfile' can be directly preserved without environment dependencies or unintentional updates, at best a root filesystem may be possible to obtain from a Docker 'image'.
+    # https://en.wikipedia.org/w/index.php?title=Docker,_Inc.&oldid=1285260999#History
+    # https://en.wikipedia.org/w/index.php?title=Docker_(software)&oldid=1286977923#History
+    
+    docker build -t nvidia_nemo-heavy .
+    docker tag nvidia_nemo-heavy "$DOCKER_USER"/nvidia_nemo-heavy:latest
+
+    #docker push user/nvidia_nemo-heavy:latest
+
+    #export safeToDeleteGit="true"
+    _safeRMR "$safeTmp"/repo
+
+    _stop
+}
+__factoryCreate_nvidia_nemo-heavy() {
+    if [[ "$recursionGuard_factory_ops" == "" ]]
+    then
+        _factory_ops_recursion "$@"
+        return
+    fi
+
+    "$scriptAbsoluteLocation" __factoryCreate_sequence_nvidia_nemo-heavy "$@"
+}
+
+
+
+
+
 
 
 
@@ -26908,6 +28922,21 @@ factory_knowledge_distillDir='/c/q/p/zCore/infrastructure/ubiquitous_bash/_local
 [[ -e ./knowledge_distill ]] && factory_knowledge_distillDir="$factory_projectDir"/knowledge_distill
 [[ -e ./_local/knowledge_distill ]] && factory_knowledge_distillDir="$factory_projectDir"/_local/knowledge_distill
 
+
+#-v "$factory_projectDir":/workspace/project -v "$factory_projectDir":/workspace/data
+if _if_cygwin
+then
+export factory_dir_args=( -v "$factory_projectDir":/workspace/project -v "$factory_projectDir":/workspace/data -v "$factory_outputDir":/output -v "$factory_outputDir":/workspace/data/output -v "$factory_outputDir":/workspace/data/outputs -v "$factory_modelDir":/model -v "$factory_modelDir":/workspace/data/model -v "$factory_modelDir":/workspace/data/models -v "$factory_datasetDir":/dataset -v "$factory_datasetDir":/workspace/data/dataset -v "$factory_datasetDir":/workspace/data/datasets -v "$factory_knowledgeDir":/knowledge -v "$factory_knowledge_distillDir":/knowledge_distill -v "$factory_projectDir"/cache_pip:/workspace/cache_pip )
+fi
+if ! _if_cygwin
+then
+export factory_dir_args=( -v "$factory_projectDir":/workspace/project -v "$factory_projectDir":/workspace/data -v "$factory_outputDir":/output -v "$factory_outputDir":/workspace/data/output -v "$factory_outputDir":/workspace/data/outputs -v "$factory_modelDir":/model -v "$factory_modelDir":/workspace/data/model -v "$factory_modelDir":/workspace/data/models -v "$factory_datasetDir":/dataset -v "$factory_datasetDir":/workspace/data/dataset -v "$factory_datasetDir":/workspace/data/datasets -v "$factory_projectDir"/cache_pip:/workspace/cache_pip )
+fi
+
+
+export factory_api_args=( -e JUPYTER_PASSWORD="$JUPYTER_PASSWORD" -e HF_API_KEY="$HF_API_KEY" -e HF_TOKEN="$HF_TOKEN" -e GH_TOKEN="$GH_TOKEN" -e OPENAI_API_KEY="$OPENAI_API_KEY" -e OPENROUTER_API_KEY="$OPENROUTER_API_KEY" -e ai_safety="$ai_safety" )
+
+
 # ###
 # PASTE
 # ###
@@ -26919,6 +28948,11 @@ factory_knowledge_distillDir='/c/q/p/zCore/infrastructure/ubiquitous_bash/_local
 
 
 _factory_axolotl() {
+if [[ "$recursionGuard_factory_ops" == "" ]]
+then
+_factory_ops_recursion "$@"
+return
+fi
 
 ! type _set_factory_dir > /dev/null 2>&1 && exit 1
 _set_factory_dir
@@ -26929,14 +28963,27 @@ _set_factory_dir
 # PASTE
 # ###
 
-docker pull axolotlai/axolotl:main-latest
+wsl -d docker-desktop sh -c "echo 'net.core.bpf_jit_harden=1' > /etc/sysctl.d/99-nvidia-workaround-bpf_jit_harden.conf"
+wsl -d docker-desktop sysctl -p /etc/sysctl.d/99-nvidia-workaround-bpf_jit_harden.conf
 
+dockerName='axolotlai/axolotl:main-latest'
+
+docker pull "$dockerName"
+
+entrypoint=$(docker inspect -f '{{join .Config.Entrypoint " "}}' "$dockerName")
+cmd=$(docker inspect -f '{{join .Config.Cmd " "}}' "$dockerName")
+workdir=$(docker inspect -f '{{.Config.WorkingDir}}' "$dockerName")
 _messagePlain_request 'request: paste ->'
 echo > ./._run-factory_axolotl
+echo "echo 'axolotl' > /info_factoryName.txt" | tee -a ./._run-factory_axolotl
 _request_paste_factory-prepare_finetune | tee -a ./._run-factory_axolotl
 _request_paste_factory-install_ubiquitous_bash | tee -a ./._run-factory_axolotl
 _request_paste_factory-show_finetune | tee -a ./._run-factory_axolotl
-docker inspect --format='{{json .Config.Entrypoint}}' axolotlai/axolotl:main-latest | jq -r '.[]' | tee -a ./._run-factory_axolotl
+#docker inspect --format='{{json .Config.Entrypoint}}' "$dockerName" | jq -r '.[]' | tee -a ./._run-factory_axolotl
+mkdir -p "$workdir" | tee -a ./._run-factory_axolotl
+echo '[ -n '"$workdir"' ] && cd '"$workdir" | tee -a ./._run-factory_axolotl
+#echo "exec ${entrypoint} ${cmd}" | tee -a ./._run-factory_axolotl
+echo "exec ${entrypoint}" | tee -a ./._run-factory_axolotl
 #echo 'bash -i' >> ./._run-factory_axolotl
 _messagePlain_request 'request: <- paste'
 
@@ -26946,7 +28993,7 @@ _messagePlain_request 'request: <- paste'
 
 ! type _getAbsoluteLocation > /dev/null 2>&1 && exit 1
 
-#docker image inspect axolotlai/axolotl:main-latest --format '{{json .Config.Entrypoint}} {{json .Config.Cmd}}'
+#docker image inspect "$dockerName" --format '{{json .Config.Entrypoint}} {{json .Config.Cmd}}'
 
 dockerRunArgs=( bash /workspace/project/._run-factory_axolotl )
 [[ ! -e ./._run-factory_axolotl ]] && dockerRunArgs=( )
@@ -26956,17 +29003,21 @@ then
 #--privileged
 #--ipc=host --ulimit memlock=-1 --ulimit stack=67108864
 #-v 'C:\q':/q -v 'C:\core':/core -v "$USERPROFILE"'\Downloads':/Downloads
-docker run --shm-size=20g --name axolotl-$(_uid 14) --gpus "all" -e "$JUPYTER_PASSWORD" -e HF_AKI_KEY="$HF_AKI_KEY" -v 'C:\q':/q -v 'C:\core':/core -v "$USERPROFILE"'\Downloads':/Downloads -v "$factory_outputDir":/output -v "$factory_modelDir":/model -v "$factory_datasetDir":/dataset -v "$factory_knowledgeDir":/knowledge -v "$factory_knowledge_distillDir":/knowledge_distill -v "$factory_projectDir":/workspace/project --rm -it axolotlai/axolotl:main-latest "${dockerRunArgs[@]}"
+docker run --shm-size=20g --name axolotl-$(_uid 14) --gpus "all" "${factory_api_args[@]}" -v 'C:\q':/q -v 'C:\q\p\zCore\infrastructure\ubiquitous_bash':/workspace/ubiquitous_bash:ro -v 'C:\core':/core -v "$USERPROFILE"'\Downloads':/Downloads "${factory_dir_args[@]}" -v "$factory_projectDir"/cache_pip:/workspace/cache_pip --rm -it "$dockerName" "${dockerRunArgs[@]}"
 fi
 if ! _if_cygwin
 then
 # WARNING: May be untested.
-docker run --shm-size=20g --name axolotl-$(_uid 14) --gpus "all" -e "$JUPYTER_PASSWORD" -e HF_AKI_KEY="$HF_AKI_KEY" -v '/home/user/___quick':/q -v '/home/user/core':/core -v "/home/user"'/Downloads':/Downloads -v "$factory_outputDir":/output -v "$factory_modelDir":/model -v "$factory_datasetDir":/dataset -v "$factory_projectDir":/workspace/project --rm -it axolotlai/axolotl:main-latest "${dockerRunArgs[@]}"
+docker run --shm-size=20g --name axolotl-$(_uid 14) --gpus "all" "${factory_api_args[@]}" -v '/home/user/___quick':/q -v "$HOME"/core/infrastructure/ubiquitous_bash:/workspace/ubiquitous_bash:ro -v '/home/user/core':/core -v "/home/user"'/Downloads':/Downloads "${factory_dir_args[@]}" -v "$factory_projectDir"/cache_pip:/workspace/cache_pip --rm -it "$dockerName" "${dockerRunArgs[@]}"
 fi
 
 # ###
 # PASTE
 # ###
+
+rmdir ./models > /dev/null 2>&1
+rmdir ./datasets > /dev/null 2>&1
+rmdir ./outputs > /dev/null 2>&1
 
 
 
@@ -26976,6 +29027,11 @@ fi
 
 
 _factory_runpod-official() {
+if [[ "$recursionGuard_factory_ops" == "" ]]
+then
+_factory_ops_recursion "$@"
+return
+fi
 
 ! type _set_factory_dir > /dev/null 2>&1 && exit 1
 _set_factory_dir
@@ -26986,17 +29042,37 @@ _set_factory_dir
 # PASTE
 # ###
 
+wsl -d docker-desktop sh -c "echo 'net.core.bpf_jit_harden=1' > /etc/sysctl.d/99-nvidia-workaround-bpf_jit_harden.conf"
+wsl -d docker-desktop sysctl -p /etc/sysctl.d/99-nvidia-workaround-bpf_jit_harden.conf
+
+# https://hub.docker.com/r/runpod/pytorch/tags
+# https://www.runpod.io/console/deploy
+# https://www.runpod.io/console/explore/runpod-torch-v240
+# runpod/pytorch:2.2.0-py3.10-cuda12.1.1-devel-ubuntu22.04
+# runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
+# runpod/pytorch:2.8.0-py3.11-cuda12.8.1-cudnn-devel-ubuntu22.04
+# runpod/pytorch:2.1.0-py3.10-cuda11.8.0-devel-ubuntu22.04
+dockerName='runpod/pytorch:2.8.0-py3.11-cuda12.8.1-cudnn-devel-ubuntu22.04'
+
 [[ JUPYTER_PASSWORD == "" ]] && export JUPYTER_PASSWORD=$(openssl rand 768 | base64 | tr -dc 'a-zA-Z0-9' | tr -d 'acdefhilmnopqrsuvACDEFHILMNOPQRSU14580' | head -c "24")
 
-docker pull runpod/pytorch:2.2.0-py3.10-cuda12.1.1-devel-ubuntu22.04
+docker pull "$dockerName"
 
+entrypoint=$(docker inspect -f '{{join .Config.Entrypoint " "}}' "$dockerName")
+cmd=$(docker inspect -f '{{join .Config.Cmd " "}}' "$dockerName")
+workdir=$(docker inspect -f '{{.Config.WorkingDir}}' "$dockerName")
 _messagePlain_request 'request: paste ->'
 echo > ./._run-factory_runpod
+echo "echo 'runpod-pytorch-official' > /info_factoryName.txt" | tee -a ./._run-factory_runpod
 _request_paste_factory-prepare_finetune | tee -a ./._run-factory_runpod
 _request_paste_factory-install_ubiquitous_bash | tee -a ./._run-factory_runpod
 _request_paste_factory-show_finetune | tee -a ./._run-factory_runpod
 _messagePlain_request 'request: JUPYTER_PASSWORD: '"$JUPYTER_PASSWORD"
-docker inspect --format='{{json .Config.Entrypoint}}' runpod/pytorch:2.2.0-py3.10-cuda12.1.1-devel-ubuntu22.04 | jq -r '.[]' | tee -a ./._run-factory_runpod
+#docker inspect --format='{{json .Config.Entrypoint}}' "$dockerName" | jq -r '.[]' | tee -a ./._run-factory_runpod
+mkdir -p "$workdir" | tee -a ./._run-factory_runpod
+echo '[ -n '"$workdir"' ] && cd '"$workdir" | tee -a ./._run-factory_runpod
+#echo "exec ${entrypoint} ${cmd}" | tee -a ./._run-factory_runpod
+echo "exec ${entrypoint}" | tee -a ./._run-factory_runpod
 #echo 'bash -i' >> ./._run-factory_runpod
 _messagePlain_request 'request: <- paste'
 
@@ -27006,7 +29082,7 @@ _messagePlain_request 'request: <- paste'
 
 ! type _getAbsoluteLocation > /dev/null 2>&1 && exit 1
 
-#docker image inspect runpod/pytorch:2.2.0-py3.10-cuda12.1.1-devel-ubuntu22.04 --format '{{json .Config.Entrypoint}} {{json .Config.Cmd}}'
+#docker image inspect "$dockerName" --format '{{json .Config.Entrypoint}} {{json .Config.Cmd}}'
 
 dockerRunArgs=( bash /workspace/project/._run-factory_runpod )
 [[ ! -e ./._run-factory_runpod ]] && dockerRunArgs=( bash )
@@ -27016,17 +29092,21 @@ then
 #--privileged
 #--ipc=host --ulimit memlock=-1 --ulimit stack=67108864
 #-v 'C:\q':/q -v 'C:\core':/core -v "$USERPROFILE"'\Downloads':/Downloads
-docker run --shm-size=20g --name runpod-$(_uid 14) --gpus "all" -e "$JUPYTER_PASSWORD" -e HF_AKI_KEY="$HF_AKI_KEY" -v 'C:\q':/q -v 'C:\core':/core -v "$USERPROFILE"'\Downloads':/Downloads -v "$factory_outputDir":/output -v "$factory_modelDir":/model -v "$factory_datasetDir":/dataset -v "$factory_knowledgeDir":/knowledge -v "$factory_knowledge_distillDir":/knowledge_distill -v "$factory_projectDir":/workspace/project --rm -it runpod/pytorch:2.2.0-py3.10-cuda12.1.1-devel-ubuntu22.04 "${dockerRunArgs[@]}"
+docker run --shm-size=20g --name runpod-$(_uid 14) --gpus "all" "${factory_api_args[@]}" -v 'C:\q':/q -v 'C:\q\p\zCore\infrastructure\ubiquitous_bash':/workspace/ubiquitous_bash:ro -v 'C:\core':/core -v "$USERPROFILE"'\Downloads':/Downloads "${factory_dir_args[@]}" -v "$factory_projectDir"/cache_pip:/workspace/cache_pip --rm -it "$dockerName" "${dockerRunArgs[@]}"
 fi
 if ! _if_cygwin
 then
 # WARNING: May be untested.
-docker run --shm-size=20g --name runpod-$(_uid 14) --gpus "all" -e "$JUPYTER_PASSWORD" -e HF_AKI_KEY="$HF_AKI_KEY" -v '/home/user/___quick':/q -v '/home/user/core':/core -v "/home/user"'/Downloads':/Downloads -v "$factory_outputDir":/output -v "$factory_modelDir":/model -v "$factory_datasetDir":/dataset -v "$factory_projectDir":/workspace/project --rm -it runpod/pytorch:2.2.0-py3.10-cuda12.1.1-devel-ubuntu22.04 "${dockerRunArgs[@]}"
+docker run --shm-size=20g --name runpod-$(_uid 14) --gpus "all" "${factory_api_args[@]}" -v '/home/user/___quick':/q -v "$HOME"/core/infrastructure/ubiquitous_bash:/workspace/ubiquitous_bash:ro -v '/home/user/core':/core -v "/home/user"'/Downloads':/Downloads "${factory_dir_args[@]}" -v "$factory_projectDir"/cache_pip:/workspace/cache_pip --rm -it "$dockerName" "${dockerRunArgs[@]}"
 fi
 
 # ###
 # PASTE
 # ###
+
+rmdir ./models > /dev/null 2>&1
+rmdir ./datasets > /dev/null 2>&1
+rmdir ./outputs > /dev/null 2>&1
 
 
 
@@ -27036,6 +29116,11 @@ fi
 
 
 _factory_runpod-heavy() {
+if [[ "$recursionGuard_factory_ops" == "" ]]
+then
+_factory_ops_recursion "$@"
+return
+fi
 
 ! type _set_factory_dir > /dev/null 2>&1 && exit 1
 _set_factory_dir
@@ -27046,19 +29131,53 @@ _set_factory_dir
 # PASTE
 # ###
 
-! docker images | tail -n+2 | grep '^runpod-pytorch-heavy' > /dev/null 2>&1 && exit
+wsl -d docker-desktop sh -c "echo 'net.core.bpf_jit_harden=1' > /etc/sysctl.d/99-nvidia-workaround-bpf_jit_harden.conf"
+wsl -d docker-desktop sysctl -p /etc/sysctl.d/99-nvidia-workaround-bpf_jit_harden.conf
+
+dockerName='runpod-pytorch-heavy'
+#docker pull ghcr.io/mirage335-colossus/"$dockerName":latest
+
+# Prefer local build .
+if [[ $(docker images -q "$dockerName" | tr -dc 'a-zA-Z0-9') == "" ]]
+then
+    # Fallback to something from Docker Hub .
+    [[ $(docker images -q "mirage335-colossus/ubiquitous_bash/""$dockerName" | tr -dc 'a-zA-Z0-9') != "" ]] && dockerName="mirage335-colossus/ubiquitous_bash/""$dockerName"
+    [[ $(docker images -q "mirage335-colossus/""$dockerName" | tr -dc 'a-zA-Z0-9') != "" ]] && dockerName="mirage335-colossus/""$dockerName"
+    [[ $(docker images -q "mirage335/""$dockerName" | tr -dc 'a-zA-Z0-9') != "" ]] && dockerName="mirage335/""$dockerName"
+
+    # Prefer something from GHCR .
+    [[ $(docker images -q "ghcr.io/mirage335-colossus/ubiquitous_bash/""$dockerName" | tr -dc 'a-zA-Z0-9') != "" ]] && dockerName="ghcr.io/mirage335-colossus/ubiquitous_bash/""$dockerName"
+    [[ $(docker images -q "ghcr.io/mirage335-colossus/""$dockerName" | tr -dc 'a-zA-Z0-9') != "" ]] && dockerName="ghcr.io/mirage335-colossus/""$dockerName"
+    [[ $(docker images -q "ghcr.io/mirage335/""$dockerName" | tr -dc 'a-zA-Z0-9') != "" ]] && dockerName="ghcr.io/mirage335/""$dockerName"
+fi
+
+if ! docker images | tail -n+2 | grep '^'"$dockerName" > /dev/null 2>&1
+then
+    _messagePlain_bad 'bad: FAIL: missing: '"$dockerName"
+    _messagePlain_request 'request: 'docker pull ghcr.io/mirage335-colossus/"$dockerName":latest
+    _messageError 'FAIL'
+    return 1
+fi
 
 [[ JUPYTER_PASSWORD == "" ]] && export JUPYTER_PASSWORD=$(openssl rand 768 | base64 | tr -dc 'a-zA-Z0-9' | tr -d 'acdefhilmnopqrsuvACDEFHILMNOPQRSU14580' | head -c "24")
 
-docker pull runpod-pytorch-heavy
+#docker pull "$dockerName"
 
+entrypoint=$(docker inspect -f '{{join .Config.Entrypoint " "}}' "$dockerName")
+cmd=$(docker inspect -f '{{join .Config.Cmd " "}}' "$dockerName")
+workdir=$(docker inspect -f '{{.Config.WorkingDir}}' "$dockerName")
 _messagePlain_request 'request: paste ->'
 echo > ./._run-factory_runpod
+echo "echo 'runpod-pytorch-heavy' > /info_factoryName.txt" | tee -a ./._run-factory_runpod
 _request_paste_factory-prepare_finetune | tee -a ./._run-factory_runpod
 _request_paste_factory-install_ubiquitous_bash | tee -a ./._run-factory_runpod
 _request_paste_factory-show_finetune | tee -a ./._run-factory_runpod
 _messagePlain_request 'request: JUPYTER_PASSWORD: '"$JUPYTER_PASSWORD"
-docker inspect --format='{{json .Config.Entrypoint}}' runpod-pytorch-heavy | jq -r '.[]' | tee -a ./._run-factory_runpod
+#docker inspect --format='{{json .Config.Entrypoint}}' "$dockerName" | jq -r '.[]' | tee -a ./._run-factory_runpod
+mkdir -p "$workdir" | tee -a ./._run-factory_runpod
+echo '[ -n '"$workdir"' ] && cd '"$workdir" | tee -a ./._run-factory_runpod
+#echo "exec ${entrypoint} ${cmd}" | tee -a ./._run-factory_runpod
+echo "exec ${entrypoint}" | tee -a ./._run-factory_runpod
 #echo 'bash -i' >> ./._run-factory_runpod
 _messagePlain_request 'request: <- paste'
 
@@ -27068,7 +29187,7 @@ _messagePlain_request 'request: <- paste'
 
 ! type _getAbsoluteLocation > /dev/null 2>&1 && exit 1
 
-#docker image inspect runpod-pytorch-heavy --format '{{json .Config.Entrypoint}} {{json .Config.Cmd}}'
+#docker image inspect "$dockerName" --format '{{json .Config.Entrypoint}} {{json .Config.Cmd}}'
 
 dockerRunArgs=( bash /workspace/project/._run-factory_runpod )
 [[ ! -e ./._run-factory_runpod ]] && dockerRunArgs=( bash )
@@ -27078,28 +29197,474 @@ then
 #--privileged
 #--ipc=host --ulimit memlock=-1 --ulimit stack=67108864
 #-v 'C:\q':/q -v 'C:\core':/core -v "$USERPROFILE"'\Downloads':/Downloads
-docker run --shm-size=20g --name runpod-$(_uid 14) --gpus "all" -e "$JUPYTER_PASSWORD" -e HF_AKI_KEY="$HF_AKI_KEY" -v 'C:\q':/q -v 'C:\core':/core -v "$USERPROFILE"'\Downloads':/Downloads -v "$factory_outputDir":/output -v "$factory_modelDir":/model -v "$factory_datasetDir":/dataset -v "$factory_knowledgeDir":/knowledge -v "$factory_knowledge_distillDir":/knowledge_distill -v "$factory_projectDir":/workspace/project --rm -it runpod-pytorch-heavy "${dockerRunArgs[@]}"
+docker run --shm-size=20g --name runpod-$(_uid 14) --gpus "all" "${factory_api_args[@]}" -v 'C:\q':/q -v 'C:\q\p\zCore\infrastructure\ubiquitous_bash':/workspace/ubiquitous_bash:ro -v 'C:\core':/core -v "$USERPROFILE"'\Downloads':/Downloads "${factory_dir_args[@]}" -v "$factory_projectDir"/cache_pip:/workspace/cache_pip --rm -it "$dockerName" "${dockerRunArgs[@]}"
 fi
 if ! _if_cygwin
 then
 # WARNING: May be untested.
-docker run --shm-size=20g --name runpod-$(_uid 14) --gpus "all" -e "$JUPYTER_PASSWORD" -e HF_AKI_KEY="$HF_AKI_KEY" -v '/home/user/___quick':/q -v '/home/user/core':/core -v "/home/user"'/Downloads':/Downloads -v "$factory_outputDir":/output -v "$factory_modelDir":/model -v "$factory_datasetDir":/dataset -v "$factory_projectDir":/workspace/project --rm -it runpod-pytorch-heavy "${dockerRunArgs[@]}"
+docker run --shm-size=20g --name runpod-$(_uid 14) --gpus "all" "${factory_api_args[@]}" -v '/home/user/___quick':/q -v "$HOME"/core/infrastructure/ubiquitous_bash:/workspace/ubiquitous_bash:ro -v '/home/user/core':/core -v "/home/user"'/Downloads':/Downloads "${factory_dir_args[@]}" -v "$factory_projectDir"/cache_pip:/workspace/cache_pip --rm -it "$dockerName" "${dockerRunArgs[@]}"
 fi
 
 # ###
 # PASTE
 # ###
 
+rmdir ./models > /dev/null 2>&1
+rmdir ./datasets > /dev/null 2>&1
+rmdir ./outputs > /dev/null 2>&1
+
 
 
 }
 _factory_runpod() {
-    _factory_runpod-heavy
+    if [[ "$recursionGuard_factory_ops" == "" ]]
+    then
+        _factory_ops_recursion "$@"
+        return
+    fi
+
+    #_factory_runpod-heavy "$@"
+    _factory_runpod-official "$@"
 }
 
 
 
 # https://hub.docker.com/u/langchain
+
+
+
+
+
+
+
+
+
+
+_factory_runpod-unsloth() {
+if [[ "$recursionGuard_factory_ops" == "" ]]
+then
+_factory_ops_recursion "$@"
+return
+fi
+
+! type _set_factory_dir > /dev/null 2>&1 && exit 1
+_set_factory_dir
+
+
+
+# ###
+# PASTE
+# ###
+
+wsl -d docker-desktop sh -c "echo 'net.core.bpf_jit_harden=1' > /etc/sysctl.d/99-nvidia-workaround-bpf_jit_harden.conf"
+wsl -d docker-desktop sysctl -p /etc/sysctl.d/99-nvidia-workaround-bpf_jit_harden.conf
+
+dockerName='runpod-pytorch-unsloth'
+#docker pull ghcr.io/mirage335-colossus/"$dockerName":latest
+
+# Prefer local build .
+if [[ $(docker images -q "$dockerName" | tr -dc 'a-zA-Z0-9') == "" ]]
+then
+    # Fallback to something from Docker Hub .
+    [[ $(docker images -q "mirage335-colossus/ubiquitous_bash/""$dockerName" | tr -dc 'a-zA-Z0-9') != "" ]] && dockerName="mirage335-colossus/ubiquitous_bash/""$dockerName"
+    [[ $(docker images -q "mirage335-colossus/""$dockerName" | tr -dc 'a-zA-Z0-9') != "" ]] && dockerName="mirage335-colossus/""$dockerName"
+    [[ $(docker images -q "mirage335/""$dockerName" | tr -dc 'a-zA-Z0-9') != "" ]] && dockerName="mirage335/""$dockerName"
+
+    # Prefer something from GHCR .
+    [[ $(docker images -q "ghcr.io/mirage335-colossus/ubiquitous_bash/""$dockerName" | tr -dc 'a-zA-Z0-9') != "" ]] && dockerName="ghcr.io/mirage335-colossus/ubiquitous_bash/""$dockerName"
+    [[ $(docker images -q "ghcr.io/mirage335-colossus/""$dockerName" | tr -dc 'a-zA-Z0-9') != "" ]] && dockerName="ghcr.io/mirage335-colossus/""$dockerName"
+    [[ $(docker images -q "ghcr.io/mirage335/""$dockerName" | tr -dc 'a-zA-Z0-9') != "" ]] && dockerName="ghcr.io/mirage335/""$dockerName"
+fi
+
+if ! docker images | tail -n+2 | grep '^'"$dockerName" > /dev/null 2>&1
+then
+    _messagePlain_bad 'bad: FAIL: missing: '"$dockerName"
+    _messagePlain_request 'request: 'docker pull ghcr.io/mirage335-colossus/"$dockerName":latest
+    _messageError 'FAIL'
+    return 1
+fi
+
+[[ JUPYTER_PASSWORD == "" ]] && export JUPYTER_PASSWORD=$(openssl rand 768 | base64 | tr -dc 'a-zA-Z0-9' | tr -d 'acdefhilmnopqrsuvACDEFHILMNOPQRSU14580' | head -c "24")
+
+#docker pull "$dockerName"
+
+entrypoint=$(docker inspect -f '{{join .Config.Entrypoint " "}}' "$dockerName")
+cmd=$(docker inspect -f '{{join .Config.Cmd " "}}' "$dockerName")
+workdir=$(docker inspect -f '{{.Config.WorkingDir}}' "$dockerName")
+_messagePlain_request 'request: paste ->'
+echo > ./._run-factory_runpod
+echo "echo 'runpod-pytorch-unsloth' > /info_factoryName.txt" | tee -a ./._run-factory_runpod
+echo "echo '# Please read researchEngine documentation for (hopefully) stabilized examples .' > /info_factoryMOTD.txt" | tee -a ./._run-factory_runpod
+echo "echo 'ubiquitous_bash=~/.ubcore/ubiquitous_bash ; vim -R "'"$ubiquitous_bash"'"/_lib/kit/app/researchEngine/_dev/README-FACTORY-unsloth.md' >> /info_factoryMOTD.txt" | tee -a ./._run-factory_runpod
+echo "chmod 755 /info_factoryMOTD.txt" | tee -a ./._run-factory_runpod
+_request_paste_factory-prepare_finetune | tee -a ./._run-factory_runpod
+_request_paste_factory-install_ubiquitous_bash | tee -a ./._run-factory_runpod
+_request_paste_factory-show_finetune | tee -a ./._run-factory_runpod
+_messagePlain_request 'request: JUPYTER_PASSWORD: '"$JUPYTER_PASSWORD"
+#docker inspect --format='{{json .Config.Entrypoint}}' "$dockerName" | jq -r '.[]' | tee -a ./._run-factory_runpod
+mkdir -p "$workdir" | tee -a ./._run-factory_runpod
+echo '[ -n '"$workdir"' ] && cd '"$workdir" | tee -a ./._run-factory_runpod
+#echo "exec ${entrypoint} ${cmd}" | tee -a ./._run-factory_runpod
+echo "exec ${entrypoint}" | tee -a ./._run-factory_runpod
+#echo 'bash -i' >> ./._run-factory_runpod
+_messagePlain_request 'request: <- paste'
+
+
+# ###
+
+
+! type _getAbsoluteLocation > /dev/null 2>&1 && exit 1
+
+#docker image inspect "$dockerName" --format '{{json .Config.Entrypoint}} {{json .Config.Cmd}}'
+
+dockerRunArgs=( bash /workspace/project/._run-factory_runpod )
+[[ ! -e ./._run-factory_runpod ]] && dockerRunArgs=( bash )
+
+if _if_cygwin
+then
+#--privileged
+#--ipc=host --ulimit memlock=-1 --ulimit stack=67108864
+#-v 'C:\q':/q -v 'C:\core':/core -v "$USERPROFILE"'\Downloads':/Downloads
+docker run --shm-size=20g --name runpod-$(_uid 14) --gpus "all" "${factory_api_args[@]}" -v 'C:\q':/q -v 'C:\q\p\zCore\infrastructure\ubiquitous_bash':/workspace/ubiquitous_bash:ro -v 'C:\core':/core -v "$USERPROFILE"'\Downloads':/Downloads "${factory_dir_args[@]}" -v "$factory_projectDir"/cache_pip:/workspace/cache_pip --rm -it "$dockerName" "${dockerRunArgs[@]}"
+fi
+if ! _if_cygwin
+then
+# WARNING: May be untested.
+docker run --shm-size=20g --name runpod-$(_uid 14) --gpus "all" "${factory_api_args[@]}" -v '/home/user/___quick':/q -v "$HOME"/core/infrastructure/ubiquitous_bash:/workspace/ubiquitous_bash:ro -v '/home/user/core':/core -v "/home/user"'/Downloads':/Downloads "${factory_dir_args[@]}" -v "$factory_projectDir"/cache_pip:/workspace/cache_pip --rm -it "$dockerName" "${dockerRunArgs[@]}"
+fi
+
+# ###
+# PASTE
+# ###
+
+rmdir ./models > /dev/null 2>&1
+rmdir ./datasets > /dev/null 2>&1
+rmdir ./outputs > /dev/null 2>&1
+
+
+
+}
+_factory_unsloth() {
+    if [[ "$recursionGuard_factory_ops" == "" ]]
+    then
+        _factory_ops_recursion "$@"
+        return
+    fi
+
+    _factory_runpod-unsloth "$@"
+}
+
+
+
+
+
+
+
+
+
+
+_factory_nvidia_nemo-dev() {
+if [[ "$recursionGuard_factory_ops" == "" ]]
+then
+_factory_ops_recursion "$@"
+return
+fi
+
+! type _set_factory_dir > /dev/null 2>&1 && exit 1
+_set_factory_dir
+
+
+
+# ###
+# PASTE
+# ###
+
+wsl -d docker-desktop sh -c "echo 'net.core.bpf_jit_harden=1' > /etc/sysctl.d/99-nvidia-workaround-bpf_jit_harden.conf"
+wsl -d docker-desktop sysctl -p /etc/sysctl.d/99-nvidia-workaround-bpf_jit_harden.conf
+
+dockerName='nvcr.io/nvidia/nemo:dev'
+#nvcr.io/nvidia/nemo:dev
+#nvcr.io/nvidia/nemo:25.04
+#nvcr.io/nvidia/nemo:24.01.framework
+##docker pull ghcr.io/mirage335-colossus/"$dockerName":latest
+
+[[ JUPYTER_PASSWORD == "" ]] && export JUPYTER_PASSWORD=$(openssl rand 768 | base64 | tr -dc 'a-zA-Z0-9' | tr -d 'acdefhilmnopqrsuvACDEFHILMNOPQRSU14580' | head -c "24")
+
+docker pull "$dockerName"
+
+entrypoint=$(docker inspect -f '{{join .Config.Entrypoint " "}}' "$dockerName")
+cmd=$(docker inspect -f '{{join .Config.Cmd " "}}' "$dockerName")
+workdir=$(docker inspect -f '{{.Config.WorkingDir}}' "$dockerName")
+_messagePlain_request 'request: paste ->'
+echo > ./._run-factory_nvidia
+echo "echo 'nvidia_nemo-dev' > /info_factoryName.txt" | tee -a ./._run-factory_nvidia
+echo "echo '# Please read researchEngine documentation for (hopefully) stabilized examples .' > /info_factoryMOTD.txt" | tee -a ./._run-factory_nvidia
+echo "echo 'ubiquitous_bash=~/.ubcore/ubiquitous_bash ; vim -R "'"$ubiquitous_bash"'"/_lib/kit/app/researchEngine/_dev/README-FACTORY-nvidia_nemo.md' >> /info_factoryMOTD.txt" | tee -a ./._run-factory_nvidia
+echo "chmod 755 /info_factoryMOTD.txt" | tee -a ./._run-factory_nvidia
+_request_paste_factory-prepare_finetune | tee -a ./._run-factory_nvidia
+_request_paste_factory-install_ubiquitous_bash | tee -a ./._run-factory_nvidia
+_request_paste_factory-show_finetune | tee -a ./._run-factory_nvidia
+_messagePlain_request 'request: JUPYTER_PASSWORD: '"$JUPYTER_PASSWORD"
+#docker inspect --format='{{json .Config.Entrypoint}}' "$dockerName" | jq -r '.[]' | tee -a ./._run-factory_nvidia
+mkdir -p "$workdir" | tee -a ./._run-factory_nvidia
+echo '[ -n '"$workdir"' ] && cd '"$workdir" | tee -a ./._run-factory_nvidia
+#echo "exec ${entrypoint} ${cmd}" | tee -a ./._run-factory_nvidia
+echo "exec ${entrypoint}" | tee -a ./._run-factory_nvidia
+#echo 'bash -i' >> ./._run-factory_nvidia
+_messagePlain_request 'request: <- paste'
+
+
+# ###
+
+
+! type _getAbsoluteLocation > /dev/null 2>&1 && exit 1
+
+#docker image inspect "$dockerName" --format '{{json .Config.Entrypoint}} {{json .Config.Cmd}}'
+
+dockerRunArgs=( bash /workspace/project/._run-factory_nvidia )
+[[ ! -e ./._run-factory_nvidia ]] && dockerRunArgs=( bash )
+
+if _if_cygwin
+then
+#--privileged
+#--ipc=host --ulimit memlock=-1 --ulimit stack=67108864
+#-v 'C:\q':/q -v 'C:\core':/core -v "$USERPROFILE"'\Downloads':/Downloads
+docker run --shm-size=20g --name nvidia-$(_uid 14) --gpus "all" "${factory_api_args[@]}" -v 'C:\q':/q -v 'C:\q\p\zCore\infrastructure\ubiquitous_bash':/workspace/ubiquitous_bash:ro -v 'C:\core':/core -v "$USERPROFILE"'\Downloads':/Downloads "${factory_dir_args[@]}" -v "$factory_projectDir"/cache_pip:/workspace/cache_pip --rm -it "$dockerName" "${dockerRunArgs[@]}"
+fi
+if ! _if_cygwin
+then
+# WARNING: May be untested.
+docker run --shm-size=20g --name nvidia-$(_uid 14) --gpus "all" "${factory_api_args[@]}" -v '/home/user/___quick':/q -v "$HOME"/core/infrastructure/ubiquitous_bash:/workspace/ubiquitous_bash:ro -v '/home/user/core':/core -v "/home/user"'/Downloads':/Downloads "${factory_dir_args[@]}" -v "$factory_projectDir"/cache_pip:/workspace/cache_pip --rm -it "$dockerName" "${dockerRunArgs[@]}"
+fi
+
+# ###
+# PASTE
+# ###
+
+rmdir ./models > /dev/null 2>&1
+rmdir ./datasets > /dev/null 2>&1
+rmdir ./outputs > /dev/null 2>&1
+
+
+
+}
+_factory_nvidia_nemo-official() {
+if [[ "$recursionGuard_factory_ops" == "" ]]
+then
+_factory_ops_recursion "$@"
+return
+fi
+
+! type _set_factory_dir > /dev/null 2>&1 && exit 1
+_set_factory_dir
+
+
+
+# ###
+# PASTE
+# ###
+
+wsl -d docker-desktop sh -c "echo 'net.core.bpf_jit_harden=1' > /etc/sysctl.d/99-nvidia-workaround-bpf_jit_harden.conf"
+wsl -d docker-desktop sysctl -p /etc/sysctl.d/99-nvidia-workaround-bpf_jit_harden.conf
+
+dockerName='nvcr.io/nvidia/nemo:25.04'
+#nvcr.io/nvidia/nemo:dev
+#nvcr.io/nvidia/nemo:25.04
+#nvcr.io/nvidia/nemo:24.01.framework
+##docker pull ghcr.io/mirage335-colossus/"$dockerName":latest
+
+# Prefer local build .
+
+[[ JUPYTER_PASSWORD == "" ]] && export JUPYTER_PASSWORD=$(openssl rand 768 | base64 | tr -dc 'a-zA-Z0-9' | tr -d 'acdefhilmnopqrsuvACDEFHILMNOPQRSU14580' | head -c "24")
+
+docker pull "$dockerName"
+
+entrypoint=$(docker inspect -f '{{join .Config.Entrypoint " "}}' "$dockerName")
+cmd=$(docker inspect -f '{{join .Config.Cmd " "}}' "$dockerName")
+workdir=$(docker inspect -f '{{.Config.WorkingDir}}' "$dockerName")
+_messagePlain_request 'request: paste ->'
+echo > ./._run-factory_nvidia
+echo "echo 'nvidia_nemo-official' > /info_factoryName.txt" | tee -a ./._run-factory_nvidia
+echo "echo '# Please read researchEngine documentation for (hopefully) stabilized examples .' > /info_factoryMOTD.txt" | tee -a ./._run-factory_nvidia
+echo "echo 'ubiquitous_bash=~/.ubcore/ubiquitous_bash ; vim -R "'"$ubiquitous_bash"'"/_lib/kit/app/researchEngine/_dev/README-FACTORY-nvidia_nemo.md' >> /info_factoryMOTD.txt" | tee -a ./._run-factory_nvidia
+echo "chmod 755 /info_factoryMOTD.txt" | tee -a ./._run-factory_nvidia
+_request_paste_factory-prepare_finetune | tee -a ./._run-factory_nvidia
+_request_paste_factory-install_ubiquitous_bash | tee -a ./._run-factory_nvidia
+_request_paste_factory-show_finetune | tee -a ./._run-factory_nvidia
+_messagePlain_request 'request: JUPYTER_PASSWORD: '"$JUPYTER_PASSWORD"
+#docker inspect --format='{{json .Config.Entrypoint}}' "$dockerName" | jq -r '.[]' | tee -a ./._run-factory_nvidia
+mkdir -p "$workdir" | tee -a ./._run-factory_nvidia
+echo '[ -n '"$workdir"' ] && cd '"$workdir" | tee -a ./._run-factory_nvidia
+#echo "exec ${entrypoint} ${cmd}" | tee -a ./._run-factory_nvidia
+echo "exec ${entrypoint}" | tee -a ./._run-factory_nvidia
+#echo 'bash -i' >> ./._run-factory_nvidia
+_messagePlain_request 'request: <- paste'
+
+
+# ###
+
+
+! type _getAbsoluteLocation > /dev/null 2>&1 && exit 1
+
+#docker image inspect "$dockerName" --format '{{json .Config.Entrypoint}} {{json .Config.Cmd}}'
+
+dockerRunArgs=( bash /workspace/project/._run-factory_nvidia )
+[[ ! -e ./._run-factory_nvidia ]] && dockerRunArgs=( bash )
+
+if _if_cygwin
+then
+#--privileged
+#--ipc=host --ulimit memlock=-1 --ulimit stack=67108864
+#-v 'C:\q':/q -v 'C:\core':/core -v "$USERPROFILE"'\Downloads':/Downloads
+docker run --shm-size=20g --name nvidia-$(_uid 14) --gpus "all" "${factory_api_args[@]}" -v 'C:\q':/q -v 'C:\q\p\zCore\infrastructure\ubiquitous_bash':/workspace/ubiquitous_bash:ro -v 'C:\core':/core -v "$USERPROFILE"'\Downloads':/Downloads "${factory_dir_args[@]}" -v "$factory_projectDir"/cache_pip:/workspace/cache_pip --rm -it "$dockerName" "${dockerRunArgs[@]}"
+fi
+if ! _if_cygwin
+then
+# WARNING: May be untested.
+docker run --shm-size=20g --name nvidia-$(_uid 14) --gpus "all" "${factory_api_args[@]}" -v '/home/user/___quick':/q -v "$HOME"/core/infrastructure/ubiquitous_bash:/workspace/ubiquitous_bash:ro -v '/home/user/core':/core -v "/home/user"'/Downloads':/Downloads "${factory_dir_args[@]}" -v "$factory_projectDir"/cache_pip:/workspace/cache_pip --rm -it "$dockerName" "${dockerRunArgs[@]}"
+fi
+
+# ###
+# PASTE
+# ###
+
+rmdir ./models > /dev/null 2>&1
+rmdir ./datasets > /dev/null 2>&1
+rmdir ./outputs > /dev/null 2>&1
+
+
+
+}
+_factory_nvidia_nemo-heavy() {
+if [[ "$recursionGuard_factory_ops" == "" ]]
+then
+_factory_ops_recursion "$@"
+return
+fi
+
+! type _set_factory_dir > /dev/null 2>&1 && exit 1
+_set_factory_dir
+
+
+
+# ###
+# PASTE
+# ###
+
+wsl -d docker-desktop sh -c "echo 'net.core.bpf_jit_harden=1' > /etc/sysctl.d/99-nvidia-workaround-bpf_jit_harden.conf"
+wsl -d docker-desktop sysctl -p /etc/sysctl.d/99-nvidia-workaround-bpf_jit_harden.conf
+
+dockerName='nvidia_nemo-heavy'
+#nvcr.io/nvidia/nemo:dev
+#nvcr.io/nvidia/nemo:25.04
+#nvcr.io/nvidia/nemo:24.01.framework
+##docker pull ghcr.io/mirage335-colossus/"$dockerName":latest
+
+# Prefer local build .
+if [[ $(docker images -q "$dockerName" | tr -dc 'a-zA-Z0-9') == "" ]]
+then
+    # Fallback to something from Docker Hub .
+    [[ $(docker images -q "mirage335-colossus/ubiquitous_bash/""$dockerName" | tr -dc 'a-zA-Z0-9') != "" ]] && dockerName="mirage335-colossus/ubiquitous_bash/""$dockerName"
+    [[ $(docker images -q "mirage335-colossus/""$dockerName" | tr -dc 'a-zA-Z0-9') != "" ]] && dockerName="mirage335-colossus/""$dockerName"
+    [[ $(docker images -q "mirage335/""$dockerName" | tr -dc 'a-zA-Z0-9') != "" ]] && dockerName="mirage335/""$dockerName"
+
+    # Prefer something from GHCR .
+    [[ $(docker images -q "ghcr.io/mirage335-colossus/ubiquitous_bash/""$dockerName" | tr -dc 'a-zA-Z0-9') != "" ]] && dockerName="ghcr.io/mirage335-colossus/ubiquitous_bash/""$dockerName"
+    [[ $(docker images -q "ghcr.io/mirage335-colossus/""$dockerName" | tr -dc 'a-zA-Z0-9') != "" ]] && dockerName="ghcr.io/mirage335-colossus/""$dockerName"
+    [[ $(docker images -q "ghcr.io/mirage335/""$dockerName" | tr -dc 'a-zA-Z0-9') != "" ]] && dockerName="ghcr.io/mirage335/""$dockerName"
+fi
+
+if ! docker images | tail -n+2 | grep '^'"$dockerName" > /dev/null 2>&1
+then
+    _messagePlain_bad 'bad: FAIL: missing: '"$dockerName"
+    _messagePlain_request 'request: 'docker pull ghcr.io/mirage335-colossus/"$dockerName":latest
+    _messageError 'FAIL'
+    return 1
+fi
+
+[[ JUPYTER_PASSWORD == "" ]] && export JUPYTER_PASSWORD=$(openssl rand 768 | base64 | tr -dc 'a-zA-Z0-9' | tr -d 'acdefhilmnopqrsuvACDEFHILMNOPQRSU14580' | head -c "24")
+
+#docker pull "$dockerName"
+
+entrypoint=$(docker inspect -f '{{join .Config.Entrypoint " "}}' "$dockerName")
+cmd=$(docker inspect -f '{{join .Config.Cmd " "}}' "$dockerName")
+workdir=$(docker inspect -f '{{.Config.WorkingDir}}' "$dockerName")
+_messagePlain_request 'request: paste ->'
+echo > ./._run-factory_nvidia
+echo "echo 'nvidia_nemo-heavy' > /info_factoryName.txt" | tee -a ./._run-factory_nvidia
+echo "echo '# Please read researchEngine documentation for (hopefully) stabilized examples .' > /info_factoryMOTD.txt" | tee -a ./._run-factory_nvidia
+echo "echo 'ubiquitous_bash=~/.ubcore/ubiquitous_bash ; vim -R "'"$ubiquitous_bash"'"/_lib/kit/app/researchEngine/_dev/README-FACTORY-nvidia_nemo.md' >> /info_factoryMOTD.txt" | tee -a ./._run-factory_nvidia
+echo "chmod 755 /info_factoryMOTD.txt" | tee -a ./._run-factory_nvidia
+_request_paste_factory-prepare_finetune | tee -a ./._run-factory_nvidia
+_request_paste_factory-install_ubiquitous_bash | tee -a ./._run-factory_nvidia
+_request_paste_factory-show_finetune | tee -a ./._run-factory_nvidia
+_messagePlain_request 'request: JUPYTER_PASSWORD: '"$JUPYTER_PASSWORD"
+#docker inspect --format='{{json .Config.Entrypoint}}' "$dockerName" | jq -r '.[]' | tee -a ./._run-factory_nvidia
+mkdir -p "$workdir" | tee -a ./._run-factory_nvidia
+echo '[ -n '"$workdir"' ] && cd '"$workdir" | tee -a ./._run-factory_nvidia
+#echo "exec ${entrypoint} ${cmd}" | tee -a ./._run-factory_nvidia
+echo "exec ${entrypoint}" | tee -a ./._run-factory_nvidia
+#echo 'bash -i' >> ./._run-factory_nvidia
+_messagePlain_request 'request: <- paste'
+
+
+# ###
+
+
+! type _getAbsoluteLocation > /dev/null 2>&1 && exit 1
+
+#docker image inspect "$dockerName" --format '{{json .Config.Entrypoint}} {{json .Config.Cmd}}'
+
+dockerRunArgs=( bash /workspace/project/._run-factory_nvidia )
+[[ ! -e ./._run-factory_nvidia ]] && dockerRunArgs=( bash )
+
+if _if_cygwin
+then
+#--privileged
+#--ipc=host --ulimit memlock=-1 --ulimit stack=67108864
+#-v 'C:\q':/q -v 'C:\core':/core -v "$USERPROFILE"'\Downloads':/Downloads
+docker run --shm-size=20g --name nvidia-$(_uid 14) --gpus "all" "${factory_api_args[@]}" -v 'C:\q':/q -v 'C:\q\p\zCore\infrastructure\ubiquitous_bash':/workspace/ubiquitous_bash:ro -v 'C:\core':/core -v "$USERPROFILE"'\Downloads':/Downloads "${factory_dir_args[@]}" -v "$factory_projectDir"/cache_pip:/workspace/cache_pip --rm -it "$dockerName" "${dockerRunArgs[@]}"
+fi
+if ! _if_cygwin
+then
+# WARNING: May be untested.
+docker run --shm-size=20g --name nvidia-$(_uid 14) --gpus "all" "${factory_api_args[@]}" -v '/home/user/___quick':/q -v "$HOME"/core/infrastructure/ubiquitous_bash:/workspace/ubiquitous_bash:ro -v '/home/user/core':/core -v "/home/user"'/Downloads':/Downloads "${factory_dir_args[@]}" -v "$factory_projectDir"/cache_pip:/workspace/cache_pip --rm -it "$dockerName" "${dockerRunArgs[@]}"
+fi
+
+# ###
+# PASTE
+# ###
+
+rmdir ./models > /dev/null 2>&1
+rmdir ./datasets > /dev/null 2>&1
+rmdir ./outputs > /dev/null 2>&1
+
+
+
+}
+_factory_nvidia_nemo() {
+    if [[ "$recursionGuard_factory_ops" == "" ]]
+    then
+        _factory_ops_recursion "$@"
+        return
+    fi
+
+    _factory_nvidia_nemo-dev "$@"
+    #_factory_nvidia_nemo-official "$@"
+    #_factory_nvidia_nemo-heavy "$@"
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -27132,19 +29697,47 @@ cat << 'CZXWXcRMTo8EmM8i4d'
 doNotMatch
 # ###
 
-if [[ -e /core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh ]]
+if [[ -e /workspace/ubiquitous_bash/ubiquitous_bash.sh ]]
 then
-/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _setupUbiquitous_nonet
-export profileScriptLocation="/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh"
-export profileScriptFolder="/core/infrastructure/ubiquitous_bash"
-. "/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh" --profile _importShortcuts
+( cd /workspace/ubiquitous_bash ; /workspace/ubiquitous_bash/ubiquitous_bash.sh _gitBest pull ; git submodule update )
+/workspace/ubiquitous_bash/ubiquitous_bash.sh _setupUbiquitous_nonet
+export profileScriptLocation="/workspace/ubiquitous_bash/ubiquitous_bash.sh"
+export profileScriptFolder="/workspace/ubiquitous_bash"
+. "/workspace/ubiquitous_bash/ubiquitous_bash.sh" --profile _importShortcuts
 else
-! [[ -e /ubiquitous_bash.sh ]] && wget 'https://raw.githubusercontent.com/mirage335/ubiquitous_bash/master/ubiquitous_bash.sh'
-mv -f ./ubiquitous_bash.sh /ubiquitous_bash.sh
-chmod u+x /ubiquitous_bash.sh
-/ubiquitous_bash.sh _setupUbiquitous_nonet
+mkdir -p /workspace
+! [[ -e /workspace/ubiquitous_bash.sh ]] && wget 'https://raw.githubusercontent.com/mirage335/ubiquitous_bash/master/ubiquitous_bash.sh'
+mv -f ./ubiquitous_bash.sh /workspace/ubiquitous_bash.sh
+chmod u+x /workspace/ubiquitous_bash.sh
+rmdir /workspace/ubiquitous_bash > /dev/null 2>&1
+/workspace/ubiquitous_bash.sh _gitBest clone --depth 1 --recursive git@github.com:mirage335-colossus/ubiquitous_bash.git
+mv -f ./ubiquitous_bash /workspace/ubiquitous_bash
+mkdir -p /workspace/ubiquitous_bash
+! [[ -e /workspace/ubiquitous_bash/ubiquitous_bash.sh ]] && wget 'https://raw.githubusercontent.com/mirage335/ubiquitous_bash/master/ubiquitous_bash.sh'
+mv -f ./ubiquitous_bash.sh /workspace/ubiquitous_bash/ubiquitous_bash.sh
+chmod u+x /workspace/ubiquitous_bash/ubiquitous_bash.sh
+/workspace/ubiquitous_bash/ubiquitous_bash.sh _setupUbiquitous_nonet
+( cd ~/.ubcore/ubiquitous_bash ; ~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh _gitBest pull ; git submodule update )
 fi
 #clear
+
+## ATTENTION: Not enabled by default, slow to download. Call '_setup_ollama' manually .
+## DISCOURAGED. Better to benefit from 'ubiquitous_bash' maintenance identifying the most recent ollama installation commands. 
+##curl -fsSL https://ollama.com/install.sh | sh
+## DISCOURAGED. Does NOT install Llama-augment model.
+##/workspace/ubiquitous_bash/ubiquitous_bash.sh _setup_ollama_sequence
+##/workspace/ubiquitous_bash/ubiquitous_bash.sh _service_ollama > /dev/null 2>&1
+## ATTRIBUTION-AI: ChatGPT o3  2025-05-05
+#echo | sudo -n -u ollama nohup ollama serve </dev/null >>/var/log/ollama.log 2>&1 &
+#while ! wget --timeout=1 --tries=3 127.0.0.1:11434 > /dev/null -q -O - > /dev/null
+#do
+#sleep 1
+#done
+#stty echo
+#stty sane
+#stty echo
+## PREFERRED. Normally robust, resilient, maintained, and adds the 'Llama-augment' model for automation, etc.
+##/workspace/ubiquitous_bash/ubiquitous_bash.sh _setup_ollama
 
 # ###
 false << 'doNotMatch'
@@ -36451,6 +39044,62 @@ _recoll() {
 }
 
 
+
+# WARNING: May be untested.
+_setup_claude_code() {
+    _mustGetSudo
+
+    _get_npm
+
+    #npm install -g @anthropic-ai/claude-code
+    sudo -n npm install -g @anthropic-ai/claude-code
+}
+
+
+
+
+
+
+
+
+
+# NOTICE: Installing 'codex' may be useful for cloud, container, etc, usage (eg. within a RunPod instance, within a Docker container, etc).)
+# Also recommend 'Cline' VSCode extension .
+_setup_codex() {
+    _mustGetSudo
+
+    _get_npm
+
+    #@openai/codex
+    #@openai/codex@latest
+    sudo -n npm install -g @openai/codex
+}
+
+
+# https://github.com/openai/codex/issues/1189
+#codex --approval-mode full-auto --provider openrouter --model openai/codex-mini
+#
+#unset OPENAI_API_KEY
+#unset OPENROUTER_API_KEY
+#export OPENAI_BASE_URL="https://openrouter.ai/api/v1"
+#export OPENAI_API_KEY="sk-***-21"
+#codex --model openai/o4-mini
+#codex --model openai/codex-mini
+
+
+#--model codex-mini-latest
+#--model o3
+
+#alias codex='wsl -d ubdist codex'
+
+
+
+
+
+alias codexAuto='codex --approval-mode full-auto'
+
+
+
 #screenscraper-nix
 
 # ATTENTION: Expect new software development will be required. Some relevant capability apparently already exists from OBS, ffmpeg , gstreamer , etc . Due to apparent lack of 'NVIDIA Game Stream' , most likely a GPU-agnostic real-time h264 or similar video codec would also be helpful.
@@ -42649,6 +45298,226 @@ CZXWXcRMTo8EmM8i4d
 
 
 
+
+# '$SSH_pub_Coordinator_01'
+# ssh ... rclone ... push/pull ... /local/dir/. ... .../brig/machineName/.
+
+
+
+
+
+
+# TODO... ideas...
+
+#Need filesystem available to all hosts in realtime... HTTP?
+ # NOT HTTPS . No need for SSL, only *experimental* use of factories, etc, would ever use that.
+
+#unifs...
+
+
+#maybe an http server more convenient and safer than onedrive...?
+#puddleJumper  toggleable  lighttpd,nginx, etc ?
+#documentation - while loop to push/rclone to puddleJumper repeatedly?
+
+
+
+
+
+
+# WARNING
+# WARNING
+# WARNING
+#
+# WARNING: May be untested.
+#
+# WARNING
+# WARNING
+# WARNING
+
+
+
+
+
+
+
+# Very simple VPN service for temporary ad-hoc networks (ie. between 'factory' containers, some of which may be capable of different tasks, but which together are used as a factory to generate an output).
+
+# Manually operated, as usual of 'factory' , 'server' , etc, functions . Does NOT necessarily install a service (eg. systemd hook), but does get a server program going without restarting anything, etc. Run function from within 'Docker' container, etc, if needed.
+
+
+
+# Possible alternative services:
+# tailscale ?
+
+# ATTENTION: NOTICE: DEPENDENCIES:
+#apt-get install wireguard wireguard-go
+# ATTENTION: NOTICE: RECOMMENDED:
+#apt-get install sudo net-tools man-db ufw nftables yes
+#echo -e 'y\ny\ny\n' | unminimize
+#_cfgFW-desktop
+
+# May also be useful to host some other convenient servers with hardware (or other resource, cloud, etc) occupied by the VPN server.
+#nfs
+#OpenWebUI
+#
+# https://docs.openwebui.com/getting-started/quick-start/
+#
+# API keys used for such a temporary network should problably be named with prefix 'API_FACTORY_' or similar .
+#  (with very short expiration)
+
+
+
+
+
+# WARNING: Avoid addresses that are internet routable or may conflict with hosting providers, etc.
+# WARNING: Avoid HappyCAN (aka. FakeCAN), related special IP ranges, etc.
+#  Beware HappyCAN and related allocations are extremely broad, as absolutely necessary to avoid unreliable centralized services by uniquely numbering devices according to bitmask within ranges representing purpose, peripherial, and sensor/actuator/etc .
+# Do NOT use 10.x.x.x , all of these addresses are either used by HappyCAN, or reserved for servers sharing possible connectivity through a HappyCAN compliant network.
+#
+# https://en.wikipedia.org/wiki/Reserved_IP_addresses#IPv4
+# https://www.techspot.com/guides/287-default-router-ip-addresses/
+#
+# 172.16.0.0/12  172.16.0.0–172.31.255.255  Explicit FAIL (filtered out) for HappyCAN fw. RECOMMENDED!
+# 198.18.0.0/15  198.18.0.0–198.19.255.255	 Official purpose is benchmarking between networks. May be appropriate in practice for such very high-performance temporary private networks.
+
+
+# WARNING: Choose port outside RESERVED ranges but within otherwise allocated range 38000:38999 . Allowed through fw by default as a range of ports only used for those specific production network services which have established methods of safe use.
+# WARNING: Ports 38000-38010 RESERVED for laboratory network experimentation with pipes , both TCP and UDP.
+# WARNING: Ports 38085-38099 RESERVED for laboratory network experimentation with pipes , both TCP and UDP.
+# WARNING: Ports 38400-38699 RESERVED for laboratory network experimentation with pipes , both TCP and UDP (especially for RF frequency mixing or BFSK/OFDM, QAM, etc, conversion or modulation from analog Ethernet/SFP baseband).
+# WARNING: Ports 38800-38899 RESERVED for decentralized replacements for HTTP/HTTPS , peer discovery, etc, both TCP and UDP.
+# WARNING: Ports 38980-38999 RESERVED for gizmos , both TCP and UDP.
+#
+# Do NOT use 38020, 38021, 38022, etc (ie. SSH, SFTP, FTP, etc, suffixes) .
+#
+# https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
+#
+# Convention is '380xx' prefix, then the common port number . For an SSH server, '38022' would be reasonable.
+#
+# VPN server port '38024'  suggested .
+
+
+# Beware servers which must NOT be reachable outside the VPN must use a port range blocked by firewall by default.
+#
+# (from _findPort)
+##Non public ports are between 49152-65535 (2^15 + 2^14 to 2^16 - 1).
+##Convention is to assign ports 55000-65499 and 50025-53999 to specialized servers.
+##read lower_port upper_port < /proc/sys/net/ipv4/ip_local_port_range
+#[[ "$lower_port" == "" ]] && lower_port=54000
+#[[ "$upper_port" == "" ]] && upper_port=54999
+#
+# NFS/VPN server port '52049'  suggested .
+# CIFS/VPN server port '53020'  suggested .
+# SMB/VPN server port '50445'  suggested .
+
+
+
+
+
+# https://upcloud.com/resources/tutorials/get-started-wireguard-vpn?utm_source=chatgpt.com
+#/etc/wireguard/wg0.conf
+_here_wireguard() {
+
+    cat << CZXWXcRMTo8EmM8i4d
+
+[Interface]
+PrivateKey = $WIREGUARD_PRIVATE
+#Address = 10.0.0.1/24
+Address = 172.16.0.1/24
+#PostUp = 
+#PostDown = 
+ListenPort = $WIREGUARD_PORT
+
+[Peer]
+PublicKey = $WIREGUARD_PUBLIC
+#AllowedIPs = 10.0.0.2/32
+AllowedIPs = 172.16.0.0/12
+
+
+CZXWXcRMTo8EmM8i4d
+}
+
+
+_server_sequence-wireguard() {
+    _mustBeRoot
+
+    _start
+
+    _messageNormal '_server-wireguard: init'
+    [[ "$WIREGUARD_PORT" == "" ]] && WIREGUARD_PORT="38024"
+
+    if [[ "$WIREGUARD_PRIVATE" == "" ]] || [[ "$WIREGUARD_PUBLIC" == "" ]]
+    then
+        if [[ -e /etc/wireguard/privatekey ]] && [[ -e /etc/wireguard/publickey ]]
+        then
+            export WIREGUARD_PRIVATE=$(cat /etc/wireguard/privatekey)
+            export WIREGUARD_PUBLIC=$(cat /etc/wireguard/publickey)
+        fi
+    fi
+
+    if [[ "$WIREGUARD_PRIVATE" == "" ]] || [[ "$WIREGUARD_PUBLIC" == "" ]]
+    then
+        # Create.
+        wg genkey | tee /etc/wireguard/privatekey | wg pubkey > /etc/wireguard/publickey
+
+        export WIREGUARD_PRIVATE=$(cat /etc/wireguard/privatekey)
+        export WIREGUARD_PUBLIC=$(cat /etc/wireguard/publickey)
+    fi
+
+    if [[ -e /etc/wireguard/wg0.conf ]]
+    then
+        _messageNormal '_server-wireguard: down'
+        wg-quick down wg0
+    fi
+
+    _messageNormal '_server-wireguard: sysctl'
+    ## Enable port forward (if necessary and appropriate).
+    if ! cat /etc/sysctl.conf | grep '^net.ipv4.ip_forward=1' > /dev/null 2>&1
+    then
+        echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
+        sysctl -w net.ipv4.ip_forward=1
+    fi
+    if ! sysctl -a 2>/dev/null | grep '^net.ipv4.ip_forward = 1' > /dev/null 2>&1
+    then
+        _messagePlain_bad 'bad: FAIL: sysctl: net.ipv4.ip_forward != 1'
+        _messageFAIL
+    fi
+    if sysctl -a 2>/dev/null | grep '^net.ipv4.ip_forward = 1' > /dev/null 2>&1
+    then
+        _messagePlain_good 'good: sysctl: net.ipv4.ip_forward'
+    fi
+
+    _messageNormal '_server-wireguard: config'
+    _here_wireguard > /etc/wireguard/wg0.conf
+    
+
+    
+    _messageNormal '_server-wireguard: up'
+
+    # ATTRIBUTION-AI: ChatGPT 4.5 Deep Research  2025-05-05
+    export WG_QUICK_USERSPACE_IMPLEMENTATION="$(command -v wireguard-go || command -v wireguard)"
+    export WG_I_PREFER_BUGGY_USERSPACE_TO_POLISHED_KMOD=1
+
+    wg-quick up wg0
+
+    _messageNormal 'done: _server-wireguard'
+
+    _messagePlain_request 'request: VPN Client Public Key: WIREGUARD_PUBLIC='"$WIREGUARD_PUBLIC"
+
+
+    _stop
+}
+_server-wireguard() {
+    "$scriptAbsoluteLocation" _server_sequence-wireguard "$@"
+}
+
+
+
+
+
+
+
+
 _importShortcuts() {
 	_tryExec "_resetFakeHomeEnv"
 	
@@ -42688,6 +45557,27 @@ CZXWXcRMTo8EmM8i4d
 	_setupUbiquitous_accessories_here-nixenv-bashrc
 
 	
+}
+
+
+
+
+
+_setupUbiquitous_accessories_here-vimrc() {
+	cat << CZXWXcRMTo8EmM8i4d
+
+
+
+" ubcore
+
+" https://stackoverflow.com/questions/27871937/markdown-syntax-coloring-for-less-pager
+" https://www.benpickles.com/articles/88-vim-syntax-highlight-markdown-code-blocks
+" https://github.com/tpope/vim-markdown
+let g:markdown_fenced_languages = ['html', 'js=javascript', 'ruby', 'python', 'bash=sh']
+let g:markdown_minlines = 1750
+
+
+CZXWXcRMTo8EmM8i4d
 }
 
 
@@ -43069,6 +45959,20 @@ CZXWXcRMTo8EmM8i4d
 
 
 
+_setupUbiquitous_accessories_here-convenience() {
+		cat << CZXWXcRMTo8EmM8i4d
+
+# Equivalence to Dockerfile .
+#alias RUN=_bin
+alias RUN=""
+#  #RUN ( echo test )
+
+CZXWXcRMTo8EmM8i4d
+
+}
+
+
+
 
 
 _setupUbiquitous_accessories_here-user_bashrc() {
@@ -43082,6 +45986,47 @@ _setupUbiquitous_accessories_here-user_bashrc() {
 if [[ -e "$HOME"/_bashrc ]]
 then
 	. "$HOME"/_bashrc
+fi
+
+CZXWXcRMTo8EmM8i4d
+
+}
+
+
+_setupUbiquitous_accessories_here-container_environment() {
+	
+	cat << CZXWXcRMTo8EmM8i4d
+
+# Coordinator/Worker, SSH Authorized
+if [[ "\$SSH_pub_Coordinator_01" != "" ]] || [[ "\$PUBLIC_KEY" != "" ]]
+then
+	_ubcore_add_authorized_SSH() {
+		[[ "\$1" == "" ]] && return 0
+
+		mkdir -p "$HOME"/.ssh
+		chmod 700 "$HOME"/.ssh 2> /dev/null
+		
+		local currentString=\$(printf '%s' "\$1" | awk '{print \$2}' | tr -dc 'a-zA-Z0-9')
+
+		[[ ! -e "$HOME"/.ssh/authorized_keys ]] && echo -n > "$HOME"/.ssh/authorized_keys && chmod 600 "$HOME"/.ssh/authorized_keys
+		if cat "$HOME"/.ssh/authorized_keys | tr -dc 'a-zA-Z0-9' | grep "\$currentString" > /dev/null 2>&1
+		then
+			return 0
+		else
+			echo "\$1" >> "$HOME"/.ssh/authorized_keys
+			chmod 600 "$HOME"/.ssh/authorized_keys
+			return 0
+		fi
+		return 1
+	}
+
+	_ubcore_add_authorized_SSH "\$PUBLIC_KEY"
+	
+	_ubcore_add_authorized_SSH "\$SSH_pub_Coordinator_01"
+	_ubcore_add_authorized_SSH "\$SSH_pub_Coordinator_02"
+	_ubcore_add_authorized_SSH "\$SSH_pub_Coordinator_03"
+
+	unset _ubcore_add_authorized_SSH
 fi
 
 CZXWXcRMTo8EmM8i4d
@@ -43113,6 +46058,17 @@ _setupUbiquitous_accessories-plasma() {
 	chmod u+x "$HOME"/.config/plasma-workspace/env/profile.sh
 	
 	
+	return 0
+}
+
+_setupUbiquitous_accessories-vim() {
+	_messagePlain_nominal 'init: _setupUbiquitous_accessories-gnuoctave'
+	
+	if ! grep ubcore "$ubHome"/.vimrc > /dev/null 2>&1 && _messagePlain_probe 'vimrc'
+	then
+		_setupUbiquitous_accessories_here-vimrc >> "$ubHome"/.vimrc
+	fi
+
 	return 0
 }
 
@@ -43201,6 +46157,9 @@ _setupUbiquitous_accessories() {
 
 	_setupUbiquitous_accessories-plasma "$@"
 
+
+	_setupUbiquitous_accessories-vim "$@"
+
 	
 	_setupUbiquitous_accessories-gnuoctave "$@"
 	
@@ -43222,13 +46181,19 @@ _setupUbiquitous_accessories_bashrc() {
 	
 	
 	_setupUbiquitous_accessories_here-coreoracle_bashrc "$@"
+
+
+	_setupUbiquitous_accessories_here-convenience "$@"
 	
 	
-	# WARNING: Python must remain last. Failure to hook python is a failure that must show as an error exit status from the users profile (a red "1" on the first line of first visual prompt command prompt).
+	# WARNING: Python should remain last if possible. Failure to hook python is a failure that must show as an error exit status from the users profile (a red "1" on the first line of first visual prompt command prompt).
+	#  WARNING: Do NOT use 'currentExitStatus_python_bashrc' or similar varaibles unless this exit status is really necessary. Performance cost will be significant. Do not attempt to use a 'return' statement, rather if attempting to implement this, instead run 'true' or 'false' at the end of the 'ubcorerc' script depending on the exit status. Discouraged.
 	_setupUbiquitous_accessories_here-python_bashrc "$@"
 	
 	
 	_setupUbiquitous_accessories_here-user_bashrc "$@"
+
+	_setupUbiquitous_accessories_here-container_environment "$@"
 	
 	#echo true
 }
@@ -43319,8 +46284,15 @@ PS1_lineNumber=""
 export profileScriptLocation="$ubcoreUBdir"/ubcore.sh
 #export profileScriptLocation="$ubcoreUBdir"/lean.sh
 export profileScriptFolder="$ubcoreUBdir"
-[[ "\$scriptAbsoluteLocation" != "" ]] && . "\$scriptAbsoluteLocation" --parent _importShortcuts
-[[ "\$scriptAbsoluteLocation" == "" ]] && . "\$profileScriptLocation" --profile _importShortcuts
+if [[ "\$force_profileScriptLocation" == "" ]]
+then
+	[[ "\$scriptAbsoluteLocation" != "" ]] && . "\$scriptAbsoluteLocation" --parent _importShortcuts
+	[[ "\$scriptAbsoluteLocation" == "" ]] && . "\$profileScriptLocation" --profile _importShortcuts
+else
+	export profileScriptLocation="\$force_profileScriptLocation"
+	export profileScriptFolder="\$force_profileScriptFolder"
+	[[ "\$force_profileScriptLocation" != "" ]] && . "\$force_profileScriptLocation" --profile _importShortcuts
+fi
 [[ "\$ub_setScriptChecksum_disable" == 'true' ]] && export ub_setScriptChecksum_disable="" && unset ub_setScriptChecksum_disable
 
 # Returns priority to normal.
@@ -43379,6 +46351,16 @@ true
 
 CZXWXcRMTo8EmM8i4d
 
+
+	cat << CZXWXcRMTo8EmM8i4d
+
+[[ -e /info_factoryMOTD.txt ]] && cat /info_factoryMOTD.txt
+#[[ -e /info_factoryMOTD.sh ]] && . /info_factoryMOTD.sh
+
+true
+
+CZXWXcRMTo8EmM8i4d
+
 }
 
 
@@ -43407,8 +46389,9 @@ _setupUbiquitous_resize() {
 
 _install_certs() {
     _messageNormal 'install: certs'
-    if _if_cygwin
+    if [[ $(id -u 2> /dev/null) == "0" ]] || [[ "$USER" == "root" ]] || _if_cygwin
     then
+    
         # Editing the Cygwin root filesystem itself, root permissions granted within Cygwin environment itself are effective.
         sudo() {
             [[ "$1" == "-n" ]] && shift
@@ -43536,7 +46519,7 @@ _selfCloneUbiquitous() {
 	cp -a "$scriptAbsoluteFolder"/lean.py "$ubcoreUBdir"/lean.py > /dev/null 2>&1
 	[[ "$?" != "0" ]] && currentExitStatus="1"
 
-	mkdir "$ubcoreUBdir"/_lib/kit/app/researchEngine/kit/certs
+	mkdir -p "$ubcoreUBdir"/_lib/kit/app/researchEngine/kit/certs
 	if [[ -e "$scriptAbsoluteFolder"/_lib/kit/app/researchEngine/kit/certs ]]
 	then
 		cp -a "$scriptAbsoluteFolder"/_lib/kit/app/researchEngine/kit/certs/* "$ubcoreUBdir"/_lib/kit/app/researchEngine/kit/certs/
@@ -46213,6 +49196,73 @@ _set_msw_ghToken() {
     return 0
 }
 
+_set_msw_apiToken() {
+    if [[ "$WSLENV" != "OPENAI_API_KEY" ]] && [[ "$WSLENV" != "OPENAI_API_KEY"* ]] && [[ "$WSLENV" != *"OPENAI_API_KEY" ]] && [[ "$WSLENV" != *"OPENAI_API_KEY"* ]]
+    then
+        if [[ "$WSLENV" == "" ]]
+        then
+            export WSLENV="OPENAI_API_KEY"
+        else
+            export WSLENV="$WSLENV:OPENAI_API_KEY"
+        fi
+    fi
+    if [[ "$WSLENV" != "OPENROUTER_API_KEY" ]] && [[ "$WSLENV" != "OPENROUTER_API_KEY"* ]] && [[ "$WSLENV" != *"OPENROUTER_API_KEY" ]] && [[ "$WSLENV" != *"OPENROUTER_API_KEY"* ]]
+    then
+        if [[ "$WSLENV" == "" ]]
+        then
+            export WSLENV="OPENROUTER_API_KEY"
+        else
+            export WSLENV="$WSLENV:OPENROUTER_API_KEY"
+        fi
+    fi
+    if [[ "$WSLENV" != "HF_AKI_KEY" ]] && [[ "$WSLENV" != "HF_AKI_KEY"* ]] && [[ "$WSLENV" != *"HF_AKI_KEY" ]] && [[ "$WSLENV" != *"HF_AKI_KEY"* ]]
+    then
+        if [[ "$WSLENV" == "" ]]
+        then
+            export WSLENV="HF_AKI_KEY"
+        else
+            export WSLENV="$WSLENV:HF_AKI_KEY"
+        fi
+    fi
+    if [[ "$WSLENV" != "HF_TOKEN" ]] && [[ "$WSLENV" != "HF_TOKEN"* ]] && [[ "$WSLENV" != *"HF_TOKEN" ]] && [[ "$WSLENV" != *"HF_TOKEN"* ]]
+    then
+        if [[ "$WSLENV" == "" ]]
+        then
+            export WSLENV="HF_TOKEN"
+        else
+            export WSLENV="$WSLENV:HF_TOKEN"
+        fi
+    fi
+    if [[ "$WSLENV" != "PUBLIC_KEY" ]] && [[ "$WSLENV" != "PUBLIC_KEY"* ]] && [[ "$WSLENV" != *"PUBLIC_KEY" ]] && [[ "$WSLENV" != *"PUBLIC_KEY"* ]]
+    then
+        if [[ "$WSLENV" == "" ]]
+        then
+            export WSLENV="PUBLIC_KEY"
+        else
+            export WSLENV="$WSLENV:PUBLIC_KEY"
+        fi
+    fi
+    if [[ "$WSLENV" != "JUPYTER_PASSWORD" ]] && [[ "$WSLENV" != "JUPYTER_PASSWORD"* ]] && [[ "$WSLENV" != *"JUPYTER_PASSWORD" ]] && [[ "$WSLENV" != *"JUPYTER_PASSWORD"* ]]
+    then
+        if [[ "$WSLENV" == "" ]]
+        then
+            export WSLENV="JUPYTER_PASSWORD"
+        else
+            export WSLENV="$WSLENV:JUPYTER_PASSWORD"
+        fi
+    fi
+    if [[ "$WSLENV" != "ai_safety" ]] && [[ "$WSLENV" != "ai_safety"* ]] && [[ "$WSLENV" != *"ai_safety" ]] && [[ "$WSLENV" != *"ai_safety"* ]]
+    then
+        if [[ "$WSLENV" == "" ]]
+        then
+            export WSLENV="ai_safety"
+        else
+            export WSLENV="$WSLENV:ai_safety"
+        fi
+    fi
+    return 0
+}
+
 
 _set_msw_wsl() {
     ! _if_cygwin && return 1
@@ -46221,6 +49271,7 @@ _set_msw_wsl() {
     _set_msw_qt5ct
 
     _set_msw_ghToken
+    _set_msw_apiToken
 
     return 0
 }
@@ -54281,18 +57332,32 @@ _test-shell-cygwin() {
 	
 	local currentPathCount
 	currentPathCount=$(echo "$PATH" | grep -o ':' | wc -l | tr -dc '0-9')
-	if [[ "$currentPathCount" -gt 50 ]]
+	#if [[ "$currentPathCount" -gt 50 ]]
+	if [[ "$currentPathCount" -gt 66 ]]
 	then
 		echo 'fail: count: PATH: '"$currentPathCount"
 		_messageFAIL
 	fi
-	if [[ "$currentPathCount" -gt 44 ]]
+	#if [[ "$currentPathCount" -gt 44 ]]
+	if [[ "$currentPathCount" -gt 60 ]]
 	then
 		echo 'warn: count: PATH: '"$currentPathCount"
 		echo 'warn: MSWEXTPATH may be ignored'
 		_messagePlain_request 'request: reduce the length of PATH variable'
 	fi
 	
+	if [[ "$currentPathCount" -gt 48 ]]
+	then
+		echo 'warn: count: PATH: '"$currentPathCount"
+		echo 'warn: MSWEXTPATH exceeds preferred 48'
+		_messagePlain_request 'request: reduce the length of PATH variable'
+	fi
+	if [[ "$currentPathCount" -gt 44 ]]
+	then
+		echo 'warn: count: PATH: '"$currentPathCount"
+		echo 'warn: MSWEXTPATH exceeds preferred 44'
+		_messagePlain_request 'request: reduce the length of PATH variable'
+	fi
 	if [[ "$currentPathCount" -gt 32 ]]
 	then
 		echo 'warn: count: PATH: '"$currentPathCount"
@@ -64422,6 +67487,8 @@ _init_deps() {
 	export enUb_generic=""
 
 	export enUb_dev_buildOps=""
+
+	export enUb_dev_ai=""
 	
 	export enUb_cloud_heavy=""
 	
@@ -64440,6 +67507,7 @@ _init_deps() {
 	export enUb_distro=""
 	export enUb_getMinimal=""
 	export enUb_getMost_special_veracrypt=""
+	export enUb_getMost_special_npm=""
 	export enUb_build=""
 	export enUb_buildBash=""
 	export enUb_os_x11=""
@@ -64506,7 +67574,11 @@ _init_deps() {
 
 	export enUb_ai_shortcuts=""
 	export enUb_ollama_shortcuts=""
+	export enUb_ai_augment=""
 	export enUb_factory_shortcuts=""
+	export enUb_factory_shortcuts_ops=""
+
+	export enUb_server=""
 }
 
 _deps_generic() {
@@ -64534,6 +67606,10 @@ _deps_dev_buildOps() {
 	_deps_generic
 	
 	export enUb_dev_buildOps="true"
+}
+
+_deps_dev_ai() {
+	export enUb_dev_ai="true"
 }
 
 _deps_cloud_heavy() {
@@ -64611,6 +67687,10 @@ _deps_distro() {
 
 _deps_getMinimal() {
 	export enUb_getMinimal="true"
+}
+
+_deps_get_npm() {
+	export enUb_getMost_special_npm="true"
 }
 
 _deps_getVeracrypt() {
@@ -64914,15 +67994,38 @@ _deps_calculators() {
 
 _deps_ai_shortcuts() {
 	_deps_generic
+
+	_deps_ai
 	
 	export enUb_ai_shortcuts="true"
 	export enUb_ollama_shortcuts="true"
+}
+_deps_ai_augment() {
+	_deps_ai_shortcuts
+
+	export enUb_ai_augment="true"
 }
 
 _deps_factory_shortcuts() {
 	_deps_generic
 	
 	export enUb_factory_shortcuts="true"
+}
+_deps_factory_shortcuts_ops() {
+	_deps_generic
+	
+	export enUb_factory_shortcuts_ops="true"
+}
+
+_deps_server() {
+	_deps_generic
+
+	_deps_fw
+
+	_deps_factory_shortcuts
+	_deps_factory_shortcuts_ops
+	
+	export enUb_server="true"
 }
 
 #placeholder, define under "queue/build"
@@ -65415,6 +68518,8 @@ _compile_bash_deps() {
 	
 	if [[ "$1" == "lean" ]]
 	then
+		_deps_dev_ai
+		
 		_deps_dev_buildOps
 		
 		#_deps_git
@@ -65437,6 +68542,8 @@ _compile_bash_deps() {
 	# Specifically intended to be imported into user profile.
 	if [[ "$1" == "ubcore" ]]
 	then
+		_deps_dev_ai
+		
 		_deps_dev_buildOps
 		
 		_deps_notLean
@@ -65472,6 +68579,7 @@ _compile_bash_deps() {
 		
 		_deps_distro
 		_deps_getMinimal
+		_deps_get_npm
 		_deps_getVeracrypt
 		_deps_linux
 		
@@ -65488,6 +68596,7 @@ _compile_bash_deps() {
 		
 		_deps_ai
 		_deps_ai_shortcuts
+		_deps_ai_augment
 
 		#_deps_ai
 		_deps_ai_dataset
@@ -65495,6 +68604,9 @@ _compile_bash_deps() {
 		_deps_ai_knowledge
 
 		_deps_factory_shortcuts
+		_deps_factory_shortcuts_ops
+
+		_deps_server
 		
 		_deps_calculators
 		
@@ -65550,6 +68662,8 @@ _compile_bash_deps() {
 	
 	if [[ "$1" == "processor" ]]
 	then
+		_deps_dev_ai
+		
 		_deps_dev
 		_deps_dev_buildOps
 		
@@ -65560,6 +68674,7 @@ _compile_bash_deps() {
 		
 		_deps_ai
 		_deps_ai_shortcuts
+		_deps_ai_augment
 
 		#_deps_ai
 		_deps_ai_dataset
@@ -65567,6 +68682,8 @@ _compile_bash_deps() {
 		_deps_ai_knowledge
 
 		_deps_factory_shortcuts
+
+		_deps_server
 		
 		_deps_calculators
 		
@@ -65586,6 +68703,8 @@ _compile_bash_deps() {
 	
 	if [[ "$1" == "abstract" ]] || [[ "$1" == "abstractfs" ]]
 	then
+		_deps_dev_ai
+		
 		_deps_dev
 		_deps_dev_buildOps
 		
@@ -65594,6 +68713,7 @@ _compile_bash_deps() {
 		
 		_deps_ai
 		_deps_ai_shortcuts
+		_deps_ai_augment
 
 		#_deps_ai
 		_deps_ai_dataset
@@ -65621,6 +68741,8 @@ _compile_bash_deps() {
 	# Beware most uses of fakehome will benefit from full virtualization fallback.
 	if [[ "$1" == "fakehome" ]]
 	then
+		_deps_dev_ai
+		
 		_deps_dev
 		_deps_dev_buildOps
 		
@@ -65629,6 +68751,7 @@ _compile_bash_deps() {
 		
 		_deps_ai
 		_deps_ai_shortcuts
+		_deps_ai_augment
 
 		#_deps_ai
 		_deps_ai_dataset
@@ -65656,6 +68779,8 @@ _compile_bash_deps() {
 	
 	if [[ "$1" == "monolithic" ]]
 	then
+		_deps_dev_ai
+		
 		_deps_dev_heavy
 		#_deps_dev_heavy_atom
 		_deps_dev
@@ -65701,6 +68826,7 @@ _compile_bash_deps() {
 		
 		_deps_ai
 		_deps_ai_shortcuts
+		_deps_ai_augment
 
 		#_deps_ai
 		_deps_ai_dataset
@@ -65708,6 +68834,8 @@ _compile_bash_deps() {
 		_deps_ai_knowledge
 
 		_deps_factory_shortcuts
+
+		_deps_server
 		
 		_deps_calculators
 		
@@ -65730,6 +68858,7 @@ _compile_bash_deps() {
 		
 		_deps_distro
 		_deps_getMinimal
+		_deps_get_npm
 		_deps_getVeracrypt
 		
 		#_deps_blockchain
@@ -65771,6 +68900,8 @@ _compile_bash_deps() {
 	
 	if [[ "$1" == "core" ]]
 	then
+		_deps_dev_ai
+		
 		_deps_dev_heavy
 		#_deps_dev_heavy_atom
 		_deps_dev
@@ -65816,6 +68947,7 @@ _compile_bash_deps() {
 		
 		_deps_ai
 		_deps_ai_shortcuts
+		_deps_ai_augment
 
 		#_deps_ai
 		_deps_ai_dataset
@@ -65823,6 +68955,8 @@ _compile_bash_deps() {
 		_deps_ai_knowledge
 
 		_deps_factory_shortcuts
+
+		_deps_server
 		
 		_deps_calculators
 		
@@ -65845,6 +68979,7 @@ _compile_bash_deps() {
 		
 		_deps_distro
 		_deps_getMinimal
+		_deps_get_npm
 		_deps_getVeracrypt
 		
 		#_deps_blockchain
@@ -65887,10 +69022,13 @@ _compile_bash_deps() {
 	# In practice, 'core' now includes '_deps_ai' by default to support '_deps_ai_dataset' .
 	if [[ "$1" == "core_ai" ]]
 	then
+		_deps_dev_ai
+		
 		_deps_virtPython
 		
 		_deps_ai
 		_deps_ai_shortcuts
+		_deps_ai_augment
 		_compile_bash_deps 'core'
 
 		#_deps_ai
@@ -65899,10 +69037,14 @@ _compile_bash_deps() {
 		_deps_ai_knowledge
 
 		_deps_factory_shortcuts
+
+		_deps_server
 	fi
 	
 	if [[ "$1" == "" ]] || [[ "$1" == "ubiquitous_bash" ]] || [[ "$1" == "ubiquitous_bash.sh" ]] || [[ "$1" == "complete" ]]
 	then
+		_deps_dev_ai
+		
 		_deps_dev_heavy
 		#_deps_dev_heavy_atom
 		_deps_dev
@@ -65948,6 +69090,7 @@ _compile_bash_deps() {
 		
 		_deps_ai
 		_deps_ai_shortcuts
+		_deps_ai_augment
 
 		#_deps_ai
 		_deps_ai_dataset
@@ -65955,6 +69098,9 @@ _compile_bash_deps() {
 		_deps_ai_knowledge
 
 		_deps_factory_shortcuts
+		_deps_factory_shortcuts_ops
+
+		_deps_server
 		
 		_deps_calculators
 		
@@ -65977,6 +69123,7 @@ _compile_bash_deps() {
 		
 		_deps_distro
 		_deps_getMinimal
+		_deps_get_npm
 		_deps_getVeracrypt
 		
 		_deps_blockchain
@@ -66163,6 +69310,8 @@ _compile_bash_utilities() {
 	( [[ "$enUb_notLean" == "true" ]] || [[ "$enUb_getMinimal" == "true" ]] ) && includeScriptList+=( "os/distro/unix/openssl"/splice_openssl.sh )
 	
 	( [[ "$enUb_notLean" == "true" ]] || [[ "$enUb_getMinimal" == "true" ]] ) && includeScriptList+=( "os/distro"/getMost_special_zWorkarounds.sh )
+
+	( [[ "$enUb_notLean" == "true" ]] || [[ "$enUb_getMinimal" == "true" ]] || [[ "$enUb_getMost_special_npm" == "true" ]] ) && includeScriptList+=( "os/distro"/getMost_special_npm.sh )
 	
 	( [[ "$enUb_notLean" == "true" ]] || [[ "$enUb_getMinimal" == "true" ]] || [[ "$enUb_getMost_special_veracrypt" == "true" ]] ) && includeScriptList+=( "os/distro"/getMost_special_veracrypt.sh )
 	
@@ -66307,7 +69456,10 @@ _compile_bash_shortcuts() {
 	[[ "$enUb_ollama" == "true" ]] && includeScriptList+=( "ai/ollama"/ollama.sh )
 	
 	( ( [[ "$enUb_dev_heavy" == "true" ]] ) || [[ "$enUb_ollama_shortcuts" == "true" ]] ) && includeScriptList+=( "shortcuts/ai/ollama"/ollama.sh )
+	
+	( ( [[ "$enUb_dev_heavy" == "true" ]] ) || [[ "$enUb_ai_augment" == "true" ]] ) && includeScriptList+=( "shortcuts/ai/augment"/augment.sh )
 
+	[[ "$enUb_factory_shortcuts" ]] && includeScriptList+=( "shortcuts/factory"/factoryCreate_here.sh )
 	[[ "$enUb_factory_shortcuts" ]] && includeScriptList+=( "shortcuts/factory"/factoryCreate.sh )
 	[[ "$enUb_factory_shortcuts" ]] && includeScriptList+=( "shortcuts/factory"/factory.sh )
 	
@@ -66383,6 +69535,10 @@ _compile_bash_shortcuts() {
 	
 	( [[ "$enUb_dev_heavy" == "true" ]] || [[ "$enUb_search" == "true" ]] ) && includeScriptList+=( "shortcuts/dev/app/search"/search.sh )
 	( [[ "$enUb_dev_heavy" == "true" ]] || [[ "$enUb_search" == "true" ]] ) && includeScriptList+=( "shortcuts/dev/app/search/recoll"/recoll.sh )
+	
+	
+	( [[ "$enUb_dev_ai" == "true" ]] ) && includeScriptList+=( "shortcuts/dev/ai"/claude_code.sh )
+	( [[ "$enUb_dev_ai" == "true" ]] ) && includeScriptList+=( "shortcuts/dev/ai"/codex.sh )
 	
 	
 	( [[ "$enUb_cloud_heavy" == "true" ]] || [[ "$enUb_cloud" == "true" ]] ) && includeScriptList+=( "shortcuts/cloud/self/screenScraper"/screenScraper-nix.sh )
@@ -66468,6 +69624,11 @@ _compile_bash_shortcuts() {
 	[[ "$enUb_linux" == "true" ]] && includeScriptList+=( "shortcuts/linux"/kernelConfig_platform.sh )
 	
 	[[ "$enUb_linux" == "true" ]] && includeScriptList+=( "shortcuts/linux"/bfq.sh )
+
+	
+	[[ "$enUb_server" ]] && includeScriptList+=( "server"/coordinatorWorker.sh )
+
+	[[ "$enUb_server" ]] && includeScriptList+=( "server"/wireguard.sh )
 }
 
 _compile_bash_shortcuts_setup() {
@@ -66662,6 +69823,8 @@ _compile_bash_selfHost() {
 
 _compile_bash_overrides() {
 	export includeScriptList
+	
+	[[ "$enUb_factory_shortcuts_ops" ]] && includeScriptList+=( "shortcuts/factory"/factory-ops.sh )
 	
 	[[ "$enUb_dev_buildOps" == "true" ]] && includeScriptList+=( "build/zSpecial"/build-ops.sh )
 	
@@ -67159,6 +70322,53 @@ _compile_bash_entry_prog() {
 }
 
 
+# Very unusual.
+_factory_ops() {
+    #if [[ "$ub_ops_disable" != 'true' ]]
+    #then
+        #if [[ "$objectName" == "ubiquitous_bash" ]] #&& false
+        #then
+            if [[ -e "$scriptAbsoluteFolder"/shortcuts/factory/factory.sh ]] && [[ -e "$scriptAbsoluteFolder"/shortcuts/factory/factoryCreate.sh ]] && [[ -e "$scriptAbsoluteFolder"/shortcuts/factory/factoryCreate_here.sh ]]
+            then
+                . "$scriptAbsoluteFolder"/shortcuts/factory/factory.sh
+                . "$scriptAbsoluteFolder"/shortcuts/factory/factoryCreate.sh
+                . "$scriptAbsoluteFolder"/shortcuts/factory/factoryCreate_here.sh
+            fi
+        #fi
+    #fi
+}
+if [[ "$ub_ops_disable" != 'true' ]]
+then
+    if [[ "$objectName" == "ubiquitous_bash" ]] #&& false
+    then
+        _factory_ops
+    fi
+fi
+
+
+# Before calling function, get latest function version .
+#if [[ "$recursionGuard_factory_ops" == "" ]]
+#then
+    #_factory_ops_recursion "$@"
+    #return
+#fi
+_factory_ops_recursion() {
+    local currentExitStatus_recursion=""
+    _factory_ops
+    if [[ "$recursionGuard_factory_ops" == "" ]]
+    then
+        export recursionGuard_factory_ops="true"
+        "${FUNCNAME[1]}" "$@"
+        currentExitStatus_recursion="$?"
+        export recursionGuard_factory_ops=""
+        unset recursionGuard_factory_ops
+        return "$currentExitStatus_recursion"
+    fi
+}
+
+
+
+
 # ATTENTION: You probably do NOT want to bother with this specialized build system.
 #
 # WARNING: No production use.
@@ -67416,6 +70626,22 @@ _bash() {
 	[[ "$ub_scope_name" != "" ]] && _scopePrompt
 	
 	_safe_declare_uid
+
+
+	## CAUTION: Usually STUPID AND DANGEROUS . No production use. Exclusively for 'ubiquitous_bash' itself development.
+	## Proper use of embedded scripts, '--embed', etc, is provided by the '_scope' functions, etc, intended for such purposes in almost all cases.
+	##
+	## WARNING: May be untested. May break 'python', 'bash', 'octave', etc. May break any '.bashrc', '.ubcorerc', python hooks, other hooks, etc. May break '_setupUbiquitous'.
+	## Bad idea. Very specialized. Broken inheritance.
+	##
+	## No known use.
+	## Functions, etc, are NOT inherited by bash terminal from script.
+	##
+	#if [[ "$1" == "--norc" ]] && [[ "$2" == "-i" ]] && [[ "$scriptAbsoluteLocation" == *"ubcore.sh" ]]
+	#then
+		#bash "$@"
+		#return
+	#fi
 	
 	
 	[[ "$1" == '-i' ]] && shift
