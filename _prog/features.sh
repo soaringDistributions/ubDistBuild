@@ -454,7 +454,7 @@ _setup_vm-wsl2_sequence() {
     wsl -d "ubdist_fallback" sudo -n systemctl stop ollama.service
     
 
-    _install_vm-wsl2-portForward ubdist
+    _install_vm-wsl2-portForward ubdist notBooting
     
 
 
@@ -892,9 +892,57 @@ _install_vm-wsl2-kernel() {
 
 
 _install_vm-wsl2-portForward() {
-    if ! wsl -d ubdist echo available | grep available > /dev/null 2>&1
+    if [[ "$2" != "notBooting" ]]
     then
-        _messagePlain_warn 'warn: _install_vm-wsl2-portForward: wsl: ubdist: missing'
+        echo
+        local currentIteration=0
+        for (( currentIteration=0; currentIteration<25; currentIteration++ ))
+        do
+            echo -n .
+            sleep 1
+        done
+        echo
+
+        wsl -d "ubdist" sudo -n systemctl stop hostport-proxy.service
+        wsl -d "ubdist" sudo -n systemctl disable hostport-proxy.service
+        wsl -d "ubdist" sudo -n systemctl stop ollama.service
+        wsl -d "ubdist" sudo -n systemctl disable ollama.service
+
+
+        ollama ls > /dev/null 2>&1
+
+
+        echo
+        local currentIteration=0
+        for (( currentIteration=0; currentIteration<10; currentIteration++ ))
+        do
+            echo -n .
+            sleep 1
+        done
+        echo
+
+        
+        ollama ls > /dev/null 2>&1
+
+
+        echo
+        local currentIteration=0
+        for (( currentIteration=0; currentIteration<5; currentIteration++ ))
+        do
+            echo -n .
+            sleep 1
+        done
+        echo
+    fi
+    
+    local current_wsldist
+    current_wsldist="$1"
+    [[ "$current_wsldist" == "" ]] && current_wsldist="ubdist"
+
+    
+    if ! wsl -d "$current_wsldist" echo available | grep available > /dev/null 2>&1
+    then
+        _messagePlain_warn 'warn: _install_vm-wsl2-portForward: wsl: '"$current_wsldist"': missing'
         #_messageFAIL
         #_stop 1
         return 1
@@ -902,9 +950,9 @@ _install_vm-wsl2-portForward() {
 
     _setup_wsl2_procedure-fw
 
-    _setup_wsl2_procedure-portproxy ubdist
+    _setup_wsl2_procedure-portproxy "$current_wsldist"
 
-    _setup_wsl2_guest-portForward ubdist
+    _setup_wsl2_guest-portForward "$current_wsldist"
 }
 
 
