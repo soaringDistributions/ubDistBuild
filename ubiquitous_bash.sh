@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1587287882'
+export ub_setScriptChecksum_contents='3061194022'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -27226,7 +27226,7 @@ _service_ollama() {
 _service_ollama_augment() {
 	if _if_cygwin && ! wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O - > /dev/null 2>&1
 	then
-		nohup ollama ls > /dev/null 2>&1 &
+		( nohup ollama ls > /dev/null 2>&1 & ) > /dev/null
 		disown -r "$!"
 		sleep 7
 	fi
@@ -27239,9 +27239,9 @@ _service_ollama_augment() {
 
 	if _if_wsl && ! wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O - > /dev/null 2>&1
 	then
-		nohup ollama ls > /dev/null 2>&1 &
-		disown -r "$!"
-		sleep 2
+		#( nohup ollama ls > /dev/null 2>&1 & ) > /dev/null
+		#disown -r "$!"
+		#sleep 2
 		
 		##/mnt/c/Windows/System32/cmd.exe /C 'C:\q\p\zCore\infrastructure\ubiquitous_bash\_bin.bat' '/cygdrive/c/q/p/zCore/infrastructure/ubiquitous_bash/ubiquitous_bash.sh' '_bin' 'sleep' '45'
 		##/mnt/c/Windows/System32/cmd.exe /C 'C:\q\p\zCore\infrastructure\ubiquitous_bash\_bin.bat' '/cygdrive/c/q/p/zCore/infrastructure/ubiquitous_bash/ubiquitous_bash.sh' '_bin' '_setup_wsl2_procedure-portproxy' > /dev/null 2>&1
@@ -64571,7 +64571,7 @@ _install_vm-wsl2-portForward() {
         _messageNormal '_install_vm-wsl2-portForward: booting'
 
         # TODO: Possibly enable this, if it will not keep the installer from closing and will not close ollama with the installer.
-        nohup ollama ls > /dev/null 2>&1 &
+        ( nohup ollama ls > /dev/null 2>&1 & ) > /dev/null
 		disown -r "$!"
         sleep 7
         echo .
@@ -64603,7 +64603,7 @@ _install_vm-wsl2-portForward() {
         wsl -d "ubdist" sudo -n systemctl disable ollama.service
 
 
-        nohup ollama ls > /dev/null 2>&1 &
+        ( nohup ollama ls > /dev/null 2>&1 & ) > /dev/null
 		disown -r "$!"
 
 
@@ -64617,7 +64617,7 @@ _install_vm-wsl2-portForward() {
         echo
 
         
-        nohup ollama ls > /dev/null 2>&1 &
+        ( nohup ollama ls > /dev/null 2>&1 & ) > /dev/null
 		disown -r "$!"
 
 
@@ -64655,7 +64655,7 @@ _install_vm-wsl2-portForward() {
         wsl -d "ubdist" sudo -n systemctl disable ollama.service
 
 
-        nohup ollama ls > /dev/null 2>&1 &
+        ( nohup ollama ls > /dev/null 2>&1 & ) > /dev/null
 		disown -r "$!"
 
 
@@ -64669,7 +64669,7 @@ _install_vm-wsl2-portForward() {
         echo
 
         
-        nohup ollama ls > /dev/null 2>&1 &
+        ( nohup ollama ls > /dev/null 2>&1 & ) > /dev/null
 		disown -r "$!"
 
 
