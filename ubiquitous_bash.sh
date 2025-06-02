@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1131744211'
+export ub_setScriptChecksum_contents='2078091548'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -25611,6 +25611,68 @@ _write_wslconfig() {
 
 
 
+if false
+then
+
+# Experiment - boot .
+
+netsh interface portproxy delete v4tov4 listenport=11434 listenaddress=$(wsl -d ubdist cat /net-hostip)
+netsh interface portproxy delete v4tov4 listenport=11434 listenaddress=0.0.0.0
+netsh interface portproxy show v4tov4
+
+wsl -d "ubdist" sudo -n systemctl disable hostport-proxy.service
+wsl -d "ubdist" sudo -n systemctl disable ollama.service
+
+
+
+
+
+# Experiment - run .
+
+wsl -d ubdist wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O -
+netsh interface portproxy show v4tov4
+
+netsh interface portproxy delete v4tov4 listenport=11434 listenaddress=$(wsl -d ubdist cat /net-hostip)
+netsh interface portproxy delete v4tov4 listenport=11434 listenaddress=0.0.0.0
+netsh interface portproxy show v4tov4
+
+wsl -d ubdist wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O -
+
+cd /cygdrive/c/q/p/zCore/infrastructure/ubiquitous_bash
+./ubiquitous_bash.sh _setup_wsl2_procedure-fw
+./ubiquitous_bash.sh _setup_wsl2_procedure-portproxy
+./ubiquitous_bash.sh _setup_wsl2_guest-portForward
+
+netsh interface portproxy add v4tov4 listenport=11434 listenaddress=0.0.0.0 connectport=11434 connectaddress=127.0.0.1
+netsh interface portproxy show v4tov4
+
+sc.exe query iphlpsvc
+netstat -ano | findstr :11434
+wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O -
+
+wsl -d ubdist wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O -
+wsl -d ubdist cat /net-hostip ; wsl -d ubdist wget --timeout=1 --tries=3 'http://'$(wsl -d ubdist cat /net-hostip)':11434' -q -O -
+
+
+
+# Scrap
+
+wsl -d "ubdist" sudo -n systemctl daemon-reload
+#wsl -d "ubdist" sudo -n systemctl enable --now hostport-proxy.service
+
+wsl -d "ubdist" sudo -n systemctl disable hostport-proxy.service
+
+wsl -d "ubdist" sudo -n systemctl restart hostport-proxy.service
+
+
+
+
+
+#_setup_wsl2
+
+
+fi
+
 
 
 _setup_wsl2_guest-portForward() {
@@ -25694,7 +25756,9 @@ CZXWXcRMTo8EmM8i4d
 
     _messagePlain_probe 'systemctl'
     wsl -d "$current_wsldist" sudo -n systemctl daemon-reload
-    wsl -d "$current_wsldist" sudo -n systemctl enable --now hostport-proxy.service
+    #wsl -d "$current_wsldist" sudo -n systemctl enable --now hostport-proxy.service
+
+    wsl -d "$current_wsldist" sudo -n systemctl disable hostport-proxy.service
 
     wsl -d "$current_wsldist" sudo -n systemctl restart hostport-proxy.service
 
@@ -25725,11 +25789,24 @@ New-NetFirewallRule -Name "AllowWSL2-11434" -DisplayName "Allow WSL2 Port 11434 
     -InterfaceAlias "vEthernet (WSL)"
 CZXWXcRMTo8EmM8i4d
 
+    # ATTRIBUTION-AI: ChatGPT o4-mini  2025-06-01
+    # ATTRIBUTION-AI: Llama 3.1 Nemotron Ultra 253b v1  2025-06-01  (translation to one-liner)
+    powershell -Command "Remove-NetFirewallRule -Name 'AllowWSL2-11434 - vEthernet (WSL (Hyper-V firewall))'; Remove-NetFirewallRule -Name 'AllowWSL2-11434 - vEthernet (Default Switch)'; Remove-NetFirewallRule -Name 'AllowWSL2-11434 - vEthernet (WSL)'"
+    powershell -Command "Get-NetFirewallRule -Name 'AllowWSL2-11434*' | Remove-NetFirewallRule"
+    #
+    # DUBIOUS
+    #netsh advfirewall firewall delete rule name="AllowWSL2-11434 - vEthernet (WSL (Hyper-V firewall))"
+    #netsh advfirewall firewall delete rule name="AllowWSL2-11434 - vEthernet (Default Switch)"
+    #netsh advfirewall firewall delete rule name="AllowWSL2-11434 - vEthernet (WSL)"
+
     # ATTRIBUTION-AI: Llama 3.1 Nemotron Ultra 253b v1  2025-06-01  (translation from PowerShell interactive terminal to powershell command call under Cygwin/MSW bash shell)
     # ATTENTION: Not all of these named interfaces usually exist. Cosmetic errors usually occur.
     powershell -Command "New-NetFirewallRule -Name 'AllowWSL2-11434 - vEthernet (WSL (Hyper-V firewall))' -DisplayName 'Allow WSL2 Port 11434 (TCP) - vEthernet (WSL (Hyper-V firewall))' -Description 'Allows inbound TCP port 11434 from WSL2 virtual network only (for NAT port proxy)' -Protocol TCP -Direction Inbound -Action Allow -LocalPort 11434 -InterfaceAlias 'vEthernet (WSL (Hyper-V firewall))'"
     powershell -Command "New-NetFirewallRule -Name 'AllowWSL2-11434 - vEthernet (Default Switch)' -DisplayName 'Allow WSL2 Port 11434 (TCP) - vEthernet (Default Switch)' -Description 'Allows inbound TCP port 11434 from WSL2 virtual network only (for NAT port proxy)' -Protocol TCP -Direction Inbound -Action Allow -LocalPort 11434 -InterfaceAlias 'vEthernet (Default Switch)'"
     powershell -Command "New-NetFirewallRule -Name 'AllowWSL2-11434 - vEthernet (WSL)' -DisplayName 'Allow WSL2 Port 11434 (TCP) - vEthernet (WSL)' -Description 'Allows inbound TCP port 11434 from WSL2 virtual network only (for NAT port proxy)' -Protocol TCP -Direction Inbound -Action Allow -LocalPort 11434 -InterfaceAlias 'vEthernet (WSL)'"
+
+    powershell -Command "New-NetFirewallRule -Name 'AllowWSL2-11434 - InterfaceType' -InterfaceType HyperV -Direction Inbound -LocalPort 11434 -Protocol TCP -Action Allow"
+    
 }
 
 # ATTENTION: NOTICE: Add to 'startup' of MSWindows host, etc, if necessary.
@@ -25931,9 +26008,9 @@ _setup_wsl2_procedure() {
     sleep 5
     wsl --set-default-version 2
 
-    sleep 5
-    _setup_wsl2_procedure-fw
-    _setup_wsl2_procedure-portproxy
+    #sleep 5
+    #_setup_wsl2_procedure-fw
+    #_setup_wsl2_procedure-portproxy
 }
 _setup_wsl2() {
     "$scriptAbsoluteLocation" _setup_wsl2_procedure "$@"
@@ -60683,6 +60760,21 @@ _package_ubDistBuild_rootfs() {
 	_set_ubDistBuild
 	
 	rm -f "$scriptLocal"/package_rootfs.tar.flx > /dev/null 2>&1
+
+	
+	cd "$scriptLocal"
+	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+
+	# If systemctl is usable when 'booting' an instance of 'rootfs', this is usually WSL2, and some services (eg. ollama) could conflict with the host.
+	# Else, if systemctl is not usable, this is usually Docker containers, etc, and such services can be started as needed (ie. _service_ollama_augment ).
+
+	_chroot sudo -n systemctl disable ollama
+	_chroot systemctl disable ollama.service
+	_chroot sudo -n systemctl stop ollama
+	_chroot systemctl stop ollama.service
+
+	! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
 	
 	cd "$scriptLocal"
 	! "$scriptAbsoluteLocation" _openImage && _messagePlain_bad 'fail: _openImage' && _messageFAIL
@@ -63878,7 +63970,8 @@ _setup_vm-wsl2_sequence() {
     mkdir -p '/cygdrive/c/core/infrastructure/ubdist_wsl'
     _userMSW _messagePlain_probe wsl --import ubdist '/cygdrive/c/core/infrastructure/ubdist_wsl' "$scriptLocal"/package_rootfs.tar --version 2
     _userMSW wsl --import ubdist '/cygdrive/c/core/infrastructure/ubdist_wsl' "$scriptLocal"/package_rootfs.tar --version 2
-
+    wsl -d "ubdist" sudo -n systemctl disable ollama.service
+    wsl -d "ubdist" sudo -n systemctl stop ollama.service
 
     # Preserve fallback and rootfs if automatic test is successful. Expected to suffice for rebuilding 'ubdist' or other dist/OS from an MSW host if necessary.
     if wsl -d "ubdist" /bin/true > /dev/null 2>&1 && ! wsl -d "ubdist" /bin/false > /dev/null 2>&1 && wsl -d ubdist /home/user/ubiquitous_bash.sh _true && ! wsl -d ubdist /home/user/ubiquitous_bash.sh _false
@@ -63891,6 +63984,8 @@ _setup_vm-wsl2_sequence() {
         mkdir -p '/cygdrive/c/core/infrastructure/ubdist_wsl_fallback'
         _userMSW _messagePlain_probe wsl --import ubdist_fallback '/cygdrive/c/core/infrastructure/ubdist_wsl_fallback' "$scriptLocal"/package_rootfs.tar --version 2
         _userMSW wsl --import ubdist_fallback '/cygdrive/c/core/infrastructure/ubdist_wsl_fallback' "$scriptLocal"/package_rootfs.tar --version 2
+        wsl -d "ubdist_fallback" sudo -n systemctl disable ollama.service
+        wsl -d "ubdist_fallback" sudo -n systemctl stop ollama.service
 
         if wsl -d "ubdist" /bin/true > /dev/null 2>&1 && ! wsl -d "ubdist" /bin/false > /dev/null 2>&1 && wsl -d ubdist /home/user/ubiquitous_bash.sh _true && ! wsl -d ubdist /home/user/ubiquitous_bash.sh _false
         then
@@ -64005,8 +64100,13 @@ _setup_vm-wsl2_sequence() {
     fi
 
 
+    wsl -d "ubdist" sudo -n systemctl disable ollama.service
+    wsl -d "ubdist" sudo -n systemctl stop ollama.service
+    wsl -d "ubdist_fallback" sudo -n systemctl disable ollama.service
+    wsl -d "ubdist_fallback" sudo -n systemctl stop ollama.service
+    
 
-    _install_vm-wsl2-portForward ubdist
+    _install_vm-wsl2-portForward ubdist notBooting
     
 
 
@@ -64444,9 +64544,57 @@ _install_vm-wsl2-kernel() {
 
 
 _install_vm-wsl2-portForward() {
-    if ! wsl -d ubdist echo available | grep available > /dev/null 2>&1
+    if [[ "$2" != "notBooting" ]]
     then
-        _messagePlain_warn 'warn: _install_vm-wsl2-portForward: wsl: ubdist: missing'
+        echo
+        local currentIteration=0
+        for (( currentIteration=0; currentIteration<25; currentIteration++ ))
+        do
+            echo -n .
+            sleep 1
+        done
+        echo
+
+        wsl -d "ubdist" sudo -n systemctl stop hostport-proxy.service
+        wsl -d "ubdist" sudo -n systemctl disable hostport-proxy.service
+        wsl -d "ubdist" sudo -n systemctl stop ollama.service
+        wsl -d "ubdist" sudo -n systemctl disable ollama.service
+
+
+        ollama ls > /dev/null 2>&1
+
+
+        echo
+        local currentIteration=0
+        for (( currentIteration=0; currentIteration<10; currentIteration++ ))
+        do
+            echo -n .
+            sleep 1
+        done
+        echo
+
+        
+        ollama ls > /dev/null 2>&1
+
+
+        echo
+        local currentIteration=0
+        for (( currentIteration=0; currentIteration<5; currentIteration++ ))
+        do
+            echo -n .
+            sleep 1
+        done
+        echo
+    fi
+    
+    local current_wsldist
+    current_wsldist="$1"
+    [[ "$current_wsldist" == "" ]] && current_wsldist="ubdist"
+
+    
+    if ! wsl -d "$current_wsldist" echo available | grep available > /dev/null 2>&1
+    then
+        _messagePlain_warn 'warn: _install_vm-wsl2-portForward: wsl: '"$current_wsldist"': missing'
         #_messageFAIL
         #_stop 1
         return 1
@@ -64454,9 +64602,9 @@ _install_vm-wsl2-portForward() {
 
     _setup_wsl2_procedure-fw
 
-    _setup_wsl2_procedure-portproxy ubdist
+    _setup_wsl2_procedure-portproxy "$current_wsldist"
 
-    _setup_wsl2_guest-portForward ubdist
+    _setup_wsl2_guest-portForward "$current_wsldist"
 }
 
 
