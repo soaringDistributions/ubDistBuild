@@ -921,7 +921,8 @@ _install_vm-wsl2-portForward() {
 		disown -r "$!"
         sleep 7
         echo .
-        _powershell -NoProfile -Command "Start-Process cmd.exe -ArgumentList '/C','$scriptAbsoluteFolder_msw\_bin.bat','_install_vm-wsl2-portForward','$current_wsldist','bootingAdmin' -Verb RunAs -Wait"
+        #-Wait
+        _powershell -NoProfile -Command "Start-Process cmd.exe -ArgumentList '/C','$scriptAbsoluteFolder_msw\_bin.bat','_install_vm-wsl2-portForward','$current_wsldist','bootingAdmin' -Verb RunAs"
         echo .
         
         return 0
