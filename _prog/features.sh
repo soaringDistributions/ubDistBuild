@@ -917,8 +917,7 @@ _install_vm-wsl2-portForward() {
         _messageNormal '_install_vm-wsl2-portForward: booting'
 
         # TODO: Possibly enable this, if it will not keep the installer from closing and will not close ollama with the installer.
-        ( nohup ollama ls > /dev/null 2>&1 & ) > /dev/null
-		disown -r "$!"
+        ( nohup ollama ls > /dev/null 2>&1 & disown -r "$!" ) > /dev/null
         sleep 7
         echo .
         #-Wait
@@ -949,8 +948,7 @@ _install_vm-wsl2-portForward() {
         wsl -d "ubdist" sudo -n systemctl disable ollama.service
 
 
-        ( nohup ollama ls > /dev/null 2>&1 & ) > /dev/null
-		disown -r "$!"
+        ( nohup ollama ls > /dev/null 2>&1 & disown -r "$!" ) > /dev/null
 
 
         echo
@@ -963,8 +961,7 @@ _install_vm-wsl2-portForward() {
         echo
 
         
-        ( nohup ollama ls > /dev/null 2>&1 & ) > /dev/null
-		disown -r "$!"
+        ( nohup ollama ls > /dev/null 2>&1 & disown -r "$!" ) > /dev/null
 
 
         echo
@@ -1001,8 +998,7 @@ _install_vm-wsl2-portForward() {
         wsl -d "ubdist" sudo -n systemctl disable ollama.service
 
 
-        ( nohup ollama ls > /dev/null 2>&1 & ) > /dev/null
-		disown -r "$!"
+        ( nohup ollama ls > /dev/null 2>&1 & disown -r "$!" ) > /dev/null
 
 
         echo
@@ -1015,8 +1011,7 @@ _install_vm-wsl2-portForward() {
         echo
 
         
-        ( nohup ollama ls > /dev/null 2>&1 & ) > /dev/null
-		disown -r "$!"
+        ( nohup ollama ls > /dev/null 2>&1 & disown -r "$!" ) > /dev/null
 
 
         echo
