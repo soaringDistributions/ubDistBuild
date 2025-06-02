@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='3400462822'
+export ub_setScriptChecksum_contents='361907982'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -64566,7 +64566,7 @@ _install_vm-wsl2-portForward() {
     current_wsl_scriptAbsoluteFolder=$(cygpath -m "$scriptAbsoluteFolder")
     current_wsl_scriptAbsoluteFolder=$(wsl -d "$current_wsldist" wslpath "$current_wsl_scriptAbsoluteFolder")
 
-    if [[ "$2" != "notBooting" ]] && [[ "$2" != "bootingAdmin" ]]
+    if [[ "$2" != "notBooting" ]] && [[ "$2" != "bootingAdmin" ]] && [[ "$2" != "notBootingAdmin" ]]
     then
         _messageNormal '_install_vm-wsl2-portForward: booting'
 
@@ -64620,6 +64620,56 @@ _install_vm-wsl2-portForward() {
         echo
         currentIteration=0
         for (( currentIteration=0; currentIteration<5; currentIteration++ ))
+        do
+            echo -n .
+            sleep 1
+        done
+        echo
+
+
+        #return 0
+        #exit 0
+    fi
+    
+    if [[ "$2" == "notBootingAdmin" ]]
+    then
+        _messageNormal '_install_vm-wsl2-portForward: notBootingAdmin'
+        
+        local currentIteration
+        echo
+        currentIteration=0
+        for (( currentIteration=0; currentIteration<1; currentIteration++ ))
+        do
+            echo -n .
+            sleep 1
+        done
+        echo
+
+        wsl -d "ubdist" sudo -n systemctl stop hostport-proxy.service
+        wsl -d "ubdist" sudo -n systemctl disable hostport-proxy.service
+        wsl -d "ubdist" sudo -n systemctl stop ollama.service
+        wsl -d "ubdist" sudo -n systemctl disable ollama.service
+
+
+        ollama ls > /dev/null 2>&1
+
+
+        echo
+        currentIteration=0
+        for (( currentIteration=0; currentIteration<1; currentIteration++ ))
+        do
+            echo -n .
+            sleep 1
+        done
+        echo
+
+        
+        ollama ls > /dev/null 2>&1
+
+
+        echo
+        currentIteration=0
+        for (( currentIteration=0; currentIteration<2; currentIteration++ ))
         do
             echo -n .
             sleep 1

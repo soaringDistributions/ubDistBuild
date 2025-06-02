@@ -912,7 +912,7 @@ _install_vm-wsl2-portForward() {
     current_wsl_scriptAbsoluteFolder=$(cygpath -m "$scriptAbsoluteFolder")
     current_wsl_scriptAbsoluteFolder=$(wsl -d "$current_wsldist" wslpath "$current_wsl_scriptAbsoluteFolder")
 
-    if [[ "$2" != "notBooting" ]] && [[ "$2" != "bootingAdmin" ]]
+    if [[ "$2" != "notBooting" ]] && [[ "$2" != "bootingAdmin" ]] && [[ "$2" != "notBootingAdmin" ]]
     then
         _messageNormal '_install_vm-wsl2-portForward: booting'
 
@@ -966,6 +966,56 @@ _install_vm-wsl2-portForward() {
         echo
         currentIteration=0
         for (( currentIteration=0; currentIteration<5; currentIteration++ ))
+        do
+            echo -n .
+            sleep 1
+        done
+        echo
+
+
+        #return 0
+        #exit 0
+    fi
+    
+    if [[ "$2" == "notBootingAdmin" ]]
+    then
+        _messageNormal '_install_vm-wsl2-portForward: notBootingAdmin'
+        
+        local currentIteration
+        echo
+        currentIteration=0
+        for (( currentIteration=0; currentIteration<1; currentIteration++ ))
+        do
+            echo -n .
+            sleep 1
+        done
+        echo
+
+        wsl -d "ubdist" sudo -n systemctl stop hostport-proxy.service
+        wsl -d "ubdist" sudo -n systemctl disable hostport-proxy.service
+        wsl -d "ubdist" sudo -n systemctl stop ollama.service
+        wsl -d "ubdist" sudo -n systemctl disable ollama.service
+
+
+        ollama ls > /dev/null 2>&1
+
+
+        echo
+        currentIteration=0
+        for (( currentIteration=0; currentIteration<1; currentIteration++ ))
+        do
+            echo -n .
+            sleep 1
+        done
+        echo
+
+        
+        ollama ls > /dev/null 2>&1
+
+
+        echo
+        currentIteration=0
+        for (( currentIteration=0; currentIteration<2; currentIteration++ ))
         do
             echo -n .
             sleep 1
