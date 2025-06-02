@@ -917,7 +917,8 @@ _install_vm-wsl2-portForward() {
         _messageNormal '_install_vm-wsl2-portForward: booting'
 
 
-        ollama ls > /dev/null 2>&1
+        nohup ollama ls > /dev/null 2>&1 &
+		disown -r "$!"
         sleep 7
         echo .
         _powershell -NoProfile -Command "Start-Process cmd.exe -ArgumentList '/C','$scriptAbsoluteFolder_msw\_bin.bat','_install_vm-wsl2-portForward','$current_wsldist','bootingAdmin' -Verb RunAs -Wait"
@@ -947,7 +948,8 @@ _install_vm-wsl2-portForward() {
         wsl -d "ubdist" sudo -n systemctl disable ollama.service
 
 
-        ollama ls > /dev/null 2>&1
+        nohup ollama ls > /dev/null 2>&1 &
+		disown -r "$!"
 
 
         echo
@@ -960,7 +962,8 @@ _install_vm-wsl2-portForward() {
         echo
 
         
-        ollama ls > /dev/null 2>&1
+        nohup ollama ls > /dev/null 2>&1 &
+		disown -r "$!"
 
 
         echo
@@ -997,7 +1000,8 @@ _install_vm-wsl2-portForward() {
         wsl -d "ubdist" sudo -n systemctl disable ollama.service
 
 
-        ollama ls > /dev/null 2>&1
+        nohup ollama ls > /dev/null 2>&1 &
+		disown -r "$!"
 
 
         echo
@@ -1010,12 +1014,13 @@ _install_vm-wsl2-portForward() {
         echo
 
         
-        ollama ls > /dev/null 2>&1
+        nohup ollama ls > /dev/null 2>&1 &
+		disown -r "$!"
 
 
         echo
         currentIteration=0
-        for (( currentIteration=0; currentIteration<2; currentIteration++ ))
+        for (( currentIteration=0; currentIteration<5; currentIteration++ ))
         do
             echo -n .
             sleep 1
