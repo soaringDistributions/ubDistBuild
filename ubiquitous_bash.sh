@@ -36,7 +36,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='2078091548'
+export ub_setScriptChecksum_contents='109309362'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -64544,10 +64544,48 @@ _install_vm-wsl2-kernel() {
 
 
 _install_vm-wsl2-portForward() {
-    if [[ "$2" != "notBooting" ]]
+    local current_wsldist
+    current_wsldist="$1"
+    [[ "$current_wsldist" == "" ]] && current_wsldist="ubdist"
+
+    if ! wsl -d "$current_wsldist" echo available | grep available > /dev/null 2>&1
     then
+        _messagePlain_warn 'warn: _install_vm-wsl2-portForward: wsl: '"$current_wsldist"': missing'
+        #_messageFAIL
+        #_stop 1
+        return 1
+    fi
+
+    local current_wsl_scriptAbsoluteLocation
+    current_wsl_scriptAbsoluteLocation=$(cygpath -m "$scriptAbsoluteLocation")
+    current_wsl_scriptAbsoluteLocation=$(wsl -d "$current_wsldist" wslpath "$current_wsl_scriptAbsoluteLocation")
+
+    local current_wsl_scriptAbsoluteFolder
+    current_wsl_scriptAbsoluteFolder=$(cygpath -m "$scriptAbsoluteFolder")
+    current_wsl_scriptAbsoluteFolder=$(wsl -d "$current_wsldist" wslpath "$current_wsl_scriptAbsoluteFolder")
+
+    if [[ "$2" != "notBooting" ]] && [[ "$2" != "bootingAdmin" ]]
+    then
+        _messageNormal '_install_vm-wsl2-portForward: booting'
+
+
+        ollama ls > /dev/null 2>&1
+        sleep 7
+        echo .
+        _powershell -NoProfile -Command "Start-Process cmd.exe -ArgumentList '/C','$scriptAbsoluteFolder_msw\_bin.bat','_install_vm-wsl2-portForward','$current_wsldist','bootingAdmin' -Verb RunAs -Wait"
+        echo .
+        
+        return 0
+        exit 0
+    fi
+    
+    if [[ "$2" == "bootingAdmin" ]]
+    then
+        _messageNormal '_install_vm-wsl2-portForward: bootingAdmin'
+        
+        local currentIteration
         echo
-        local currentIteration=0
+        currentIteration=0
         for (( currentIteration=0; currentIteration<25; currentIteration++ ))
         do
             echo -n .
@@ -64565,7 +64603,7 @@ _install_vm-wsl2-portForward() {
 
 
         echo
-        local currentIteration=0
+        currentIteration=0
         for (( currentIteration=0; currentIteration<10; currentIteration++ ))
         do
             echo -n .
@@ -64578,26 +64616,17 @@ _install_vm-wsl2-portForward() {
 
 
         echo
-        local currentIteration=0
+        currentIteration=0
         for (( currentIteration=0; currentIteration<5; currentIteration++ ))
         do
             echo -n .
             sleep 1
         done
         echo
-    fi
-    
-    local current_wsldist
-    current_wsldist="$1"
-    [[ "$current_wsldist" == "" ]] && current_wsldist="ubdist"
 
-    
-    if ! wsl -d "$current_wsldist" echo available | grep available > /dev/null 2>&1
-    then
-        _messagePlain_warn 'warn: _install_vm-wsl2-portForward: wsl: '"$current_wsldist"': missing'
-        #_messageFAIL
-        #_stop 1
-        return 1
+
+        #return 0
+        #exit 0
     fi
 
     _setup_wsl2_procedure-fw
