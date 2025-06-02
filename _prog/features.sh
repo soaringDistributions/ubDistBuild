@@ -917,8 +917,8 @@ _install_vm-wsl2-portForward() {
         _messageNormal '_install_vm-wsl2-portForward: booting'
 
         # TODO: Possibly enable this, if it will not keep the installer from closing and will not close ollama with the installer.
-        #nohup ollama ls > /dev/null 2>&1 &
-		#disown -r "$!"
+        nohup ollama ls > /dev/null 2>&1 &
+		disown -r "$!"
         sleep 7
         echo .
         _powershell -NoProfile -Command "Start-Process cmd.exe -ArgumentList '/C','$scriptAbsoluteFolder_msw\_bin.bat','_install_vm-wsl2-portForward','$current_wsldist','bootingAdmin' -Verb RunAs -Wait"
@@ -948,8 +948,8 @@ _install_vm-wsl2-portForward() {
         wsl -d "ubdist" sudo -n systemctl disable ollama.service
 
 
-        #nohup ollama ls > /dev/null 2>&1 &
-		#disown -r "$!"
+        nohup ollama ls > /dev/null 2>&1 &
+		disown -r "$!"
 
 
         echo
@@ -962,8 +962,8 @@ _install_vm-wsl2-portForward() {
         echo
 
         
-        #nohup ollama ls > /dev/null 2>&1 &
-		#disown -r "$!"
+        nohup ollama ls > /dev/null 2>&1 &
+		disown -r "$!"
 
 
         echo
@@ -1000,8 +1000,8 @@ _install_vm-wsl2-portForward() {
         wsl -d "ubdist" sudo -n systemctl disable ollama.service
 
 
-        #nohup ollama ls > /dev/null 2>&1 &
-		#disown -r "$!"
+        nohup ollama ls > /dev/null 2>&1 &
+		disown -r "$!"
 
 
         echo
@@ -1014,8 +1014,8 @@ _install_vm-wsl2-portForward() {
         echo
 
         
-        #nohup ollama ls > /dev/null 2>&1 &
-		#disown -r "$!"
+        nohup ollama ls > /dev/null 2>&1 &
+		disown -r "$!"
 
 
         echo
