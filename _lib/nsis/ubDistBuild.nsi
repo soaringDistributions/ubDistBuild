@@ -151,6 +151,10 @@ Section "Install"
   File /r "..\..\..\ubDistBuild-accessories\parts\ubDistBuild_bundle\filezilla\*"
 
 
+  ; ATTENTION: Startups may be copied again.
+  CopyFiles "C:\_install_vm-wsl2-portForward.bat" "$SMSTARTUP"
+
+
 
   ExpandEnvStrings $5 %COMSPEC%
   ExecWait '"$5" /C "C:\core\infrastructure\ubDistBuild\_bin.bat" _setup_install $0'
