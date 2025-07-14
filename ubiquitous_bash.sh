@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+if [[ "$ubDEBUG" == "true" ]] ; then set +x ; set +E ; set +o functrace ; set +o errtrace ; export -n SHELLOPTS 2>/dev/null || true ; trap '' RETURN ; trap - RETURN ; fi
+
 [[ "$PATH" != *"/usr/local/bin"* ]] && [[ -e "/usr/local/bin" ]] && export PATH=/usr/local/bin:"$PATH"
 [[ "$PATH" != *"/usr/bin"* ]] && [[ -e "/usr/bin" ]] && export PATH=/usr/bin:"$PATH"
 [[ "$PATH" != *"/bin:"* ]] && [[ -e "/bin" ]] && export PATH=/bin:"$PATH"
@@ -33,10 +35,11 @@ _ub_cksum_special_derivativeScripts_contents() {
 }
 ##### CHECKSUM BOUNDARY - 30 lines
 
+[[ "$ubDEBUG" == "true" ]] && export ub_setScriptChecksum_disable='true'
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
-export ub_setScriptChecksum_header='2591634041'
-export ub_setScriptChecksum_contents='1124875469'
+export ub_setScriptChecksum_header='3620520443'
+export ub_setScriptChecksum_contents='3881306524'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -681,11 +684,11 @@ fi
 # As of 2025-05-20 , a development system, VSCode PowerShell terminal, has been known to impose 45 such lines on MSWEXTPATH , other PowerShell terminal imposed 41 such lines. Limit of 44 lines at the time was exceeded.
 if [[ "$MSWEXTPATH" != "" ]] && ( [[ "$PATH" == *"/cygdrive"* ]] || [[ "$PATH" == "/cygdrive"* ]] ) && [[ "$convertedMSWEXTPATH" == "" ]] && _if_cygwin
 then
-	if [[ $(echo "$MSWEXTPATH" | grep -o ';\|:' | wc -l | tr -dc '0-9') -le 60 ]] && [[ $(echo "$PATH" | grep -o ':' | wc -l | tr -dc '0-9') -le 60 ]]
-	then
-		export convertedMSWEXTPATH=$(cygpath -p "$MSWEXTPATH")
-		export PATH=/usr/bin:"$convertedMSWEXTPATH":"$PATH"
-	fi
+        if [[ $(echo "$MSWEXTPATH" | grep -o ';' | wc -l | tr -dc '0-9') -le 99 ]] && [[ $(echo "$PATH" | grep -o ':' | wc -l | tr -dc '0-9') -le 99 ]]
+        then
+                export convertedMSWEXTPATH=$(cygpath -p "$MSWEXTPATH")
+                export PATH=/usr/bin:"$convertedMSWEXTPATH":"$PATH"
+        fi
 fi
 
 
@@ -1027,8 +1030,18 @@ then
 	#}
 	#alias l='_wsl'
 	alias u='_wsl'
+	
+	# MSWindows native 'PowerSession' apparently does not support 'asciinema cat'.
+	#alias asciinema='PowerSession'
 
-	alias codex='wsl -d ubdist codex'
+	# Optional. Other than recording, and some issues with 'asciinema cat', pip installed 'asciinema' seems usable .
+	# Use _asciinema_record to record .
+	alias asciinema='wsl -d ubdist asciinema'
+
+	#alias codex='wsl -d ubdist codex'
+	alias codex='wsl -d ubdist "~/.ubcore/ubiquitous_bash/ubcore.sh" _codexBin-usr_bin_node'
+
+	alias codexNative=$(type -P codex 2>/dev/null)
 fi
 	
 _sudo_cygwin-if_parameter-skip2() {
@@ -1209,9 +1222,8 @@ _userMSW() {
 	"${processedArgs[@]}"
 }
 
-
-_powershell() {
-    local currentPowershellBinary
+_discover_powershell() {
+	local currentPowershellBinary
     currentPowershellBinary=$(find /cygdrive/c/Windows/System32/WindowsPowerShell/ -name powershell.exe 2>/dev/null | head -n 1)
     [[ "$currentPowershellBinary" == "" ]] && currentPowershellBinary=$(find /cygdrive/d/Windows/System32/WindowsPowerShell/ -name powershell.exe 2>/dev/null | head -n 1)
     [[ "$currentPowershellBinary" == "" ]] && currentPowershellBinary=$(find /cygdrive/e/Windows/System32/WindowsPowerShell/ -name powershell.exe 2>/dev/null | head -n 1)
@@ -1221,6 +1233,15 @@ _powershell() {
     [[ "$currentPowershellBinary" == "" ]] && currentPowershellBinary=$(find /mnt/d/Windows/System32/WindowsPowerShell/ -name powershell.exe 2>/dev/null | head -n 1)
     [[ "$currentPowershellBinary" == "" ]] && currentPowershellBinary=$(find /mnt/e/Windows/System32/WindowsPowerShell/ -name powershell.exe 2>/dev/null | head -n 1)
     [[ "$currentPowershellBinary" == "" ]] && currentPowershellBinary=$(find /mnt/f/Windows/System32/WindowsPowerShell/ -name powershell.exe 2>/dev/null | head -n 1)
+
+	_safeEcho "$currentPowershellBinary"
+	[[ "$currentPowershellBinary" != "" ]] && return 0
+	return 1
+}
+
+_powershell() {
+    local currentPowershellBinary
+    currentPowershellBinary=$(_discover_powershell)
 
 	#_userMSW "$currentPowershellBinary" "$@"
     "$currentPowershellBinary" "$@"
@@ -1507,6 +1528,31 @@ then
 		kate -n "$@"
 	}
 
+	code() {
+		local current_workdir
+		#current_workdir=$(_getAbsoluteFolder "$1")
+		current_workdir=$(_searchBaseDir "$@")
+		current_workdir=$(cygpath -w "$current_workdir")
+
+
+		local currentArg
+		local currentResult
+		processedArgs=()
+		for currentArg in "$@"
+		do
+			if [[ -e "$currentArg" ]] || [[ "$currentArg" == "/cygdrive/"* ]] || [[ "$currentArg" == "/home/"* ]] || [[ "$currentArg" == "/root/"* ]]
+			then
+				currentResult=$(cygpath -w "$currentArg")
+			else
+				currentResult="$currentArg"
+			fi
+			
+			processedArgs+=("$currentResult")
+		done
+
+		"$(type -P code)" --new-window "${processedArgs[@]}" --new-window "$current_workdir"
+	}
+
 	_aria2c_cygwin_overide() {
 		if _safeEcho_newline "$@" | grep '\--async-dns' > /dev/null
 		then
@@ -1687,6 +1733,14 @@ _setup_ubiquitousBash_cygwin_procedure() {
 	# ATTENTION: NOTICE: Any installer for developers which relies on unpacking directories to '/core/infrastructure' must also add this to '/' .
 	# Having '_bash.bat' at '/' normally allows developers to get a bash prompt from both 'CMD' and 'PowerShell' terminal windows by '/_bash' command.
 	cp "$scriptAbsoluteFolder"/_bash.bat "$currentCygdriveC_equivalent"/
+
+
+	# ATTENTION: Bad idea. UNIX style line endings have been tested compatible with: cmd/MSWindows, Cygwin/MSW (bash), ubdist/WSL2. Presumably also compatible with UNIX/Linux .
+	#unix2dos "$currentCygdriveC_equivalent"/core/infrastructure/ubiquitous_bash/*.bat
+	#unix2dos "$currentCygdriveC_equivalent"/_bash.bat
+
+	#unix2dos "$cygwinMSWmenuDir"/ubiquitous_bash/_bash.bat
+	#unix2dos "$cygwinMSWdesktopDir"/_bash.bat
 	
 	
 	_messagePlain_good 'done: _setup_ubiquitousBash_cygwin: lean'
@@ -2604,20 +2658,21 @@ _cygwin_translation_rootFileParameter() {
 
 #Critical prerequsites.
 _getAbsolute_criticalDep() {
-	#  ! type realpath > /dev/null 2>&1 && return 1
-	! type readlink > /dev/null 2>&1 && return 1
-	! type dirname > /dev/null 2>&1 && return 1
-	! type basename > /dev/null 2>&1 && return 1
+	#  ! type realpath > /dev/null 2>&1 && exit 1
+	! type readlink > /dev/null 2>&1 && exit 1
+	! type dirname > /dev/null 2>&1 && exit 1
+	! type basename > /dev/null 2>&1 && exit 1
 	
 	#Known to succeed under BusyBox (OpenWRT), NetBSD, and common Linux variants. No known failure modes. Extra precaution.
-	! readlink -f . > /dev/null 2>&1 && return 1
+	! readlink -f . > /dev/null 2>&1 && exit 1
 	
-	! echo 'qwerty123.git' | grep '\.git$' > /dev/null 2>&1 && return 1
-	echo 'qwerty1234git' | grep '\.git$' > /dev/null 2>&1 && return 1
+	! echo 'qwerty123.git' | grep '\.git$' > /dev/null 2>&1 && exit 1
+	echo 'qwerty1234git' | grep '\.git$' > /dev/null 2>&1 && exit 1
 	
 	return 0
 }
-! _getAbsolute_criticalDep && exit 1
+#! _getAbsolute_criticalDep && exit 1
+_getAbsolute_criticalDep
 
 #Retrieves absolute path of current script, while maintaining symlinks, even when "./" would translate with "readlink -f" into something disregarding symlinked components in $PWD.
 #However, will dereference symlinks IF the script location itself is a symlink. This is to allow symlinking to scripts to function normally.
@@ -3423,11 +3478,15 @@ _permissions_ubiquitous_repo() {
 	return 0
 }
 
-_test_permissions_ubiquitous-cygwin() {
+_test_permissions_ubiquitous-exception() {
+	_if_cygwin && echo 'warn: accepted: cygwin: permissions' && return 0
+
+	# Possible shared filesystem mount without correct permissions from the host .
+	[[ -e /.dockerenv ]] && echo 'warn: accepted: docker: permissions' && return 0
+
+
 	! _if_cygwin && _stop 1
 	#  ! _if_cygwin && _stop "$1"
-	
-	_if_cygwin && echo 'warn: accepted: cygwin: permissions' && return 0
 }
 
 #Checks whether currently set "$scriptBin" and similar locations are actually safe.
@@ -3435,10 +3494,10 @@ _test_permissions_ubiquitous-cygwin() {
 _test_permissions_ubiquitous() {
 	[[ ! -e "$scriptAbsoluteFolder" ]] && _stop 1
 	
-	! _permissions_directory_checkForPath "$scriptAbsoluteFolder" && _test_permissions_ubiquitous-cygwin 1
+	! _permissions_directory_checkForPath "$scriptAbsoluteFolder" && _test_permissions_ubiquitous-exception 1
 	
-	[[ -e "$scriptBin" ]] && ! _permissions_directory_checkForPath "$scriptBin" && _test_permissions_ubiquitous-cygwin 1
-	[[ -e "$scriptBundle" ]] && ! _permissions_directory_checkForPath "$scriptBundle" && _test_permissions_ubiquitous-cygwin 1
+	[[ -e "$scriptBin" ]] && ! _permissions_directory_checkForPath "$scriptBin" && _test_permissions_ubiquitous-exception 1
+	[[ -e "$scriptBundle" ]] && ! _permissions_directory_checkForPath "$scriptBundle" && _test_permissions_ubiquitous-exception 1
 	
 	return 0
 }
@@ -11582,6 +11641,8 @@ _getMost_debian11_install() {
 	#_getMost_backend_aptGetInstall synergy quicksynergy
 	
 	_getMost_backend_aptGetInstall vim
+	
+	_getMost_backend_aptGetInstall strace
 
 	_getMost_backend_aptGetInstall man-db
 	
@@ -11713,6 +11774,9 @@ _getMost_debian11_install() {
 	_getMost_backend_aptGetInstall libncurses-dev
 	_getMost_backend_aptGetInstall autoconf
 	_getMost_backend_aptGetInstall libudev-dev
+
+	_getMost_backend_aptGetInstall imagemagick
+	_getMost_backend_aptGetInstall graphicsmagick-imagemagick-compat
 
 	_getMost_backend_aptGetInstall dwarves
 	_getMost_backend_aptGetInstall pahole
@@ -12008,6 +12072,8 @@ _getMost_debian11_install() {
 	_getMost_backend_aptGetInstall mawk
 	_getMost_backend_aptGetInstall nano
 	_getMost_backend_aptGetInstall nilfs-tools
+
+	_getMost_backend_aptGetInstall jq
 	
 	_getMost_backend_aptGetInstall build-essential
 	_getMost_backend_aptGetInstall bison
@@ -12152,6 +12218,9 @@ _getMost_debian11_install() {
 	_getMost_backend_aptGetInstall nsis
 
 	_getMost_backend_aptGetInstall dos2unix
+
+
+	_getMost_backend_aptGetInstall xxd
 	
 	
 	# Sometimes may be useful as a workaround for docker 'overlay2' 'storage-driver' .
@@ -12173,6 +12242,7 @@ _getMost_debian11_install() {
 	_getMost_backend_aptGetInstall mksquashfs
 	_getMost_backend_aptGetInstall grub-mkstandalone
 	_getMost_backend_aptGetInstall mkfs.vfat
+	_getMost_backend_aptGetInstall dosfstools
 	_getMost_backend_aptGetInstall mkswap
 	_getMost_backend_aptGetInstall mmd
 	_getMost_backend_aptGetInstall mcopy
@@ -12210,6 +12280,22 @@ _getMost_debian11_install() {
 	_getMost_backend_aptGetInstall aptitude
 	_getMost_backend_aptGetInstall recode
 	_getMost_backend_aptGetInstall asciidoc
+	
+	_getMost_backend_aptGetInstall pandoc
+	_getMost_backend_aptGetInstall texlive-xetex
+	_getMost_backend_aptGetInstall texlive-latex-recommended
+	_getMost_backend_aptGetInstall texlive-latex-extra
+	_getMost_backend_aptGetInstall fonts-texgyre
+	_getMost_backend_aptGetInstall fonts-texgyre-math
+	_getMost_backend_aptGetInstall tex-gyre
+	_getMost_backend_aptGetInstall texlive-fonts-recommended
+	
+	_getMost_backend_aptGetInstall asciinema
+	_getMost_backend_aptGetInstall gifsicle imagemagick apngasm ffmpeg
+	_getMost_backend_aptGetInstall webp
+
+	_getMost_backend_aptGetInstall ansifilter
+	_getMost_backend_aptGetInstall ansifilter-gui
 	
 	
 	
@@ -12327,6 +12413,13 @@ _getMost_debian11_install() {
 	_getMost_backend_aptGetInstall python3-torchaudio
 	_getMost_backend_aptGetInstall python3-torchtext
 	_getMost_backend_aptGetInstall python3-torchvision
+
+
+
+
+
+	_getMost_backend_aptGetInstall dialog
+	_getMost_backend_aptGetInstall whiptail
 	
 	
 	
@@ -12819,6 +12912,8 @@ _getMinimal_cloud() {
 	
 	_getMost_backend_aptGetInstall linux-image-amd64
 	
+	_getMost_backend_aptGetInstall strace
+	
 	# WARNING: Rust is not yet (2023-11-12) anywhere near as editable on the fly or pervasively available as bash .
 	#  Criteria for such are far more necessarily far more stringent than might be intuitively obvious.
 	#  Rust is expected to remain non-competitive with bash for purposes of 'ubiquitous_bash', even for reference implementations, for at least 6years .
@@ -13204,6 +13299,87 @@ _getMinimal_cloud() {
 	
 	
 	return 0
+}
+
+
+# Minimizes runtime (to avoid timeouts) and conflicts with installed software. Usually used by specialized Docker containers (eg. 'ghcr.io/openai/codex-universal' , 'openai-heavy' , etc) , within environments unable (unlike a usual VPS) to directly use a custom dist/OS (eg. OpenAI ChatGPT Codex WebUI , RunPod , etc).
+_getMinimal_special() {
+	echo 'APT::AutoRemove::RecommendsImportant "true";
+APT::AutoRemove::SuggestsImportant "true";' | tee /etc/apt/apt.conf.d/99autoremove-recommends > /dev/null
+
+
+	
+	unset _aptGetInstall
+	unalias _aptGetInstall 2>/dev/null
+	_aptGetInstall() {
+		env XZ_OPT="-T0" DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install -q --install-recommends -y "$@"
+	}
+
+	# ubiquitous_bash  fast alternative
+	#procps strace sudo wget gpg curl pigz pixz bash aria2 git git-lfs bc nmap socat sockstat rsync net-tools uuid-runtime netcat-openbsd axel util-linux gawk libncurses-dev gh crudini bsdutils findutils p7zip p7zip-full unzip zip lbzip2 dnsutils bind9-dnsutils lz4 mawk patch tar gzip bzip2 sed pv expect wipe iputils-ping zstd zlib1g coreutils openssl xz-utils libreadline8 libreadline-dev mkisofs genisoimage dos2unix lsof aptitude jq xxd sloccount dosfstools apt-utils git-filter-repo qalc apt-transport-https tcl tk
+
+	# ubiquitous_bash  basic alternative
+	#procps strace sudo wget gpg curl pigz pixz bash aria2 git git-lfs bc nmap socat sockstat rsync net-tools uuid-runtime netcat-openbsd axel unionfs-fuse util-linux screen gawk libelf-dev libncurses-dev gh crudini bsdutils findutils p7zip p7zip-full unzip zip lbzip2 jp2a dnsutils bind9-dnsutils lz4 mawk libelf-dev elfutils patch tar gzip bzip2 librecode0 udftools sed cpio pv expect wipe iputils-ping btrfs-progs btrfs-compsize zstd zlib1g coreutils openssl growisofs e2fsprogs xz-utils libreadline8 libreadline-dev mkisofs genisoimage wodim dos2unix fuse-overlayfs xorriso squashfs-tools mtools lsof aptitude jq xxd sloccount dosfstools apt-utils git-filter-repo qalc apt-transport-https tcl tk
+
+	_aptGetInstall procps strace sudo wget gpg curl pigz pixz bash aria2 git git-lfs bc nmap socat sockstat rsync net-tools uuid-runtime iperf3 vim man-db gnulib libtool libtool-bin intltool libgts-dev netcat-openbsd iperf axel unionfs-fuse debootstrap util-linux screen gawk build-essential flex libelf-dev libncurses-dev autoconf libudev-dev dwarves pahole cmake gh libusb-dev libusb-1.0 setserial libffi-dev libusb-1.0-0 libusb-1.0-0-dev libusb-1.0-doc pkg-config crudini bsdutils findutils v4l-utils libevent-dev libjpeg-dev libbsd-dev libusb-1.0 gdb libbabeltrace1 libc6-dbg libsource-highlight-common libsource-highlight4v5 initramfs-tools dmidecode p7zip p7zip-full unzip zip lbzip2 jp2a dnsutils bind9-dnsutils live-boot mktorrent gdisk lz4 mawk nano bison libelf-dev elfutils patch tar gzip bzip2 librecode0 sed texinfo udftools wondershaper sysbench libssl-dev cpio pv expect libfuse2 wipe iputils-ping btrfs-progs btrfs-compsize zstd zlib1g nilfs-tools coreutils sg3-utils kpartx openssl growisofs udev cryptsetup parted e2fsprogs xz-utils libreadline8 libreadline-dev mkisofs genisoimage wodim eject hdparm sdparm php cifs-utils debhelper nsis dos2unix fuse-overlayfs xorriso squashfs-tools grub-pc-bin grub-efi-amd64-bin mtools squashfs-tools squashfs-tools-ng fdisk lsof usbutils aptitude recode libpotrace0 libwmf-bin w3m par2 yubikey-manager qrencode tasksel jq xxd sloccount dosfstools apt-utils git-filter-repo qalc apt-transport-https tcl tk libgdl-3-5 libgdl-3-common > /quicklog.tmp 2>&1
+	tail /quicklog.tmp
+	rm -f /quicklog.tmp
+
+	#tcl tk libgdl-3-5 libgdl-3-common
+
+	#avrdude gcc-avr binutils-avr avr-libc stm32flash dfu-util libnewlib-arm-none-eabi gcc-arm-none-eabi binutils-arm-none-eabi
+
+	#mingw-w64 g++-mingw-w64-x86-64-win32 binutils-mingw-w64 mingw-w64-tools gdb-mingw-w64
+
+	#pkg-haskell-tools alex cabal-install happy hscolour ghc
+
+	#kicad electric lepton-eda pcb-rnd gerbv electronics-pcb pstoedit pdftk
+
+	#wkhtmltopdf asciidoc
+
+	#vainfo ffmpeg
+
+	#samba qemu-system-x86 qemu-system-arm qemu-efi-arm qemu-efi-aarch64 qemu-user-static qemu-utils dosbox
+
+	#wireless-tools rfkill cloud-guest-utils
+
+	#recoll
+
+	#zbar-tools
+
+
+
+	#rustc cargo
+
+	#openjdk-17-jdk openjdk-17-jre
+
+	#psk31lx
+
+	#emacs
+
+	#python3-serial
+
+
+
+	#locales-all
+
+	# ddd
+
+	
+
+	apt-get remove --autoremove -y
+	apt-get -y clean
+
+
+
+	"$scriptAbsoluteLocation" _here_opensslConfig_legacy | tee /etc/ssl/openssl_legacy.cnf > /dev/null 2>&1
+	echo '
+
+	.include = /etc/ssl/openssl_legacy.cnf
+
+	' | cat /etc/ssl/openssl.cnf.orig - 2>/dev/null | tee /etc/ssl/openssl.cnf > /dev/null 2>&1
+
+
 }
 
 
@@ -13631,6 +13807,14 @@ _get_workarounds() {
 _get_npm() {
     _mustGetSudo
 
+    if _if_cygwin
+    then
+        ! type npm > /dev/null 2>&1 && echo 'request: https://github.com/coreybutler/nvm-windows/releases' && exit 1
+
+        type npm > /dev/null 2>&1
+        return
+    fi
+
     ##sudo -n env DEBIAN_FRONTEND=noninteractive apt-get install -y curl
     _getDep curl
 
@@ -13644,6 +13828,9 @@ _get_npm() {
     #sudo -n npm install -g @openai/codex
     ##npm install -g @anthropic-ai/claude-code
     #sudo -n npm install -g @anthropic-ai/claude-code
+
+    ! type npm > /dev/null 2>&1 && exit 1
+    return 0
 }
 
 
@@ -14766,6 +14953,9 @@ _custom_ubcp_prog() {
 }
 _custom_ubcp_sequence() {
 	_cygwin_workaround_dev_stderr
+
+    local functionEntryPWD
+    functionEntryPWD="$PWD"
     
     _messageNormal '_custom_ubcp: apt-cyg --quiet'
 	_messagePlain_probe apt-cyg --quiet install ImageMagick
@@ -14775,6 +14965,74 @@ _custom_ubcp_sequence() {
 	_messageNormal '_custom_ubcp: pip3'
 	_messagePlain_probe pip3 install piexif
     pip3 install piexif 2>&1
+
+
+
+    _messageNormal '_custom_ubcp: runpodctl'
+
+    #wget -qO- 'https://cli.runpod.net' | sed 's/\[ "\$EUID" -ne 0 \]/false/' | bash
+
+    mkdir -p "$HOME"/core/installations
+    cd "$HOME"/core/installations
+    _gitBest clone --recursive --depth 1 git@github.com:runpod/runpodctl.git
+    
+    cd "$HOME"/bin/
+    rm -f runpodctl.exe
+    #wget 'https://github.com/runpod/runpodctl/releases/download/v1.14.3/runpodctl-windows-amd64.exe' -O runpodctl.exe
+    wget 'https://github.com/runpod/runpodctl/releases/download/v1.14.4/runpodctl-windows-amd64.exe' -O runpodctl.exe
+    chmod ugoa+rx runpodctl.exe
+
+    cd "$functionEntryPWD"
+
+
+
+    # https://github.com/asciinema/asciinema/issues/467
+    # wsl asciinema rec -c cmd.exe
+    # https://github.com/Watfaq/PowerSession-rs
+    _messageNormal '_custom_ubcp: PowerSession - asciinema alternative for MSWindows'
+
+    mkdir -p "$HOME"/core/installations
+    cd "$HOME"/core/installations
+    _gitBest clone --recursive --depth 1 git@github.com:Watfaq/PowerSession-rs.git
+    
+    cd "$HOME"/bin/
+    rm -f PowerSession.exe
+    wget 'https://github.com/Watfaq/PowerSession-rs/releases/latest/download/PowerSession.exe' -O PowerSession.exe
+    chmod ugoa+rx PowerSession.exe
+
+
+    cd "$functionEntryPWD"
+
+
+
+    # https://gitlab.com/saalen/ansifilter/-/releases
+    # http://andre-simon.de/zip/ansifilter-2.21-x64.zip
+    # https://web.archive.org/web/20250618063648/http://andre-simon.de/zip/ansifilter-2.21-x64.zip
+    _messageNormal '_custom_ubcp: ansifilter'
+
+    mkdir -p "$HOME"/core/installations
+    cd "$HOME"/core/installations
+    wget 'https://web.archive.org/web/20250618063648/http://andre-simon.de/zip/ansifilter-2.21-x64.zip'
+    if [[ $(sha256sum ansifilter-2.21-x64.zip | cut -f1 -d' ' | tr -dc 'a-fA-F0-9') != '57624ae40be4c9173937d15c97f68413daa271a0ec2248ec83394f220b88adb9' ]]
+    then
+        rm -f ansifilter-2.21-x64.zip
+    else
+        unzip -o ansifilter-2.21-x64.zip
+        rm -f ansifilter-2.21-x64.zip
+        cd ansifilter-2.21-x64
+        chmod ugoa+rx ansifilter.exe
+        chmod ugoa+rx ansifilter-gui.exe
+        #cp -a ansifilter.exe "$HOME"/bin/ansifilter.exe
+        #cp -a ansifilter-gui.exe "$HOME"/bin/ansifilter-gui.exe
+        mv -f ansifilter.exe "$HOME"/bin/ansifilter.exe
+        mv -f ansifilter-gui.exe "$HOME"/bin/ansifilter-gui.exe
+    fi
+
+    cd "$functionEntryPWD"
+
+
+
+    cd "$functionEntryPWD"
 
     _cygwin_workaround_dev_stderr
 	_custom_ubcp_prog "$@"
@@ -14929,6 +15187,230 @@ _stopwatch() {
 	[[ "$currentExitStatus_self" != "0" ]] && return "$currentExitStatus_self"
 	return 0
 }
+
+
+
+
+
+
+_setup_asciinema_convert() {
+    _mustGetSudo
+
+    _get_npm
+
+    if _if_cygwin
+    then
+        # MSW user permissions seems sufficient to call npm .
+        sudo() {
+            [[ "$1" == "-n" ]] && shift
+            "$@"
+        }
+    fi
+
+    sudo -n npm install -g asciicast2gif
+
+    if ! _if_cygwin
+    then
+        #pip3 install --break-system-packages term2md
+        #sudo -n pip3 install --break-system-packages term2md
+        true
+    fi
+
+    if _if_cygwin
+    then
+        ##pip3 install --quiet --no-input --no-build-isolation -U term2md
+        #pip3 install --no-input --no-build-isolation -U term2md
+        true
+    fi
+
+
+    _getDep perl
+
+    _getDep sed
+
+
+    return 0
+}
+
+#_asciinema_record 'command' [./rec.log]
+#./ubiquitous_bash.sh _asciinema_record "/home/root/'a b'/ubiquitous_bash.sh _scope ." "record.txt"
+#./ubiquitous_bash.sh _asciinema_record '/home/root/"a b"/ubiquitous_bash.sh _scope .' "record.txt"
+#./ubiquitous_bash.sh _asciinema_record "bash" "record.txt"
+#./ubiquitous_bash.sh _asciinema_record 'echo "$PATH"' "record.txt"
+#./ubiquitous_bash.sh _asciinema_record 'echo "$safeTmp"' "record.txt"
+_asciinema_record() {
+    local current_record_file
+    current_record_file="$2"
+    if ( [[ -d "$current_record_file" ]] || { [[ -L "$current_record_file" ]] && [[ -d "$(readlink -f "$current_record_file")" ]]; } )
+    then
+        current_record_file="$current_record_file"/rec_$(date +%Y-%m-%d.%H).log
+        [[ -e "$current_record_file"/_local ]] && current_record_file="$current_record_file"/_local/rec_$(date +%Y-%m-%d.%H).log
+    fi
+    if [[ "$current_record_file" == "" ]]
+    then
+        current_record_file=./rec_$(date +%Y-%m-%d.%H).log
+    fi
+
+    rm -f "$current_record_file" > /dev/null 2>&1
+
+    # DUBIOUS - cannot directly inherit Cygwin/MSW environment, functions, session, "$safeTmp", etc. May be usable with '.embed.sh' or similar.
+    # Otherwise maybe the best asciinema backend for Cygwin/MSW .
+    # https://github.com/asciinema/asciinema/issues/467
+    if _if_cygwin && wsl -d ubdist true > /dev/null 2>&1 && ! wsl -d ubdist false > /dev/null 2>&1 && [[ force_asciinema_disable_wsl2 != "true" ]]
+    then
+        local current_bin_cmd_wsl
+        current_bin_cmd_wsl=$(type -P cmd 2>/dev/null)
+        current_bin_cmd_wsl=$(cygpath --mixed "$current_bin_cmd_wsl")
+        current_bin_cmd_wsl=$(wsl -d ubdist wslpath "$current_bin_cmd_wsl")
+
+        local current_bin_bash_wsl
+        current_bin_bash_wsl=$(cygpath --mixed /bin/bash)
+        #current_bin_bash_wsl=$(wsl -d ubdist wslpath "$current_bin_bash_wsl")
+
+
+
+        # ### Backend: WSL2 .
+
+        #./ubiquitous_bash.sh _asciinema_record "/home/root/'a b'/ubiquitous_bash.sh _scope ." "record.txt"
+        #_messagePlain_probe_safe wsl -d ubdist asciinema rec --command "$current_bin_cmd_wsl"' /C '"$current_bin_bash_wsl"' -c "'"$1"'"' "$current_record_file"
+        #wsl -d ubdist asciinema rec --command "$current_bin_cmd_wsl"' /C '"$current_bin_bash_wsl"' -c "'"$1"'"' "$current_record_file"
+        #return
+        
+        #./ubiquitous_bash.sh _asciinema_record 'echo "$PATH"' "record.txt"
+        #./ubiquitous_bash.sh _asciinema_record '/home/root/"a b"/ubiquitous_bash.sh _scope .' "record.txt"
+        _messagePlain_probe_safe wsl -d ubdist asciinema rec --command "$current_bin_cmd_wsl"' /C '"$current_bin_bash_wsl"' -c '"'""$1""'" "$current_record_file"
+        wsl -d ubdist asciinema rec --command "$current_bin_cmd_wsl"' /C '"$current_bin_bash_wsl"' -c '"'""$1""'" "$current_record_file"
+        return
+
+
+        
+    fi
+
+    # https://github.com/asciinema/asciinema/issues/467
+    if _if_cygwin && type PowerSession > /dev/null 2>&1 && [[ force_asciinema_disable_native != "true" ]]
+    then
+        #PowerSession rec --command 'bash ./ubiquitous_bash.sh _scope .' "$current_record_file"
+
+        # Discouraged. Tends to record the 'clear' command, etc, causing inconvenience.
+        #wsl asciinema rec -c '~/.ubcore/ubiquitous_bash/ubcore.sh _powershell C:\_bash'
+
+        # CAUTION: Native MSW calling bash directly through cmd/powershell directly is STRONGLY DISCOURAGED.
+        # Do NOT use such tricks for Python, etc. Do NOT rely on such tricks for necessary functionality. Instrumentation ONLY.
+        local current_bin_bash=$(cygpath -w /bin/bash | sed 's/\\/\\\\/g')
+
+
+        local current_bin_powershell
+        #current_bin_powershell=$(_discover_powershell)
+        #current_bin_powershell=$(type -P powershell)
+        #current_bin_powershell=$(cygpath -w "$current_bin_powershell")
+        current_bin_powershell="powershell"
+
+        ##_powershell -Command "$current_bin_bash"" -c '"'bash ./ubiquitous_bash.sh _scope .'"'"
+        ##PowerSession rec --command "$current_bin_powershell"' -Command '"$current_bin_bash"" -c '"' ./ubiquitous_bash.sh _scope . '"'" "$current_record_file"
+        #PowerSession rec --command "$current_bin_powershell"' -Command '"$current_bin_bash"" -c '"''"$1"''"'" "$current_record_file"
+        #return
+
+        local current_bin_cmd
+        current_bin_cmd="cmd"
+        #"$current_bin_cmd" /C "$current_bin_bash" '-c' 'bash ./ubiquitous_bash.sh _scope .'
+        #PowerSession rec --command  "$current_bin_cmd"' /C '"$current_bin_bash"" '-c' ""'"'./ubiquitous_bash.sh _scope .'"'" "$current_record_file"
+        #PowerSession rec --command  "$current_bin_cmd"' /C '"$current_bin_bash"" '-c' ""'"''"$1"''"'" "$current_record_file"
+        #return
+
+
+
+        #PowerSession rec --command "cmd /C C:\\core\\infrastructure\\ubcp\\cygwin\\bin\\bash.exe /home/root/'a b'/ubiquitous_bash.sh _scope ." record.txt
+
+        #PowerSession rec --command "powershell -Command C:\\core\\infrastructure\\ubcp\\cygwin\\bin\\bash.exe /home/root/'a b'/ubiquitous_bash.sh _scope ." record.txt
+        #PowerSession rec --command "$current_bin_powershell -Command $current_bin_bash $1" "$current_record_file"
+
+
+
+        # ### Backend: Native/MSWindows - cmd .
+
+        #./ubiquitous_bash.sh _asciinema_record "/home/root/'a b'/ubiquitous_bash.sh _scope ." "record.txt"
+        #_messagePlain_probe_safe PowerSession rec --command "$current_bin_cmd"' /C '"$current_bin_bash"' -c "'"$1"'"' "$current_record_file"
+        #PowerSession rec --command "$current_bin_cmd"' /C '"$current_bin_bash"' -c "'"$1"'"' "$current_record_file"
+        #return
+
+        #./ubiquitous_bash.sh _asciinema_record '/home/root/"a b"/ubiquitous_bash.sh _scope .' "record.txt"
+        #./ubiquitous_bash.sh _asciinema_record 'echo "$safeTmp"' "record.txt"
+        _messagePlain_probe_safe PowerSession rec --command "$current_bin_cmd"' /C '"$current_bin_bash"' -c '"'""$1""'" "$current_record_file"
+        PowerSession rec --command "$current_bin_cmd"' /C '"$current_bin_bash"' -c '"'""$1""'" "$current_record_file"
+        return
+
+
+
+        #_messagePlain_probe_safe PowerSession rec --command "$current_bin_powershell"' -Command '"$current_bin_bash"' -c "'"$1"'"' "$current_record_file"
+        #PowerSession rec --command "$current_bin_powershell"' -Command '"$current_bin_bash"' -c "'"$1"'"' "$current_record_file"
+        #_messagePlain_probe_safe PowerSession rec --command "$current_bin_powershell"' -Command '"$current_bin_bash"' -c '"'""$1""'" "$current_record_file"
+        #PowerSession rec --command "$current_bin_powershell"' -Command '"$current_bin_bash"' -c '"'""$1""'" "$current_record_file"
+
+
+
+        #PowerSession rec --command powershell' -Command "C:\\core\\infrastructure\\ubcp\\cygwin\\bin\\bash.exe" "-c" ''"/home/root/'a b'/ubiquitous_bash.sh _scope ."' record.txt
+        #PowerSession rec --command powershell' -Command "C:\\core\\infrastructure\\ubcp\\cygwin\\bin\\bash.exe" "-c" '"\"/home/root/'a b'/ubiquitous_bash.sh _scope .\"" record.txt
+        #PowerSession rec --command powershell' -Command "C:\\core\\infrastructure\\ubcp\\cygwin\\bin\\bash.exe" "-c" ''"\"echo x\""' record.txt
+        #PowerSession rec --command powershell' -Command "C:\\core\\infrastructure\\ubcp\\cygwin\\bin\\bash.exe" "-c" "\"echo x\""' record.txt
+        #PowerSession rec --command powershell' -Command "C:\\core\\infrastructure\\ubcp\\cygwin\\bin\\bash.exe" "-c" "'"'echo x'"'"' record.txt
+        #PowerSession rec --command powershell' -Command "C:\\core\\infrastructure\\ubcp\\cygwin\\bin\\bash.exe" "-c" "\"'"echo x"'\""' record.txt
+
+
+
+        # Backend: Native/MSWindows - powershell .
+
+        #./ubiquitous_bash.sh _asciinema_record '/home/root/"a b"/ubiquitous_bash.sh _scope .' "record.txt"
+        ##
+        ##
+        #
+        #./ubiquitous_bash.sh _asciinema_record "/home/root/'a b'/ubiquitous_bash.sh _scope ." "record.txt"
+        #_messagePlain_probe_safe PowerSession rec --command powershell' -Command "C:\\core\\infrastructure\\ubcp\\cygwin\\bin\\bash.exe" "-c" "\"'"$1"'\""' "$current_record_file"
+        #PowerSession rec --command powershell' -Command "C:\\core\\infrastructure\\ubcp\\cygwin\\bin\\bash.exe" "-c" "\"'"$1"'\""' "$current_record_file"
+        #return
+
+
+
+    fi
+
+    asciinema rec --command "$1" "$current_record_file"
+}
+_record() {
+    _asciinema_record "$@"
+}
+
+
+
+_asciinema_markdown() {
+    # ATTRIBUTION-AI: ChatGPT o3-pro , OpenAI codex-mini  2025-06-18  (partially)
+
+    echo
+
+    #asciinema cat "$1" | perl -pe 's/\x07//g && s/^[^\r]*\r//' | term2md
+
+
+    if _if_cygwin
+    then
+        wsl -d ubdist asciinema cat "$@" | perl -pe 's/\x07//g && s/^[^\r]*\r//' | ansifilter --html | sed 's/background-color:#000000;//g' | sed -n '/<pre>/,/<\/pre>/p'
+        return
+    fi
+
+    # ATTRIBUTION-AI: ChatGPT o3-pro  2025-06-29  (partially)
+    asciinema cat "$@" | perl -pe 's/\x07//g && s/^[^\r]*\r//' | ansifilter --html | sed 's/background-color:#000000;//g' | sed -n '/<pre>/,/<\/pre>/p' | sed -E 's@(<span style="font-weight:bold;color:#87afaf;">&gt;</span>)([^[:space:]])@\1 \2@g'
+
+    echo
+}
+_markdown() {
+    _asciinema_markdown "$@"
+}
+
+
+
+
+
+
+
+
+
 
 
 
@@ -17350,14 +17832,14 @@ _fakeHome() {
 	fakeHomeENVvars+=(SESSION_MANAGER="$SESSION_MANAGER" WINDOWID="$WINDOWID" QT_ACCESSIBILITY="$QT_ACCESSIBILITY" COLORTERM="$COLORTERM" XDG_SESSION_PATH="$XDG_SESSION_PATH" LANGUAGE="$LANGUAGE"  SHELL_SESSION_ID="$SHELL_SESSION_ID" DESKTOP_SESSION="$DESKTOP_SESSION" XCURSOR_SIZE="$XCURSOR_SIZE" GTK_MODULES="$GTK_MODULES" XDG_SEAT="$XDG_SEAT" XDG_SESSION_DESKTOP="$XDG_SESSION_DESKTOP" XDG_SESSION_TYPE="$XDG_SESSION_TYPE" XDG_CURRENT_DESKTOP="$XDG_CURRENT_DESKTOP" KONSOLE_DBUS_SERVICE="$KONSOLE_DBUS_SERVICE" PYTHONSTARTUP="$PYTHONSTARTUP" KONSOLE_DBUS_SESSION="$KONSOLE_DBUS_SESSION" PROFILEHOME="$PROFILEHOME" XDG_SEAT_PATH="$XDG_SEAT_PATH" KDE_SESSION_UID="$KDE_SESSION_UID" XDG_SESSION_CLASS="$XDG_SESSION_CLASS" COLORFGBG="$COLORFGBG" KDE_SESSION_VERSION="$KDE_SESSION_VERSION" SHLVL="$SHLVL" LC_MEASUREMENT="$LC_MEASUREMENT" XDG_VTNR="$XDG_VTNR" XDG_SESSION_ID="$XDG_SESSION_ID" GS_LIB="$GS_LIB" XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" LC_TIME="$LC_TIME" QT_AUTO_SCREEN_SCALE_FACTOR="$QT_AUTO_SCREEN_SCALE_FACTOR" XCURSOR_THEME="$XCURSOR_THEME" KDE_FULL_SESSION="$KDE_FULL_SESSION" KONSOLE_PROFILE_NAME="$KONSOLE_PROFILE_NAME" DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" KONSOLE_DBUS_WINDOW="$KONSOLE_DBUS_WINDOW" LS_COLORS="$LS_COLORS")
 	
 	fakeHomeENVvars+=(QT_QPA_PLATFORMTHEME="$QT_QPA_PLATFORMTHEME")
+
+	[[ "$devfast" != "" ]] && fakeHomeENVvars+=(devfast="$devfast")
 	
 	
 	if type dbus-run-session > /dev/null 2>&1 && [[ "$fakeHome_dbusRunSession_DISABLE" != "true" ]]
 	then
 		fakeHomeENVvars+=(dbus-run-session)
 	fi
-
-	[[ "$devfast" != "" ]] && fakeHomeENVvars+=(devfast="$devfast")
 	
 	#env -i DISPLAY="$DISPLAY" XAUTH="$XAUTH" XAUTHORITY="$XAUTHORITY" XSOCK="$XSOCK" XDG_SESSION_DESKTOP='KDE' XDG_CURRENT_DESKTOP='KDE' realHome="$realHome" keepFakeHome="$keepFakeHome" HOME="$HOME" setFakeHome="$setFakeHome" TERM="${TERM}" SHELL="${SHELL}" PATH="${PATH}" _JAVA_OPTIONS=${_JAVA_OPTIONS}scriptAbsoluteLocation="$scriptAbsoluteLocation" sessionid="$sessionid" scriptAbsoluteFolder="$scriptAbsoluteFolder" realSessionID="$realSessionID" realScriptAbsoluteLocation="$realScriptAbsoluteLocation" realScriptAbsoluteFolder="$realScriptAbsoluteFolder" dbus-run-session "$@"
 	##env -i DISPLAY="$DISPLAY" XAUTH="$XAUTH" XAUTHORITY="$XAUTHORITY" XSOCK="$XSOCK" XDG_SESSION_DESKTOP='KDE' XDG_CURRENT_DESKTOP='KDE' realHome="$realHome" keepFakeHome="$keepFakeHome" HOME="$HOME" setFakeHome="$setFakeHome" TERM="${TERM}" SHELL="${SHELL}" PATH="${PATH}" _JAVA_OPTIONS=${_JAVA_OPTIONS}scriptAbsoluteLocation="$scriptAbsoluteLocation" scriptAbsoluteFolder="$scriptAbsoluteFolder" dbus-run-session "$@"
@@ -18328,10 +18810,10 @@ _set_msw_python_procedure() {
 
 
     [[ ! -e "$_pythonLib" ]] && ( _messagePlain_bad 'bad: missing: $_pythonLib' >&2 ) > /dev/null && _messageFAIL >&2
-    [[ ! -e "$_pythonSitePackages" ]] && ( _messagePlain_bad 'bad: missing: $_pythonLib' >&2 ) > /dev/null && _messageFAIL >&2
-    [[ ! -e "$_pythonPip_file" ]] && ( _messagePlain_bad 'bad: missing: $_pythonLib' >&2 ) > /dev/null && _messageFAIL >&2
-    [[ ! -e "$_pythonPip" ]] && ( _messagePlain_bad 'bad: missing: $_pythonLib' >&2 ) > /dev/null && _messageFAIL >&2
-    #[[ ! -e "$_pythonPipInstaller_file" ]] && ( _messagePlain_bad 'bad: missing: $_pythonLib' >&2 ) > /dev/null && _messageFAIL >&2
+    [[ ! -e "$_pythonSitePackages" ]] && ( _messagePlain_bad 'bad: missing: $_pythonSitePackages' >&2 ) > /dev/null && _messageFAIL >&2
+    [[ ! -e "$_pythonPip_file" ]] && ( _messagePlain_bad 'bad: missing: $_pythonPip_file' >&2 ) > /dev/null && _messageFAIL >&2
+    [[ ! -e "$_pythonPip" ]] && ( _messagePlain_bad 'bad: missing: $_pythonPip' >&2 ) > /dev/null && _messageFAIL >&2
+    #[[ ! -e "$_pythonPipInstaller_file" ]] && ( _messagePlain_bad 'bad: missing: $_pythonPipInstaller_file' >&2 ) > /dev/null && _messageFAIL >&2
 
     local current_binaries_path
     current_binaries_path="$_PATH_pythonDir"
@@ -18358,10 +18840,10 @@ _set_msw_python_procedure() {
 
 
         [[ ! -e "$_pythonLib" ]] && ( _messagePlain_bad 'bad: missing: $_pythonLib' >&2 ) > /dev/null && _messageFAIL >&2
-        [[ ! -e "$_pythonSitePackages" ]] && ( _messagePlain_bad 'bad: missing: $_pythonLib' >&2 ) > /dev/null && _messageFAIL >&2
-        [[ ! -e "$_pythonPip_file" ]] && ( _messagePlain_bad 'bad: missing: $_pythonLib' >&2 ) > /dev/null && _messageFAIL >&2
-        [[ ! -e "$_pythonPip" ]] && ( _messagePlain_bad 'bad: missing: $_pythonLib' >&2 ) > /dev/null && _messageFAIL >&2
-        #[[ ! -e "$_pythonPipInstaller_file" ]] && ( _messagePlain_bad 'bad: missing: $_pythonLib' >&2 ) > /dev/null && _messageFAIL >&2
+        [[ ! -e "$_pythonSitePackages" ]] && ( _messagePlain_bad 'bad: missing: $_pythonSitePackages' >&2 ) > /dev/null && _messageFAIL >&2
+        [[ ! -e "$_pythonPip_file" ]] && ( _messagePlain_bad 'bad: missing: $_pythonPip_file' >&2 ) > /dev/null && _messageFAIL >&2
+        [[ ! -e "$_pythonPip" ]] && ( _messagePlain_bad 'bad: missing: $_pythonPip' >&2 ) > /dev/null && _messageFAIL >&2
+        #[[ ! -e "$_pythonPipInstaller_file" ]] && ( _messagePlain_bad 'bad: missing: $_pythonPipInstaller_file' >&2 ) > /dev/null && _messageFAIL >&2
 
 
         current_binaries_path="$VIRTUAL_ENV_unix"
@@ -18377,7 +18859,7 @@ _set_msw_python_procedure() {
     return 0
 }
 
-set_msw_python() {
+_set_msw_python() {
     _set_msw_python_3_10 "$@"
 }
 _set_msw_python_3_10() {
@@ -19053,7 +19535,7 @@ _set_nix_python_procedure() {
     return 0
 }
 
-set_nix_python() {
+_set_nix_python() {
     _set_nix_python_3 "$@"
 }
 _set_nix_python_3() {
@@ -23427,13 +23909,13 @@ _testQEMU_x64-raspi() {
 	sudo -n service binfmt-support --full-restart > /dev/null 2>&1
 	service binfmt-support --full-restart > /dev/null 2>&1
 	
-	if ! sudo -n cat /proc/sys/fs/binfmt_misc/* 2> /dev/null | grep qemu | grep 'arm$\|arm-static$\|arm-binfmt-P$\|arm-binfmt' > /dev/null 2>&1 && ! _if_cygwin
+	if ! sudo -n cat /proc/sys/fs/binfmt_misc/* 2> /dev/null | grep qemu | grep 'arm$\|arm-static$\|arm-binfmt-P$\|arm-binfmt' > /dev/null 2>&1 && ! _if_cygwin && ! [[ -e /.dockerenv ]]
 	then
 		echo 'binfmts does not mention qemu-arm'
 		[[ "$INSTANCE_ID" == "" ]] && _stop 1
 	fi
 	
-	if ! sudo -n cat /proc/sys/fs/binfmt_misc/* 2> /dev/null | grep qemu | grep 'armeb$\|armeb-static$\|armeb-binfmt-P$\|armeb-binfmt' > /dev/null 2>&1 && ! _if_cygwin
+	if ! sudo -n cat /proc/sys/fs/binfmt_misc/* 2> /dev/null | grep qemu | grep 'armeb$\|armeb-static$\|armeb-binfmt-P$\|armeb-binfmt' > /dev/null 2>&1 && ! _if_cygwin && ! [[ -e /.dockerenv ]]
 	then
 		echo 'binfmts does not mention qemu-armeb'
 		[[ "$INSTANCE_ID" == "" ]] && _stop 1
@@ -23921,6 +24403,8 @@ _persistentQemu() {
 }
 
 _testVBox() {
+	[[ -e /.dockerenv ]] && echo 'warn: accepted: docker: missing: vbox' && return 0
+	
 	if ( [[ -e /etc/issue ]] && cat /etc/issue | grep 'Debian' > /dev/null 2>&1 ) || ( [[ -e /etc/issue ]] && cat /etc/issue | grep 'Ubuntu' > /dev/null 2>&1 )
 	then
 		if ! dpkg -l | grep linux-headers-$(uname -r) > /dev/null 2>&1
@@ -25459,7 +25943,7 @@ _test_docker() {
 	_checkDep gosu-i386
 	
 	
-	if ! _if_cygwin
+	if ! _if_cygwin && ! [[ -e /.dockerenv ]]
 	then
 		
 		#https://docs.docker.com/engine/installation/linux/docker-ce/debian/#install-using-the-repository
@@ -25511,7 +25995,7 @@ _test_docker() {
 	
 	
 	
-	if _if_cygwin
+	if _if_cygwin || [[ -e /.dockerenv ]]
 	then
 		return 0
 	fi
@@ -25708,6 +26192,8 @@ while true; do
 
   HOST_IP=$(<"$HOST_IP_FILE")
   [[ -n "$HOST_IP" ]] || { sleep 2; continue; }
+
+  wget --timeout=1 --tries=3 http://"$HOST_IP":11434 -q -O - > /dev/null 2>&1 || { sleep 2; continue; }
 
   echo "$(date '+%F %T') 127.0.0.1:$PORT → $HOST_IP:$PORT"
   # --fork lets a single socat instance serve many clients in parallel
@@ -26051,6 +26537,11 @@ _here_wsl_conf() {
 # ATTENTION: Directive for nested virtualization may have moved to being more appropriate for a host '.wslconfig' file than a guest '/etc/wsl.conf' file .
 #[wsl2]
 #nestedVirtualization=true
+#
+# ATTENTION: Disabling 'appendWindowsPath' is expected very appropriate for 'ubdist/OS' , as this distribution is already very general purpose, and usual 'ubiquitous_bash' scripting already provides overrides for and calls cmd, powershell, explorer, as very rarely appropriate or needed.
+#[interop]
+#appendWindowsPath = false   # keep Linux-only PATH
+#enabled = false           # uncomment to disable Windows interop entirely
     cat << 'CZXWXcRMTo8EmM8i4d'
 
 [boot]
@@ -26062,6 +26553,9 @@ default = user
 
 [automount]
 options = "metadata"
+
+[interop]
+appendWindowsPath = false
 
 CZXWXcRMTo8EmM8i4d
 }
@@ -26453,10 +26947,12 @@ _visualPrompt_promptCommand() {
 	if [[ "$PS1_lineNumber" == '1' ]]
 	then
 		# https://unix.stackexchange.com/questions/266921/is-it-possible-to-use-ansi-color-escape-codes-in-bash-here-documents
-		PS1_lineNumberText=$(echo -e -n '\E[1;36m'1)
 		#PS1_lineNumberText=$(echo -e -n '\E[1;36m'1)
-		#PS1_lineNumberText=$(echo -e -n '\[\033[01;36m\]'1)
-		#PS1_lineNumberText=$(echo -e -n '\033[01;36m'1)
+		##PS1_lineNumberText=$(echo -e -n '\E[1;36m'1)
+		##PS1_lineNumberText=$(echo -e -n '\[\033[01;36m\]'1)
+		##PS1_lineNumberText=$(echo -e -n '\033[01;36m'1)
+
+		PS1_lineNumberText=$(echo -e -n '\E[1;36;109m'1)
 	fi
 }
 
@@ -26574,7 +27070,7 @@ _visualPrompt() {
 	if _if_wsl && [[ -e "/mnt/c/Windows/System32/cmd.exe" ]] && /mnt/c/Windows/System32/cmd.exe /C where nvidia-smi > /dev/null 2>&1
 	then
 		export prompt_specialInfo=$(
-			/mnt/c/Windows/System32/cmd.exe /C nvidia-smi --query-gpu=name,memory.total --format=csv,noheader,nounits | _filter_nvidia_smi_gpuInfo
+			( cd /mnt/c ; /mnt/c/Windows/System32/cmd.exe /C nvidia-smi --query-gpu=name,memory.total --format=csv,noheader,nounits 2>/dev/null | _filter_nvidia_smi_gpuInfo )
 		)
 	fi
 
@@ -26597,15 +27093,46 @@ _visualPrompt() {
 		#export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${currentChroot:+($currentChroot)}\[\033[01;33m\]\u\[\033[01;32m\]@'"$currentHostname"'\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]'"$prompt_nixShell"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[37m\][\w]\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '	
 	#fi
 	
+
+
+	# NOTICE: ATTENTION: Bright colors. More compatible with older terminals (in theory).
+	#
+	# https://stackoverflow.com/questions/4842424/list-of-ansi-color-escape-sequences
+	# Slightly darker yellow will be more printable on white background (ie. Pandoc rendering from HTML from asciinema cat ).
+	#01;33m
+	#38;5;214m
+	#
+	#\[\033[01;33m\]
+	#'\[\e[01;33m\e[38;5;214m\]'
+	#'\[\033[01;33m\033[38;5;214m\]'
+	#if _if_cygwin
+	#then
+		#export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${currentChroot:+($currentChroot)}\[\033[01;33m\033[38;5;214m\]\u\[\033[01;32m\]@'"$currentHostname"'\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(([[ "$VIRTUAL_ENV_PROMPT" != "" ]] && echo -n "$VIRTUAL_ENV_PROMPT") || date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]'"$prompt_specialInfo"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]\[\033[37m\]\w\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '
+	#elif ( uname -a | grep -i 'microsoft' > /dev/null 2>&1 || uname -a | grep -i 'WSL2' > /dev/null 2>&1 )
+	#then
+		#export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${currentChroot:+($currentChroot)}\[\033[01;33m\033[38;5;214m\]\u\[\033[01;32m\]@'"$currentHostname"-wsl2'\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(([[ "$VIRTUAL_ENV_PROMPT" != "" ]] && echo -n "$VIRTUAL_ENV_PROMPT") || date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]'"$prompt_specialInfo"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]\[\033[37m\]\w\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '
+	#else
+		#export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${currentChroot:+($currentChroot)}\[\033[01;33m\033[38;5;214m\]\u\[\033[01;32m\]@'"$currentHostname"'\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(([[ "$VIRTUAL_ENV_PROMPT" != "" ]] && echo -n "$VIRTUAL_ENV_PROMPT") || date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]'"$prompt_specialInfo"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[37m\][\w]\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '	
+	#fi
+
+	# ATTRIBUTION-AI: ChatGPT o4-mini-high  2025-06-29 .
+	#echo -e "\033[01;40m\033[01;36m\033[01;34m|\033[01;31m0:(exampleChroot)\033[01;33m\033[38;5;214muser\033[01;32m@exampleHost\033[01;36m\033[01;34m)\033[01;36m\033[01;34m-cloudNet(\033[01;35mvenv\033[01;34m)\033[01;36m|\033[00mINFO\n\033[01;40m\033[01;36m\033[01;34m\033[37m/home/user\033[00m\n\033[01;36m\033[01;34m|1\033[01;34m \033[36m> \033[00m"
+
+
+
+	# NOTICE: ATTENTION: Color saturation reduced. Similar benefits, delineating separate information strings and command prompts between commands.
+	# Less distracting.
+	
 	if _if_cygwin
 	then
-		export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${currentChroot:+($currentChroot)}\[\033[01;33m\]\u\[\033[01;32m\]@'"$currentHostname"'\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(([[ "$VIRTUAL_ENV_PROMPT" != "" ]] && echo -n "$VIRTUAL_ENV_PROMPT") || date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]'"$prompt_specialInfo"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]\[\033[37m\]\w\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '
+		export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[38;5;109m\]\[\033[01;34m\033[38;5;103m\]|\[\033[01;31m\]\[\033[38;5;138m\]${?}:${currentChroot:+($currentChroot)}\[\033[01;33m\033[38;5;179m\]\u\[\033[01;32m\033[38;5;108m\]@'"$currentHostname"'\[\033[01;36m\]\[\033[38;5;109m\]\[\033[01;34m\033[38;5;103m\])\[\033[01;36m\]\[\033[38;5;109m\]\[\033[01;34m\033[38;5;103m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\033[38;5;96m\]$(([[ "$VIRTUAL_ENV_PROMPT" != "" ]] && echo -n "$VIRTUAL_ENV_PROMPT") || date +%H:%M:%S\.%d)\[\033[01;34m\033[38;5;103m\])\[\033[01;36m\]\[\033[38;5;109m\]|\[\033[00m\]'"$prompt_specialInfo"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[38;5;109m\]\[\033[01;34m\033[38;5;103m\]\[\033[37m\033[38;5;253m\]\w\[\033[00m\]\n\[\033[01;36m\]\[\033[38;5;109m\]\[\033[01;34m\033[38;5;103m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]\[\033[38;5;109m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\033[38;5;103m\]) \[\033[36m\]\[\033[38;5;109m\]'""'>\[\033[00m\] '
 	elif ( uname -a | grep -i 'microsoft' > /dev/null 2>&1 || uname -a | grep -i 'WSL2' > /dev/null 2>&1 )
 	then
-		export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${currentChroot:+($currentChroot)}\[\033[01;33m\]\u\[\033[01;32m\]@'"$currentHostname"-wsl2'\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(([[ "$VIRTUAL_ENV_PROMPT" != "" ]] && echo -n "$VIRTUAL_ENV_PROMPT") || date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]'"$prompt_specialInfo"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]\[\033[37m\]\w\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '
+		export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[38;5;109m\]\[\033[01;34m\033[38;5;103m\]|\[\033[01;31m\]\[\033[38;5;138m\]${?}:${currentChroot:+($currentChroot)}\[\033[01;33m\033[38;5;179m\]\u\[\033[01;32m\033[38;5;108m\]@'"$currentHostname"-wsl2'\[\033[01;36m\]\[\033[38;5;109m\]\[\033[01;34m\033[38;5;103m\])\[\033[01;36m\]\[\033[38;5;109m\]\[\033[01;34m\033[38;5;103m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\033[38;5;96m\]$(([[ "$VIRTUAL_ENV_PROMPT" != "" ]] && echo -n "$VIRTUAL_ENV_PROMPT") || date +%H:%M:%S\.%d)\[\033[01;34m\033[38;5;103m\])\[\033[01;36m\]\[\033[38;5;109m\]|\[\033[00m\]'"$prompt_specialInfo"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[38;5;109m\]\[\033[01;34m\033[38;5;103m\]\[\033[37m\033[38;5;253m\]\w\[\033[00m\]\n\[\033[01;36m\]\[\033[38;5;109m\]\[\033[01;34m\033[38;5;103m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]\[\033[38;5;109m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\033[38;5;103m\]) \[\033[36m\]\[\033[38;5;109m\]'""'>\[\033[00m\] '
 	else
-		export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[01;31m\]${?}:${currentChroot:+($currentChroot)}\[\033[01;33m\]\u\[\033[01;32m\]@'"$currentHostname"'\[\033[01;36m\]\[\033[01;34m\])\[\033[01;36m\]\[\033[01;34m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\]$(([[ "$VIRTUAL_ENV_PROMPT" != "" ]] && echo -n "$VIRTUAL_ENV_PROMPT") || date +%H:%M:%S\.%d)\[\033[01;34m\])\[\033[01;36m\]|\[\033[00m\]'"$prompt_specialInfo"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[01;34m\]|\[\033[37m\][\w]\[\033[00m\]\n\[\033[01;36m\]\[\033[01;34m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\]) \[\033[36m\]'""'>\[\033[00m\] '	
+		export PS1='\[\033[01;40m\]\[\033[01;36m\]\[\033[38;5;109m\]\[\033[01;34m\033[38;5;103m\]|\[\033[01;31m\]\[\033[38;5;138m\]${?}:${currentChroot:+($currentChroot)}\[\033[01;33m\033[38;5;179m\]\u\[\033[01;32m\033[38;5;108m\]@'"$currentHostname"'\[\033[01;36m\]\[\033[38;5;109m\]\[\033[01;34m\033[38;5;103m\])\[\033[01;36m\]\[\033[38;5;109m\]\[\033[01;34m\033[38;5;103m\]-'"$prompt_cloudNetName"'(\[\033[01;35m\033[38;5;96m\]$(([[ "$VIRTUAL_ENV_PROMPT" != "" ]] && echo -n "$VIRTUAL_ENV_PROMPT") || date +%H:%M:%S\.%d)\[\033[01;34m\033[38;5;103m\])\[\033[01;36m\]\[\033[38;5;109m\]|\[\033[00m\]'"$prompt_specialInfo"'\n\[\033[01;40m\]\[\033[01;36m\]\[\033[38;5;109m\]\[\033[01;34m\033[38;5;103m\]|\[\033[37m\033[38;5;253m\][\w]\[\033[00m\]\n\[\033[01;36m\]\[\033[38;5;109m\]\[\033[01;34m\033[38;5;103m\]|$([[ "$PS1_lineNumber" == "1" ]] && echo -e -n '"'"'\[\033[01;36m\]\[\033[38;5;109m\]'"'"'$PS1_lineNumber || echo -e -n $PS1_lineNumber)\[\033[01;34m\033[38;5;103m\]) \[\033[36m\]\[\033[38;5;109m\]'""'>\[\033[00m\] '	
 	fi
+
 	
 	#export PS1="$prompt_specialInfo""$PS1"
 }
@@ -26712,129 +27239,82 @@ _upgrade_researchEngine-safe-nvidia() {
 # (2) NOTICE: Please DO read all comments from both directories for both VERY significant TODO items, and possible obligations you may have to follow to actually use some specifically supported AI models.
 
 
+# ATTENTION: NOTICE: ./ubiquitous_bash.sh _here_license-Llama-3-augment > ./shortcuts/ai/ollama/License-Llama-3-NeuralDaredevil-8B-abliterated.txt
+_here_license-Llama-3-augment() {
+	if ( [[ "$accept_nonpermissiveNONCOMMERCIAL" != "false" ]] ) || [[ -e "$HOME"/nonpermissiveNONCOMMERCIAL ]]
+	then
+		cat << 'CZXWXcRMTo8EmM8i4d'
+	LICENSE """Built with Llama
+Built with Meta Llama 3
+Llama 3.1 is licensed under the Llama 3.1 Community License, Copyright © Meta Platforms, Inc. All Rights Reserved.
+Meta Llama 3 is licensed under the Meta Llama 3 Community License, Copyright © Meta Platforms, Inc. All Rights Reserved.
+CZXWXcRMTo8EmM8i4d
 
+		cat << 'CZXWXcRMTo8EmM8i4d'
+License and terms of use are under the 'Meta' corporation's llama3_1 , llama3 , license and use policy.
 
+CZXWXcRMTo8EmM8i4d
+	fi
 
-
-# NOTICE: You are obtaining the 'Llama-augment' model, or an upstream model used as a 'Llama-augment' model, by using this function: the 'Llama-augment' model is not, through this code itself, distributed to you (ie. you are likely receiving the 'Llama-augment' model from Soaring Distributions LLC regardless of where you obtained this code from).
-_setup_ollama_model_augment_sequence() {
-	# NOTICE: WARNING: Normally, any redistribution of a 'Llama', similar AI model, or other AI model, would be from an authoratative corporation, such as "Soaring Distributions LLC" .
-	
-	# DANGER: An 'augment' model, which may be included with 'ubdist' or other 'dist/OS' is intended SOLELY for developer use. As a public domain or some publicly available AI model licensing terms apparently allow, this model may be modified for better compliance with technical use cases (such as not disregarding the previous conversation when given repeated 'system' prompts), or for smaller model size (eg. through quantization, or use of a lower parameter count model).
-	
-	# DANGER DANGER: Any 'augment' model really should NOT be used for 'end user' services, including any any built-in help for any end-user program or machinery (excepting that it may or may NOT be reasonable to include with some non-commercial open-source software as a built-in help, wizard, etc, following usual expectations of community provided software). You should expect users WILL, at best, more easily 'jailbreak' such a model, and, due to the emphasis on technical usage (where reliability above 0.2% failure rates, unusual repetitive prompting, etc) as well as small model size, there may be both a complete absence of any safeguards as well as a (albeit not yet observed) possibility of introducing harmful subjects to otherwise harmless conversation.
-	
-	# YOU HAVE BEEN WARNED ! DEVELOPERS ONLY, NOT USERS !
-	
-	
-	# Any distribution or any other activity regarding any 'augmentation' or other AI model is without any warranty of any kind. Superseding all other statements, there are no representations or warranties of any kind concerning the Work, express, implied, statutory or otherwise, including without limitation warranties of title, merchantability, fitness for a particular purpose, non infringement, or the absence of latent or other defects, accuracy, or the present or absence of errors, whether or not discoverable, all to the greatest extent permissible under applicable law.
-	
-	# SPECIFICALLY THIS STATEMENT DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM THE USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS PROVIDED HEREUNDER.
-	
-	
-	# NOTICE: Purpose of the 'augment' model is, above all other purposes, both:
-	#  (1) To supervise and direct decisions and analysis by other AI models (such as from vision encoders, but also mathematical reasoning specific LLMs, computer activity and security logging LLMs, etc).
-	#  (2) To assist and possibly supervise 'human-in-the-loop' decision making (eg. to sanity check human responses).
-	
-	
-	# https://huggingface.co/mlabonne/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF/tree/main
-	# https://web.archive.org/web/20240831194035/https://huggingface.co/mlabonne/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF/tree/main
-	# Explicitly states 'License: llama3.1'. Readme file from repository does NOT contradict this.
-	
-	# https://www.llama.com/llama3_1/license/
-	# https://huggingface.co/meta-llama/Meta-Llama-3.1-70B-Instruct/blob/main/LICENSE
-	#  NOTICE: ATTENTION: This license has been preserved as 'LICENSE-Llama-3.1.txt', but this license does NOT apply to any 'ubiquitous_bash' code or any other work that is not either a work by Meta or strictly a derivative of a work by Meta (such as a modified AI model GGUF or safetensors file) !
-	
-	# https://www.llama.com/llama3_1/use-policy/
-	
-	
-	# https://www.llama.com/llama3_1/license/
-	#  'include “Llama” at the beginning of any such AI model name'
-	# ATTENTION: Nevertheless, it is very possible a non-'Llama' model will eventually be used, especially as science and technology (eg. plasma recombination EUV physics) related datasets (eg. relevant Wikipedia articles) are increasingly gathered.
-	
-	
-	# https://www.llama.com/llama3_2/license/
-	# https://www.llama.com/llama3_2/use-policy/
-	#  'or to enable functionality disabled by Meta'
-	#   The functionality offered by 'Llama 3.2' (eg. multimodal functionality) is expected to exceed the purpose of an 'augment' model, but the reliabilility limitations imposed are expected prohibitive (especially regarding repeated 'system' prompts). Thus, it is expected that 'Llama 3.1' will be the last 'Llama' model used as an 'augment' model. This is NOT a concern, because it is expected that 'Llama 3.1' already reached a point of diminishing returns on what can be achieved by AI model training methods alone.
-	#   Purposes other than as an 'augment' model, which is a text-only technical use case, and expected to require fine tuning (eg. on prompt/responses generated from the 'ubiquitous_bash' codebase), at that, are expected to achieve very adequate performance from 'stock' original 'Llama' models, or at least those fine-tuned for specific use cases (eg. needle-in-haystack, computer vision object recognition, robot motor control, etc).
-	
-	
-	
-	
-	
-	
-	
-	# ATTENTION: Default context size is low to ensure compatibility with low-RAM computers (LLM on CPU performance generally being acceptable).
-	# STRONGLY RECOMMENDED to greatly increase the context length (6144) if at all possible (>32GB RAM) or to decrease if necessary (eg. 8GB RAM) .
-	
-	#/clear
-	#/set parameter num_thread 768
-	#/set parameter num_gpu 0
-	
-	# 4GB (presumed)
-	#/set parameter num_ctx 512
-
-	# 8GB (presumed)
-	#/set parameter num_ctx 2048
-
-	#/set parameter num_ctx 4096
-
-	# 16GB (presumed)
-	#/set parameter num_ctx 8192
-
-	#/set parameter num_ctx 16384
-
-	# 32GB
-	#/set parameter num_ctx 32768
-
-	# 68.5GiB (presumed)
-	#/set parameter num_ctx 131072
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	local functionEntryPWD="$PWD"
-	_start
-	
-	
-	cd "$safeTmp"
-	
-	
-	
-	
-	
-	
-	# TODO: Replace with model fine-tuned by additional relevant codebases and scientific knowledge.
-	
-	# TODO: TODO: Intentionally overfit smaller parameter models by reinforcing prompt/response for specific knowledge (eg. plasma recombiation light emission physics) and reasoning (eg. robot motor control).
-	
-	
-	# TODO: There may or may not be more track record with this slightly different model, using Q4-K-M quantization.
-	# https://huggingface.co/grimjim/Llama-3.1-8B-Instruct-abliterated_via_adapter-GGUF
-	
-	# TODO: Consider alternative quantization, especially IQ2-M, IQ4-XS. Beware Q4-K-M may have some community testing of important edge cases already.
-	# https://huggingface.co/bartowski/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF/tree/main
-	
-	echo 'FROM ./llama-3.1-8b-instruct-abliterated.Q4_K_M.gguf
-PARAMETER num_ctx 6144
-' > Llama-augment.Modelfile
-
-	cat << 'CZXWXcRMTo8EmM8i4d' >> Llama-augment.Modelfile
+	if ( [[ "$accept_nonpermissiveNONCOMMERCIAL" == "false" ]] ) && [[ ! -e "$HOME"/nonpermissiveNONCOMMERCIAL ]]
+	then
+		cat << 'CZXWXcRMTo8EmM8i4d'
 	LICENSE """Built with Llama
 Llama 3.1 is licensed under the Llama 3.1 Community License, Copyright © Meta Platforms, Inc. All Rights Reserved.
+CZXWXcRMTo8EmM8i4d
 
-License and terms of use are inherited from the 'Meta' corporation's llama3_1 license and use policy.
+		cat << 'CZXWXcRMTo8EmM8i4d'
+License and terms of use are under the 'Meta' corporation's llama3_1 license and use policy.
+
+CZXWXcRMTo8EmM8i4d
+	fi
+
+	cat << 'CZXWXcRMTo8EmM8i4d'
+
+Llama 3 augment
+
+
 https://www.llama.com/llama3_1/license/
 https://www.llama.com/llama3_1/use-policy/
+https://about.meta.com/brand/resources/meta/company-brand/
+CZXWXcRMTo8EmM8i4d
 
-Copies of these license and use policies, to the extent required and/or appropriate, are included in appropriate subdirectories of a proper recursive download of any git repository used to distribute this project. 
+	if ( [[ "$accept_nonpermissiveNONCOMMERCIAL" != "false" ]] ) || [[ -e "$HOME"/nonpermissiveNONCOMMERCIAL ]]
+	then
+		cat << 'CZXWXcRMTo8EmM8i4d'
+https://www.llama.com/llama3/license/
+https://www.llama.com/llama3/use-policy/
+CZXWXcRMTo8EmM8i4d
+	fi
 
+cat << 'CZXWXcRMTo8EmM8i4d'
+
+https://www.llama.com/faq/
+
+Copies of these license and use policies, etc, to the extent required and/or appropriate, are included in appropriate subdirectories of a proper recursive download of any git repository used to distribute this project. 
+
+License, possible sub-license, etc, of datasets, etc, fine-tuned, etc, models, etc, merged, etc, derivative models, etc, may not or may be relevant, and may or may not include 'Apache 2.0' , 'MIT' , 'cc-by-4.0' , and/or 'cc-by-nc-4.0', etc.
+
+https://www.apache.org/licenses/LICENSE-2.0.txt
+https://opensource.org/license/mit
+https://creativecommons.org/licenses/by/4.0/legalcode.txt
+https://creativecommons.org/licenses/by-sa/4.0/legalcode.txt
+https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.txt
+https://creativecommons.org/licenses/by/4.0/
+https://creativecommons.org/licenses/by-sa/4.0/
+https://creativecommons.org/licenses/by-nc-sa/4.0/
+https://creativecommons.org/licenses/by/3.0/
+https://creativecommons.org/licenses/by/2.0/
+https://creativecommons.org/licenses/by/1.0/
+
+Clarification from comments, documentation, etc, usually provided with the 'ubiquitous_bash' project, may or may not be relevant, which may or may not to some extent depend on which 'Llama-3-augment' model you have installed, which may or may not depend on which source code from where you used to install the 'Llama-3-augment' model .
+
+https://github.com/mirage335-colossus/ubiquitous_bash/blob/master/ai/ollama/ollama.sh
+./ai/ollama/ollama.sh
+./shortcuts/ai/ollama/Notice.txt
+./shortcuts/ai/ollama/LICENSE-Llama-3.1.txt
+./shortcuts/ai/ollama/LICENSE-Llama-3.txt
+./_lib/kit/app/researchEngine/license-llama/
 
 DANGER!
 
@@ -26860,6 +27340,495 @@ In particular, any 'augment' model provided is with a extensive DISCLAIMER regar
 
 Nothing in this text is intended to allow for any legal liability to anyone for any and all use, distribution, copying, etc.
 
+CZXWXcRMTo8EmM8i4d
+
+
+
+	if ( [[ "$accept_nonpermissiveNONCOMMERCIAL" == "false" ]] ) && [[ ! -e "$HOME"/nonpermissiveNONCOMMERCIAL ]]
+	then
+		cat << 'CZXWXcRMTo8EmM8i4d'
+
+		# https://huggingface.co/mlabonne/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF/tree/main
+		# https://web.archive.org/web/20240831194035/https://huggingface.co/mlabonne/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF/tree/main
+		# https://huggingface.co/mradermacher/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF
+		# https://web.archive.org/web/20250323003504/https://huggingface.co/mradermacher/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF
+		# https://huggingface.co/bartowski/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF
+		# https://web.archive.org/web/20250105072418/https://huggingface.co/bartowski/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF
+		#
+		# Explicitly states 'License: llama3.1'. Readme files, etc, from repository does NOT contradict this.
+CZXWXcRMTo8EmM8i4d
+	fi
+	
+	if ( [[ "$accept_nonpermissiveNONCOMMERCIAL" != "false" ]] ) || [[ -e "$HOME"/nonpermissiveNONCOMMERCIAL ]]
+	then
+		cat << 'CZXWXcRMTo8EmM8i4d'
+
+		# Derived from  "Llama 3" NeuralDaredevil-8B-abliterated  . CreativeCommons license notices apply.
+		#
+		# NOTICE: This merged model is distributed under the following Creative Commons licenses:
+		# Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License (for significant weight components, etc, originating from  Llama-3 Soliloquy 8B v2  )
+		# Creative Commons Attribution 4.0 International (CC BY 4.0) (for significant weight components, etc, originating from  Meta-Llama-3-8B-Instruct-DPO  )
+		# And simultaneously subject to:
+		# Meta Llama 3 Community License
+		# Llama 3.1 Community License .
+		
+
+		# https://huggingface.co/mlabonne/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF/tree/main
+		# https://web.archive.org/web/20240831194035/https://huggingface.co/mlabonne/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF/tree/main
+		# https://huggingface.co/mradermacher/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF
+		# https://web.archive.org/web/20250323003504/https://huggingface.co/mradermacher/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF
+		# https://huggingface.co/bartowski/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF
+		# https://web.archive.org/web/20250105072418/https://huggingface.co/bartowski/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF
+		# https://huggingface.co/mlabonne/NeuralDaredevil-8B-abliterated
+		# https://huggingface.co/QuantFactory/NeuralDaredevil-8B-abliterated-GGUF
+		# https://huggingface.co/QuantFactory/NeuralDaredevil-8B-abliterated-GGUF/tree/main
+		# https://web.archive.org/web/20250526124847/https://huggingface.co/QuantFactory/NeuralDaredevil-8B-abliterated-GGUF
+		# https://web.archive.org/web/20250206175259/https://huggingface.co/QuantFactory/NeuralDaredevil-8B-abliterated-GGUF/tree/main
+		#
+		#
+		# https://huggingface.co/mlabonne/NeuralDaredevil-8B-abliterated
+		#  https://huggingface.co/datasets/mlabonne/orpo-dpo-mix-40k
+		#   'License: apache-2.0'
+		# https://huggingface.co/mlabonne/Daredevil-8B-abliterated
+		# https://huggingface.co/mlabonne/Daredevil-8B
+		#
+		# https://huggingface.co/nbeerbower/llama-3-stella-8B
+		# https://web.archive.org/web/20240829103303/https://huggingface.co/nbeerbower/llama-3-stella-8B
+		#  'governed by META LLAMA 3 COMMUNITY LICENSE AGREEMENT'
+		#  https://huggingface.co/nbeerbower/llama-3-bible-dpo-8B
+		#   'governed by META LLAMA 3 COMMUNITY LICENSE AGREEMENT'
+		#   https://huggingface.co/datasets/nbeerbower/bible-dpo
+		#    'License: apache-2.0'
+		#  https://huggingface.co/nbeerbower/llama-3-gutenberg-8B
+		#  https://web.archive.org/web/20250303232239/https://huggingface.co/nbeerbower/llama-3-gutenberg-8B
+		#   'governed by META LLAMA 3 COMMUNITY LICENSE AGREEMENT'
+		#   https://huggingface.co/datasets/jondurbin/gutenberg-dpo-v0.1
+		#    'License: cc-by-4.0'
+		#  https://huggingface.co/elyn-dev/Llama-3-Soliloquy-8B-v2
+		#   'licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public License, under META LLAMA 3 COMMUNITY LICENSE AGREEMENT'
+		#   'License: cc-by-nc-sa-4.0'
+		#  https://huggingface.co/theo77186/Llama-3-8B-Instruct-norefusal
+		#   https://huggingface.co/datasets/jondurbin/airoboros-2.2
+		#   https://github.com/llm-attacks/llm-attacks/blob/main/data/advbench/harmful_behaviors.csv
+		#    https://github.com/llm-attacks/llm-attacks/blob/main/LICENSE
+		#     'MIT License'
+		#  https://huggingface.co/bunnycore/Cognitron-8B
+		#   'Llama-3-8B-Lexi-Uncensored'
+		#   https://huggingface.co/Orenguteng/Llama-3-8B-Lexi-Uncensored
+		#   'Einstein-v6.1-Llama3-8B'
+		#   https://huggingface.co/Weyaxi/Einstein-v6.1-Llama3-8B
+		#    NOTICE: Datasets license consistent with documentation, CreativeCommons license, permissive license, Llama 3.1 license, Llama 3 license, etc, or public domain, etc, affirmed by AI (ChatGPT o3 DeepResearch , ChatGPT 4.5 DeepResearch, ChatGPT or-mini-high DeepResearch, Perplexity Sonar DeepResearch, etc) inquiry.
+		#    'dolphin-2.9-llama3-8b'
+		#    https://huggingface.co/cognitivecomputations/dolphin-2.9-llama3-8b
+		#     'grant permission for any use, including commercial, that falls within accordance with Meta's Llama-3 license'
+		#     NOTICE: Datasets license consistent with documentation, CreativeCommons license, permissive license, Llama 3.1 license, Llama 3 license, etc, or public domain, etc, affirmed by AI (ChatGPT o3 DeepResearch , ChatGPT 4.5 DeepResearch, ChatGPT or-mini-high DeepResearch, Perplexity Sonar DeepResearch, etc) inquiry.
+		#  https://huggingface.co/lodrick-the-lafted/Olethros-8B
+		#   https://huggingface.co/datasets/lodrick-the-lafted/OpusStories
+		#    'License: apache-2.0'
+		#   https://huggingface.co/datasets/lodrick-the-lafted/Sao10K_Claude-3-Opus-Instruct-3.3K
+		#    'License: apache-2.0'
+		#   https://huggingface.co/datasets/lodrick-the-lafted/Samantha-Opus
+		#    'License: apache-2.0'
+		#   https://huggingface.co/datasets/lodrick-the-lafted/Worldsim-Opus
+		#    'License: apache-2.0'
+		#
+		# https://web.archive.org/web/20240525160322/https://huggingface.co/Hastagaras/llama-3-8b-okay
+		#
+		#  https://huggingface.co/nbeerbower/llama-3-gutenberg-8B
+		#  https://web.archive.org/web/20250303232239/https://huggingface.co/nbeerbower/llama-3-gutenberg-8B
+		#   'governed by META LLAMA 3 COMMUNITY LICENSE AGREEMENT'
+		#   https://huggingface.co/datasets/jondurbin/gutenberg-dpo-v0.1
+		#    'License: cc-by-4.0'
+		#
+		# https://huggingface.co/openchat/openchat-3.6-8b-20240522
+		# https://web.archive.org/web/20250618114410/https://huggingface.co/openchat/openchat-3.6-8b-20240522
+		#  https://github.com/imoneoi/openchat
+		#   https://github.com/imoneoi/openchat/blob/master/LICENSE
+		#    'Apache' '2.0'
+		# 
+		# https://huggingface.co/Kukedlc/NeuralLLaMa-3-8b-DT-v0.1
+		# https://web.archive.org/web/20250504052139/https://huggingface.co/Kukedlc/NeuralLLaMa-3-8b-DT-v0.1
+		#  https://huggingface.co/mlabonne/ChimeraLlama-3-8B-v2
+		#   https://huggingface.co/NousResearch/Meta-Llama-3-8B-Instruct
+		#   https://huggingface.co/mlabonne/OrpoLlama-3-8B
+		#   https://huggingface.co/cognitivecomputations/dolphin-2.9-llama3-8b
+		#    NOTICE: Datasets license consistent with documentation, CreativeCommons license, permissive license, Llama 3.1 license, Llama 3 license, etc, or public domain, etc, affirmed by AI (ChatGPT o3 DeepResearch , ChatGPT 4.5 DeepResearch, ChatGPT or-mini-high DeepResearch, Perplexity Sonar DeepResearch, etc) inquiry.
+		#    'grant permission for any use, including commercial, that falls within accordance with Meta's Llama-3 license'
+		#   https://huggingface.co/Locutusque/llama-3-neural-chat-v1-8b
+		#   https://huggingface.co/cloudyu/Meta-Llama-3-8B-Instruct-DPO
+		#    'License: cc'
+		#   https://huggingface.co/vicgalle/Configurable-Llama-3-8B-v0.3
+		#   https://huggingface.co/nbeerbower/llama-3-dragonmaid-8B-v2?not-for-all-audiences=true
+		#   https://huggingface.co/nbeerbower/llama-3-wissenschaft-8B-v2
+		#  https://huggingface.co/nbeerbower/llama-3-stella-8B
+		#   'governed by META LLAMA 3 COMMUNITY LICENSE AGREEMENT'
+		#   https://huggingface.co/nbeerbower/llama-3-bible-dpo-8B
+		#    'governed by META LLAMA 3 COMMUNITY LICENSE AGREEMENT'
+		#    https://huggingface.co/datasets/nbeerbower/bible-dpo
+		#     'License: apache-2.0'
+		#   https://huggingface.co/nbeerbower/llama-3-gutenberg-8B
+		#   https://web.archive.org/web/20250303232239/https://huggingface.co/nbeerbower/llama-3-gutenberg-8B
+		#    'governed by META LLAMA 3 COMMUNITY LICENSE AGREEMENT'
+		#    https://huggingface.co/datasets/jondurbin/gutenberg-dpo-v0.1
+		#     'License: cc-by-4.0'
+		#   https://huggingface.co/elyn-dev/Llama-3-Soliloquy-8B-v2
+		#    'licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public License, under META LLAMA 3 COMMUNITY LICENSE AGREEMENT'
+		#   https://huggingface.co/theo77186/Llama-3-8B-Instruct-norefusal
+		#    https://huggingface.co/datasets/jondurbin/airoboros-2.2
+		#    https://github.com/llm-attacks/llm-attacks/blob/main/data/advbench/harmful_behaviors.csv
+		#     https://github.com/llm-attacks/llm-attacks/blob/main/LICENSE
+		#      'MIT License'
+		#   https://huggingface.co/bunnycore/Cognitron-8B
+		#    'Llama-3-8B-Lexi-Uncensored'
+		#    https://huggingface.co/Orenguteng/Llama-3-8B-Lexi-Uncensored
+		#    'Einstein-v6.1-Llama3-8B'
+		#    https://huggingface.co/Weyaxi/Einstein-v6.1-Llama3-8B
+		#	  NOTICE: Datasets license consistent with documentation, CreativeCommons license, permissive license, Llama 3.1 license, Llama 3 license, etc, or public domain, etc, affirmed by AI (ChatGPT o3 DeepResearch , ChatGPT 4.5 DeepResearch, ChatGPT or-mini-high DeepResearch, Perplexity Sonar DeepResearch, etc) inquiry.
+		#     'dolphin-2.9-llama3-8b'
+		#     https://huggingface.co/cognitivecomputations/dolphin-2.9-llama3-8b
+		#      'grant permission for any use, including commercial, that falls within accordance with Meta's Llama-3 license'
+		#      NOTICE: Datasets license consistent with documentation, CreativeCommons license, permissive license, Llama 3.1 license, Llama 3 license, etc, or public domain, etc, affirmed by AI (ChatGPT o3 DeepResearch , ChatGPT 4.5 DeepResearch, ChatGPT or-mini-high DeepResearch, Perplexity Sonar DeepResearch, etc) inquiry.
+		#   https://huggingface.co/lodrick-the-lafted/Olethros-8B
+		#    https://huggingface.co/datasets/lodrick-the-lafted/OpusStories
+		#     'License: apache-2.0'
+		#    https://huggingface.co/datasets/lodrick-the-lafted/Sao10K_Claude-3-Opus-Instruct-3.3K
+		#     'License: apache-2.0'
+		#    https://huggingface.co/datasets/lodrick-the-lafted/Samantha-Opus
+		#     'License: apache-2.0'
+		#    https://huggingface.co/datasets/lodrick-the-lafted/Worldsim-Opus
+		#     'License: apache-2.0'
+		#  https://huggingface.co/uygarkurt/llama-3-merged-linear
+		#   https://www.youtube.com/watch?v=gNXBp3wttFU
+		#   https://github.com/uygarkurt/Model-Merge/blob/main/linear.yml
+		#    'model: VAGOsolutions/Llama-3-SauerkrautLM-8b-Instruct'
+		#     https://huggingface.co/VAGOsolutions/Llama-3-SauerkrautLM-8b-Instruct
+		#     https://web.archive.org/web/20241216233234/https://huggingface.co/VAGOsolutions/Llama-3-SauerkrautLM-8b-Instruct
+		#    'model: DeepMount00/Llama-3-8b-Ita'
+		#     https://huggingface.co/DeepMount00/Llama-3-8b-Ita
+		#     https://web.archive.org/web/20241222221326/https://huggingface.co/DeepMount00/Llama-3-8b-Ita
+		#      NOTICE: Datasets license consistent with documentation, CreativeCommons license, permissive license, Llama 3.1 license, Llama 3 license, etc, or public domain, etc, affirmed by AI (ChatGPT o3 DeepResearch , ChatGPT 4.5 DeepResearch, ChatGPT or-mini-high DeepResearch, Perplexity Sonar DeepResearch, etc) inquiry.
+		#    'model: nbeerbower/llama-3-gutenberg-8B'
+		#     https://huggingface.co/nbeerbower/llama-3-gutenberg-8B
+		#     https://web.archive.org/web/20250303232239/https://huggingface.co/nbeerbower/llama-3-gutenberg-8B
+		#      'governed by META LLAMA 3 COMMUNITY LICENSE AGREEMENT'
+		#      https://huggingface.co/datasets/jondurbin/gutenberg-dpo-v0.1
+		#       'License: cc-by-4.0'
+		#
+		# https://huggingface.co/cstr/llama3-8b-spaetzle-v20
+		# https://web.archive.org/web/20240829102655/https://huggingface.co/cstr/llama3-8b-spaetzle-v20
+		#  https://huggingface.co/cstr/llama3-8b-spaetzle-v13
+		#   https://huggingface.co/Azure99/blossom-v5-llama3-8b
+		#    'License: apache-2.0'
+		#    https://huggingface.co/datasets/Azure99/blossom-chat-v3
+		#    https://huggingface.co/datasets/Azure99/blossom-math-v4
+		#    https://huggingface.co/datasets/Azure99/blossom-wizard-v3
+		#    https://huggingface.co/datasets/Azure99/blossom-orca-v3
+		#     'License: apache-2.0'
+		#   https://huggingface.co/VAGOsolutions/Llama-3-SauerkrautLM-8b-Instruct
+		#   https://web.archive.org/web/20241216233234/https://huggingface.co/VAGOsolutions/Llama-3-SauerkrautLM-8b-Instruct
+		#  https://huggingface.co/nbeerbower/llama-3-wissenschaft-8B-v2
+		#   'governed by META LLAMA 3 COMMUNITY LICENSE AGREEMENT'
+		#   https://huggingface.co/datasets/tasksource/ScienceQA_text_only
+		#    
+		#
+		# https://huggingface.co/mlabonne/ChimeraLlama-3-8B-v3
+		# https://web.archive.org/web/20240902141843/https://huggingface.co/mlabonne/ChimeraLlama-3-8B-v3
+		#  https://huggingface.co/NousResearch/Meta-Llama-3-8B-Instruct
+		#   'License' 'https://llama.meta.com/llama3/license'
+		#  https://huggingface.co/mlabonne/OrpoLlama-3-8B
+		#   https://huggingface.co/datasets/mlabonne/orpo-dpo-mix-40k
+		#    'License: apache-2.0'
+		#  https://huggingface.co/cognitivecomputations/dolphin-2.9-llama3-8b
+		#   'grant permission for any use, including commercial, that falls within accordance with Meta's Llama-3 license'
+		#   NOTICE: Datasets license consistent with documentation, CreativeCommons license, permissive license, Llama 3.1 license, Llama 3 license, etc, or public domain, etc, affirmed by AI (ChatGPT o3 DeepResearch , ChatGPT 4.5 DeepResearch, ChatGPT or-mini-high DeepResearch, Perplexity Sonar DeepResearch, etc) inquiry.
+		#  https://huggingface.co/Danielbrdz/Barcenas-Llama3-8b-ORPO
+		#   https://huggingface.co/datasets/reciperesearch/dolphin-sft-v0.1-preference
+		#    'License: apache-2.0'
+		#  https://huggingface.co/VAGOsolutions/Llama-3-SauerkrautLM-8b-Instruct
+		#  https://huggingface.co/vicgalle/Configurable-Llama-3-8B-v0.3
+		#   https://huggingface.co/datasets/vicgalle/configurable-system-prompt-multitask
+		#    'License: cc-by-4.0'
+		#  https://huggingface.co/MaziyarPanahi/Llama-3-8B-Instruct-DPO-v0.3
+		#   https://huggingface.co/datasets/Intel/orca_dpo_pairs
+		#     'License: apache-2.0'
+		#
+		# https://huggingface.co/flammenai/Mahou-1.1-llama3-8B
+		# https://web.archive.org/web/20240829113546/https://huggingface.co/flammenai/Mahou-1.1-llama3-8B
+		#  https://huggingface.co/datasets/flammenai/Grill-preprod-v1_chatML
+		#   'License: apache-2.0'
+		#
+		# https://web.archive.org/web/20240829101937/https://huggingface.co/KingNish/KingNish-Llama3-8b
+		#  https://huggingface.co/VAGOsolutions/Llama-3-SauerkrautLM-8b-Instruct
+		#  https://web.archive.org/web/20241216233234/https://huggingface.co/VAGOsolutions/Llama-3-SauerkrautLM-8b-Instruct
+		#   'License: meta-llama'
+		#  https://huggingface.co/mlabonne/ChimeraLlama-3-8B-v3
+		#  https://web.archive.org/web/20240902141843/https://huggingface.co/mlabonne/ChimeraLlama-3-8B-v3
+		#   https://huggingface.co/NousResearch/Meta-Llama-3-8B-Instruct
+		#    'License' 'https://llama.meta.com/llama3/license'
+		#   https://huggingface.co/mlabonne/OrpoLlama-3-8B
+		#    https://huggingface.co/datasets/mlabonne/orpo-dpo-mix-40k
+		#     'License: apache-2.0'
+		#   https://huggingface.co/cognitivecomputations/dolphin-2.9-llama3-8b
+		#    'grant permission for any use, including commercial, that falls within accordance with Meta's Llama-3 license'
+		#    NOTICE: Datasets license consistent with documentation, CreativeCommons license, permissive license, Llama 3.1 license, Llama 3 license, etc, or public domain, etc, affirmed by AI (ChatGPT o3 DeepResearch , ChatGPT 4.5 DeepResearch, ChatGPT or-mini-high DeepResearch, Perplexity Sonar DeepResearch, etc) inquiry.
+		#   https://huggingface.co/Danielbrdz/Barcenas-Llama3-8b-ORPO
+		#    https://huggingface.co/datasets/reciperesearch/dolphin-sft-v0.1-preference
+		#     'License: apache-2.0'
+		#   https://huggingface.co/VAGOsolutions/Llama-3-SauerkrautLM-8b-Instruct
+		#   https://huggingface.co/vicgalle/Configurable-Llama-3-8B-v0.3
+		#    https://huggingface.co/datasets/vicgalle/configurable-system-prompt-multitask
+		#     'License: cc-by-4.0'
+		#   https://huggingface.co/MaziyarPanahi/Llama-3-8B-Instruct-DPO-v0.3
+		#    https://huggingface.co/datasets/Intel/orca_dpo_pairs
+		#     'License: apache-2.0'
+		#
+		# Datasets and related information possibly used or possibly not used, during, usually at least mostly third-party, non-commercial model development . Noted for completeness and clarity, not necessarily of any relevance. Please read remaining explanation why any such information may not be relevant.
+		# List obtained from, and datasets license consistent with documentation, CreativeCommons license, permissive license, Llama 3.1 license, Llama 3 license, etc, or public domain, etc, affirmed by, AI (ChatGPT o3 DeepResearch , ChatGPT 4.5 DeepResearch, ChatGPT or-mini-high DeepResearch, Perplexity Sonar DeepResearch, etc) inquiry.
+		# OpenAssistant/oasst_top1_2023-08-25
+		# https://huggingface.co/datasets/HuggingFaceH4/ultrachat_200k
+		# https://huggingface.co/datasets/teknium/OpenHermes-2.5
+		# https://huggingface.co/datasets/m-a-p/CodeFeedback-Filtered-Instruction
+		# https://huggingface.co/datasets/cognitivecomputations/dolphin-coder/tree/main#:~:text=License%3A
+		# https://huggingface.co/datasets/cognitivecomputations/samantha-data#:~:text=License%3A
+		# https://huggingface.co/datasets/microsoft/orca-math-word-problems-200k
+		# https://huggingface.co/datasets/abacusai/SystemChat-1.1
+		# https://huggingface.co/datasets/Locutusque/function-calling-chatml
+		# https://huggingface.co/datasets/internlm/Agent-FLAN
+		# https://huggingface.co/datasets/cognitivecomputations/Dolphin-2.9
+		# https://huggingface.co/datasets/tasksource/ScienceQA_text_only
+		# https://huggingface.co/datasets/allenai/ai2_arc/blob/main/README.md#:~:text=License%3A
+		# https://huggingface.co/datasets/camel-ai/physics
+		# https://huggingface.co/datasets/camel-ai/chemistry
+		# https://huggingface.co/datasets/camel-ai/biology
+		# https://huggingface.co/datasets/camel-ai/math
+		# metaeval/reclor https://www.atyun.com/resources/group/metaeval#:~:text=%E8%AE%B8%E5%8F%AF%3A
+		# https://github.com/allenai/OpenBookQA/blob/main/LICENSE
+		# https://huggingface.co/datasets/garage-bAInd/Open-Platypus/commit/4a0588535f76b0606f4e39083149d20eeb8106f0#:~:text=garage,commercial%20%7C%20%3B%2041
+		# https://ai-testing.gitee.com/hf-datasets/derek-thomas/ScienceQA
+		# https://huggingface.co/datasets/jondurbin/airoboros-3.2?not-for-all-audiences=true
+		# https://huggingface.co/datasets/LDJnr/Capybara
+		# https://huggingface.co/datasets/STEM-AI-mtl/Electrical-engineering
+		# https://huggingface.co/datasets/knowrohit07/saraswati-stem/commit/f7d3000f1df13f1f9ca2f44db04aa4d6bb1d8f72#:~:text=%2B%201
+		# https://huggingface.co/datasets/sablo/oasst2_curated
+		# https://paperswithcode.com/paper/lmsys-chat-1m-a-large-scale-real-world-llm#:~:text=The%20dataset%20is%20publicly%20available,Terms%20Data%20policy
+		# https://huggingface.co/datasets/TIGER-Lab/MathInstruct/blob/main/README.md#:~:text=README.md%20%C2%B7%20TIGER,2.0
+		# https://jmai.amegroups.org/article/view/9452/html#:~:text=Examples%20of%20medical%20question%20and,ND%204.0%29%2C%20which%20permits
+		# https://jmai.amegroups.org/article/view/9452/html#:~:text=Examples%20of%20medical%20question%20and,ND%204.0%29%2C%20which%20permits
+		# https://huggingface.co/datasets/meta-math/MetaMathQA-40K
+		# https://github.com/seominjoon/piqa/blob/master/LICENSE
+		# https://huggingface.co/datasets/allenai/sciq
+		# https://huggingface.co/datasets/Open-Orca/SlimOrca
+		# https://huggingface.co/datasets/migtissera/Synthia-v1.3
+		# https://modelscope.cn/datasets/allenai/WildChat
+		# https://huggingface.co/datasets/teknium/GPTeacher-General-Instruct
+		# https://github.com/cloudera/CML_AMP_Finetune_Foundation_Model_Multiple_Tasks
+		# https://huggingface.co/datasets/HuggingFaceH4/no_robots
+		# https://ollama.com/fl0id/teuken-7b-instruct-commercial-v0.4:latest#:~:text=fl0id%2Fteuken,2.0%20%3B%20HuggingFaceH4%2Fultrachat_200k%2C%20EN
+		# mandyyyyii/scibench
+		# TIGER-Lab/ScienceEval
+		# https://huggingface.co/datasets/bigbio/med_qa
+		# DeepMount00/llm_ita_ultra
+		# Cot-Alpaca-GPT4-From-OpenHermes-2.5
+		# OpenChat/openchat_sharegpt4_dataset
+		# totally-not-an-llm/EverythingLM-data-V3
+		# WizardLM/WizardLM_evol_instruct_70k
+		# ToolBench instruction shards (toolbench_instruct_j1s1_3k_unfiltered.jsonl, toolbench_negative_unfiltered.jsonl, toolbench_react_10p_unfiltered.jsonl, toolbench_tflan_cot_30p_unfiltered.jsonl)
+		# Other Dolphin 2.9 training shards (dolphin201-sharegpt2.jsonl, Ultrachat200kunfiltered.jsonl, openhermes200k_unfiltered.jsonl, dolphin-coder-translate-sharegpt2.jsonl, dolphin-coder-codegen-sharegpt2.jsonl, m-a-p_Code-Feedback-sharegpt-unfiltered.jsonl, m-a-p_CodeFeedback-Filtered-Instruction-sharegpt-unfiltered.jsonl, not_samantha_norefusals.jsonl, Orca-Math-resort-unfiltered.jsonl, agent_instruct_react_unfiltered.jsonl, SystemConversations.jsonl)
+		#
+		# * **Gutenberg DPO v0.1** – Dataset curated by Jon Durbin (HF user *jondurbin*), derived from public-domain Project Gutenberg texts. *License: CC BY 4.0*.
+		#  https://huggingface.co/datasets/jondurbin/gutenberg-dpo-v0.1#:~:text=License%3A
+		# * **Configurable System Prompt Multitask** – Synthetic preference dataset by Victor Gallego (HF user *vicgalle*). *License: CC BY 4.0*.
+		#  https://huggingface.co/datasets/vicgalle/configurable-system-prompt-multitask#:~:text=License%3A
+		# * **SciQ Dataset** – Crowdsourced science QA dataset from Allen Institute for AI. *License: CC BY-NC 3.0 (Unported)*.
+		#  https://huggingface.co/datasets/allenai/sciq#:~:text=License%3A
+		# * **AI2 Reasoning Challenge (ARC)** – Science questions dataset by Allen Institute for AI. *License: CC BY-SA 4.0*.
+		#  https://huggingface.co/datasets/allenai/ai2_arc#:~:text=License%3A
+		# * **ScienceQA Dataset** – Multimodal science QA benchmark (Lu et al., NeurIPS 2022). *License: CC BY-NC-SA 4.0*.
+		#  https://scienceqa.github.io/#:~:text=Our%20dataset%20is%20distributed%20under,check%20out%20our%20github%20repository
+		#  https://scienceqa.github.io/#:~:text=Our%20dataset%20is%20distributed%20under,out%20our%20%2010%20github
+		# * **Llama-3 Soliloquy 8B v2** – Fine-tuned model by Elyn (HF user *elyn-dev/openlynn*). *License: CC BY-NC-SA 4.0*.
+		#  https://huggingface.co/elyn-dev/Llama-3-Soliloquy-8B-v2#:~:text=This%20model%20is%20licensed%20under,LLAMA%203%20COMMUNITY%20LICENSE%20AGREEMENT
+		#  https://huggingface.co/elyn-dev/Llama-3-Soliloquy-8B-v2#:~:text=license,imply%20endorsement%20by%20the%20licensor
+		#
+		# 
+		#
+		# NOTICE: CreativeCommons Attribution is different for each of the three "Llama 3" Daredevil AI models .
+		#
+		#
+		# "Llama 3" Daredevil mlabonne/Daredevil-8B model  https://huggingface.co/mlabonne/Daredevil-8B
+		#
+		# Global merge of included AI model weights; no fine-tuning after merge.  Datasets not redistributed.
+		#
+		# CC components follow – Title   Modification status   License + URI   Author/Source   Work URI   (CC licenses include disclaimers of warranty)
+		# All license links also carry the CC warranty disclaimer.
+		#
+		# Llama-3 Soliloquy 8B v2 (model)   Weights merged (global merge, no further training)   CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/   Elyn-dev   https://huggingface.co/elyn-dev/Llama-3-Soliloquy-8B-v2
+		# Gutenberg-DPO v0.1 (dataset)   Used indirectly via upstream fine-tuning; upstream already cleaned chapters & generated synthetic prompts (retain these prior modifications); not redistributed here   CC BY 4.0 https://creativecommons.org/licenses/by/4.0/   Jon Durbin, 2024   https://huggingface.co/datasets/jondurbin/gutenberg-dpo-v0.1
+		# Configurable System Prompt Multitask (dataset)   Used indirectly via upstream fine-tuning; dataset is fully synthetic preference pairs (retain prior modification note); not redistributed   CC BY 4.0 https://creativecommons.org/licenses/by/4.0/   Victor Gallego   https://huggingface.co/datasets/vicgalle/configurable-system-prompt-multitask
+		# AI2 ARC (dataset)   Used indirectly via upstream fine-tuning; no edits by Daredevil-8B; dataset not redistributed, so BY-SA obligations do not propagate   CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/   Allen Institute for AI   https://huggingface.co/datasets/allenai/ai2_arc
+		# SciQ (dataset)   Used indirectly via upstream fine-tuning; converted JSON->tokens only; dataset not redistributed   CC BY-NC 3.0 https://creativecommons.org/licenses/by-nc/3.0/   Johannes Welbl et al.   https://huggingface.co/datasets/allenai/sciq
+		# ScienceQA (dataset)   Used indirectly via upstream fine-tuning; upstream already removed images; not redistributed   CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/   Lu et al., 2022   https://github.com/lupantech/ScienceQA
+		# Truthy-DPO v0.1 (dataset)   Used in upstream DPO step; no edits; not redistributed   CC BY 4.0 https://creativecommons.org/licenses/by/4.0/   Jon Durbin   https://huggingface.co/datasets/jondurbin/truthy-dpo-v0.1
+		# Meta-Llama-3-8B-Instruct-DPO (model)   Weights merged (global merge, no additional training) CC BY 4.0   https://creativecommons.org/licenses/by/4.0/   cloudyu   https://huggingface.co/cloudyu/Meta-Llama-3-8B-Instruct-DPO
+		#
+		#
+		# "Llama 3" Daredevil mlabonne/Daredevil-8B-abliterated model  https://huggingface.co/mlabonne/Daredevil-8B-abliterated
+		#
+		# Global merge of included AI-model weights, followed by 'abliteration' weight manipulation; no further fine-tuning after merge.  Datasets are training-only and are not redistributed.
+		#
+		# CC components follow –  Title   Modification status   License + URI   Author/Source   Work URI   (all CC licenses include disclaimers of warranty)
+		# All license links also carry the CC warranty disclaimer.
+		#
+		# Llama-3 Soliloquy 8B v2 (model)          Weights merged **and abliterated** (global merge + abliteration; no extra training)          CC BY-NC-SA 4.0  https://creativecommons.org/licenses/by-nc-sa/4.0/          Elyn-dev          https://huggingface.co/elyn-dev/Llama-3-Soliloquy-8B-v2
+		# Gutenberg-DPO v0.1 (dataset)             Used indirectly via upstream fine-tuning; retains upstream synthetic-prompt edits; not redistributed          CC BY 4.0  https://creativecommons.org/licenses/by/4.0/          Jon Durbin (2024)          https://huggingface.co/datasets/jondurbin/gutenberg-dpo-v0.1
+		# Configurable System Prompt Multitask (dataset)   Used indirectly via upstream fine-tuning; unchanged; not redistributed          CC BY 4.0  https://creativecommons.org/licenses/by/4.0/          Victor Gallego          https://huggingface.co/datasets/vicgalle/configurable-system-prompt-multitask
+		# AI2 ARC (dataset)                         Used indirectly via upstream fine-tuning; no edits; dataset not redistributed (BY-SA therefore not triggered)          CC BY-SA 4.0  https://creativecommons.org/licenses/by-sa/4.0/          Allen Institute for AI          https://huggingface.co/datasets/allenai/ai2_arc
+		# SciQ (dataset)                           Used indirectly via upstream fine-tuning; JSON→tokens only; not redistributed          CC BY-NC 3.0  https://creativecommons.org/licenses/by-nc/3.0/          Johannes Welbl et al.          https://huggingface.co/datasets/allenai/sciq
+		# ScienceQA (dataset)                       Used indirectly via upstream fine-tuning; images removed upstream; not redistributed          CC BY-NC-SA 4.0  https://creativecommons.org/licenses/by-nc-sa/4.0/          Pan Lu et al. (2022)          https://github.com/lupantech/ScienceQA
+		# Truthy-DPO v0.1 (dataset)   Used in upstream DPO step; no edits; not redistributed   CC BY 4.0 https://creativecommons.org/licenses/by/4.0/   Jon Durbin   https://huggingface.co/datasets/jondurbin/truthy-dpo-v0.1
+		# Meta-Llama-3-8B-Instruct-DPO (model)      Weights merged **and abliterated** (global merge + abliteration)          CC BY 4.0  https://creativecommons.org/licenses/by/4.0/          cloudyu          https://huggingface.co/cloudyu/Meta-Llama-3-8B-Instruct-DPO
+		#
+		#
+		# "Llama 3" Daredevil mlabonne/NeuralDaredevil-8B-abliterated model  https://huggingface.co/mlabonne/NeuralDaredevil-8B-abliterated
+		#
+		# Global merge of included AI-model weights -> ‘abliteration’ weight manipulation -> DPO fine-tune (one epoch on mlabonne/orpo-dpo-mix-40k).
+		#
+		# CC components follow –  Title   Modification status   License + URI   Author/Source   Work URI   (all CC licenses include disclaimers of warranty)
+		# All license links also carry the CC warranty disclaimer.
+		#
+		# Llama-3 Soliloquy 8B v2 (model)   Weights merged in Daredevil-8B, then **further updated by abliteration + DPO fine-tune**   CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/   Elyn-dev   https://huggingface.co/elyn-dev/Llama-3-Soliloquy-8B-v2
+		# Gutenberg-DPO v0.1 (dataset)   Used for DPO fine-tune **without additional edits** (tokenisation only); retains prior cleaning & prompt synthesis by creator; *not redistributed*   CC BY 4.0 https://creativecommons.org/licenses/by/4.0/   Jon Durbin, 2024   https://huggingface.co/datasets/jondurbin/gutenberg-dpo-v0.1
+		# Configurable System Prompt Multitask (dataset)   Used for DPO fine-tune **as-is** (parquet → tokens); *not redistributed*   CC BY 4.0 https://creativecommons.org/licenses/by/4.0/   Victor Gallego   https://huggingface.co/datasets/vicgalle/configurable-system-prompt-multitask
+		# AI2 ARC (dataset)   Indirectly included via upstream models; **no new edits**; dataset only consumed for training so BY-SA obligations do not propagate; *not redistributed*   CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/   Allen Institute for AI   https://huggingface.co/datasets/allenai/ai2_arc
+		# SciQ (dataset)   Used for DPO fine-tune; **JSON → ChatML conversion only**; *not redistributed*   CC BY-NC 3.0 https://creativecommons.org/licenses/by-nc/3.0/   Johannes Welbl et al. (2017)   https://huggingface.co/datasets/allenai/sciq
+		# ScienceQA (dataset)   Upstream already removed images; **text portion used unchanged** in DPO set; *not redistributed*   CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/   Lu et al., 2022   https://scienceqa.github.io/
+		# Truthy-DPO v0.1 (dataset)   Used in upstream DPO step; no edits; not redistributed   CC BY 4.0 https://creativecommons.org/licenses/by/4.0/   Jon Durbin   https://huggingface.co/datasets/jondurbin/truthy-dpo-v0.1
+		# Meta-Llama-3-8B-Instruct-DPO (model)   Weights merged, then **altered by abliteration + DPO fine-tune**   CC BY 4.0  https://creativecommons.org/licenses/by/4.0/   cloudyu   https://huggingface.co/cloudyu/Meta-Llama-3-8B-Instruct-DPO
+		# 
+		# 
+		# https://creativecommons.org/licenses/by/4.0/legalcode.txt
+		# https://creativecommons.org/licenses/by-sa/4.0/legalcode.txt
+		# https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.txt
+		# https://creativecommons.org/licenses/by/4.0/
+		# https://creativecommons.org/licenses/by-sa/4.0/
+		# https://creativecommons.org/licenses/by-nc-sa/4.0/
+		# https://creativecommons.org/licenses/by/3.0/
+		# https://creativecommons.org/licenses/by/2.0/
+		# https://creativecommons.org/licenses/by/1.0/
+		#
+		# Models fine-tuned, etc, with more than a few datasets, have been evaluated for dataset license by prompting  ChatGPT o3 DeepResearch , ChatGPT 4.5 DeepResearch , ChatGPT o4-mini-high DeepResearch , or similar , and may be labeled 'Datasets license consistent with documentation, CreativeCommons license, permissive license, Llama 3.1 license, Llama 3 license, etc, or public domain, etc, affirmed by AI (ChatGPT o3 DeepResearch , ChatGPT 4.5 DeepResearch, ChatGPT or-mini-high DeepResearch, Perplexity Sonar DeepResearch, etc) inquiry.' . Such documentation must not be misconstrued: there is a consensus reflected both in statements by the community often stating a license that does not include the license terms from a dataset used in fine-tuning, training, etc, as well economically relevant activity in the AI industry, that transformative use of datasets for training and inference to create non-infringing content is, whether under fair-use or other doctrine, not affected by the licensing of the dataset. Nothing about any documentation here shall be misconstrued as contradicting such consensus, expectation, etc.
+		#
+		# Nor shall any such documentation be misconstrued to suggest any dataset enumerated here is in any way more significant than datasets used by Meta to train Llama , DeepSeek to train DeepSeek-R1 .
+		#
+		# Llama 3, Llama 3.1 , Llama 3.3 , DeepSeek-R1 , other such 'open-weights' models, 'open-weights' community derivatives of such 'open-weights' models, regardless of commercial use of these models, were trained, created, etc, as a non-commercial and possibly also educational activity - any use of any datasets was non-commercial . The business justification of building long-term shareholder value under which corporations donate to strictly non-profit (eg. 501c3 ) entities wholly unrelated to their own business interests, solely to meet public ethics expectations, clearly shows that entities with commercial goals engage in unrelated activity that is widely perceived as much of a legitimate corporate non-commercial activity as other corporate activities some may perceive as legitimate whether commercial or non-commercial.
+		#
+		# Meta's contribution to society in producing the "Llama 3" (trademarked), "Llama" (trademarked) models without a direct commercial purpose in doing so is significant. All reasonable efforts are made as regards to "Llama 3", "Llama", etc,  models used, etc, to comply with then current Meta's brand guidelines.
+		#
+		# Dataset, models, etc, used for fine-tuning, merging, etc, by developer 'mlabonne', and similar developers, usually at least mostly third-party developers, creating "Llama 3" 'NeuralDaredevil-8B-abliterated' , "Llama 3" 'NeuralDaredevil-8B-abliterated' , etc, and similar, models, was the developer's sole responsibility. Compliance with licenses of datasets either under permissive open-source licenses, or outright essentially public domain, etc, during fine-tuning, or compliance with licenses of such permissively licensed or outright essentially public domain open-weights models merged, or at least without imposing any non-commercial licensing of the developer's own, was an obvious non-commercial research activity, reasonably expected at least fair use, private use, transformative use, etc, and the responsibility of the relevant developer, usually at least mostly third-party developers, etc, at that time.
+		#
+		# Use of any particular dataset by a model merged into another model then merged into yet another model, has been substantially diluted, and possibly in yet another way very significantly transformed. Actual benefit, much less content, resulting from that particular dataset may be negligible, yet mathematically infeasible to identify in the model and reduce to noise, as well as actually impossible to remove. The insignificance of any supposed contribution, unrelatedness to any actual purpose of using the model, and infeasibility of removal, may or may not significantly dilute, discredit, etc, any related intellectual property claim.
+		#
+		# Relatively small (~8B parameters) open-weights AI LLM models developed non-commercially, embedded use of AI LLM models, offline use of AI LLM models, use of AI LLM models without a closed-source commercial web interface built by the same entity as the AI LLM model creator, and/or other similar such situations, without either limiting to such situations or requiring any combination of such situations, unambiguously obviously does not compete with the entire combination of at least partially paywalled online non-embedded use of closed-weights at least most differentiatingly relatively huge (>1T parameters expected by the general public) AI LLM models developed as a commercial product offered through online closed-source commercial web interface, online APIs, etc.
+		#
+		# Possibly interesting legal interpretations seem to exist around OpenAI.
+		#  https://huggingface.co/datasets/jondurbin/airoboros-2.2
+		#   'ToS' 'Please seek legal advice'
+		#  https://huggingface.co/datasets/RyokoAI/ShareGPT52K  .
+		#   'CC0: No Rights Reserved.'
+		#   'The output of machine learning algorithms is uncopyrightable in the United States and other jurisdictions. Additionally, the OpenAI terms of service do not apply to this dataset as users of this dataset are not accessing the OpenAI service.'
+		#
+		# Explicitly states 'License: llama3.1' , 'License: llama3' , etc. Any permissive license (eg. Apache 2.0, MIT, CreativeCommons, etc) or less permissive license (eg. CreativeCommons NonCommercial) has been found by human review and followed up AI provided review, as reasonably permissive license terms.
+		#
+		# NOTICE: Thus, the 'Llama-3-augment' model, as derived from either 'Llama 3.1 8B', 'Llama 3 8B', or any of the other derivative AI LLM models above, etc:
+		# (*) Itself created non-commercially, whether 'Llama 3.1 8B', 'Llama 3 8B', "Llama 3" 'NeuralDaredevil', or derived thereof, etc.
+		# (*) Permitted by Meta except for entities meeting this specific criteria from 'Llama 3.1', 'Llama 3', license text, for commercial, etc, use.
+		#  'on the Llama 3.1 version release date, the monthly active users of the products or services made available by or for Licensee, or Licensee’s affiliates, is greater than 700 million monthly active users in the preceding calendar month'
+		#  'on the Meta Llama 3 version release date, the monthly active users of the products or services made available by or for Licensee, or Licensee’s affiliates, is greater than 700 million monthly active users in the preceding calendar month'
+		# (*) May or may not, depending on both actual relevance and the underlying model used, incur a CreativeCommons Non-Commercial less permissive licensing term, to 'elyn-dev' creator of 'Llama-3-Soliloquy-8B-v2' . Developers of possibly relevant models and merged models apparently did not explicitly impose their own claim of such a less permissive licensing term.
+		#  https://huggingface.co/elyn-dev/Llama-3-Soliloquy-8B-v2
+		#  https://huggingface.co/nbeerbower/llama-3-stella-8B
+		#  https://huggingface.co/mlabonne/Daredevil-8B
+		#  https://huggingface.co/mlabonne/Daredevil-8B-abliterated
+		#  https://huggingface.co/mlabonne/NeuralDaredevil-8B-abliterated
+		
+		# https://www.llama.com/llama3_1/license/
+		# https://huggingface.co/meta-llama/Meta-Llama-3.1-70B-Instruct/blob/main/LICENSE
+		#  NOTICE: ATTENTION: This license has been preserved as 'LICENSE-Llama-3.1.txt', but this license does NOT apply to any 'ubiquitous_bash' code or any other work that is not either a work by Meta or strictly a derivative of a work by Meta (such as a modified AI model GGUF or safetensors file) !
+		
+		# https://www.llama.com/llama3_1/use-policy/
+
+		# https://about.meta.com/brand/resources/meta/company-brand/
+		
+		
+		# https://www.llama.com/llama3_1/license/
+		#  'include “Llama” at the beginning of any such AI model name'
+		# ATTENTION: Nevertheless, it is very possible a non-'Llama' model will eventually be used, especially as science and technology (eg. plasma recombination EUV physics) related datasets (eg. relevant Wikipedia articles) are increasingly gathered.
+
+
+		# https://www.llama.com/llama3/license/
+		# https://www.llama.com/llama3/use-policy/
+		
+		
+		# https://www.apache.org/licenses/LICENSE-2.0.txt
+		# https://opensource.org/license/mit
+		# https://creativecommons.org/licenses/by/4.0/legalcode.txt
+		# https://creativecommons.org/licenses/by-sa/4.0/legalcode.txt
+		# https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.txt
+		# https://creativecommons.org/licenses/by/4.0/
+		# https://creativecommons.org/licenses/by-sa/4.0/
+		# https://creativecommons.org/licenses/by-nc-sa/4.0/
+		# https://creativecommons.org/licenses/by/3.0/
+		# https://creativecommons.org/licenses/by/2.0/
+		# https://creativecommons.org/licenses/by/1.0/
+
+
+
+		# Regarding any CreativeCommons NonCommercial less permissive licensing term that may possibly or may not have been incurred:
+		# May be internal use not primarily intended for or directed toward commercial advantage:
+		# *) Generating technical, business, etc, decisions.
+		# *) Writing content not directly on behalf of a customer - technical standards, marketing, email replies, etc.
+		# *) Processing step in a robot error detection and correction algorithm.
+		# *) Part of the operations of a commercial business but not itself intended primarily for exploiting commercially.
+		# *) Included due to upstream non-commercial supplier's (eg. open-source developer's) preferred component in a complex system also used by the public for other purposes, archival preservation of an AI model through distribution, the supplier's savings on non-commercial use of disk space, bandwidth, build time/computation, etc, rather than to gain any actual advantage for a commercial business.
+		# 
+		# May be separate from the usual commercial use of AI models usually intentionally prevented under CreativeCommons NonCommercial license:
+		# *) Not an inference service generating outputs solely with this AI model based solely on user input.
+		# *) Not using content directly from this AI model as a substantial contribution to such expressive content of a paid service as roleplaying character dialogue.
+		# 
+		# May not be providing a means for users to 
+		# *) Not offering consulting or other assistance to generate both specific output of this AI model and from other than an approved paid service.
+		# *) Vastly, absurdly, prohibitively difficult to, from prefixing, suffixing, etc, useful given inputs, obtain outputs intentionally resembling this AI model from AI model after complex merges, to the point of resembling intentional effort both to cause the AI model to refuse to do this and to cause the AI model to not produce such resemblances.
+		# 
+		# May be out of scope:
+		# *) Transformative processing of outputs by another AI model .
+		# *) Extracted facts with zero originality being the only output, such as converting natural-language input to output a name, number, address, etc.
+		# *) Trivial, unrecognizable, effect, etc, of an AI model only contributing weights to a merged model merged into another model.
+		# *) No substantial protectable expression in the composite model weights due to weight-averaging obliterating individual training patterns, merges, etc, to the point of being functionally noise.
+		# 
+		# May be beyond best practices and reasonable effort to mitigate more:
+		# *) Disproportionate infeasibility of determining both removal of merged AI model weights and absence of other damage after complex merging into AI model merged into another AI model merged into this AI model, with all such merges having possible previous merges disrupting any baseline values, possibly multiple cases of such complex composition, under limited precision arithmetic.
+		# 
+		# May be zero-substitution negligible market effect:
+		# *) Non-availability of the merged model useful for different purposes through official approved paid service.
+		# *) Non-availability and poor maintenance of this AI model from approved official paid service (eg. OpenRouter  404: No endpoints found ) .
+		# *) Security necessity - offline inference necessary due to AI model output use in a pipeline running commands, parameters interpretable as commands, and/or AI model input being from a pipeline that could have possibly picked up sensitive files such as password lists.
+		# *) Performance necessity - within a looping pipeline, etc, that would be a large factor or orders of magnitude prohibitively slower, from available paid service.
+		# *) Reliability necessity - must continue essential data processing, possibly also business processes, etc, without fragility of internet outage, including historic incidents of multiple redundant satellite internet provider outages.
+		# *) Security necessity - use in a strictly offline air-gapped or data-pumped environment with very strict integrity checking, etc.
+		# *) No market harm - intermediate functional data for factual, decision making, practical uses, made possible by possibly transformative merging, fine-tuning, etc, instead of uses explicitly declared description and purposes of this AI model or official approved paid service, etc, for finished creative fiction, immersive, dynamic, fictional experiences, roleplay, etc.
+		# 
+		# In particular, it is usually already inappropriate to begin with to directly show outputs from an AI 'augment' model directly to end-users, as such models may usually rely on subsequent processing by another model for 'safety'.
+		# 
+		# A different situation may emerge when attempting to, for profit, without similarly distributing the AI model for free, redistribute the AI model or something including the AI model, such as a dist/OS .
+		# 
+		# This is not advice: some, all, and/or none, of these evaluation points may or may not apply, particularly depending on ongoing legal proceedings determining the applicability of copyright law at all to the possibly transformative, etc, uses, etc, of AI models.
+
+CZXWXcRMTo8EmM8i4d
+	fi
+
+
+
+	cat << 'CZXWXcRMTo8EmM8i4d'
 
 
 
@@ -26977,29 +27946,250 @@ Agreement.
 the State of California without regard to choice of law principles, and the UN Convention on Contracts
 for the International Sale of Goods does not apply to this Agreement. The courts of California shall have
 exclusive jurisdiction of any dispute arising out of this Agreement.
-"""
+
 CZXWXcRMTo8EmM8i4d
-	
-	#wget 'https://huggingface.co/mlabonne/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF/resolve/main/meta-llama-3.1-8b-instruct-abliterated.Q4_K_M.gguf'
-	aria2c --log=- --log-level=info -x "3" --async-dns=false -o 'llama-3.1-8b-instruct-abliterated.Q4_K_M.gguf' 'https://huggingface.co/mlabonne/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF/resolve/main/meta-llama-3.1-8b-instruct-abliterated.Q4_K_M.gguf'
-	[[ ! -e 'llama-3.1-8b-instruct-abliterated.Q4_K_M.gguf' ]] && aria2c --log=- --log-level=info -x "3" --async-dns=false -o 'llama-3.1-8b-instruct-abliterated.Q4_K_M.gguf' 'https://huggingface.co/mlabonne/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF/resolve/main/meta-llama-3.1-8b-instruct-abliterated.Q4_K_M.gguf' --disable-ipv6=true
-	
-	if [[ ! -e 'llama-3.1-8b-instruct-abliterated.Q4_K_M.gguf' ]]
+
+	if ( [[ "$accept_nonpermissiveNONCOMMERCIAL" != "false" ]] ) || [[ -e "$HOME"/nonpermissiveNONCOMMERCIAL ]]
 	then
-		_wget_githubRelease_join "soaringDistributions/Llama-augment_bundle" "" "llama-3.1-8b-instruct-abliterated.Q4_K_M.gguf"
+		cat << 'CZXWXcRMTo8EmM8i4d'
+
+
+
+META LLAMA 3 COMMUNITY LICENSE AGREEMENT
+Meta Llama 3 Version Release Date: April 18, 2024
+
+“Agreement” means the terms and conditions for use, reproduction, distribution and modification of the Llama Materials set forth herein.
+“Documentation” means the specifications, manuals and documentation accompanying Meta Llama 3 distributed by Meta at https://llama.com/get-started/.
+“Licensee” or “you” means you, or your employer or any other person or entity (if you are entering into this Agreement on such person or entity’s behalf), of the age required under applicable laws, rules or regulations to provide legal consent and that has legal authority to bind your employer or such other person or entity if you are entering in this Agreement on their behalf.
+“MetaLlama 3” means the foundational large language models and software and algorithms, including machine-learning model code, trained model weights, inference-enabling code, training-enabling code, fine-tuning enabling code and other elements of the foregoing distributed by Meta at https://llama.com/llama-downloads.
+“Llama Materials” means, collectively, Meta’s proprietary Meta Llama 3 and Documentation (and any portion thereof) made available under this Agreement.
+“Meta” or “we” means Meta Platforms Ireland Limited (if you are located in or, if you are an entity, your principal place of business is in the EEA or Switzerland) and Meta Platforms, Inc. (if you are located outside of the EEA or Switzerland).
+By clicking “I Accept” below or by using or distributing any portion or element of the Llama Materials, you agree to be bound by this Agreement.
+
+1. License Rights and Redistribution.
+a. Grant of Rights. You are granted a non-exclusive, worldwide, non-transferable and royalty-free limited license under Meta’s intellectual property or other rights owned by Meta embodied in the Llama Materials to use, reproduce, distribute, copy, create derivative works of, and make modifications to the Llama Materials.
+b. Redistribution and Use.
+i. If you distribute or make available the Llama Materials (or any derivative works thereof), or a product or service that uses any of them, including another AI model, you shall (A) provide a copy of this Agreement with any such Llama Materials; and (B) prominently display “Built with Meta Llama 3” on a related website, user interface, blogpost, about page, or product documentation. If you use the Llama Materials to create, train, fine tune, or otherwise improve an AI model, which is distributed or made available, you shall also include “Llama 3” at the beginning of any such AI model name.
+
+ii. If you receive Llama Materials, or any derivative works thereof, from a Licensee as part of an integrated end user product, then Section 2 of this Agreement will not apply to you.
+
+iii. You must retain in all copies of the Llama Materials that you distribute the following attribution notice within a “Notice” text file distributed as a part of such copies: “Meta Llama 3 is licensed under the Meta Llama 3 Community License, Copyright © Meta Platforms, Inc. All Rights Reserved.”
+
+iv. Your use of the Llama Materials must comply with applicable laws and regulations (including trade compliance laws and regulations) and adhere to the Acceptable Use Policy for the Llama Materials (available at https://llama.com/llama3/use-policy), which is hereby incorporated by reference into this Agreement.
+v. You will not use the Llama Materials or any output or results of the Llama Materials to improve any other large language model (excluding Meta Llama 3 or derivative works thereof).
+
+2. Additional Commercial Terms. If, on the Meta Llama 3 version release date, the monthly active users of the products or services made available by or for Licensee, or Licensee’s affiliates, is greater than 700 million monthly active users in the preceding calendar month, you must request a license from Meta, which Meta may grant to you in its sole discretion, and you are not authorized to exercise any of the rights under this Agreement unless or until Meta otherwise expressly grants you such rights.
+3. Disclaimer of Warranty. UNLESS REQUIRED BY APPLICABLE LAW, THE LLAMA MATERIALS AND ANY OUTPUT AND RESULTS THEREFROM ARE PROVIDED ON AN “AS IS” BASIS, WITHOUT WARRANTIES OF ANY KIND, AND META DISCLAIMS ALL WARRANTIES OF ANY KIND, BOTH EXPRESS AND IMPLIED, INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE. YOU ARE SOLELY RESPONSIBLE FOR DETERMINING THE APPROPRIATENESS OF USING OR REDISTRIBUTING THE LLAMA MATERIALS AND ASSUME ANY RISKS ASSOCIATED WITH YOUR USE OF THE LLAMA MATERIALS AND ANY OUTPUT AND RESULTS.
+4. Limitation of Liability. IN NO EVENT WILL META OR ITS AFFILIATES BE LIABLE UNDER ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, TORT, NEGLIGENCE, PRODUCTS LIABILITY, OR OTHERWISE, ARISING OUT OF THIS AGREEMENT, FOR ANY LOST PROFITS OR ANY INDIRECT, SPECIAL, CONSEQUENTIAL, INCIDENTAL, EXEMPLARY OR PUNITIVE DAMAGES, EVEN IF META OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF ANY OF THE FOREGOING.
+5. Intellectual Property.
+a. No trademark licenses are granted under this Agreement, and in connection with the Llama Materials, neither Meta nor Licensee may use any name or mark owned by or associated with the other or any of its affiliates, except as required for reasonable and customary use in describing and redistributing the Llama Materials or as set forth in this Section 5(a). Meta hereby grants you a license to use “Llama 3” (the “Mark”) solely as required to comply with the last sentence of Section 1.b.i. You will comply with Meta’s brand guidelines (currently accessible at https://about.meta.com/brand/resources/meta/company-brand/). All goodwill arising out of your use of the Mark will inure to the benefit of Meta.
+b. Subject to Meta’s ownership of Llama Materials and derivatives made by or for Meta, with respect to any derivative works and modifications of the Llama Materials that are made by you, as between you and Meta, you are and will be the owner of such derivative works and modifications.
+
+c. If you institute litigation or other proceedings against Meta or any entity (including a cross-claim or counterclaim in a lawsuit) alleging that the Llama Materials or Meta Llama 3 outputs or results, or any portion of any of the foregoing, constitutes infringement of intellectual property or other rights owned or licensable by you, then any licenses granted to you under this Agreement shall terminate as of the date such litigation or claim is filed or instituted. You will indemnify and hold harmless Meta from and against any claim by any third party arising out of or related to your use or distribution of the Llama Materials.
+
+6. Term and Termination. The term of this Agreement will commence upon your acceptance of this Agreement or access to the Llama Materials and will continue in full force and effect until terminated in accordance with the terms and conditions herein. Meta may terminate this Agreement if you are in breach of any term or condition of this Agreement. Upon termination of this Agreement, you shall delete and cease use of the Llama Materials. Sections 3, 4 and 7 shall survive the termination of this Agreement.
+7. Governing Law and Jurisdiction. This Agreement will be governed and construed under the laws of the State of California without regard to choice of law principles, and the UN Convention on Contracts for the International Sale of Goods does not apply to this Agreement. The courts of California shall have exclusive jurisdiction of any dispute arising out of this Agreement.
+CZXWXcRMTo8EmM8i4d
+	fi
+
+	echo '"""'
+}
+
+
+# NOTICE: You are obtaining the 'Llama-3-augment' model, or an upstream model used as a 'Llama-3-augment' model, by using this function: the 'Llama-3-augment' model is not, through this code itself, distributed to you (ie. you are likely receiving the 'Llama-3-augment' model from Soaring Distributions LLC regardless of where you obtained this code from).
+_setup_ollama_model_augment_sequence() {
+	# NOTICE: WARNING: Normally, any redistribution of a 'Llama', similar AI model, or other AI model, would be from an authoratative corporation, such as "Soaring Distributions LLC" .
+	
+	# DANGER: An 'augment' model, which may be included with 'ubdist' or other 'dist/OS' is intended SOLELY for developer use. As a public domain or some publicly available AI model licensing terms apparently allow, this model may be modified for better compliance with technical use cases (such as not disregarding the previous conversation when given repeated 'system' prompts), or for smaller model size (eg. through quantization, or use of a lower parameter count model).
+	
+	# DANGER DANGER: Any 'augment' model really should NOT be used for 'end user' services, including any any built-in help for any end-user program or machinery (excepting that it may or may NOT be reasonable to include with some non-commercial open-source software as a built-in help, wizard, etc, following usual expectations of community provided software). You should expect users WILL, at best, more easily 'jailbreak' such a model, and, due to the emphasis on technical usage (where reliability above 0.2% failure rates, unusual repetitive prompting, etc) as well as small model size, there may be both a complete absence of any safeguards as well as a (albeit not yet observed) possibility of introducing harmful subjects to otherwise harmless conversation.
+	
+	# YOU HAVE BEEN WARNED ! DEVELOPERS ONLY, NOT USERS !
+	
+	
+	# Any distribution or any other activity regarding any 'augmentation' or other AI model is without any warranty of any kind. Superseding all other statements, there are no representations or warranties of any kind concerning the Work, express, implied, statutory or otherwise, including without limitation warranties of title, merchantability, fitness for a particular purpose, non infringement, or the absence of latent or other defects, accuracy, or the present or absence of errors, whether or not discoverable, all to the greatest extent permissible under applicable law.
+	
+	# SPECIFICALLY THIS STATEMENT DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM THE USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS PROVIDED HEREUNDER.
+	
+	
+	# NOTICE: Purpose of the 'augment' model is, above all other purposes, both:
+	#  (1) To supervise and direct decisions and analysis by other AI models (such as from vision encoders, but also mathematical reasoning specific LLMs, computer activity and security logging LLMs, etc).
+	#  (2) To assist and possibly supervise 'human-in-the-loop' decision making (eg. to sanity check human responses).
+	
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	
+	# https://www.llama.com/llama3_2/license/
+	# https://www.llama.com/llama3_2/use-policy/
+	#  'or to enable functionality disabled by Meta'
+	#   The functionality offered by 'Llama 3.2' (eg. multimodal functionality) is expected to exceed the purpose of an 'augment' model, but the reliability limitations imposed are expected prohibitive (especially regarding repeated 'system' prompts). Thus, it is expected that 'Llama 3.1' will be the last 'Llama' model used as an 'augment' model. This is NOT a concern, because it is expected that 'Llama 3.1' already reached a point of diminishing returns on what can be achieved by AI model training methods alone.
+	#   Purposes other than as an 'augment' model, which is a text-only technical use case, and expected to require fine tuning (eg. on prompt/responses generated from the 'ubiquitous_bash' codebase), at that, are expected to achieve very adequate performance from 'stock' original 'Llama' models, or at least those fine-tuned for specific use cases (eg. needle-in-haystack, computer vision object recognition, robot motor control, etc).
+	
+	
+	
+	
+	
+	
+	
+	# ATTENTION: Default context size is low to ensure compatibility with low-RAM computers (LLM on CPU performance generally being acceptable).
+	# STRONGLY RECOMMENDED to greatly increase the context length (6144) if at all possible (>32GB RAM) or to decrease if necessary (eg. 8GB RAM) .
+	
+	#/clear
+	#/set parameter num_thread 768
+	#/set parameter num_gpu 0
+	
+	# 4GB (presumed)
+	#/set parameter num_ctx 512
+
+	# 8GB (presumed)
+	#/set parameter num_ctx 2048
+
+	#/set parameter num_ctx 4096
+
+	# 16GB (presumed)
+	#/set parameter num_ctx 8192
+
+	#/set parameter num_ctx 16384
+
+	# 32GB
+	#/set parameter num_ctx 32768
+
+	# 68.5GiB (presumed)
+	#/set parameter num_ctx 131072
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	local functionEntryPWD="$PWD"
+	_start
+	
+	
+	cd "$safeTmp"
+	
+	
+	
+	
+	
+	
+	# TODO: Replace with model fine-tuned by additional relevant codebases and scientific knowledge.
+	
+	# TODO: TODO: Intentionally overfit smaller parameter models by reinforcing prompt/response for specific knowledge (eg. plasma recombiation light emission physics) and reasoning (eg. robot motor control).
+	
+
+	# Reducing 'Llama-3-augment' model size by more qunatization than Q4_K_M mostly benefits use cases possibly alongside other AI LLM models which may consume nearly all available RAM, VRAM, etc.
+	
+	# May or may not be more track record with this slightly different model, using Q4-K-M quantization.
+	# https://huggingface.co/grimjim/Llama-3.1-8B-Instruct-abliterated_via_adapter-GGUF
+	
+	# Alternative quantization, especially IQ2-M, IQ4-XS. Beware Q4-K-M may have some community testing of important edge cases already.
+	# https://huggingface.co/bartowski/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF/tree/main
+
+	# Given the 'augment' use that has been proven, using an AI LLM similarly to 'sed', 'grep', etc, already requiring a second 'gibberish' detection step, slight degradation of reliability should cause no issues. Recommended quantizations are IQ3_XXS (~5% per ~67% less reliability), IQ2_XXS (~20% per 67% less reliability).
+	#  The '~20% per 67%' less reliability is based on the idea that for a problem or problem set the AI LLM may solve correctly 67% of the time, the rate of correct solutions will be reduced by ~20% .
+	#  https://raw.githubusercontent.com/matt-c1/llama-3-quant-comparison/refs/heads/main/plots/MMLU-Correctness-vs-Model-Size.svg
+	# https://huggingface.co/mradermacher/Meta-Llama-3.1-8B-Instruct-abliterated-i1-GGUF/tree/main
+
+
+	
+	# Default 'temperature' may have previously been 0.8 .
+	# https://github.com/ollama/ollama/issues/6410?utm_source=chatgpt.com
+	# https://github.com/ollama/ollama/blob/main/api/types.go#L657
+	echo 'FROM ./NeuralDaredevil-8B-abliterated.Q3_K_M.gguf
+PARAMETER num_ctx 6144
+
+TEMPLATE "{{- range .Messages }}<|start_header_id|>{{ .Role }}<|end_header_id|>
+
+{{ .Content }}<|eot_id|>
+{{- end }}<|start_header_id|>assistant<|end_header_id|>
+
+"
+PARAMETER num_ctx 6144
+PARAMETER stop <|start_header_id|>
+PARAMETER stop <|end_header_id|>
+PARAMETER stop <|eot_id|>
+PARAMETER temperature 0.7
+
+' > Llama-3-augment.Modelfile
+
+	_here_license-Llama-3-augment >> Llama-3-augment.Modelfile
+	
+	if ( [[ "$accept_nonpermissiveNONCOMMERCIAL" == "false" ]] ) && [[ ! -e "$HOME"/nonpermissiveNONCOMMERCIAL ]]
+	then
+		#wget 'https://huggingface.co/mlabonne/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF/resolve/main/llama-3.1-8b-instruct-abliterated.Q4_K_M.gguf'
+		aria2c --log=- --log-level=info -x "3" --async-dns=false -o 'llama-3.1-8b-instruct-abliterated.Q4_K_M.gguf' 'https://huggingface.co/mlabonne/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF/resolve/main/llama-3.1-8b-instruct-abliterated.Q4_K_M.gguf'
+		[[ ! -e 'llama-3.1-8b-instruct-abliterated.Q4_K_M.gguf' ]] && aria2c --log=- --log-level=info -x "3" --async-dns=false -o 'llama-3.1-8b-instruct-abliterated.Q4_K_M.gguf' 'https://huggingface.co/mlabonne/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF/resolve/main/llama-3.1-8b-instruct-abliterated.Q4_K_M.gguf' --disable-ipv6=true
+	
+		if [[ ! -e 'llama-3.1-8b-instruct-abliterated.Q4_K_M.gguf' ]]
+		then
+			_wget_githubRelease_join "soaringDistributions/Llama-3-augment_bundle" "" "llama-3.1-8b-instruct-abliterated.Q4_K_M.gguf"
+		fi
+	fi
+	
+	if ( [[ "$accept_nonpermissiveNONCOMMERCIAL" != "false" ]] ) || [[ -e "$HOME"/nonpermissiveNONCOMMERCIAL ]]
+	then
+		echo 'Llama-3-augment '$(date | tr -dc 'a-zA-Z0-9: ') >> "$HOME"/nonpermissiveNONCOMMERCIAL
+		! _if_cygwin && sudo -n cp -f -a "$HOME"/nonpermissiveNONCOMMERCIAL /nonpermissiveNONCOMMERCIAL
+		cp -f -a "$HOME"/nonpermissiveNONCOMMERCIAL /nonpermissiveNONCOMMERCIAL
+		
+		# DUBIOUS . May not be compatible with ollama , etc.
+		##wget 'https://huggingface.co/mradermacher/Meta-Llama-3.1-8B-Instruct-abliterated-i1-GGUF/resolve/main/Meta-Llama-3.1-8B-Instruct-abliterated.i1-IQ2_XXS.gguf'
+		#aria2c --log=- --log-level=info -x "3" --async-dns=false -o 'Meta-Llama-3.1-8B-Instruct-abliterated.i1-IQ3_XXS.gguf' 'https://huggingface.co/mradermacher/Meta-Llama-3.1-8B-Instruct-abliterated-i1-GGUF/resolve/main/Meta-Llama-3.1-8B-Instruct-abliterated.i1-IQ3_XXS.gguf'
+		#[[ ! -e 'Meta-Llama-3.1-8B-Instruct-abliterated.i1-IQ3_XXS.gguf' ]] && aria2c --log=- --log-level=info -x "3" --async-dns=false -o 'Meta-Llama-3.1-8B-Instruct-abliterated.i1-IQ3_XXS.gguf' 'https://huggingface.co/mradermacher/Meta-Llama-3.1-8B-Instruct-abliterated-i1-GGUF/resolve/main/Meta-Llama-3.1-8B-Instruct-abliterated.i1-IQ3_XXS.gguf' --disable-ipv6=true
+
+		# DUBIOUS . May not be compatible with ollama , etc.
+		##wget 'https://huggingface.co/bartowski/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF/resolve/main/Meta-Llama-3.1-8B-Instruct-abliterated-IQ2_M.gguf'
+		#aria2c --log=- --log-level=info -x "3" --async-dns=false -o 'Meta-Llama-3.1-8B-Instruct-abliterated-IQ2_M.gguf' 'https://huggingface.co/bartowski/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF/resolve/main/Meta-Llama-3.1-8B-Instruct-abliterated-IQ2_M.gguf'
+		#[[ ! -e 'Meta-Llama-3.1-8B-Instruct-abliterated-IQ2_M.gguf' ]] && aria2c --log=- --log-level=info -x "3" --async-dns=false -o 'Meta-Llama-3.1-8B-Instruct-abliterated-IQ2_M.gguf' 'https://huggingface.co/bartowski/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF/resolve/main/Meta-Llama-3.1-8B-Instruct-abliterated-IQ2_M.gguf' --disable-ipv6=true
+
+		##wget 'https://huggingface.co/mlabonne/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF/resolve/main/meta-llama-3.1-8b-instruct-abliterated.Q2_K.gguf'
+		#aria2c --log=- --log-level=info -x "3" --async-dns=false -o 'meta-llama-3.1-8b-instruct-abliterated.Q2_K.gguf' 'https://huggingface.co/mlabonne/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF/resolve/main/meta-llama-3.1-8b-instruct-abliterated.Q2_K.gguf'
+		#[[ ! -e 'meta-llama-3.1-8b-instruct-abliterated.Q2_K.gguf' ]] && aria2c --log=- --log-level=info -x "3" --async-dns=false -o 'meta-llama-3.1-8b-instruct-abliterated.Q2_K.gguf' 'https://huggingface.co/mlabonne/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF/resolve/main/meta-llama-3.1-8b-instruct-abliterated.Q2_K.gguf' --disable-ipv6=true
+
+		#wget 'https://huggingface.co/QuantFactory/NeuralDaredevil-8B-abliterated-GGUF/resolve/main/NeuralDaredevil-8B-abliterated.Q3_K_M.gguf'
+		aria2c --log=- --log-level=info -x "3" --async-dns=false -o 'NeuralDaredevil-8B-abliterated.Q3_K_M.gguf' 'https://huggingface.co/QuantFactory/NeuralDaredevil-8B-abliterated-GGUF/resolve/main/NeuralDaredevil-8B-abliterated.Q3_K_M.gguf'
+		[[ ! -e 'NeuralDaredevil-8B-abliterated.Q3_K_M.gguf' ]] && aria2c --log=- --log-level=info -x "3" --async-dns=false -o 'NeuralDaredevil-8B-abliterated.Q3_K_M.gguf' 'https://huggingface.co/QuantFactory/NeuralDaredevil-8B-abliterated-GGUF/resolve/main/NeuralDaredevil-8B-abliterated.Q3_K_M.gguf' --disable-ipv6=true
+	
+		if [[ ! -e 'NeuralDaredevil-8B-abliterated.Q3_K_M.gguf' ]]
+		then
+			_wget_githubRelease_join "soaringDistributions/Llama-3-augment_bundle" "" "Llama-3-NeuralDaredevil-8B-abliterated.Q3_K_M.gguf"
+		fi
 	fi
 	
 	_service_ollama
 	
-	! ollama create Llama-augment -f Llama-augment.Modelfile && _messagePlain_bad 'bad: FAIL: ollama create Llama-augment' && _messageFAIL
+	! ollama create Llama-3-augment -f Llama-3-augment.Modelfile && _messagePlain_bad 'bad: FAIL: ollama create Llama-3-augment' && _messageFAIL
 	
 	if ! _if_cygwin
 	then
-		! echo | sudo -n tee /AI-Llama-augment > /dev/null && _messagePlain_bad 'bad: FAIL: echo | sudo -n tee /AI-Llama-augment' && _messageFAIL
+		! echo | sudo -n tee /AI-Llama-3-augment > /dev/null && _messagePlain_bad 'bad: FAIL: echo | sudo -n tee /AI-Llama-3-augment' && _messageFAIL
 	fi
 
+	rm -f NeuralDaredevil-8B-abliterated.Q3_K_M.gguf
+	rm -f meta-llama-3.1-8b-instruct-abliterated.Q2_K.gguf
+	rm -f Meta-Llama-3.1-8B-Instruct-abliterated-IQ2_M.gguf
+	rm -f Meta-Llama-3.1-8B-Instruct-abliterated.i1-IQ2_XXS.gguf
+	rm -f Meta-Llama-3.1-8B-Instruct-abliterated.i1-IQ3_XXS.gguf
 	rm -f llama-3.1-8b-instruct-abliterated.Q4_K_M.gguf
-	rm -f Llama-augment.Modelfile
+	rm -f Llama-3-augment.Modelfile
 	
 	_ollama_stop_augment
 	
@@ -27065,7 +28255,7 @@ _test_ollama() {
 	#_mustGetSudo
 	#export currentUser_ollama=$(_user_ollama)
 
-	if ! type -p ollama > /dev/null 2>&1 || ! [[ -e /AI-Llama-augment ]]
+	if ! type -p ollama > /dev/null 2>&1 || ! [[ -e /AI-Llama-3-augment ]]
 	then
 		_setup_ollama
 	fi
@@ -27192,7 +28382,7 @@ _user_ollama() {
 _service_ollama() {
 	_mustGetSudo
 	_if_cygwin && return 0
-	if ! sudo -n -u ollama bash -c 'type -p ollama'
+	if ! sudo -n -u ollama bash -c 'type -p ollama' > /dev/null
 	then
 		echo 'warn: _service_ollama: missing: ollama'
 		return 1
@@ -27224,20 +28414,26 @@ _service_ollama() {
 # Mostly, this is used to workaround very unusual dist/OS build and custom situations (ie. ChRoot, GitHub Actions, etc).
 # CAUTION: This leaves a background process running, which must continue running (ie. not hangup) while other programs use it, and which must terminate upon shutdown , _closeChRoot , etc .
 _service_ollama_augment() {
-	if _if_cygwin && ! wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O - > /dev/null 2>&1
+	local current_OLLAMA_HOST
+	current_OLLAMA_HOST="$OLLAMA_HOST"
+	[[ "$current_OLLAMA_HOST" == "" ]] && current_OLLAMA_HOST='127.0.0.1:11434'
+
+	wget --timeout=1 --tries=3 'http://'"$current_OLLAMA_HOST" -q -O - > /dev/null 2>&1 && return 0
+	
+	if _if_cygwin && ! wget --timeout=1 --tries=3 'http://'"$current_OLLAMA_HOST" -q -O - > /dev/null 2>&1
 	then
 		( nohup ollama ls > /dev/null 2>&1 & disown -r "$!" ) > /dev/null
 		
 		sleep 7
 	fi
 
-	if _if_cygwin && ! wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O - > /dev/null 2>&1
+	if _if_cygwin && ! wget --timeout=1 --tries=3 'http://'"$current_OLLAMA_HOST" -q -O - > /dev/null 2>&1
 	then
 		return 1
 	fi
 	_if_cygwin && return 0
 
-	if _if_wsl && ! wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O - > /dev/null 2>&1
+	if _if_wsl && ! wget --timeout=1 --tries=3 'http://'"$current_OLLAMA_HOST" -q -O - > /dev/null 2>&1
 	then
 		#( nohup ollama ls > /dev/null 2>&1 & disown -r "$!" ) > /dev/null
 		#sleep 2
@@ -27251,7 +28447,7 @@ _service_ollama_augment() {
 		#,'start','""','/b'
 		"$scriptAbsoluteLocation" _powershell -NoProfile -Command "Start-Process cmd.exe -ArgumentList '/C','C:\core\infrastructure\ubDistBuild\_bin.bat','_install_vm-wsl2-portForward','ubdist','notBootingAdmin' -Verb RunAs" > /dev/null 2>&1
 		local currentIteration=0
-		while ! wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O - > /dev/null 2>&1 && [[ "$currentIteration" -lt 45 ]]
+		while ! wget --timeout=1 --tries=3 'http://'"$current_OLLAMA_HOST" -q -O - > /dev/null 2>&1 && [[ "$currentIteration" -lt 45 ]]
 		do
 			currentIteration=$((currentIteration+1))
 			sleep 1
@@ -27260,7 +28456,7 @@ _service_ollama_augment() {
 		sleep 3
 	fi
 
-	if _if_wsl && ! wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O - > /dev/null 2>&1
+	if _if_wsl && ! wget --timeout=1 --tries=3 'http://'"$current_OLLAMA_HOST" -q -O - > /dev/null 2>&1
 	then
 		return 1
 	fi
@@ -27273,13 +28469,13 @@ _service_ollama_augment() {
 		return 1
 	fi
 	
-	if ! wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O - > /dev/null 2>&1
+	if ! wget --timeout=1 --tries=3 'http://'"$current_OLLAMA_HOST" -q -O - > /dev/null 2>&1
 	then
 		# ATTENTION: This is basically how to not cause interactive bash shell issues starting a background service at Docker container runtime.
 		# WARNING: May not be adequately tested.
 		# ATTRIBUTION-AI: ChatGPT o3  2025-05-05  (partially)
 		( echo | sudo -n -u ollama nohup ollama serve </dev/null >>/var/log/ollama.log 2>&1 & ) &> /dev/null
-		while ! wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O - > /dev/null 2>&1
+		while ! wget --timeout=1 --tries=3 'http://'"$current_OLLAMA_HOST" -q -O - > /dev/null 2>&1
 		do
 			sleep 1
 		done
@@ -27288,7 +28484,7 @@ _service_ollama_augment() {
 		stty echo
 		
 		#sudo -n -u ollama ollama serve &
-		#while ! wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O - > /dev/null 2>&1
+		#while ! wget --timeout=1 --tries=3 'http://'"$current_OLLAMA_HOST" -q -O - > /dev/null 2>&1
 		#do
 			#echo "wait: ollama: service"
 			#sleep 1
@@ -27297,7 +28493,7 @@ _service_ollama_augment() {
 	fi
 	
 	
-	if ! wget --timeout=1 --tries=3 'http://127.0.0.1:11434' -q -O - > /dev/null 2>&1
+	if ! wget --timeout=1 --tries=3 'http://'"$current_OLLAMA_HOST" -q -O - > /dev/null 2>&1
 	then
 		#echo 'fail: _service_ollama: ollama: 127.0.0.1:11434'
 		return 1
@@ -27331,9 +28527,9 @@ _ollama_set_sequence-augment-normal() {
 	_start
 	cd "$safeTmp"
 
-	ollama show Llama-augment --modelfile | sed 's/PARAMETER num_ctx [0-9]*/PARAMETER num_ctx 6144/' > ./Llama-augment-tmp.Modelfile
+	ollama show Llama-3-augment --modelfile | sed 's/PARAMETER num_ctx [0-9]*/PARAMETER num_ctx 6144/' > ./Llama-3-augment-tmp.Modelfile
 	sleep 9
-	ollama create Llama-augment --file ./Llama-augment-tmp.Modelfile
+	ollama create Llama-3-augment --file ./Llama-3-augment-tmp.Modelfile
 	sleep 9
 
 	cd "$functionEntryPWD"
@@ -27351,9 +28547,9 @@ _ollama_set_sequence-augment-lowRAM() {
 	cd "$safeTmp"
 
 	#512
-	ollama show Llama-augment --modelfile | sed 's/PARAMETER num_ctx [0-9]*/PARAMETER num_ctx 640/' > ./Llama-augment-tmp.Modelfile
+	ollama show Llama-3-augment --modelfile | sed 's/PARAMETER num_ctx [0-9]*/PARAMETER num_ctx 640/' > ./Llama-3-augment-tmp.Modelfile
 	sleep 9
-	ollama create Llama-augment --file ./Llama-augment-tmp.Modelfile
+	ollama create Llama-3-augment --file ./Llama-3-augment-tmp.Modelfile
 	sleep 9
 
 
@@ -27367,7 +28563,7 @@ _ollama_set-augment-lowRAM() {
 
 
 _ollama_stop_augment() {
-	ollama stop Llama-augment
+	ollama stop Llama-3-augment
 }
 
 _ollama_run_augment() {
@@ -27385,12 +28581,45 @@ _ollama_run_augment() {
 
 	! _service_ollama_augment && return 1
 
-	if ! ollama show Llama-augment > /dev/null 2>&1
+	if [[ "$OLLAMA_HOST" != "" ]] && ! type -P ollama > /dev/null 2>&1
+	then
+		local current_api_timeout="$OLLAMA_TIMEOUT"
+		[[ "$current_api_timeout" == "" ]] && current_api_timeout=7200
+		#jq -Rs '{model:"Llama-3-augment", prompt:., stream: false}' | _timeout "$current_api_timeout" curl -fsS --max-time "$current_api_timeout" -X POST -H "Content-Type: application/json" --data-binary @- http://"$OLLAMA_HOST"/api/generate | jq -r '.response'
+		#jq -Rs '{model:"Llama-3-augment", prompt:., stream: true}' | _timeout "$current_api_timeout" curl -fsS --no-buffer --max-time "$current_api_timeout" -X POST -H "Content-Type: application/json" --data-binary @- http://"$OLLAMA_HOST"/api/generate | jq -rj --unbuffered 'if .done? then "\n" elif .response? then .response else empty end'
+		if [[ "$*" == "" ]]
+		then
+			jq -Rs '{model:"Llama-3-augment", prompt:., stream: true}' | _timeout "$current_api_timeout" curl -fsS --no-buffer --max-time "$current_api_timeout" -X POST -H "Content-Type: application/json" --data-binary @- http://"$OLLAMA_HOST"/api/generate | jq -rj --unbuffered 'if .done? then "\n" elif .response? then .response else empty end'
+			return
+		else
+			_safeEcho_newline "$@" | jq -Rs '{model:"Llama-3-augment", prompt:., stream: true}' | _timeout "$current_api_timeout" curl -fsS --no-buffer --max-time "$current_api_timeout" -X POST -H "Content-Type: application/json" --data-binary @- http://"$OLLAMA_HOST"/api/generate | jq -rj --unbuffered 'if .done? then "\n" elif .response? then .response else empty end'
+			return
+		fi
+	fi
+
+	if ! ollama show Llama-3-augment > /dev/null 2>&1
 	then
 		"$scriptAbsoluteLocation" _setup_ollama_model_augment_sequence > /dev/null 2>&1
 	fi
 	
-	ollama run Llama-augment "$@"
+	# Suggested >2400 for batch processing, <600 for long 'augment' outputs, <120 for 'augment' use cases underlying user interaction (ie. impatience).
+	if [[ "$OLLAMA_TIMEOUT" != "" ]]
+	then
+		(
+			# ATTRIBUTION-AI: ChatGPT o3  2025-06-03  (suggested OLLAMA_LOAD_TIMEOUT ... ChatGPT may have automatically included some web search results )
+			# DUBIOUS .
+			# https://pkg.go.dev/github.com/ollama/ollama/envconfig?utm_source=chatgpt.com
+			# https://github.com/ollama/ollama/blob/v0.9.0/envconfig/config.go#L120
+			# https://github.com/ollama/ollama/issues/6678
+			# https://github.com/ollama/ollama/issues/5081
+			export OLLAMA_LOAD_TIMEOUT="$OLLAMA_TIMEOUT"s
+			
+			_timeout "$OLLAMA_TIMEOUT" ollama run Llama-3-augment "$@"
+		)
+		return
+	fi
+
+	ollama run Llama-3-augment "$@"
 }
 # 'l'... 'LLM', 'language', 'Llama', etc .
 _l() {
@@ -27413,8 +28642,105 @@ alias l=_l
 
 
 
+# Developer,  technician, etc, assistant AI model . If you are tempted to use the '_l' , 'l', alias on the command-line, as possibly more thorough alternative to 'man' manual pages, this is expected usually what you want instead. Small enough model to run locally, emphasizing development related knowledge and logic, yet able to run reasonably using ~16GB VRAM, possibly CPU, etc. However, owing to the disk space requirements, not usually included with a dist/OS by default, as only intensive development workstations should really need this.
+
+
+
+
+
+
+
+_setup_ollama_model_dev_sequence() {
+    _start
+
+    cd "$safeTmp"
+
+    # Suggested <6144 token context window (ie. 'num_ctx') . May be unreliable (at the limits of what fits in 16GB VRAM, limiting context window, etc).
+    
+    ollama pull hf.co/bartowski/mistralai_Devstral-Small-2505-GGUF:IQ4_XS
+    echo FROM hf.co/bartowski/mistralai_Devstral-Small-2505-GGUF:IQ4_XS > Modelfile
+    echo PARAMETER num_gpu 41 >> Modelfile
+    echo PARAMETER num_ctx 6144 >> Modelfile
+
+    cat << 'CZXWXcRMTo8EmM8i4d' >> Modelfile
+	LICENSE """Apache 2.0 License
+https://huggingface.co/mistralai/Devstral-Small-2505
+Apache 2.0 License
+
+https://huggingface.co/bartowski/mistralai_Devstral-Small-2505-GGUF
+License: apache-2.0
+"""
+CZXWXcRMTo8EmM8i4d
+
+    ollama create hf.co/bartowski/mistralai_Devstral-Small-2505-GGUF:IQ4_XS-g41
+    
+    #ollama run hf.co/bartowski/mistralai_Devstral-Small-2505-GGUF:IQ4_XS-g41 describe this image ./download.png
+
+    _stop
+}
+
+_ollama_run_dev() {
+	# https://huggingface.co/mistralai/Devstral-Small-2505
+    #  'Apache 2.0 License'
+
+    # https://huggingface.co/bartowski/mistralai_Devstral-Small-2505-GGUF
+    #  'License: apache-2.0'
+    
+
+	! _service_ollama_augment && return 1
+
+	if [[ "$OLLAMA_HOST" != "" ]] && ! type -P ollama > /dev/null 2>&1
+	then
+		local current_api_timeout="$OLLAMA_TIMEOUT"
+		[[ "$current_api_timeout" == "" ]] && current_api_timeout=7200
+		#jq -Rs '{model:"hf.co/bartowski/mistralai_Devstral-Small-2505-GGUF:IQ4_XS-g41", prompt:., stream: false}' | _timeout "$current_api_timeout" curl -fsS --max-time "$current_api_timeout" -X POST -H "Content-Type: application/json" --data-binary @- http://"$OLLAMA_HOST"/api/generate | jq -r '.response'
+		#jq -Rs '{model:"hf.co/bartowski/mistralai_Devstral-Small-2505-GGUF:IQ4_XS-g41", prompt:., stream: true}' | _timeout "$current_api_timeout" curl -fsS --no-buffer --max-time "$current_api_timeout" -X POST -H "Content-Type: application/json" --data-binary @- http://"$OLLAMA_HOST"/api/generate | jq -rj --unbuffered 'if .done? then "\n" elif .response? then .response else empty end'
+		if [[ "$*" == "" ]]
+		then
+			jq -Rs '{model:"hf.co/bartowski/mistralai_Devstral-Small-2505-GGUF:IQ4_XS-g41", prompt:., stream: true}' | _timeout "$current_api_timeout" curl -fsS --no-buffer --max-time "$current_api_timeout" -X POST -H "Content-Type: application/json" --data-binary @- http://"$OLLAMA_HOST"/api/generate | jq -rj --unbuffered 'if .done? then "\n" elif .response? then .response else empty end'
+			return
+		else
+			_safeEcho_newline "$@" | jq -Rs '{model:"hf.co/bartowski/mistralai_Devstral-Small-2505-GGUF:IQ4_XS-g41", prompt:., stream: true}' | _timeout "$current_api_timeout" curl -fsS --no-buffer --max-time "$current_api_timeout" -X POST -H "Content-Type: application/json" --data-binary @- http://"$OLLAMA_HOST"/api/generate | jq -rj --unbuffered 'if .done? then "\n" elif .response? then .response else empty end'
+			return
+		fi
+	fi
+
+	if ! ollama show hf.co/bartowski/mistralai_Devstral-Small-2505-GGUF:IQ4_XS-g41 --modelfile > /dev/null 2>&1
+	then
+		"$scriptAbsoluteLocation" _setup_ollama_model_dev_sequence > /dev/null 2>&1
+	fi
+	
+	# Suggested >7200 for batch processing, <1800 for long 'augment' outputs, <<360 or <120 for 'augment' use cases underlying user interaction (ie. impatience).
+    # In practice, this is NOT an augment model, and should only be used either strictly interactively (stream and interrupt), or strictly for agentic development, tool use, etc (ie. Cline VSCode extension, etc) .
+	if [[ "$OLLAMA_TIMEOUT" != "" ]]
+	then
+		(
+			# ATTRIBUTION-AI: ChatGPT o3  2025-06-03  (suggested OLLAMA_LOAD_TIMEOUT ... ChatGPT may have automatically included some web search results )
+			# DUBIOUS .
+			# https://pkg.go.dev/github.com/ollama/ollama/envconfig?utm_source=chatgpt.com
+			# https://github.com/ollama/ollama/blob/v0.9.0/envconfig/config.go#L120
+			# https://github.com/ollama/ollama/issues/6678
+			# https://github.com/ollama/ollama/issues/5081
+			export OLLAMA_LOAD_TIMEOUT="$OLLAMA_TIMEOUT"s
+			
+			_timeout "$OLLAMA_TIMEOUT" ollama run hf.co/bartowski/mistralai_Devstral-Small-2505-GGUF:IQ4_XS-g41 "$@"
+		)
+		return
+	fi
+
+	ollama run hf.co/bartowski/mistralai_Devstral-Small-2505-GGUF:IQ4_XS-g41 "$@"
+}
+# 'l'... 'LLM', 'language', 'Llama', etc .
+_d() {
+	_ollama_run_dev "$@"
+}
+alias d=_d
+
+
+
+
 # Built with Llama
-# May use 'Llama-augment' model, possibly derived from 'Llama-3.1-8b' .
+# May use 'Llama-3-augment' model, possibly derived from 'Llama-3.1-8b' .
 
 
 
@@ -27505,8 +28831,14 @@ alias l=_l
 
 # Accepts stdin/stdout .
 _augment-backend() {
-    # Placeholder. Discouraged. Prefer '_l' function .
-	#jq -Rs '{model:"Llama-augment", prompt:., stream: false}' | curl -fsS --max-time 120 -X POST -H "Content-Type: application/json" --data-binary @- http://localhost:11434/api/generate | jq -r '.response'
+    # Suggested >2400 for batch processing, <600 for long 'augment' outputs, <120 for 'augment' use cases underlying user interaction (ie. impatience).
+	# If not already set (eg. to a very high value >>2400), default is 120 (seconds) .
+	[[ "$OLLAMA_TIMEOUT" != "" ]] && export OLLAMA_TIMEOUT=120
+
+	# WARNING: Do NOT timeout entire '_l' command, etc ! One-time service start, model download, etc, should NOT be subject to "$OLLAMA_TIMEOUT", etc !
+	
+	# Placeholder. Discouraged. Prefer '_l' function .
+	#jq -Rs '{model:"Llama-3-augment", prompt:., stream: false}' | _timeout "$OLLAMA_TIMEOUT" curl -fsS --max-time 120 -X POST -H "Content-Type: application/json" --data-binary @- http://localhost:11434/api/generate | jq -r '.response'
 
 	# STRONGLY PREFERRED . Will automatically call '_service_ollama_augment' as necessary!
 	#_ollama_run_augment "$@"
@@ -27514,9 +28846,40 @@ _augment-backend() {
 }
 
 
+_here_bashTool-noOtherInfo() {
+
+	# ATTENTION: NOTICE: Especially with a small model...
+	# Regard this as similar to an analog modem symbol decoder with a filter bank attached to a filter bank used as a delay line.
+	# Negative Prompt (Do not output any other information.
+	#
+	# Positive Prompt (Please state the datum, ), Negative Prompt (do not *include* any other information,), this...
+	# stuff
+	# Negative Prompt (Do not output any other information.)
+	# Positive Prompt (Output only the one line command or parameter.), Negative Prompt (Do not output any other text.), Positive Prompt (Since this is zero-shot tool use, only the one line will be helpful, any other output will be unhelpful.)
+	#
+	# Thus, for good results, your prompt given to 'augment' function should closely resemble this example:
+	# EXAMPLE
+	# Please state the domain name or IP address, do not include any other information, from this bash shellcode command:
+	# ```bash
+	# ssh root@123.123.123.123 -p 122 -i ~/.ssh/id_ed25519
+	# ```
+	#
+	# Such an approach quickly 'dampens' any Positive Prompt 'ringing' or 'overshoot' from a Positive Prompt with a Negative Prompt before any effects can accumulate in the AI LLM model output.
+	#
+	# That said, less quantization of the 'Llama-3-augment' , Q8_0 instead of Q2_K , will require far less careful such 'dampening'. Given the automation purpose of the 'Llama-3-augment' model, the tradeoff of requiring more careful prompting is well worthwhile to improve processing speed, etc. Especially since only at most one negative prompt not already automatically added is needed, and only to address a specific nuance in the developer's own Positive Prompt, such as the 'datum' being an address, given that usernames are commonly used with such addresses in HTTP URLs, etc.
+
+
+    cat << 'CZXWXcRMTo8EmM8i4d'
+
+Do not output any other information.
+
+CZXWXcRMTo8EmM8i4d
+}
 
 _here_bashTool-askCommand-ONLY() {
     cat << 'CZXWXcRMTo8EmM8i4d'
+
+Do not output any other information.
 
 Output only the one line command or parameter. Do not output any other text. Since this is zero-shot tool use, only the one line will be helpful, any other output will be unhelpful.
 
@@ -27602,27 +28965,36 @@ CZXWXcRMTo8EmM8i4d
 
 _augment_procedure() {
 	( _messageNormal ' ... augment' >&2 ) > /dev/null
-	
-	cat > "$safeTmp"/input_prompt.txt
 
-	_here_bashTool-askCommand-ONLY > "$safeTmp"/processing-bashTool-askCommand-ONLY.txt
+	[[ "$fastTmp" == "" ]] && local fastTmp="$safeTmp"
+
+	_here_bashTool-noOtherInfo > "$fastTmp"/processing-bashTool-noOtherInfo-ONLY.txt
+	
+	cat > "$fastTmp"/input_prompt.txt
+
+	_here_bashTool-askCommand-ONLY > "$fastTmp"/processing-bashTool-askCommand-ONLY.txt
 
 
 	local currentIteration=0
-	while [[ $(cat "$safeTmp"/processing-bashTool-isGibberish.txt 2>/dev/null | tr -dc 'a-zA-Z0-9' | tr 'A-Z' 'a-z' | tail -c 5 ) != 'valid' ]] && [[ "$currentIteration" -lt 85 ]]
+	#[[ "$currentIteration" -lt 85 ]]
+	while [[ $(cat "$fastTmp"/processing-bashTool-isGibberish.txt 2>/dev/null | tr -dc 'a-zA-Z0-9' | tr 'A-Z' 'a-z' | tail -c 5 ) != 'valid' ]] && [[ "$currentIteration" -lt 45 ]]
 	do
 		( _messagePlain_nominal ' ... augment: '"$currentIteration" >&2 ) > /dev/null
-		cat "$safeTmp"/input_prompt.txt "$safeTmp"/processing-bashTool-askCommand-ONLY.txt | _augment-backend "$@" > "$safeTmp"/output_prompt.txt
+		cat "$fastTmp"/processing-bashTool-noOtherInfo-ONLY.txt "$fastTmp"/input_prompt.txt "$fastTmp"/processing-bashTool-askCommand-ONLY.txt | _augment-backend "$@" > "$fastTmp"/output_prompt.txt
 
-		_here_bashTool-askGibberish > "$safeTmp"/processing-bashTool-askGibberish.txt
-		cat "$safeTmp"/output_prompt.txt "$safeTmp"/processing-bashTool-askGibberish.txt | _augment-backend "$@" > "$safeTmp"/processing-bashTool-isGibberish.txt
+		rm -f "$fastTmp"/processing-bashTool-askGibberish.txt > /dev/null 2>&1
+		if [[ -s "$fastTmp"/output_prompt.txt ]]
+		then
+			_here_bashTool-askGibberish > "$fastTmp"/processing-bashTool-askGibberish.txt
+			cat "$fastTmp"/output_prompt.txt "$fastTmp"/processing-bashTool-askGibberish.txt | _augment-backend "$@" > "$fastTmp"/processing-bashTool-isGibberish.txt
+		fi
 
-		if [[ $(cat "$safeTmp"/processing-bashTool-isGibberish.txt | tr -dc 'a-zA-Z0-9' | tr 'A-Z' 'a-z' | tail -c 5 ) != 'valid' ]]
+		if [[ -e "$fastTmp"/processing-bashTool-isGibberish.txt ]] && [[ $(cat "$fastTmp"/processing-bashTool-isGibberish.txt | tr -dc 'a-zA-Z0-9' | tr 'A-Z' 'a-z' | tail -c 5 ) != 'valid' ]]
 		then
 			( _messagePlain_warn 'warn: gibberish: ' >&2 ) > /dev/null
-			( cat "$safeTmp"/output_prompt.txt | tr -dc 'a-zA-Z0-9\-_\ \=\+\/\.' >&2 ) > /dev/null
+			( cat "$fastTmp"/output_prompt.txt | tr -dc 'a-zA-Z0-9\-_\ \=\+\/\.' >&2 ) > /dev/null
 			( echo >&2 ) > /dev/null
-			( _messagePlain_probe 'currentGibberish= '$(cat "$safeTmp"/processing-bashTool-isGibberish.txt | head -c 192 | tr -dc 'a-zA-Z0-9') >&2 ) > /dev/null
+			( _messagePlain_probe 'currentGibberish= '$(cat "$fastTmp"/processing-bashTool-isGibberish.txt | head -c 192 | tr -dc 'a-zA-Z0-9') >&2 ) > /dev/null
 			( echo  >&2 ) > /dev/null
 		fi
 		
@@ -27630,7 +29002,7 @@ _augment_procedure() {
 	done
 
 
-	cat "$safeTmp"/output_prompt.txt
+	cat "$fastTmp"/output_prompt.txt
 }
 _augment_sequence() {
 	_start
@@ -27639,9 +29011,161 @@ _augment_sequence() {
 
 	_stop
 }
+# WARNING: DUBIOUS. Unusual, VERY UNUSUAL. Avoids the more appropriate technique of recursively calling the script with the usual separate environment, _stop trap, etc.
+_augment_fast() {
+	(
+		export fastid=$(_uid)
+		export fastTmp="$tmpSelf""$tmpPrefix"/w_"$fastid"
+
+		mkdir -p "$fastTmp"
+		[[ "$tmpSelf" != "$scriptAbsoluteFolder" ]] && echo "$tmpSelf" 2> /dev/null > "$scriptAbsoluteFolder"/__d_$(echo "$fastid" | head -c 16)
+
+		_augment_procedure "$@"
+
+		_safeRMR "$fastTmp"
+		unset fastTmp
+	)
+}
 _augment() {
     "$scriptAbsoluteLocation" _augment_sequence "$@"
 }
+
+
+
+
+# ATTENTION
+# WebUI Codex explains that if the 'current directory' (ie. "$PWD") is under "$safeTmp", '_getAbsolute_criticalDep' , under 'set -e' and some environments, will  '! readlink -f . > /dev/null 2>&1 && exit 1'  due to '.' as "$safeTmp" not existing. This explanation is consistent and may fit with only recursion causing the failure.
+# CLI Codex explains that if the 'current directory' (ie. "$PWD") is under "$safeTmp", '_preserveLog' , under 'set -e' and some environments, fails at  'cp "$logTmp"/* "$permaLog"/ > /dev/null 2>&1'  on non-existent permaLog="$PWD" , logTmp="$safeTmp"/log . This explanation does not fit with only recursion causing the failure.
+#
+# This may have crept up without any possibility of anticipation: this was not causing issues previously, does not seem related to ongoing changes to "ubiquitous_bash" codebase at the time, may be closely related to ongoing 'inherit_errexit' quirks from different bash versions, indeed affects one the most convoluted bash inherited codepaths, and significant differences in bash versions between some possibly relevant environments do apparently exist.
+#
+# Changing current directory to "$scriptAbsoluteFolder" is NOT an acceptable workaround, as the "ubiquitous_bash" script may be imported in another bash session not expecting this, and self-deletion of an "ubiquitous_bash" directory is a VERY valid use case (eg. for installers for which cluttering up a filesystem with yet another 'wget ubiquitous_bash.sh' may be undesirable).
+#
+# In any case, '_stop' with the current directory being the automatically deleted "$safeTmp" , with such recursion as 'factory-ops' is NOT safe.
+# TODO: Other "ubiquitous_bash" functions may also be affected, and should be reviewed ASAP for _stop without  ' cd "$functionEntryPWD" '  .
+# 
+#
+#cd "$functionEntryPWD"
+
+
+___factoryTest_sequence() {
+    _messagePlain_nominal '___factoryTest_sequence'
+    if [[ "$recursionGuard_factory_ops" == "" ]]
+    then
+        _messagePlain_probe '_factory_ops_recursion: from ___factoryTest_sequence'
+        _factory_ops_recursion "$@"
+        return
+    fi
+
+    _start
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+
+
+    cd "$safeTmp"
+    cp "$scriptAbsoluteFolder"/ubiquitous_bash.sh "$safeTmp"/ubiquitous_bash.sh
+
+    #if [[ "$CI" != "" ]] && [[ "$objectName" == "ubiquitous_bash" ]]
+    #then
+        _messagePlain_probe 'mkdir -p '"$safeTmp"/repo
+        mkdir -p "$safeTmp"/repo
+        #( cd "$safeTmp"/repo ; mkdir -p dummyRepo ; cd dummyRepo ; echo dummy > dummy.txt ; mkdir .git ; echo 'dummy' > .git/dummy.txt )
+        ##( cd "$safeTmp"/repo ; git config --global checkout.workers -1 ; _gitBest clone --depth 1 git@github.com:mirage335-colossus/"$objectName".git ; cd "$safeTmp"/repo/"$objectName" ; _gitBest submodule update --init --depth 1 --recursive )
+        #export safeToDeleteGit="true"
+    #fi
+
+    
+	cd "$functionEntryPWD"
+
+    #export safeToDeleteGit="true"
+    #_messagePlain_probe '_safeRMR "$safeTmp"/repo'
+    #_safeRMR "$safeTmp"/repo
+    _messagePlain_probe '_stop'
+    _stop 0
+}
+___factoryTest_direct() {
+    _messagePlain_nominal '___factoryTest_direct'
+    
+    if [[ "$recursionGuard_factory_ops" == "" ]]
+    then
+        _messagePlain_probe '_factory_ops_recursion: from ___factoryTest_direct'
+        _factory_ops_recursion "$@"
+        return
+    fi
+
+    _messagePlain_probe '"$scriptAbsoluteLocation" ___factoryTest_sequence "$@"'
+    "$scriptAbsoluteLocation" ___factoryTest_sequence "$@"
+}
+
+
+
+
+
+
+
+___factoryTest_skip_recursion1() {
+    _messagePlain_nominal '___factoryTest_skip_recursion1'
+
+    _messagePlain_probe '"$scriptAbsoluteLocation" ___factoryTest_sequence "$@"'
+    "$scriptAbsoluteLocation" ___factoryTest_sequence "$@"
+}
+
+
+
+
+
+
+
+
+___factoryTest_skip_recursion2_sequence() {
+    _messagePlain_nominal '___factoryTest_skip_recursion2_sequence'
+
+    _start
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+
+    cd "$safeTmp"
+    cp "$scriptAbsoluteFolder"/ubiquitous_bash.sh "$safeTmp"/ubiquitous_bash.sh
+
+    #if [[ "$CI" != "" ]] && [[ "$objectName" == "ubiquitous_bash" ]]
+    #then
+        _messagePlain_probe 'mkdir -p '"$safeTmp"/repo
+        mkdir -p "$safeTmp"/repo
+        #( cd "$safeTmp"/repo ; mkdir -p dummyRepo ; cd dummyRepo ; echo dummy > dummy.txt ; mkdir .git ; echo 'dummy' > .git/dummy.txt )
+        ##( cd "$safeTmp"/repo ; git config --global checkout.workers -1 ; _gitBest clone --depth 1 git@github.com:mirage335-colossus/"$objectName".git ; cd "$safeTmp"/repo/"$objectName" ; _gitBest submodule update --init --depth 1 --recursive )
+        #export safeToDeleteGit="true"
+    #fi
+    
+	cd "$functionEntryPWD"
+
+    #export safeToDeleteGit="true"
+    #_messagePlain_probe '_safeRMR "$safeTmp"/repo'
+    #_safeRMR "$safeTmp"/repo
+    _messagePlain_probe '_stop'
+    _stop 0
+}
+___factoryTest_skip_recursion2() {
+    _messagePlain_nominal '___factoryTest_skip_recursion2'
+
+    _messagePlain_probe '"$scriptAbsoluteLocation" ___factoryTest_skip_recursion2_sequence "$@"'
+    "$scriptAbsoluteLocation" ___factoryTest_skip_recursion2_sequence "$@"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -27681,6 +29205,9 @@ COPY <<EOFSPECIAL /install_ub.sh
 # ###
 # PASTE
 # ###
+
+#[[ -e /.dockerenv ]] && 
+git config --global --add safe.directory '*' > /dev/null 2>&1
 
 if [[ -e /workspace/ubiquitous_bash/ubiquitous_bash.sh ]]
 then
@@ -27753,7 +29280,17 @@ env DEBIAN_FRONTEND=noninteractive apt-get install coreutils -y ;\
 env DEBIAN_FRONTEND=noninteractive apt install python3 python3-pip git -y ;\ 
 env DEBIAN_FRONTEND=noninteractive apt-get install libcurl4-openssl-dev -y ;\ 
 env DEBIAN_FRONTEND=noninteractive apt-get install ffmpeg -y ;\ 
-env DEBIAN_FRONTEND=noninteractive apt-get install asciinema -y
+env DEBIAN_FRONTEND=noninteractive apt-get install asciinema -y ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get install gifsicle imagemagick apngasm ffmpeg -y ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get install gifsicle imagemagick apngasm ffmpeg -y webp
+
+
+# ATTRIBUTION-AI: ChatGPT o3  2025-06-05
+RUN ( [ -n "$(dpkg-divert --list /usr/bin/man | tr -dc '[:alnum:]')" ] && rm -f /usr/bin/man && dpkg-divert --remove --rename /usr/bin/man ) ;\ 
+rm -f /etc/dpkg/dpkg.cfg.d/excludes ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get install man-db manpages manpages-dev manpages-posix -y ;\ 
+env DEBIAN_FRONTEND=noninteractive apt-get --reinstall install -y $(dpkg-query -W -f='${Package} ') ;\ 
+mandb -q
 
 
 RUN env DEBIAN_FRONTEND=noninteractive apt-get install sudo -y ;\ 
@@ -27762,10 +29299,10 @@ RUN env DEBIAN_FRONTEND=noninteractive apt-get install sudo -y ;\
 
 # DISCOURAGED. Better to benefit from 'ubiquitous_bash' maintenance identifying the most recent ollama installation commands. 
 #RUN curl -fsSL https://ollama.com/install.sh | sh
-# DISCOURAGED. Does NOT install Llama-augment model.
+# DISCOURAGED. Does NOT install Llama-3-augment model.
 RUN /workspace/ubiquitous_bash/ubiquitous_bash.sh _setup_ollama_sequence ;\ 
 /workspace/ubiquitous_bash/ubiquitous_bash.sh _service_ollama
-# PREFERRED. Normally robust, resilient, maintained, and adds the 'Llama-augment' model for automation, etc.
+# PREFERRED. Normally robust, resilient, maintained, and adds the 'Llama-3-augment' model for automation, etc.
 #RUN /workspace/ubiquitous_bash/ubiquitous_bash.sh _setup_ollama
 
 
@@ -27784,13 +29321,14 @@ RUN echo 'net.core.bpf_jit_harden=1' | sudo -n tee /etc/sysctl.d/99-nvidia-worka
 
 #codex
 #claude
-RUN env DEBIAN_FRONTEND=noninteractive apt-get install -y curl ;\ 
-curl -fsSL https://deb.nodesource.com/setup_23.x -o /nodesource_setup.sh ;\ 
-bash /nodesource_setup.sh ;\ 
-env DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs ;\ 
-npm install -g @openai/codex ;\ 
-npm install -g @anthropic-ai/claude-code
-
+#RUN env DEBIAN_FRONTEND=noninteractive apt-get install -y curl ;\ 
+#curl -fsSL https://deb.nodesource.com/setup_23.x -o /nodesource_setup.sh ;\ 
+#bash /nodesource_setup.sh ;\ 
+#env DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs ;\ 
+#npm install -g @openai/codex ;\ 
+#npm install -g @anthropic-ai/claude-code
+RUN /workspace/ubiquitous_bash/ubiquitous_bash.sh _setup_codex ;\ 
+/workspace/ubiquitous_bash/ubiquitous_bash.sh _setup_asciinema_convert
 
 
 # ###
@@ -27868,14 +29406,18 @@ _rm_install_libcudadev_stub-stubOnly() {
     rm -f /opt/libcudadev_stub-stubOnly/*.deb
     rm -f /opt/libcudadev_stub-stubOnly/usr/share/doc/libcuda1/copyright
     rm -f /opt/libcudadev_stub-stubOnly/usr/lib/x86_64-linux-gnu/nvidia/current/libcuda*.so*
-    _prepare_install_libcudadev_stub-stubOnly "$@"
+    _prepare_install_libcudadev_stub-stubOnly "\$@"
 }
 
 _rm_install_libcudadev_stub-stubOnly
 
-wget 'http://ftp.nl.debian.org/debian/pool/non-free/n/nvidia-graphics-drivers/libcuda1_535.216.01-1~deb12u1_amd64.deb'
+# https://packages.debian.org/search?keywords=libcuda1&searchon=names&suite=all&section=all
+#wget 'http://ftp.nl.debian.org/debian/pool/non-free/n/nvidia-graphics-drivers/libcuda1_535.216.01-1~deb12u1_amd64.deb'
+#wget 'http://ftp.nl.debian.org/debian/pool/non-free/n/nvidia-graphics-drivers/libcuda1_535.216.03-2~bpo12+1_amd64.deb'
+wget 'http://ftp.nl.debian.org/debian/pool/non-free/n/nvidia-graphics-drivers/libcuda1_535.247.01-1~deb12u1_amd64.deb'
 
-if [[ $(sha256sum *.deb | cut -f1 -d' ' | tr -dc 'a-fA-F0-9') != '99512da037ce851c81607fa5398e208aec6f17e3af9be68e3db8c7d459122575' ]]
+
+if [[ $(sha256sum *.deb | cut -f1 -d' ' | tr -dc 'a-fA-F0-9') != 'b295098ac989f41481216a25d952d431052d83f7cbf39e6cfa45e5cdf43df5cb' ]]
 then
     rm -f ./*.deb
     rm -f /opt/libcudadev_stub-stubOnly/*.deb
@@ -28051,51 +29593,68 @@ echo 'python3 /install_licenses.py > /licenses/PYTHON_THIRD_PARTY.md'
 
 
 _here_dockerfile-ubiquitous-licenses() {
+    
+    # https://packages.debian.org/bookworm/base-files
 
-    ! mkdir -p "$scriptLocal"/licenses && ( _messageError 'FAIL' >&2 ) > /dev/null && _stop 1
 
-    [[ ! -e "$scriptLocal"/licenses/gpl-2.0.txt ]] && wget -qO "$scriptLocal"/licenses/gpl-2.0.txt 'https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt'
-    [[ ! -e "$scriptLocal"/licenses/gpl-3.0.txt ]] && wget -qO "$scriptLocal"/licenses/gpl-3.0.txt 'https://www.gnu.org/licenses/gpl-3.0.txt'
-    [[ ! -e "$scriptLocal"/licenses/agpl-3.0.txt ]] && wget -qO "$scriptLocal"/licenses/agpl-3.0.txt 'https://www.gnu.org/licenses/agpl-3.0.txt'
+    #! mkdir -p "$scriptLocal"/licenses && ( _messageError 'FAIL' >&2 ) > /dev/null && _stop 1
 
+    ##https://web.archive.org/web/20250531033557/https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
+    ##https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/LICENSES/preferred/GPL-2.0
+    ##/usr/share/common-licenses/GPL-2
+    #[[ ! -e "$scriptLocal"/licenses/gpl-2.0.txt ]] && wget --timeout 9 --tries 9 -qO "$scriptLocal"/licenses/gpl-2.0.txt 'https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt'
+    #[[ ! -e "$scriptLocal"/licenses/gpl-3.0.txt ]] && wget --timeout 3 --tries 3 -qO "$scriptLocal"/licenses/gpl-3.0.txt 'https://www.gnu.org/licenses/gpl-3.0.txt'
+    #[[ ! -e "$scriptLocal"/licenses/agpl-3.0.txt ]] && wget --timeout 3 --tries 3 -qO "$scriptLocal"/licenses/agpl-3.0.txt 'https://www.gnu.org/licenses/agpl-3.0.txt'
+
+
+
+    ##echo
+    ##echo 'RUN mkdir -p /licenses'
+    ##echo
+
+    ##echo 'COPY <<EOFSPECIAL /licenses/gpl-2.0.txt'
+##cat "$scriptLocal"/licenses/gpl-2.0.txt
+##echo 'EOFSPECIAL'
+
+    ##echo 'COPY <<EOFSPECIAL /licenses/gpl-3.0.txt'
+##cat "$scriptLocal"/licenses/gpl-3.0.txt
+##echo 'EOFSPECIAL'
+
+    ##echo 'COPY <<EOFSPECIAL /licenses/agpl-3.0.txt'
+##cat "$scriptLocal"/licenses/agpl-3.0.txt
+##echo 'EOFSPECIAL'
+
+    ##echo
 
 
     #echo
     #echo 'RUN mkdir -p /licenses'
-    #echo
-
-    #echo 'COPY <<EOFSPECIAL /licenses/gpl-2.0.txt'
+    #echo 'COPY <<EOFSPECIAL /licenses/gpl-2.0__gpl-3.0__agpl-3.0.txt'
 #cat "$scriptLocal"/licenses/gpl-2.0.txt
-#echo 'EOFSPECIAL'
-
-    #echo 'COPY <<EOFSPECIAL /licenses/gpl-3.0.txt'
+#echo
+#echo
+#echo '------------------------------'
+#echo
+#echo
 #cat "$scriptLocal"/licenses/gpl-3.0.txt
-#echo 'EOFSPECIAL'
-
-    #echo 'COPY <<EOFSPECIAL /licenses/agpl-3.0.txt'
+#echo
+##echo
+#echo '------------------------------'
+#echo
+#echo
 #cat "$scriptLocal"/licenses/agpl-3.0.txt
+#echo
 #echo 'EOFSPECIAL'
 
-    #echo
+    cat << 'CZXWXcRMTo8EmM8i4d'
+
+RUN env DEBIAN_FRONTEND=noninteractive apt-get install --install-recommends -y base-files ;\ 
+mkdir -p /licenses ;\ 
+ln -sf /usr/share/common-licenses /licenses/common-licenses
 
 
-    echo
-    echo 'RUN mkdir -p /licenses'
-    echo 'COPY <<EOFSPECIAL /licenses/gpl-2.0__gpl-3.0__agpl-3.0.txt'
-cat "$scriptLocal"/licenses/gpl-2.0.txt
-echo
-echo
-echo '------------------------------'
-echo
-echo
-cat "$scriptLocal"/licenses/gpl-3.0.txt
-echo
-echo
-echo '------------------------------'
-echo
-echo
-cat "$scriptLocal"/licenses/agpl-3.0.txt
-echo 'EOFSPECIAL'
+
+CZXWXcRMTo8EmM8i4d
 
 }
 
@@ -28211,6 +29770,8 @@ __factoryCreate_sequence_runpod-pytorch-heavy() {
     fi
 
     _start
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
 
     # ATTRIBUTION-AI Llama 3.1 Nemotron Ultra 253b v1
     docker stop $(docker ps -aq --filter ancestor=runpod-pytorch-heavy 2>/dev/null) > /dev/null 2>&1
@@ -28276,6 +29837,7 @@ __factoryCreate_sequence_runpod-pytorch-heavy() {
     #export safeToDeleteGit="true"
     _safeRMR "$safeTmp"/repo
 
+    cd "$functionEntryPWD"
     _stop
 }
 __factoryCreate_runpod-pytorch-heavy() {
@@ -28404,6 +29966,8 @@ __factoryCreate_sequence_runpod-pytorch-unsloth() {
     fi
 
     _start
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
 
     # ATTRIBUTION-AI Llama 3.1 Nemotron Ultra 253b v1
     docker stop $(docker ps -aq --filter ancestor=runpod-pytorch-unsloth 2>/dev/null) > /dev/null 2>&1
@@ -28469,6 +30033,7 @@ __factoryCreate_sequence_runpod-pytorch-unsloth() {
     #export safeToDeleteGit="true"
     _safeRMR "$safeTmp"/repo
 
+    cd "$functionEntryPWD"
     _stop
 }
 __factoryCreate_runpod-pytorch-unsloth() {
@@ -28589,6 +30154,8 @@ __factoryCreate_sequence_runpod-heavy() {
     fi
 
     _start
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
 
     # ATTRIBUTION-AI Llama 3.1 Nemotron Ultra 253b v1
     docker stop $(docker ps -aq --filter ancestor=runpod-heavy 2>/dev/null) > /dev/null 2>&1
@@ -28626,6 +30193,7 @@ __factoryCreate_sequence_runpod-heavy() {
     #export safeToDeleteGit="true"
     _safeRMR "$safeTmp"/repo
 
+    cd "$functionEntryPWD"
     _stop
 }
 __factoryCreate_runpod-heavy() {
@@ -28746,6 +30314,8 @@ __factoryCreate_sequence_axolotl-heavy() {
     fi
 
     _start
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
 
     # ATTRIBUTION-AI Llama 3.1 Nemotron Ultra 253b v1
     docker stop $(docker ps -aq --filter ancestor=axolotl-heavy 2>/dev/null) > /dev/null 2>&1
@@ -28784,6 +30354,7 @@ __factoryCreate_sequence_axolotl-heavy() {
     #export safeToDeleteGit="true"
     _safeRMR "$safeTmp"/repo
 
+    cd "$functionEntryPWD"
     _stop
 }
 __factoryCreate_axolotl-heavy() {
@@ -28897,6 +30468,8 @@ __factoryCreate_sequence_nvidia_nemo-heavy() {
     fi
 
     _start
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
 
     # ATTRIBUTION-AI Llama 3.1 Nemotron Ultra 253b v1
     docker stop $(docker ps -aq --filter ancestor=nvidia_nemo-heavy 2>/dev/null) > /dev/null 2>&1
@@ -28935,6 +30508,7 @@ __factoryCreate_sequence_nvidia_nemo-heavy() {
     #export safeToDeleteGit="true"
     _safeRMR "$safeTmp"/repo
 
+    cd "$functionEntryPWD"
     _stop
 }
 __factoryCreate_nvidia_nemo-heavy() {
@@ -28947,6 +30521,182 @@ __factoryCreate_nvidia_nemo-heavy() {
     "$scriptAbsoluteLocation" __factoryCreate_sequence_nvidia_nemo-heavy "$@"
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+_here_dockerfile_openai-heavy() {
+if [[ "$recursionGuard_factory_ops" == "" ]]
+then
+_factory_ops_recursion "$@"
+return
+fi
+
+cat << 'CZXWXcRMTo8EmM8i4d'
+#docker build -t openai-heavy .
+
+# https://github.com/openai/codex-universal
+FROM ghcr.io/openai/codex-universal
+
+RUN echo 'openai-heavy' > /info_factoryName.txt
+##RUN echo '# Please read researchEngine documentation for (hopefully) stabilized examples .' >> /info_factoryMOTD.txt
+##RUN echo 'ubiquitous_bash=~/.ubcore/ubiquitous_bash ; vim -R "'"\$ubiquitous_bash"'"/_lib/kit/app/researchEngine/_dev/README-FACTORY-openai.md' >> /info_factoryMOTD.txt
+#RUN echo ' request: _setup_ollama ; apt-get install ... _getMinimal_special comments... ' >> /info_factoryMOTD.txt
+#RUN chmod 755 /info_factoryMOTD.txt
+
+CZXWXcRMTo8EmM8i4d
+
+_here_dockerfile-ubiquitous "$@"
+
+echo 'ARG CACHEBUST=1'
+echo 'RUN echo CACHEBUST... '$(_uid)' > /dev/null'
+echo 'RUN ( cd ~/.ubcore/ubiquitous_bash ; ./ubiquitous_bash.sh _gitBest pull )'
+if _if_cygwin
+then
+    echo 'COPY [ "\\ubiquitous_bash.sh", "/root/.ubcore/ubiquitous_bash/ubiquitous_bash.sh" ]'
+else
+    echo 'COPY [ "/ubiquitous_bash.sh", "~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh" ]'
+fi
+
+cat << 'CZXWXcRMTo8EmM8i4d'
+
+# ###
+# PASTE
+# ###
+
+#RUN python -m pip install --upgrade pip
+
+RUN ~/.ubcore/ubiquitous_bash/ubiquitous_bash.sh _getMinimal_special
+
+# ###
+# PASTE
+# ###
+
+CZXWXcRMTo8EmM8i4d
+
+_here_dockerfile-libcudadev_stub "$@"
+#_here_dockerfile-llamacpp "$@"
+
+_here_dockerfile-ubiquitous-documentation "$@"
+
+_here_dockerfile-ubiquitous-licenses "$@"
+
+
+cat << 'CZXWXcRMTo8EmM8i4d'
+
+WORKDIR /
+
+#docker image inspect ...FROM... --format '{{json .Config.Entrypoint}} {{json .Config.Cmd}}'
+ENTRYPOINT ["/opt/entrypoint.sh"]
+CMD [""]
+
+CZXWXcRMTo8EmM8i4d
+
+}
+__factoryCreate_sequence_openai-heavy() {
+    if [[ "$recursionGuard_factory_ops" == "" ]]
+    then
+        _factory_ops_recursion "$@"
+        return
+    fi
+
+    _start
+	local functionEntryPWD
+	functionEntryPWD="$PWD"
+
+    # ATTRIBUTION-AI Llama 3.1 Nemotron Ultra 253b v1
+    docker stop $(docker ps -aq --filter ancestor=openai-heavy 2>/dev/null) > /dev/null 2>&1
+    #docker rm $(docker ps -aq --filter ancestor=openai-heavy 2>/dev/null) > /dev/null 2>&1
+
+    _messagePlain_probe 'docker rmi --force'
+    docker rmi --force openai-heavy > /dev/null 2>&1
+
+    cd "$safeTmp"
+    cp "$scriptAbsoluteFolder"/ubiquitous_bash.sh "$safeTmp"/ubiquitous_bash.sh
+
+    if [[ "$CI" != "" ]] && [[ "$objectName" == "ubiquitous_bash" ]]
+    then
+        _messagePlain_probe 'mkdir -p '"$safeTmp"/repo
+        mkdir -p "$safeTmp"/repo
+        #mkdir -p "$safeTmp"/repo/"$objectName"
+        #cp -a "$scriptAbsoluteFolder"/.git "$safeTmp"/repo/"$objectName"/
+        #( cd "$safeTmp"/repo/"$objectName" ; "$scriptAbsoluteLocation" _gitBest reset --hard ; git submodule update --init --recursive ; find .git -iname 'config' -exec sed -i '/extraheader = AUTHORIZATION:/d' {} \; )
+        ( cd "$safeTmp"/repo ; git config --global checkout.workers -1 ; _gitBest clone --depth 1 git@github.com:mirage335-colossus/"$objectName".git ; cd "$safeTmp"/repo/"$objectName" ; _gitBest submodule update --init --depth 1 --recursive )
+        export safeToDeleteGit="true"
+    fi
+
+
+    
+    _messagePlain_probe 'docker build -t'
+    _here_dockerfile_openai-heavy > Dockerfile
+
+    # WARNING: CAUTION: DANGER: Docker is yet another third-party service dependency. Do NOT regard Docker's repository as archival preservation, and do NOT rely on Docker itself for archival preservation. Also, it is not clear whether a Docker 'image' based on 'Dockerfile' can be directly preserved without environment dependencies or unintentional updates, at best a root filesystem may be possible to obtain from a Docker 'image'.
+    # https://en.wikipedia.org/w/index.php?title=Docker,_Inc.&oldid=1285260999#History
+    # https://en.wikipedia.org/w/index.php?title=Docker_(software)&oldid=1286977923#History
+    
+
+    # ATTENTION: Add to '~/_bashrc' or similar .
+    #  Indeed '_bashrc' , NOT '.bashrc' .
+    # ATTRIBUTION-AI ChatGPT o3 (high)  2025-04-30
+    #
+    ##docker buildx rm cloud-user-default
+    ##docker buildx prune --builder cloud-user-default
+    #
+    #export DOCKER_USER="user"
+    #DOCKER_RAW_NAME="$DOCKER_USER""/default"          # what you type
+    #DOCKER_BUILDER_NAME="cloud-$(echo "$DOCKER_RAW_NAME" | tr '/:' '-')"
+    #if docker buildx ls --format '{{.Name}}' | grep -qx "$DOCKER_BUILDER_NAME"; then
+        #docker buildx use "$DOCKER_BUILDER_NAME"        # reuse
+    #else
+        #docker buildx create --driver cloud "$DOCKER_RAW_NAME" --use
+    #fi
+
+
+    #if [[ "$DOCKER_BUILDER_NAME" == "" ]]
+    #then
+        docker build --debug -t openai-heavy .
+        docker tag openai-heavy "$DOCKER_USER"/openai-heavy:latest
+    #else
+        #if [[ "$DOCKER_BUILDER_NAME" != "" ]]
+        #then
+            # https://docs.docker.com/build-cloud/usage/
+            #docker buildx build --builder "$DOCKER_BUILDER_NAME" -t openai-heavy . --push
+        #fi
+    #fi
+
+    #docker push user/openai-heavy:latest
+
+    #export safeToDeleteGit="true"
+    _safeRMR "$safeTmp"/repo
+
+    cd "$functionEntryPWD"
+    _stop
+}
+__factoryCreate_openai-heavy() {
+    if [[ "$recursionGuard_factory_ops" == "" ]]
+    then
+        _factory_ops_recursion "$@"
+        return
+    fi
+
+    "$scriptAbsoluteLocation" __factoryCreate_sequence_openai-heavy "$@"
+}
 
 
 
@@ -28981,7 +30731,7 @@ factory_projectDir=$(_getAbsoluteLocation .)
 #sleep 45
 #echo 'DANGER: proceeding! '
 #fi
-[[ "$factory_projectDir" == '/cygdrive'* ]] && factory_projectDir=$(cygpath -w "$factory_projectDir")
+( ( _if_cygwin || [[ "$factory_projectDir" == '/cygdrive'* ]] ) && ( ! _if_wsl && type cygpath >/dev/null 2>&1) ) && factory_projectDir=$(cygpath -w "$factory_projectDir")
 
 factory_modelDir="$factory_projectDir"/model
 [[ -e ./_local/model ]] && factory_modelDir="$factory_projectDir"/_local/model
@@ -29012,7 +30762,8 @@ export factory_dir_args=( -v "$factory_projectDir":/workspace/project -v "$facto
 fi
 
 
-export factory_api_args=( -e JUPYTER_PASSWORD="$JUPYTER_PASSWORD" -e HF_API_KEY="$HF_API_KEY" -e HF_TOKEN="$HF_TOKEN" -e GH_TOKEN="$GH_TOKEN" -e OPENAI_API_KEY="$OPENAI_API_KEY" -e OPENROUTER_API_KEY="$OPENROUTER_API_KEY" -e ai_safety="$ai_safety" )
+# Factory use of 'GH_TOKEN' is usually just to attempt to achieve reasonable API call, git clone, etc, limits. Since filesystems can be shared, host software can be used for more complex or privileged cases.
+export factory_api_args=( -e JUPYTER_PASSWORD="$JUPYTER_PASSWORD" --add-host=host.docker.internal:host-gateway -e OLLAMA_HOST=host.docker.internal:11434 -e HF_API_KEY="$HF_API_KEY" -e HF_TOKEN="$HF_TOKEN" -e GH_TOKEN="$GH_TOKEN" -e INPUT_GITHUB_TOKEN="$GH_TOKEN" -e OPENAI_API_KEY="$OPENAI_API_KEY" -e OPENROUTER_API_KEY="$OPENROUTER_API_KEY" -e ai_safety="$ai_safety" )
 
 
 # ###
@@ -29775,6 +31526,8 @@ cat << 'CZXWXcRMTo8EmM8i4d'
 doNotMatch
 # ###
 
+[[ -e /.dockerenv ]] && git config --global --add safe.directory '*' > /dev/null 2>&1
+
 if [[ -e /workspace/ubiquitous_bash/ubiquitous_bash.sh ]]
 then
 ( cd /workspace/ubiquitous_bash ; /workspace/ubiquitous_bash/ubiquitous_bash.sh _gitBest pull ; git submodule update )
@@ -29802,7 +31555,7 @@ fi
 ## ATTENTION: Not enabled by default, slow to download. Call '_setup_ollama' manually .
 ## DISCOURAGED. Better to benefit from 'ubiquitous_bash' maintenance identifying the most recent ollama installation commands. 
 ##curl -fsSL https://ollama.com/install.sh | sh
-## DISCOURAGED. Does NOT install Llama-augment model.
+## DISCOURAGED. Does NOT install Llama-3-augment model.
 ##/workspace/ubiquitous_bash/ubiquitous_bash.sh _setup_ollama_sequence
 ##/workspace/ubiquitous_bash/ubiquitous_bash.sh _service_ollama > /dev/null 2>&1
 ## ATTRIBUTION-AI: ChatGPT o3  2025-05-05
@@ -29814,7 +31567,7 @@ fi
 #stty echo
 #stty sane
 #stty echo
-## PREFERRED. Normally robust, resilient, maintained, and adds the 'Llama-augment' model for automation, etc.
+## PREFERRED. Normally robust, resilient, maintained, and adds the 'Llama-3-augment' model for automation, etc.
 ##/workspace/ubiquitous_bash/ubiquitous_bash.sh _setup_ollama
 
 # ###
@@ -29843,6 +31596,317 @@ nvidia-smi
 
 CZXWXcRMTo8EmM8i4d
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+_factory_openai() {
+if [[ "$recursionGuard_factory_ops" == "" ]]
+then
+_factory_ops_recursion "$@"
+return
+fi
+
+! type _set_factory_dir > /dev/null 2>&1 && exit 1
+_set_factory_dir
+
+
+
+# ###
+# PASTE
+# ###
+
+wsl -d docker-desktop sh -c "echo 'net.core.bpf_jit_harden=1' > /etc/sysctl.d/99-nvidia-workaround-bpf_jit_harden.conf"
+wsl -d docker-desktop sysctl -p /etc/sysctl.d/99-nvidia-workaround-bpf_jit_harden.conf
+
+dockerName=ghcr.io/openai/codex-universal
+docker pull ghcr.io/openai/codex-universal:latest
+
+#[[ JUPYTER_PASSWORD == "" ]] && export JUPYTER_PASSWORD=$(openssl rand 768 | base64 | tr -dc 'a-zA-Z0-9' | tr -d 'acdefhilmnopqrsuvACDEFHILMNOPQRSU14580' | head -c "24")
+
+#docker pull "$dockerName"
+
+entrypoint=$(docker inspect -f '{{join .Config.Entrypoint " "}}' "$dockerName")
+cmd=$(docker inspect -f '{{join .Config.Cmd " "}}' "$dockerName")
+#workdir=$(docker inspect -f '{{.Config.WorkingDir}}' "$dockerName")
+workdir=$(pwd)
+workdir=$(basename "$workdir")
+workdir=/workspace/"$workdir"
+#workdir=/workspace/$(basename $(pwd))
+_messagePlain_request 'request: paste ->'
+echo > ./._run-factory_openai
+echo "echo 'openai' > /info_factoryName.txt" | tee -a ./._run-factory_openai
+echo "echo '# Please read researchEngine documentation for (hopefully) stabilized examples .' > /info_factoryMOTD.txt" | tee -a ./._run-factory_openai
+echo "echo 'ubiquitous_bash=~/.ubcore/ubiquitous_bash ; vim -R "'"$ubiquitous_bash"'"/_lib/kit/app/researchEngine/_dev/README-FACTORY-openai.md' >> /info_factoryMOTD.txt" | tee -a ./._run-factory_openai
+echo "chmod 755 /info_factoryMOTD.txt" | tee -a ./._run-factory_openai
+_request_paste_factory-prepare_finetune | tee -a ./._run-factory_openai
+_request_paste_factory-install_ubiquitous_bash | tee -a ./._run-factory_openai
+_request_paste_factory-show_finetune | tee -a ./._run-factory_openai
+#_messagePlain_request 'request: JUPYTER_PASSWORD: '"$JUPYTER_PASSWORD"
+# Yes this is safe, ''.ubcorerc' will switch from '--profile' to '--parent' based on set "$scriptAbsoluteLocation" .
+echo unset ubiquitousBashID | tee -a ./._run-factory_openai
+#docker inspect --format='{{json .Config.Entrypoint}}' "$dockerName" | jq -r '.[]' | tee -a ./._run-factory_openai
+mkdir -p "$workdir" | tee -a ./._run-factory_openai
+echo '[ -n '"$workdir"' ] && cd '"$workdir" | tee -a ./._run-factory_openai
+_messagePlain_request 'request: <- paste'
+#echo "exec ${entrypoint} ${cmd}" | tee -a ./._run-factory_openai
+#
+#echo "exec ${entrypoint}" | tee -a ./._run-factory_openai
+#
+#echo echo "==================================" | tee -a ./._run-factory_openai
+#echo echo "Welcome to openai/codex-universal!" | tee -a ./._run-factory_openai
+#echo echo "==================================" | tee -a ./._run-factory_openai
+#
+#echo /opt/codex/setup_universal.sh | tee -a ./._run-factory_openai
+#
+#echo echo "Environment ready. Dropping you into a bash shell." | tee -a ./._run-factory_openai
+
+echo 'export runDelete=/workspace/project/._run-factory_openai' >> ./._run-factory_openai
+echo 'bash -i' >> ./._run-factory_openai
+
+
+# ###
+
+
+! type _getAbsoluteLocation > /dev/null 2>&1 && exit 1
+
+#docker image inspect "$dockerName" --format '{{json .Config.Entrypoint}} {{json .Config.Cmd}}'
+
+#bash
+dockerRunArgs=( /workspace/project/._run-factory_openai )
+[[ ! -e ./._run-factory_openai ]] && dockerRunArgs=( )
+
+# ATTENTION: Enabling swift will always download ~800MB . Also adds '.swift-version' .
+#-e CODEX_ENV_SWIFT_VERSION=6.1
+dockerArgs_openai=( -e CODEX_ENV_PYTHON_VERSION=3.12 -e CODEX_ENV_NODE_VERSION=20 -e CODEX_ENV_RUST_VERSION=1.87.0 -e CODEX_ENV_GO_VERSION=1.23.8 )
+#dockerArgs_openai+=( -e CODEX_ENV_SWIFT_VERSION=6.1 )
+dockerArgs_openai_workspace=( -v "$factory_projectDir":/workspace/$(basename $(pwd)) -w /workspace/$(basename $(pwd)) )
+dockerArgs_api=( --add-host=host.docker.internal:host-gateway -e OLLAMA_HOST=host.docker.internal:11434 -e HF_API_KEY="$HF_API_KEY" -e HF_TOKEN="$HF_TOKEN" -e GH_TOKEN="$GH_TOKEN" -e INPUT_GITHUB_TOKEN="$GH_TOKEN" -e OPENAI_API_KEY="$OPENAI_API_KEY" -e OPENROUTER_API_KEY="$OPENROUTER_API_KEY" -e ai_safety="$ai_safety" )
+
+if _if_cygwin
+then
+workdir_basename=$(basename "$PWD")
+[[ "$workdir_basename" != "ubiquitous_bash" ]] && dockerArgs_openai_workspace+=( -v 'C:\q\p\zCore\infrastructure\ubiquitous_bash':/workspace/ubiquitous_bash:ro )
+dockerArgs_openai_workspace+=( -v "$factory_projectDir":/workspace/project )
+#--privileged
+#--ipc=host --ulimit memlock=-1 --ulimit stack=67108864
+#-v 'C:\q':/q -v 'C:\core':/core -v "$USERPROFILE"'\Downloads':/Downloads
+#
+#-v 'C:\q':/q
+#-v 'C:\core':/core -v "$USERPROFILE"'\Downloads':/Downloads -v "$factory_projectDir":/workspace/project -v "$factory_projectDir":/workspace/data -v "$factory_projectDir"/cache_pip:/workspace/cache_pip
+docker run --shm-size=20g --name openai-$(_uid 14) --gpus "all" "${dockerArgs_api[@]}" "${dockerArgs_openai[@]}" "${dockerArgs_openai_workspace[@]}" --rm -it "$dockerName" "${dockerRunArgs[@]}"
+fi
+if ! _if_cygwin
+then
+workdir_basename=$(basename "$PWD")
+[[ "$workdir_basename" != "ubiquitous_bash" ]] && dockerArgs_openai_workspace+=( -v "$HOME"/core/infrastructure/ubiquitous_bash:/workspace/ubiquitous_bash:ro )
+dockerArgs_openai_workspace+=( -v "$factory_projectDir":/workspace/project )
+# WARNING: May be untested.
+#-v '/home/user/___quick':/q
+#-v '/home/user/core':/core -v "/home/user"'/Downloads':/Downloads -v "$factory_projectDir":/workspace/project -v "$factory_projectDir":/workspace/data -v "$factory_projectDir"/cache_pip:/workspace/cache_pip
+docker run --shm-size=20g --name openai-$(_uid 14) --gpus "all" "${dockerArgs_api[@]}" "${dockerArgs_openai[@]}" "${dockerArgs_openai_workspace[@]}" --rm -it "$dockerName" "${dockerRunArgs[@]}"
+fi
+
+# ###
+# PASTE
+# ###
+
+rmdir ./models > /dev/null 2>&1
+rmdir ./datasets > /dev/null 2>&1
+rmdir ./outputs > /dev/null 2>&1
+
+rm -f ./._run-factory_openai > /dev/null 2>&1
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+_factory_openai-heavy() {
+if [[ "$recursionGuard_factory_ops" == "" ]]
+then
+_factory_ops_recursion "$@"
+return
+fi
+
+! type _set_factory_dir > /dev/null 2>&1 && exit 1
+_set_factory_dir
+
+
+
+# ###
+# PASTE
+# ###
+
+wsl -d docker-desktop sh -c "echo 'net.core.bpf_jit_harden=1' > /etc/sysctl.d/99-nvidia-workaround-bpf_jit_harden.conf"
+wsl -d docker-desktop sysctl -p /etc/sysctl.d/99-nvidia-workaround-bpf_jit_harden.conf
+
+dockerName=openai-heavy
+#docker pull ghcr.io/openai/codex-universal:latest
+
+# Prefer local build .
+if [[ $(docker images -q "$dockerName" | tr -dc 'a-zA-Z0-9') == "" ]]
+then
+    # Fallback to something from Docker Hub .
+    [[ $(docker images -q "mirage335-colossus/ubiquitous_bash/""$dockerName" | tr -dc 'a-zA-Z0-9') != "" ]] && dockerName="mirage335-colossus/ubiquitous_bash/""$dockerName"
+    [[ $(docker images -q "mirage335-colossus/""$dockerName" | tr -dc 'a-zA-Z0-9') != "" ]] && dockerName="mirage335-colossus/""$dockerName"
+    [[ $(docker images -q "mirage335/""$dockerName" | tr -dc 'a-zA-Z0-9') != "" ]] && dockerName="mirage335/""$dockerName"
+
+    # Prefer something from GHCR .
+    [[ $(docker images -q "ghcr.io/mirage335-colossus/ubiquitous_bash/""$dockerName" | tr -dc 'a-zA-Z0-9') != "" ]] && dockerName="ghcr.io/mirage335-colossus/ubiquitous_bash/""$dockerName"
+    [[ $(docker images -q "ghcr.io/mirage335-colossus/""$dockerName" | tr -dc 'a-zA-Z0-9') != "" ]] && dockerName="ghcr.io/mirage335-colossus/""$dockerName"
+    [[ $(docker images -q "ghcr.io/mirage335/""$dockerName" | tr -dc 'a-zA-Z0-9') != "" ]] && dockerName="ghcr.io/mirage335/""$dockerName"
+fi
+
+if ! docker images | tail -n+2 | grep '^'"$dockerName" > /dev/null 2>&1
+then
+    _messagePlain_bad 'bad: FAIL: missing: '"$dockerName"
+    _messagePlain_request 'request: 'docker pull ghcr.io/mirage335-colossus/"$dockerName":latest
+    _messageError 'FAIL'
+    return 1
+fi
+
+#[[ JUPYTER_PASSWORD == "" ]] && export JUPYTER_PASSWORD=$(openssl rand 768 | base64 | tr -dc 'a-zA-Z0-9' | tr -d 'acdefhilmnopqrsuvACDEFHILMNOPQRSU14580' | head -c "24")
+
+#docker pull "$dockerName"
+
+entrypoint=$(docker inspect -f '{{join .Config.Entrypoint " "}}' "$dockerName")
+cmd=$(docker inspect -f '{{join .Config.Cmd " "}}' "$dockerName")
+#workdir=$(docker inspect -f '{{.Config.WorkingDir}}' "$dockerName")
+workdir=$(pwd)
+workdir=$(basename "$workdir")
+workdir=/workspace/"$workdir"
+#workdir=/workspace/$(basename $(pwd))
+_messagePlain_request 'request: paste ->'
+echo > ./._run-factory_openai-heavy
+echo "echo 'openai-heavy' > /info_factoryName.txt" | tee -a ./._run-factory_openai-heavy
+#echo "echo '# Please read researchEngine documentation for (hopefully) stabilized examples .' > /info_factoryMOTD.txt" | tee -a ./._run-factory_openai-heavy
+#echo "echo 'ubiquitous_bash=~/.ubcore/ubiquitous_bash ; vim -R "'"$ubiquitous_bash"'"/_lib/kit/app/researchEngine/_dev/README-FACTORY-openai.md' >> /info_factoryMOTD.txt" | tee -a ./._run-factory_openai-heavy
+#echo "chmod 755 /info_factoryMOTD.txt" | tee -a ./._run-factory_openai-heavy
+_request_paste_factory-prepare_finetune | tee -a ./._run-factory_openai-heavy
+_request_paste_factory-install_ubiquitous_bash | tee -a ./._run-factory_openai-heavy
+_request_paste_factory-show_finetune | tee -a ./._run-factory_openai-heavy
+#_messagePlain_request 'request: JUPYTER_PASSWORD: '"$JUPYTER_PASSWORD"
+# Yes this is safe, ''.ubcorerc' will switch from '--profile' to '--parent' based on set "$scriptAbsoluteLocation" .
+echo unset ubiquitousBashID | tee -a ./._run-factory_openai-heavy
+#docker inspect --format='{{json .Config.Entrypoint}}' "$dockerName" | jq -r '.[]' | tee -a ./._run-factory_openai-heavy
+mkdir -p "$workdir" | tee -a ./._run-factory_openai-heavy
+echo '[ -n '"$workdir"' ] && cd '"$workdir" | tee -a ./._run-factory_openai-heavy
+_messagePlain_request 'request: <- paste'
+#echo "exec ${entrypoint} ${cmd}" | tee -a ./._run-factory_openai-heavy
+#
+#echo "exec ${entrypoint}" | tee -a ./._run-factory_openai-heavy
+#
+#echo echo "==================================" | tee -a ./._run-factory_openai-heavy
+#echo echo "Welcome to openai/codex-universal!" | tee -a ./._run-factory_openai-heavy
+#echo echo "==================================" | tee -a ./._run-factory_openai-heavy
+#
+#echo /opt/codex/setup_universal.sh | tee -a ./._run-factory_openai-heavy
+#
+#echo echo "Environment ready. Dropping you into a bash shell." | tee -a ./._run-factory_openai-heavy
+
+echo 'export runDelete=/workspace/project/._run-factory_openai-heavy' >> ./._run-factory_openai-heavy
+echo 'bash -i' >> ./._run-factory_openai-heavy
+
+
+# ###
+
+
+! type _getAbsoluteLocation > /dev/null 2>&1 && exit 1
+
+#docker image inspect "$dockerName" --format '{{json .Config.Entrypoint}} {{json .Config.Cmd}}'
+
+#bash
+dockerRunArgs=( /workspace/project/._run-factory_openai-heavy )
+[[ ! -e ./._run-factory_openai-heavy ]] && dockerRunArgs=( )
+
+# ATTENTION: Enabling swift will always download ~800MB . Also adds '.swift-version' .
+#-e CODEX_ENV_SWIFT_VERSION=6.1
+dockerArgs_openai=( -e CODEX_ENV_PYTHON_VERSION=3.12 -e CODEX_ENV_NODE_VERSION=20 -e CODEX_ENV_RUST_VERSION=1.87.0 -e CODEX_ENV_GO_VERSION=1.23.8 )
+#dockerArgs_openai+=( -e CODEX_ENV_SWIFT_VERSION=6.1 )
+dockerArgs_openai_workspace=( -v "$factory_projectDir":/workspace/$(basename $(pwd)) -w /workspace/$(basename $(pwd)) )
+dockerArgs_api=( --add-host=host.docker.internal:host-gateway -e OLLAMA_HOST=host.docker.internal:11434 -e HF_API_KEY="$HF_API_KEY" -e HF_TOKEN="$HF_TOKEN" -e GH_TOKEN="$GH_TOKEN" -e INPUT_GITHUB_TOKEN="$GH_TOKEN" -e OPENAI_API_KEY="$OPENAI_API_KEY" -e OPENROUTER_API_KEY="$OPENROUTER_API_KEY" -e ai_safety="$ai_safety" )
+
+if _if_cygwin
+then
+workdir_basename=$(basename "$PWD")
+[[ "$workdir_basename" != "ubiquitous_bash" ]] && dockerArgs_openai_workspace+=( -v 'C:\q\p\zCore\infrastructure\ubiquitous_bash':/workspace/ubiquitous_bash:ro )
+dockerArgs_openai_workspace+=( -v "$factory_projectDir":/workspace/project )
+#--privileged
+#--ipc=host --ulimit memlock=-1 --ulimit stack=67108864
+#-v 'C:\q':/q -v 'C:\core':/core -v "$USERPROFILE"'\Downloads':/Downloads
+#
+#-v 'C:\q':/q
+#-v 'C:\core':/core -v "$USERPROFILE"'\Downloads':/Downloads -v "$factory_projectDir":/workspace/project -v "$factory_projectDir":/workspace/data -v "$factory_projectDir"/cache_pip:/workspace/cache_pip
+docker run --shm-size=20g --name openai-$(_uid 14) --gpus "all" "${dockerArgs_api[@]}" "${dockerArgs_openai[@]}" "${dockerArgs_openai_workspace[@]}" --rm -it "$dockerName" "${dockerRunArgs[@]}"
+fi
+if ! _if_cygwin
+then
+workdir_basename=$(basename "$PWD")
+[[ "$workdir_basename" != "ubiquitous_bash" ]] && dockerArgs_openai_workspace+=( -v "$HOME"/core/infrastructure/ubiquitous_bash:/workspace/ubiquitous_bash:ro )
+dockerArgs_openai_workspace+=( -v "$factory_projectDir":/workspace/project )
+# WARNING: May be untested.
+#-v '/home/user/___quick':/q
+#-v '/home/user/core':/core -v "/home/user"'/Downloads':/Downloads -v "$factory_projectDir":/workspace/project -v "$factory_projectDir":/workspace/data -v "$factory_projectDir"/cache_pip:/workspace/cache_pip
+docker run --shm-size=20g --name openai-$(_uid 14) --gpus "all" "${dockerArgs_api[@]}" "${dockerArgs_openai[@]}" "${dockerArgs_openai_workspace[@]}" --rm -it "$dockerName" "${dockerRunArgs[@]}"
+fi
+
+# ###
+# PASTE
+# ###
+
+rmdir ./models > /dev/null 2>&1
+rmdir ./datasets > /dev/null 2>&1
+rmdir ./outputs > /dev/null 2>&1
+
+rm -f ./._run-factory_openai-heavy > /dev/null 2>&1
+
+
+
+}
+
+
+
+
+
 
 
 #./ubiquitous_bash.sh _format_bash ubiquitous_bash ./_local/dataset/ubiquitous_bash
@@ -30158,7 +32222,7 @@ _format_trial() {
 #Llama 3.1 Instruct 405b
 #Llama 3.1 Instruct 70b
 #
-#Llama-augment
+#Llama-3-augment
 #
 
 
@@ -30310,11 +32374,11 @@ CZXWXcRMTo8EmM8i4d
 # ollama binary
 #_convert_bash-backend() {
     # DANGER: CAUTION: Although this is apparently standard practice for the 'ollama' program, and '/clear', etc, are apparently not interpreted from the input pipe, reliable safe input handling may not be guaranteed
-    #ollama run --verbose Llama-augment
+    #ollama run --verbose Llama-3-augment
 #}
 # ollama API (localhost)
 _convert_bash-backend() {
-    jq -Rs '{model:"Llama-augment", prompt:., stream: false}' | curl -fsS --max-time 120 -X POST -H "Content-Type: application/json" --data-binary @- http://localhost:11434/api/generate | jq -r '.response'
+    jq -Rs '{model:"Llama-3-augment", prompt:., stream: false}' | curl -fsS --max-time 120 -X POST -H "Content-Type: application/json" --data-binary @- http://localhost:11434/api/generate | jq -r '.response'
 }
 # openrouter API
 #_convert_bash-backend() {
@@ -30971,7 +33035,7 @@ CZXWXcRMTo8EmM8i4d
 # broken
 #  Llama-4 Scout (unusually often recognizes valid output as gibberish)
 #  Llama 3.1 70b INSTRUCT
-#  Llama-augment
+#  Llama-3-augment
 #  Llama-4 Maverick
 #  DeepSeek-R1 14b
 #  DeepSeek-R1 32b
@@ -34732,7 +36796,7 @@ _test_gitBest() {
 #! _wget_githubRelease "owner/repo" "" "file.ext"
 
 
-#_wget_githubRelease_join "soaringDistributions/Llama-augment_bundle" "" "llama-3.1-8b-instruct-abliterated.Q4_K_M.gguf"
+#_wget_githubRelease_join "soaringDistributions/Llama-3-augment_bundle" "" "llama-3.1-8b-instruct-abliterated.Q4_K_M.gguf"
 
 
 
@@ -39143,15 +41207,124 @@ _setup_claude_code() {
 
 # NOTICE: Installing 'codex' may be useful for cloud, container, etc, usage (eg. within a RunPod instance, within a Docker container, etc).)
 # Also recommend 'Cline' VSCode extension .
-_setup_codex() {
+
+
+_setup_codex_sequence-npm() {
+    _start
+    local functionEntryPWD
+    functionEntryPWD="$PWD"
+
+    cd "$safeTmp"
+    
+
+    # DUBIOUS .
+    #sudo -n npm install -g @openai/codex@b73426c1c40187ca13c74c03912a681072c2884f
+
+    # ATTRIBUTION-AI: devstral-small  2025-06-11
+    #sudo -n npm install https://github.com/openai/codex/archive/b73426c1c40187ca13c74c03912a681072c2884f.tar.gz
+
+
+
+    sudo -n npm install https://github.com/openai/codex/archive/8493285.tar.gz
+    sudo -n npm install https://github.com/openai/codex/archive/b051edb7d3e04200b369af37ca45e210614cf281.tar.gz
+
+
+    cd "$functionEntryPWD"
+    _stop
+}
+
+_setup_codex-npm() {
     _mustGetSudo
 
     _get_npm
 
+
+
+    # WARNING: Mainline version. DISCOURAGED, except to get dependencies needed by a frozen, and possibly more useful, version. Issues disabling sandbox .
+    #  https://github.com/openai/codex/pull/996
+    #  https://github.com/openai/codex/pull/1125
+    #  https://github.com/openai/codex/issues/1254
+    #  https://github.com/openai/codex/pull/374
     #@openai/codex
     #@openai/codex@latest
     sudo -n npm install -g @openai/codex
 }
+
+# WARNING: May be untested.
+# DUBIOUS .
+_setup_codex_sequence-upstream() {
+    _start
+    local functionEntryPWD
+    functionEntryPWD="$PWD"
+
+    #cd "$safeTmp"
+    mkdir -p "$HOME"/core/installations/codex_bin
+    cd "$HOME"/core/installations/codex_bin
+
+    # ATTRIBUTION-AI: ChatGPT o3  2025-06-11  (partially)
+
+    for v in $(env | awk -F= '/^NVM_/ {print $1}'); do
+        unset "$v"
+    done
+
+    export PATH="$(printf '%s' "$PATH" | tr ':' '\n' | grep -vE '/\.nvm/' | paste -sd ':' -)"
+    #export PATH="/usr/bin:${PATH}"
+
+    export SHELL="/bin/bash"
+    
+    sudo -n /usr/bin/corepack enable                 # turn on pnpm via corepack (Node >=16.10)
+    /usr/bin/corepack prepare pnpm@latest --activate
+
+    export safeToDeleteGit="true"
+    git clone https://github.com/openai/codex.git
+    cd codex
+
+    # fetch PR 996 and check it out locally
+    git fetch origin pull/996/head:disable-sandbox
+    git switch disable-sandbox      # or: git checkout -b disable-sandbox FETCH_HEAD
+
+    yes | /usr/lib/node_modules/corepack/shims/pnpm setup
+
+    export PNPM_HOME="$HOME""/.local/share/pnpm"
+    case ":$PATH:" in
+        *":$PNPM_HOME:"*) ;;
+        *) export PATH="$PNPM_HOME:$PATH" ;;
+    esac
+
+    # install deps for the monorepo and build just the CLI package
+    yes | /usr/lib/node_modules/corepack/shims/pnpm install
+    /usr/lib/node_modules/corepack/shims/pnpm --dir ./codex-cli run build
+
+
+    # expose the built CLI globally
+    cd ./codex-cli
+    /usr/lib/node_modules/corepack/shims/pnpm link --global
+
+    mkdir -p "$HOME"/.bun/install/global
+    [[ ! -e "$HOME"/.bun/install/global/package.json ]] && echo '{ "name": "bun-global", "private": true }' > "$HOME"/.bun/install/global/package.json
+
+    cd "$functionEntryPWD"
+    _stop
+}
+_setup_codex-upstream() {
+    _setup_codex-npm "$@"
+    "$scriptAbsoluteLocation" _setup_codex_sequence-upstream "$@"
+}
+
+_setup_codex() {
+    _setup_codex-upstream "$@"
+}
+
+
+# ATTENTION: Full WebUI Codex may need 'ubDEBUG=true' to better diagnose and continue testing.
+# WARNING: CLI Codex may NOT work well with 'ubDEBUG=true'.
+# codex ... ubiquitous_bash ... debug
+#
+#export devfast=true
+#export skimfast=true
+#
+#export ub_setScriptChecksum_disable='true'
+##export ubDEBUG=true
 
 
 # https://github.com/openai/codex/issues/1189
@@ -39169,12 +41342,159 @@ _setup_codex() {
 #--model o3
 
 #alias codex='wsl -d ubdist codex'
+#alias codexNative=$(type -P codex 2>/dev/null)
 
 
 
 
+# WARNING: Mainline versions of CLI Codex apparently do NOT disable the sandbox if '--approval-mode full-auto' parameter is given.
+#export TMPDIR=/tmp ; 
+#export CODEX_UNSAFE_ALLOW_NO_SANDBOX=1 ; codex --dangerously-auto-approve-everything
+#export CODEX_UNSAFE_ALLOW_NO_SANDBOX=1 ; codex --dangerously-auto-approve-everything --approval-mode full-auto
+#alias codexAuto='export CODEX_UNSAFE_ALLOW_NO_SANDBOX=1 ; codex --dangerously-auto-approve-everything --approval-mode full-auto'
+#alias codexForce='export CODEX_UNSAFE_ALLOW_NO_SANDBOX=1 ; codex --dangerously-auto-approve-everything'
+alias codexAuto='CODEX_UNSAFE_ALLOW_NO_SANDBOX=1 codex --dangerously-auto-approve-everything --approval-mode full-auto'
+alias codexForce='CODEX_UNSAFE_ALLOW_NO_SANDBOX=1 codex --dangerously-auto-approve-everything'
 
-alias codexAuto='codex --approval-mode full-auto'
+
+
+
+# ATTENTION: Override with 'ops.sh' , '_bashrc' , or similar, ONLY if uniquely necessary for a very unusual situation.
+#  ATTENTION: NOTICE: Otherwise, CLI Codex issues really should be very urgently reported as issues to both 'codex' and 'ubiquitous_bash' projects .
+# Assumes the usable upstream mainline 'node' and 'codex' installations are installed '/usr/bin' or similar, with conflicting (eg. not recent) or custom (eg. disable sandbox) versions installed under "$HOME" or similar.
+_codexBin-usr_local_bin_node() {
+    local currentDisableSandbox
+    currentDisableSandbox="false"
+
+    # Calling 'codexAuto' from Cygwin to WSL2 codex would not necessarily apply the environment variable. Infer always disabling sandbox implied with command line parameter .
+    local currentArg
+    for currentArg in "$@"
+    do
+        [[ "$currentArg" == "--dangerously-auto-approve-everything" ]] && currentDisableSandbox="true"
+    done
+
+    if ( [[ "$currentDisableSandbox" != "false" ]] || [[ -v CODEX_UNSAFE_ALLOW_NO_SANDBOX ]] ) && ( ( [[ ! -e /.dockerenv ]] && ! [[ -e /info_factoryName.txt ]] ) || grep 'ubDistBuild' /info-github > /dev/null 2>&1 || _if_cygwin )
+    then
+        #_messagePlain_warn
+        #_messageError
+        _messageError ' CAUTION: DANGER: Native codexAuto, codexForce, etc, may cause IRREPARABLE dist/OS BREAKAGE, filesystem DELETION , or network HARM ! ' >&2
+        echo 'Ctrl+c repeatedly to cancel!' >&2
+        echo 'wait: 5seconds: Ctrl+c repeatedly to cancel NOW!!!' >&2
+        sleep 4
+    fi
+
+    #[[ "$currentDisableSandbox" == "true" ]] && export CODEX_UNSAFE_ALLOW_NO_SANDBOX=1
+    
+
+    local currentExitStatus
+
+    if [[ -e "$HOME"/.local/share/pnpm/codex ]]
+    then
+        export PNPM_HOME="$HOME""/.local/share/pnpm"
+        case ":$PATH:" in
+            *":$PNPM_HOME:"*) ;;
+            *) export PATH="$PNPM_HOME:$PATH" ;;
+        esac
+        if [[ "$currentDisableSandbox" == "true" ]] || [[ "$CODEX_UNSAFE_ALLOW_NO_SANDBOX" == "1" ]]
+        then
+            CODEX_UNSAFE_ALLOW_NO_SANDBOX=1 "$HOME"/.local/share/pnpm/codex "$@"
+            currentExitStatus="$?"
+            unset CODEX_UNSAFE_ALLOW_NO_SANDBOX
+            return "$currentExitStatus"
+        #else
+            #"$HOME"/.local/share/pnpm/codex "$@"
+            #currentExitStatus="$?"
+            #unset CODEX_UNSAFE_ALLOW_NO_SANDBOX
+            #return "$currentExitStatus"
+        fi
+    fi
+    if [[ "$currentDisableSandbox" == "true" ]] || [[ "$CODEX_UNSAFE_ALLOW_NO_SANDBOX" == "1" ]]
+    then
+        #CODEX_UNSAFE_ALLOW_NO_SANDBOX=1 /usr/local/bin/node "$(type -P codex)" "$@"
+        #CODEX_UNSAFE_ALLOW_NO_SANDBOX=1 /usr/local/bin/node /usr/local/bin/codex "$@"
+        CODEX_UNSAFE_ALLOW_NO_SANDBOX=1 /usr/local/bin/node '/usr/lib/node_modules/@openai/codex/bin/codex.js' "$@"
+        currentExitStatus="$?"
+        unset CODEX_UNSAFE_ALLOW_NO_SANDBOX
+        return "$currentExitStatus"
+    else
+        #/usr/local/bin/node "$(type -P codex)" "$@"
+        #/usr/local/bin/node /usr/local/bin/codex "$@"
+        /usr/local/bin/node '/usr/local/lib/node_modules/@openai/codex/bin/codex.js' "$@"
+        currentExitStatus="$?"
+        unset CODEX_UNSAFE_ALLOW_NO_SANDBOX
+        return "$currentExitStatus"
+    fi
+}
+_codexBin-usr_bin_node() {
+    local currentDisableSandbox
+    currentDisableSandbox="false"
+
+    # Calling 'codexAuto' from Cygwin to WSL2 codex would not necessarily apply the environment variable. Infer always disabling sandbox implied with command line parameter .
+    local currentArg
+    for currentArg in "$@"
+    do
+        [[ "$currentArg" == "--dangerously-auto-approve-everything" ]] && currentDisableSandbox="true"
+    done
+
+    if ( [[ "$currentDisableSandbox" != "false" ]] || [[ -v CODEX_UNSAFE_ALLOW_NO_SANDBOX ]] ) && ( ( [[ ! -e /.dockerenv ]] && ! [[ -e /info_factoryName.txt ]] ) || grep 'ubDistBuild' /info-github > /dev/null 2>&1 || _if_cygwin )
+    then
+        #_messagePlain_warn
+        #_messageError
+        _messageError ' CAUTION: DANGER: Native codexAuto, codexForce, etc, may cause IRREPARABLE dist/OS BREAKAGE, filesystem DELETION , or network HARM ! ' >&2
+        echo 'Ctrl+c repeatedly to cancel!' >&2
+        echo 'wait: 5seconds: Ctrl+c repeatedly to cancel NOW!!!' >&2
+        sleep 4
+    fi
+
+    #[[ "$currentDisableSandbox" == "true" ]] && export CODEX_UNSAFE_ALLOW_NO_SANDBOX=1
+    
+
+    local currentExitStatus
+
+    if [[ -e "$HOME"/.local/share/pnpm/codex ]]
+    then
+        export PNPM_HOME="$HOME""/.local/share/pnpm"
+        case ":$PATH:" in
+            *":$PNPM_HOME:"*) ;;
+            *) export PATH="$PNPM_HOME:$PATH" ;;
+        esac
+        if [[ "$currentDisableSandbox" == "true" ]] || [[ "$CODEX_UNSAFE_ALLOW_NO_SANDBOX" == "1" ]]
+        then
+            CODEX_UNSAFE_ALLOW_NO_SANDBOX=1 "$HOME"/.local/share/pnpm/codex "$@"
+            currentExitStatus="$?"
+            unset CODEX_UNSAFE_ALLOW_NO_SANDBOX
+            return "$currentExitStatus"
+        #else
+            #"$HOME"/.local/share/pnpm/codex "$@"
+            #currentExitStatus="$?"
+            #unset CODEX_UNSAFE_ALLOW_NO_SANDBOX
+            #return "$currentExitStatus"
+        fi
+    fi
+    if [[ "$currentDisableSandbox" == "true" ]] || [[ "$CODEX_UNSAFE_ALLOW_NO_SANDBOX" == "1" ]]
+    then
+        #CODEX_UNSAFE_ALLOW_NO_SANDBOX=1 /usr/bin/node "$(type -P codex)" "$@"
+        #CODEX_UNSAFE_ALLOW_NO_SANDBOX=1 /usr/bin/node /usr/bin/codex "$@"
+        CODEX_UNSAFE_ALLOW_NO_SANDBOX=1 /usr/bin/node '/usr/lib/node_modules/@openai/codex/bin/codex.js' "$@"
+        currentExitStatus="$?"
+        unset CODEX_UNSAFE_ALLOW_NO_SANDBOX
+        return "$currentExitStatus"
+    else
+        #/usr/bin/node "$(type -P codex)" "$@"
+        #/usr/bin/node /usr/bin/codex "$@"
+        /usr/bin/node '/usr/lib/node_modules/@openai/codex/bin/codex.js' "$@"
+        currentExitStatus="$?"
+        unset CODEX_UNSAFE_ALLOW_NO_SANDBOX
+        return "$currentExitStatus"
+    fi
+}
+
+
+if type -P codex > /dev/null 2>&1
+then
+    [[ -e /usr/local/bin/node ]] && alias codex=_codexBin-usr_local_bin_node
+    [[ -e /usr/bin/node ]] && alias codex=_codexBin-usr_bin_node
+fi
 
 
 
@@ -39943,6 +42263,7 @@ _test_aws_upstream_sequence() {
 
 # ATTENTION: WARNING: Only tested with Debian Stable. May require rewrite to accommodate other distro (ie. Gentoo).
 _test_aws() {
+	# ATTENTION: Disabling for Docker containers is unusual , and may change. This is due to the unusual variety of Docker container dist/OS used, and that a use case has not been found for AWS, etc.
 	if ! _if_cygwin
 	then
 		# zlib1g-dev
@@ -39960,8 +42281,8 @@ _test_aws() {
 		# libncurses-dev
 		_getDep 'ncurses6-config'
 		_getDep 'ncursesw6-config'
-		_getDep 'ncurses5-config'
-		_getDep 'ncursesw5-config'
+		_wantGetDep 'ncurses5-config'
+		_wantGetDep 'ncursesw5-config'
 		_getDep 'curses.h'
 		_getDep 'pkgconfig/ncurses.pc'
 		_getDep 'pkgconfig/ncursesw.pc'
@@ -41716,9 +44037,15 @@ _test_cloud_updateInterval() {
 _test_cloud() {
 	_tryExec '_test_digitalocean_cloud'
 	_tryExec '_test_linode_cloud'
+
+	# May be added to give AI/Codex convenient experimentation using more capable computing.
+	#_tryExec '_test_runpod'
 	
-	
-	if _test_cloud_updateInterval
+	# ATTENTION: NOTICE: AWS and Google Cloud are occasionally enabled as a distributed test in case of future need, but until an important use case is found, may be disabled by default.
+	# ATTENTION: Disabling for Docker containers is unusual , and may change. This is due to the unusual variety of Docker container dist/OS used, and that a use case has not been found for AWS, gcloud, etc.
+	#false && 
+	#! [[ -e /.dockerenv ]] && 
+	if ! [[ -e /.dockerenv ]] && _test_cloud_updateInterval
 	then
 		rm -f "$HOME"/.ubcore/.retest-cloud > /dev/null 2>&1
 		touch "$HOME"/.ubcore/.retest-cloud
@@ -42470,7 +44797,7 @@ _nbd-available_vbox() {
 _check_nbd_vbox() {
 	! _wantSudo && _messagePlain_bad 'fail: _wantSudo' && _messageFAIL
 	
-	sudo -n ! type nbd-client > /dev/null 2>&1 && _messagePlain_bad 'fail: missing: nbd-client' && _messageFAIL
+	! sudo -n type nbd-client > /dev/null 2>&1 && _messagePlain_bad 'fail: missing: nbd-client' && _messageFAIL
 	! type qemu-nbd > /dev/null 2>&1 && _messagePlain_bad 'fail: missing: qemu nbd' && _messageFAIL
 	
 	! sudo -n modprobe nbd && _messagePlain_bad 'fail: modprobe nbd' && _messageFAIL
@@ -46107,6 +48434,8 @@ then
 	unset _ubcore_add_authorized_SSH
 fi
 
+[[ -e /.dockerenv ]] && git config --global --add safe.directory '*' > /dev/null 2>&1
+
 CZXWXcRMTo8EmM8i4d
 
 }
@@ -46358,6 +48687,8 @@ PS1_lineNumber=""
 
 # WARNING: Importing complete 'ubiquitous_bash.sh' may cause other scripts to call functions inappropriate for their needs during "_test" and "_setup" .
 # This may be acceptable if the user has already run "_setup" from the imported script .
+ubDEBUG_current="\$ubDEBUG"
+export ubDEBUG="false"
 #export profileScriptLocation="$ubcoreUBdir"/ubiquitous_bash.sh
 export profileScriptLocation="$ubcoreUBdir"/ubcore.sh
 #export profileScriptLocation="$ubcoreUBdir"/lean.sh
@@ -46372,6 +48703,7 @@ else
 	[[ "\$force_profileScriptLocation" != "" ]] && . "\$force_profileScriptLocation" --profile _importShortcuts
 fi
 [[ "\$ub_setScriptChecksum_disable" == 'true' ]] && export ub_setScriptChecksum_disable="" && unset ub_setScriptChecksum_disable
+export ubDEBUG="\$ubDEBUG_current"
 
 # Returns priority to normal.
 # Greater or equal, '_priority_app_pid_root' .
@@ -46431,6 +48763,13 @@ CZXWXcRMTo8EmM8i4d
 
 
 	cat << CZXWXcRMTo8EmM8i4d
+
+if [[ "\$runDelete" != "" ]] && [[ "\$runDelete" == '/workspace/project'* ]]
+then
+	#/workspace/project/._run-factory_openai
+	rm -f "\$runDelete"
+	unset runDelete
+fi
 
 [[ -e /info_factoryMOTD.txt ]] && cat /info_factoryMOTD.txt
 #[[ -e /info_factoryMOTD.sh ]] && . /info_factoryMOTD.sh
@@ -46524,6 +48863,12 @@ _install_certs() {
     _if_cygwin && sudo -n rm -f /etc/pki/tls/certs/*.0
 
     _install_certs_write
+
+    # Setup scripts in constrained repetitive environments (ie. OpenAI Codex setup script) may multi-thread concurrent _setupUbiquitous with apt-get . This detects that, and prevents dpkg collision.
+    while pgrep '^dpkg$' > /dev/null 2>&1
+    do
+        sleep 1
+    done
 
     local currentExitStatus="1"
     ! _if_cygwin && sudo -n update-ca-certificates
@@ -48759,7 +51104,7 @@ then
 	#then
 		_write_configure_git_safe_directory_if_admin_owned "$scriptAbsoluteFolder"
 	#fi
-elif uname -a | grep -i 'microsoft' > /dev/null 2>&1 && uname -a | grep -i 'WSL2' > /dev/null 2>&1
+elif ( uname -a | grep -i 'microsoft' > /dev/null 2>&1 && uname -a | grep -i 'WSL2' > /dev/null 2>&1 ) || [[ -e /.dockerenv ]]
 then
 	if [[ "$tmpSelf" == "" ]]
 	then
@@ -55479,10 +57824,14 @@ _stop_stty_echo() {
 	#stty echo --file=/dev/tty > /dev/null 2>&1
 	
 	[[ "$ubFoundEchoStatus" != "" ]] && stty --file=/dev/tty "$ubFoundEchoStatus" 2> /dev/null
+
+	return 0
 }
 
 # DANGER: Use of "_stop" must NOT require successful "_start". Do NOT include actions which would not be safe if "_start" was not used or unsuccessful.
 _stop() {
+	if [[ "$ubDEBUG" == "true" ]] ; then set +x ; set +E ; set +o functrace ; set +o errtrace ; export -n SHELLOPTS 2>/dev/null || true ; trap '' RETURN ; trap - RETURN ; fi
+	
 	_stop_stty_echo
 	
 	_tryExec "_stop_prog"
@@ -55535,6 +57884,7 @@ _stop() {
 	
 	_safeRMR "$shortTmp"
 	_safeRMR "$safeTmp"
+	[[ "$fastTmp" != "" ]] && _safeRMR "$fastTmp"
 	
 	[[ -e "$safeTmp" ]] && sleep 0.1 && _safeRMR "$safeTmp"
 	[[ -e "$safeTmp" ]] && sleep 0.3 && _safeRMR "$safeTmp"
@@ -55721,8 +58071,8 @@ _readLocked() {
 
 #Using _readLocked before any _createLocked operation is strongly recommended to remove any lock from prior UNIX session (ie. before latest reboot).
 _createLocked() {
-	[[ "$uDEBUG" == true ]] && caller 0 >> "$scriptLocal"/lock.log
-	[[ "$uDEBUG" == true ]] && echo -e '\t'"$sessionid"'\t'"$1" >> "$scriptLocal"/lock.log
+	[[ "$ubDEBUG" == true ]] && caller 0 >> "$scriptLocal"/lock.log
+	[[ "$ubDEBUG" == true ]] && echo -e '\t'"$sessionid"'\t'"$1" >> "$scriptLocal"/lock.log
 	
 	mkdir -p "$bootTmp"
 	
@@ -55737,7 +58087,7 @@ _createLocked() {
 	
 	if [[ -e "$lock_quicktmp"_"$lockUID" ]]
 	then
-		[[ "$uDEBUG" == true ]] && echo -e '\t'FAIL >> "$scriptLocal"/lock.log
+		[[ "$ubDEBUG" == true ]] && echo -e '\t'FAIL >> "$scriptLocal"/lock.log
 		rm -f "$lock_quicktmp"_"$lockUID" > /dev/null 2>&1
 		return 1
 	fi
@@ -56556,6 +58906,11 @@ _variableLocalTest_sequence() {
 	
 
 	variableLocalTest_evalTest() { local currentVariableNum=1 ; eval local currentVariable_${currentVariableNum}_currentData=PASS ; ( eval "[[ \$currentVariable_${currentVariableNum}_currentData == PASS ]]" && eval "[[ \$currentVariable_${currentVariableNum}_currentData != '' ]]" && eval "echo \$currentVariable_${currentVariableNum}_currentData" ) ;} ; variableLocalTest_evalTest > /dev/null ; [[ $(variableLocalTest_evalTest) != "PASS" ]] && _messageFAIL && _stop 1
+
+
+	! [[ $(currentVariable=currentValue /bin/bash --norc -c 'echoVariableTest() { echo $currentVariable ; } ; echoVariableTest') == "currentValue" ]] && _messageFAIL && _stop 1
+	! [[ $(currentVariable=currentValue currentVariable=currentValue /bin/bash --norc -c 'echoVariableTest() { echo $currentVariable ; } ; echoVariableTest') == "currentValue" ]] && _messageFAIL && _stop 1
+	! [[ $(currentVariable=currentValueA currentVariable=currentValueB /bin/bash --norc -c 'echoVariableTest() { echo $currentVariable ; } ; echoVariableTest') == "currentValueB" ]] && _messageFAIL && _stop 1
 
 	_stop
 }
@@ -57411,10 +59766,18 @@ _test-shell-cygwin() {
 	local currentPathCount
 	currentPathCount=$(echo "$PATH" | grep -o ':' | wc -l | tr -dc '0-9')
 	#if [[ "$currentPathCount" -gt 50 ]]
-	if [[ "$currentPathCount" -gt 66 ]]
+	#if [[ "$currentPathCount" -gt 66 ]]
+	if [[ "$currentPathCount" -gt 99 ]]
 	then
 		echo 'fail: count: PATH: '"$currentPathCount"
 		_messageFAIL
+	fi
+	#if [[ "$currentPathCount" -gt 66 ]]
+	if [[ "$currentPathCount" -gt 80 ]]
+	then
+		echo 'warn: count: PATH: '"$currentPathCount"
+		echo 'warn: MSWEXTPATH may be ignored'
+		_messagePlain_request 'request: reduce the length of PATH variable'
 	fi
 	#if [[ "$currentPathCount" -gt 44 ]]
 	if [[ "$currentPathCount" -gt 60 ]]
@@ -57449,36 +59812,36 @@ _test-shell-cygwin() {
 		_messagePlain_request 'request: reduce the length of PATH variable'
 	fi
 	
-	
-	
-	local currentPathCount
-	currentPathCount=$(echo "$MSWEXTPATH" | grep -o ';\|:' | wc -l | tr -dc '0-9')
-	if [[ "$currentPathCount" -gt 50 ]] && [[ "$CI" == "" ]]
+
+
+	# Discouraged. NOT guaranteed, may be removed if unmaintainable.
+	# Inheritance of variables as a means of communicating or passing parameters is not the point. Inheritance is tested to ensure an entirely different 'ubcp' environment, script, '$safeTmp', etc, is NOT used.
+	export ub_sanity_special="mustInherit"
+	if _if_cygwin
 	then
-		echo 'fail: count: MSWEXTPATH: '"$currentPathCount"
-		_messageFAIL
+		local currentResult
+		currentResult=""
+
+		local current_bin_bash
+		current_bin_bash=$(cygpath -w /bin/bash)
+
+		currentResult=$(cmd /C "$current_bin_bash" '-c' 'echo $ub_sanity_special')
+		[[ "$currentResult" != "mustInherit" ]] && echo 'fail: cmd /bin/bash: mustInherit' && _messageFAIL && return 1
+
+		currentResult=$(cmd /C "$current_bin_bash" '-c' 'echo "$safeTmp"')
+		[[ "$currentResult" != "$safeTmp" ]] && echo 'fail: cmd /bin/bash: inherit: safeTmp' && _messageFAIL && return 1
+
+
+		current_bin_bash=$(cygpath -w /bin/bash | sed 's/\\/\\\\/g')
+
+		currentResult=$(_powershell -Command "$current_bin_bash"" -c 'echo "'"$ub_sanity_special"'"'")
+		[[ "$currentResult" != "mustInherit" ]] && echo 'fail: powershell /bin/bash: mustInherit' && _messageFAIL && return 1
+
+		currentResult=$(_powershell -Command "$current_bin_bash"" -c 'echo "'"$safeTmp"'"'")
+		[[ "$currentResult" != "$safeTmp" ]] && echo 'fail: powershell /bin/bash: inherit: safeTmp' && _messageFAIL && return 1
 	fi
-	if [[ "$currentPathCount" -gt 44 ]]
-	then
-		echo 'warn: count: MSWEXTPATH: '"$currentPathCount"
-		echo 'warn: MSWEXTPATH may be ignored by default'
-		_messagePlain_request 'request: reduce the length of PATH variable'
-	fi
-	
-	
-	if [[ "$currentPathCount" -gt 32 ]]
-	then
-		echo 'warn: count: MSWEXTPATH: '"$currentPathCount"
-		echo 'warn: MSWEXTPATH exceeds preferred 32'
-		_messagePlain_request 'request: reduce the length of PATH variable'
-	fi
-	if [[ "$currentPathCount" -gt 34 ]]
-	then
-		echo 'warn: count: MSWEXTPATH: '"$currentPathCount"
-		echo 'warn: MSWEXTPATH exceeds preferred 34'
-		_messagePlain_request 'request: reduce the length of PATH variable'
-	fi
-	
+	unset ub_sanity_special
+
 	
 	
 	# Although use case specific (eg. flight sim with usual desktop applications installed) test cases may be necessary for MSW, to avoid ambiguity in expectations that every test includes an explicit PASS statement, a call to '_messagePASS' is still given.
@@ -57533,6 +59896,7 @@ _test() {
 	then
 		if _typeDep 'apt-get'
 		then
+			apt-get -y update
 			apt-get -y install sudo
 		fi
 	fi
@@ -57542,6 +59906,7 @@ _test() {
 	then
 		if _typeDep 'apt-get'
 		then
+			sudo -n apt-get -y update
 			sudo -n apt-get -y install bc
 		fi
 	fi
@@ -57619,6 +59984,9 @@ _test() {
 	_getDep cksum
 	
 	_getDep wget
+	_getDep curl
+	_wantGetDep aria2c
+	_wantGetDep axel
 	_getDep grep
 	_getDep fgrep
 	_getDep sed
@@ -59886,6 +62254,9 @@ _create_ubDistBuild-rotten_install-core() {
 	#codex
 	#claude
 	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistBuild ; chmod 755 ./ubiquitous_bash.sh ; ./ubiquitous_bash.sh _gitBest pull ; chmod 755 ./ubiquitous_bash.sh ; ./ubiquitous_bash.sh _gitBest submodule update --recursive ; ./ubiquitous_bash.sh _setup_codex ; ./ubiquitous_bash.sh _setup_claude_code'
+
+	
+	_chroot sudo -n -u user bash -c 'cd /home/user/core/infrastructure/ubDistBuild ; chmod 755 ./ubiquitous_bash.sh ; ./ubiquitous_bash.sh _gitBest pull ; chmod 755 ./ubiquitous_bash.sh ; ./ubiquitous_bash.sh _gitBest submodule update --recursive ; ./ubiquitous_bash.sh _setup_asciinema_convert'
 
 	
 
@@ -67711,6 +70082,7 @@ _init_deps() {
 	
 	export enUb_dev=""
 	export enUb_dev_heavy=""
+	export enUb_dev_heavy_asciinema=""
 	export enUb_dev_heavy_atom=""
 	
 	export enUb_generic=""
@@ -67823,6 +70195,13 @@ _deps_dev() {
 _deps_dev_heavy() {
 	_deps_notLean
 	export enUb_dev_heavy="true"
+}
+
+_deps_dev_heavy_asciinema() {
+	_deps_notLean
+	_deps_get_npm
+	#export enUb_dev_heavy="true"
+	export enUb_dev_heavy_asciinema="true"
 }
 
 _deps_dev_heavy_atom() {
@@ -68773,6 +71152,9 @@ _compile_bash_deps() {
 	then
 		_deps_dev_ai
 		
+		_deps_dev_heavy
+		_deps_dev_heavy_asciinema
+		
 		_deps_dev_buildOps
 		
 		_deps_notLean
@@ -69011,6 +71393,7 @@ _compile_bash_deps() {
 		_deps_dev_ai
 		
 		_deps_dev_heavy
+		_deps_dev_heavy_asciinema
 		#_deps_dev_heavy_atom
 		_deps_dev
 		_deps_dev_buildOps
@@ -69132,6 +71515,7 @@ _compile_bash_deps() {
 		_deps_dev_ai
 		
 		_deps_dev_heavy
+		_deps_dev_heavy_asciinema
 		#_deps_dev_heavy_atom
 		_deps_dev
 		_deps_dev_buildOps
@@ -69275,6 +71659,7 @@ _compile_bash_deps() {
 		_deps_dev_ai
 		
 		_deps_dev_heavy
+		_deps_dev_heavy_asciinema
 		#_deps_dev_heavy_atom
 		_deps_dev
 		_deps_dev_buildOps
@@ -69562,6 +71947,8 @@ _compile_bash_utilities() {
 	[[ "$enUb_dev_heavy" == "true" ]] && includeScriptList+=( "instrumentation"/bashdb/bashdb.sh )
 	( [[ "$enUb_notLean" == "true" ]] || [[ "$enUb_stopwatch" == "true" ]] ) && includeScriptList+=( "instrumentation"/profiling/stopwatch.sh )
 	
+	[[ "$enUb_dev_heavy" == "true" ]] && includeScriptList+=( "instrumentation"/asciinema/asciinema.sh )
+	
 	[[ "$enUb_generic" == "true" ]] && includeScriptList+=( "generic"/generic.sh )
 }
 
@@ -69685,9 +72072,11 @@ _compile_bash_shortcuts() {
 	[[ "$enUb_ollama" == "true" ]] && includeScriptList+=( "ai/ollama"/ollama.sh )
 	
 	( ( [[ "$enUb_dev_heavy" == "true" ]] ) || [[ "$enUb_ollama_shortcuts" == "true" ]] ) && includeScriptList+=( "shortcuts/ai/ollama"/ollama.sh )
+	( ( [[ "$enUb_dev_heavy" == "true" ]] ) || [[ "$enUb_ollama_shortcuts" == "true" ]] ) && includeScriptList+=( "shortcuts/ai/ollama"/ollama-dev.sh )
 	
 	( ( [[ "$enUb_dev_heavy" == "true" ]] ) || [[ "$enUb_ai_augment" == "true" ]] ) && includeScriptList+=( "shortcuts/ai/augment"/augment.sh )
 
+	[[ "$enUb_factory_shortcuts" ]] && includeScriptList+=( "shortcuts/factory"/factoryTest.sh )
 	[[ "$enUb_factory_shortcuts" ]] && includeScriptList+=( "shortcuts/factory"/factoryCreate_here.sh )
 	[[ "$enUb_factory_shortcuts" ]] && includeScriptList+=( "shortcuts/factory"/factoryCreate.sh )
 	[[ "$enUb_factory_shortcuts" ]] && includeScriptList+=( "shortcuts/factory"/factory.sh )
@@ -70565,6 +72954,7 @@ _factory_ops() {
             fi
         #fi
     #fi
+    true
 }
 if [[ "$ub_ops_disable" != 'true' ]]
 then
@@ -70573,6 +72963,7 @@ then
         _factory_ops
     fi
 fi
+true
 
 
 # Before calling function, get latest function version .
@@ -70593,6 +72984,7 @@ _factory_ops_recursion() {
         unset recursionGuard_factory_ops
         return "$currentExitStatus_recursion"
     fi
+    true
 }
 
 
@@ -70654,6 +73046,8 @@ then
 		stty echo --file=/dev/tty > /dev/null 2>&1
 		
 		#[[ "$ubFoundEchoStatus" != "" ]] && stty --file=/dev/tty "$ubFoundEchoStatus" 2> /dev/null
+
+		return 0
 	}
 	_stop() {
 		_stop_stty_echo
@@ -70987,8 +73381,42 @@ then
 	then
 		if [[ "$scriptLinkCommand" == '_'* ]]
 		then
+			if [[ "$ubDEBUG" == "true" ]]
+			then
+				# ATTRIBUTION-AI: ChatGPT o3  2025-06-06
+				exec 3>&2
+				#export BASH_XTRACEFD=3
+				set   -o functrace
+				set   -o errtrace
+				# May break _test_pipefail_sequence .
+				#export SHELLOPTS
+				trap '
+  set -E +x
+  call_line=${BASH_LINENO[0]}
+  call_file=${BASH_SOURCE[1]}
+  [[ $call_file == "$PWD/"* ]] && call_file=${call_file#"$PWD/"}
+  func_name=${FUNCNAME[0]:-MAIN}
+
+  if [[ "$call_line" != "0" ]] && [[ func_name != "MAIN()" ]]
+  then
+	# extract the source line and strip leading blanks
+	call_text=$(sed -n "${call_line}{s/^[[:space:]]*//;p}" "$call_file")
+
+	printf "<<<STEPOUT<<< RETURN %s() <- %s:%d : %s  status=%d\n" \
+			"$func_name"        "$call_file" \
+			"$call_line"        "$call_text" \
+			"$?" >&3
+  fi
+  set -E -x
+' RETURN
+				set -E -x
+				#set -x
+			fi
+			
 			"$scriptLinkCommand" "$@"
 			internalFunctionExitStatus="$?"
+
+			if [[ "$ubDEBUG" == "true" ]] ; then set +x ; set +E ; set +o functrace ; set +o errtrace ; export -n SHELLOPTS 2>/dev/null || true ; trap '' RETURN ; trap - RETURN ; fi
 			
 			#Exit if not imported into existing shell, or bypass requested, else fall through to subsequent return.
 			if [[ "$ub_import" != "true" ]] || [[ "$ub_import_param" == "--bypass" ]] || [[ "$ub_import_param" == "--compressed" ]]
@@ -71008,8 +73436,41 @@ then
 	# && [[ "$1" != "_test" ]] && [[ "$1" != "_setup" ]] && [[ "$1" != "_build" ]] && [[ "$1" != "_vector" ]] && [[ "$1" != "_setupCommand" ]] && [[ "$1" != "_setupCommand_meta" ]] && [[ "$1" != "_setupCommands" ]] && [[ "$1" != "_find_setupCommands" ]] && [[ "$1" != "_setup_anchor" ]] && [[ "$1" != "_anchor" ]] && [[ "$1" != "_package" ]] && [[ "$1" != *"_prog" ]] && [[ "$1" != "_main" ]] && [[ "$1" != "_collect" ]] && [[ "$1" != "_enter" ]] && [[ "$1" != "_launch" ]] && [[ "$1" != "_default" ]] && [[ "$1" != "_experiment" ]]
 	if [[ "$1" == '_'* ]] && type "$1" > /dev/null 2>&1 && [[ "$1" != "_test" ]] && [[ "$1" != "_setup" ]] && [[ "$1" != "_build" ]] && [[ "$1" != "_vector" ]] && [[ "$1" != "_setupCommand" ]] && [[ "$1" != "_setupCommand_meta" ]] && [[ "$1" != "_setupCommands" ]] && [[ "$1" != "_find_setupCommands" ]] && [[ "$1" != "_setup_anchor" ]] && [[ "$1" != "_anchor" ]] && [[ "$1" != "_package" ]] && [[ "$1" != *"_prog" ]] && [[ "$1" != "_main" ]] && [[ "$1" != "_collect" ]] && [[ "$1" != "_enter" ]] && [[ "$1" != "_launch" ]] && [[ "$1" != "_default" ]] && [[ "$1" != "_experiment" ]]
 	then
+		if [[ "$ubDEBUG" == "true" ]]
+		then
+			# ATTRIBUTION-AI: ChatGPT o3  2025-06-06
+			exec 3>&2
+			#export BASH_XTRACEFD=3
+			set   -o functrace
+			set   -o errtrace
+			# May break _test_pipefail_sequence .
+			#export SHELLOPTS
+			trap '
+  set -E +x
+  call_line=${BASH_LINENO[0]}
+  call_file=${BASH_SOURCE[1]}
+  [[ $call_file == "$PWD/"* ]] && call_file=${call_file#"$PWD/"}
+  func_name=${FUNCNAME[0]:-MAIN}
+
+  if [[ "$call_line" != "0" ]] && [[ func_name != "MAIN()" ]]
+  then
+    # extract the source line and strip leading blanks
+    call_text=$(sed -n "${call_line}{s/^[[:space:]]*//;p}" "$call_file")
+
+    printf "<<<STEPOUT<<< RETURN %s() <- %s:%d : %s  status=%d\n" \
+            "$func_name"        "$call_file" \
+            "$call_line"        "$call_text" \
+            "$?" >&3
+  fi
+' RETURN
+			set -E -x
+			#set -x
+		fi
+		
 		"$@"
 		internalFunctionExitStatus="$?"
+		
+		if [[ "$ubDEBUG" == "true" ]] ; then set +x ; set +E ; set +o functrace ; set +o errtrace ; export -n SHELLOPTS 2>/dev/null || true ; trap '' RETURN ; trap - RETURN ; fi
 		
 		#Exit if not imported into existing shell, or bypass requested, else fall through to subsequent return.
 		if [[ "$ub_import" != "true" ]] || [[ "$ub_import_param" == "--bypass" ]] || [[ "$ub_import_param" == "--compressed" ]]
