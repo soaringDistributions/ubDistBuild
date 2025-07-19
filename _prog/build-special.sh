@@ -88,6 +88,13 @@ _build_ubDistBuild-fetch() {
     7za -y x "$currentAccessoriesDir"/integrations/ubcp/package_ubcp-core.7z
     cd "$functionEntryPWD"
 
+    mkdir -p "$currentAccessoriesDir"/integrations/7zip
+    if [[ ! -e "$currentAccessoriesDir"/integrations/7zip/7zr.exe ]]
+    then
+        wget -O "$currentAccessoriesDir"/integrations/7zip/7zr.exe \
+            'https://www.7-zip.org/a/7zr.exe'
+    fi
+
 
     cd "$currentAccessoriesDir"/parts
     if [[ "$objectName" == "ubDistBuild" ]]
