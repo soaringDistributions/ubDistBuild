@@ -68,8 +68,10 @@ Section "Install"
   SetOutPath "C:\core\infrastructure\ubDistBuild"
   File /r "..\..\..\ubDistBuild-accessories\parts\ubDistBuild\*"
 
-  SetOutPath "C:\core\infrastructure\ubDistBuild\_local\ubcp"
-  File /r "..\..\..\ubDistBuild-accessories\parts\ubcp\package_ubcp-core\ubcp\*"
+  SetOutPath "C:\core\infrastructure\ubDistBuild\_local"
+  File "..\..\..\ubDistBuild-accessories\parts\ubcp\package_ubcp-core\ubcp.zip"
+  nsisunz::UnzipToLog "$INSTDIR\_local\ubcp.zip" "$INSTDIR\_local"
+  Delete "$INSTDIR\_local\ubcp.zip"
 
   ;ATTENTION
   Rename "C:\core\infrastructure\ubDistBuild-backup-uninstalled\_local\vm.img" "C:\core\infrastructure\ubDistBuild\_local\vm.img"
