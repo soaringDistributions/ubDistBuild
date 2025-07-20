@@ -39,7 +39,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='3620520443'
-export ub_setScriptChecksum_contents='1045820441'
+export ub_setScriptChecksum_contents='486327668'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -64955,13 +64955,15 @@ _build_ubDistBuild-fetch() {
 
     mkdir -p "$currentAccessoriesDir"/parts/ubDistBuild_bundle-adhoc/virtualbox/
     cd "$currentAccessoriesDir"/parts/ubDistBuild_bundle-adhoc/virtualbox/
-    wget 'https://download.virtualbox.org/virtualbox/7.0.10/VirtualBox-7.0.10-158379-Win.exe'
+    #wget 'https://download.virtualbox.org/virtualbox/7.0.10/VirtualBox-7.0.10-158379-Win.exe'
+    wget 'https://download.virtualbox.org/virtualbox/7.1.12/VirtualBox-7.1.12-169651-Win.exe'
     cd "$functionEntryPWD"
 
 
     mkdir -p "$currentAccessoriesDir"/parts/ubDistBuild_bundle-adhoc/qemu/
     cd "$currentAccessoriesDir"/parts/ubDistBuild_bundle-adhoc/qemu/
-    wget 'https://qemu.weilnetz.de/w64/2023/qemu-w64-setup-20230817.exe'
+    #wget 'https://qemu.weilnetz.de/w64/2023/qemu-w64-setup-20230817.exe'
+    wget 'https://qemu.weilnetz.de/w64/2025/qemu-w64-setup-20250422.exe'
     cd "$functionEntryPWD"
 
 
