@@ -68,8 +68,12 @@ Section "Install"
   SetOutPath "C:\core\infrastructure\ubDistBuild"
   File /r "..\..\..\ubDistBuild-accessories\parts\ubDistBuild\*"
 
-  SetOutPath "C:\core\infrastructure\ubDistBuild\_local\ubcp"
-  File /r "..\..\..\ubDistBuild-accessories\parts\ubcp\package_ubcp-core\ubcp\*"
+  SetOutPath "C:\core\infrastructure\ubDistBuild\_local"
+  File "..\..\..\ubDistBuild-accessories\integrations\ubcp\package_ubcp-core.7z"
+  SetOutPath "C:\core\infrastructure\ubDistBuild\_lib\7zip"
+  File "..\..\..\ubDistBuild-accessories\integrations\7zip\7zr.exe"
+  nsExec::ExecToLog '"C:\core\infrastructure\ubDistBuild\_lib\7zip\7zr.exe" x "C:\core\infrastructure\ubDistBuild\_local\package_ubcp-core.7z" -o"C:\core\infrastructure\ubDistBuild\_local\ubcp" -y'
+  Delete "C:\core\infrastructure\ubDistBuild\_local\package_ubcp-core.7z"
 
   ;ATTENTION
   Rename "C:\core\infrastructure\ubDistBuild-backup-uninstalled\_local\vm.img" "C:\core\infrastructure\ubDistBuild\_local\vm.img"
