@@ -211,7 +211,11 @@ _build_ubDistBuild-build() {
 
     #! type makensis && _if_cygwin && _at_userMSW_probeCmd_discoverResource-cygwinNative-ProgramFiles 'makensis' 'NSIS/bin' false
     _getMinimal-build_ubDistBuild
-    
+
+    (
+        cd "$currentAccessoriesDir"/parts/ubcp/package_ubcp-core
+        7za a -tzip -mx=9 ubcp.zip ubcp
+    )
 
     unix2dos "$scriptAbsoluteFolder"/license-installer.txt
 
