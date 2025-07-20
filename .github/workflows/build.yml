@@ -197,7 +197,8 @@ jobs:
         shell: bash
         timeout-minutes: 120
         run: |
-          rm -f ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z
+          rm -rf ../ubDistBuild-accessories/parts/ubcp/package_ubcp-core/ubcp
+          #rm -f ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z
           ./ubiquitous_bash.sh _build_ubDistBuild-build
 
       - name: _hash_ubDistBuildExe
