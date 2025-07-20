@@ -111,18 +111,18 @@ Section "Install"
   SetOutPath "$TEMP\ubDistBuild_bundle\usbip-win"
   File /r "..\..\..\ubDistBuild-accessories\parts\ubDistBuild_bundle\usbip-win\*"
   IfSilent +2
-  ExecWait '"msiexec" /i "$TEMP\ubDistBuild_bundle\usbip-win\usbipd-win_3.2.0.msi"'
+  ExecWait '"msiexec" /i "$TEMP\ubDistBuild_bundle\usbip-win\usbipd-win_5.1.0_x64.msi"'
   IfSilent 0 +2
-  ExecWait '"msiexec" /i "$TEMP\ubDistBuild_bundle\usbip-win\usbipd-win_3.2.0.msi" /passive /norestart'
+  ExecWait '"msiexec" /i "$TEMP\ubDistBuild_bundle\usbip-win\usbipd-win_5.1.0_x64.msi" /passive /norestart'
 
 
   ;start /wait
   SetOutPath "$TEMP\ubDistBuild_bundle\wsl-usb-gui"
   File /r "..\..\..\ubDistBuild-accessories\parts\ubDistBuild_bundle\wsl-usb-gui\*"
   IfSilent +2
-  ExecWait '"msiexec" /i "$TEMP\ubDistBuild_bundle\wsl-usb-gui\WSL-USB-4.1.0.msi"'
+  ExecWait '"msiexec" /i "$TEMP\ubDistBuild_bundle\wsl-usb-gui\WSL-USB-5.7.0.msi"'
   IfSilent 0 +2
-  ExecWait '"msiexec" /i "$TEMP\ubDistBuild_bundle\wsl-usb-gui\WSL-USB-4.1.0.msi" /passive /norestart'
+  ExecWait '"msiexec" /i "$TEMP\ubDistBuild_bundle\wsl-usb-gui\WSL-USB-5.7.0.msi" /passive /norestart'
 
 
   ;start /wait
@@ -149,9 +149,9 @@ Section "Install"
   SetOutPath "$TEMP\ubDistBuild_bundle-adhoc\qemu"
   File /r "..\..\..\ubDistBuild-accessories\parts\ubDistBuild_bundle-adhoc\qemu\*"
   IfSilent +2
-  ExecWait "$TEMP\ubDistBuild_bundle-adhoc\qemu\qemu-w64-setup-20230817.exe"
+  ExecWait "$TEMP\ubDistBuild_bundle-adhoc\qemu\qemu-w64-setup-20250422.exe"
   IfSilent 0 +2
-  ExecWait "$TEMP\ubDistBuild_bundle-adhoc\qemu\qemu-w64-setup-20230817.exe /S"
+  ExecWait "$TEMP\ubDistBuild_bundle-adhoc\qemu\qemu-w64-setup-20250422.exe /S"
 
 
 
