@@ -625,7 +625,7 @@ CZXWXcRMTo8EmM8i4d
 	_getMost_backend_aptGetInstall firmware-zd1211
 	_getMost_backend_aptGetInstall firmware-crystalhd
 	_getMost_backend_aptGetInstall firmware-netronome
-	_getMost_backend_aptGetInstall firmware-b43-installer
+	#_getMost_backend_aptGetInstall firmware-b43-installer
 	_getMost_backend_aptGetInstall firmware-bnx2x
 	_getMost_backend_aptGetInstall firmware-ath9k-htc-dbgsym
 	_getMost_backend_aptGetInstall firmware-b43-lpphy-installer
@@ -640,6 +640,32 @@ CZXWXcRMTo8EmM8i4d
 	_getMost_backend_aptGetInstall amd64-microcode
 	_getMost_backend_aptGetInstall intel-microcode
 	_getMost_backend_aptGetInstall iucode-tool
+
+	
+	
+	sudo -n cp "$scriptLib"/setup/debian/b43-fwcutter_019-14_amd64.deb "$globalVirtFS"/
+	if _chroot ls -A -1 /b43-fwcutter_019-14_amd64.deb > /dev/null
+	then
+		_chroot dpkg -i /b43-fwcutter_019-14_amd64.deb
+	else
+		# WARNING: HTTP (as opposed to HTTPS) strongly discouraged.
+		#_chroot wget http://ftp.us.debian.org/debian/pool/non-free/f/firmware-nonfree/b43-fwcutter_019-14_amd64.deb
+		#_chroot wget https://mirrorservice.org/sites/ftp.debian.org/debian/pool/non-free/f/firmware-nonfree/b43-fwcutter_019-14_amd64.deb
+		
+		_chroot dpkg -i ./b43-fwcutter_019-14_amd64.deb
+	fi
+	
+	sudo -n cp "$scriptLib"/setup/debian/firmware-b43-installer.deb "$globalVirtFS"/
+	if _chroot ls -A -1 /firmware-b43-installer.deb > /dev/null
+	then
+		_chroot dpkg -i /firmware-b43-installer.deb
+	else
+		# WARNING: HTTP (as opposed to HTTPS) strongly discouraged.
+		#_chroot wget http://ftp.us.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-b43-installer.deb
+		#_chroot wget https://mirrorservice.org/sites/ftp.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-b43-installer.deb
+		
+		_chroot dpkg -i ./firmware-b43-installer.deb
+	fi
 	
 	
 	_getMost_backend_aptGetInstall firmware-ipw2x00
