@@ -655,16 +655,16 @@ CZXWXcRMTo8EmM8i4d
 		_chroot dpkg -i ./b43-fwcutter_019-14_amd64.deb
 	fi
 	
-	sudo -n cp "$scriptLib"/setup/debian/firmware-b43-installer.deb "$globalVirtFS"/
-	if _chroot ls -A -1 /firmware-b43-installer.deb > /dev/null
+	sudo -n cp "$scriptLib"/setup/debian/firmware-b43-installer_019-14_all.deb "$globalVirtFS"/
+	if _chroot ls -A -1 /firmware-b43-installer_019-14_all.deb > /dev/null
 	then
-		_chroot dpkg -i /firmware-b43-installer.deb
+		_chroot dpkg -i /firmware-b43-installer_019-14_all.deb
 	else
 		# WARNING: HTTP (as opposed to HTTPS) strongly discouraged.
-		#_chroot wget http://ftp.us.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-b43-installer.deb
-		#_chroot wget https://mirrorservice.org/sites/ftp.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-b43-installer.deb
+		#_chroot wget http://ftp.us.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-b43-installer_019-14_all.deb
+		#_chroot wget https://mirrorservice.org/sites/ftp.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-b43-installer_019-14_all.deb
 		
-		_chroot dpkg -i ./firmware-b43-installer.deb
+		_chroot dpkg -i ./firmware-b43-installer_019-14_all.deb
 	fi
 	
 	
