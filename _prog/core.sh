@@ -892,6 +892,11 @@ _create_ubDistBuild-rotten_install() {
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	imagedev=$(cat "$scriptLocal"/imagedev)
+
+
+	_getMost_backend apt-get -y remove langford-dkms
+	_getMost_backend apt-get -y purge langford-dkms
+
 	
 	[[ ! -e "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh ]] && _messageFAIL
 	sudo -n cp -f "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
@@ -1256,6 +1261,7 @@ _create_ubDistBuild-rotten_install-core() {
 
 	# Apparent suggested/recommends/etc of gnuradio, which as another bad dkms thing, has been found to apparently break several critically essential things: apt , linux kernel , initramfs , live boot .
 	_getMost_backend apt-get -y remove langford-dkms
+	_getMost_backend apt-get -y purge langford-dkms
 
 	_chroot sudo -n -u user bash -c 'cd /home/user/core/installations/gr-pipe ; mkdir -p ./build ; cd ./build ; cmake .. ; make ; sudo -n make install'
 
@@ -1285,6 +1291,9 @@ _create_ubDistBuild-rotten_install-core() {
 
 
 	_getMost_backend_aptGetInstall hamradio-sdr
+	#_getMost_backend env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --no-install-recommends -y hamradio-sdr
+	_getMost_backend apt-get -y remove langford-dkms
+	_getMost_backend apt-get -y purge langford-dkms
 
 	_getMost_backend_aptGetInstall airspy
 	_getMost_backend_aptGetInstall bladerf
@@ -1315,6 +1324,9 @@ _create_ubDistBuild-rotten_install-core() {
 	_getMost_backend_aptGetInstall libhackrf-dev
 	_getMost_backend_aptGetInstall hackrf-doc
 	_getMost_backend_aptGetInstall librtlsdr-dev
+	
+	_getMost_backend apt-get -y remove langford-dkms
+	_getMost_backend apt-get -y purge langford-dkms
 	
 
 	_getMost_backend apt-get remove -y xtrx-dkms
@@ -1373,6 +1385,9 @@ _create_ubDistBuild-rotten_install-core() {
 	
 	
 	_getMost_backend_aptGetInstall sloccount
+	
+	_getMost_backend apt-get -y remove langford-dkms
+	_getMost_backend apt-get -y purge langford-dkms
 	
 	
 	# May not be usable with VirtualBox compatible kernel .
@@ -1832,6 +1847,7 @@ CZXWXcRMTo8EmM8i4d
 
 	# Have been known to apparently break several critically essential things: apt , linux kernel , initramfs , live boot . Redundant remove commands are placed here.
 	_getMost_backend apt-get -y remove langford-dkms
+	_getMost_backend apt-get -y purge langford-dkms
 	
 	_getMost_backend apt-get -y clean
 	

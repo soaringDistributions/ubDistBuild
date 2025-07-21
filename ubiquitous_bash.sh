@@ -39,7 +39,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='3620520443'
-export ub_setScriptChecksum_contents='2901940582'
+export ub_setScriptChecksum_contents='3459954274'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -61746,6 +61746,11 @@ _create_ubDistBuild-rotten_install() {
 	
 	! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
 	imagedev=$(cat "$scriptLocal"/imagedev)
+
+
+	_getMost_backend apt-get -y remove langford-dkms
+	_getMost_backend apt-get -y purge langford-dkms
+
 	
 	[[ ! -e "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh ]] && _messageFAIL
 	sudo -n cp -f "$scriptLib"/ubiquitous_bash/_lib/kit/install/cloud/cloud-init/zRotten/zMinimal/rotten_install.sh "$globalVirtFS"/rotten_install.sh
@@ -62110,6 +62115,7 @@ _create_ubDistBuild-rotten_install-core() {
 
 	# Apparent suggested/recommends/etc of gnuradio, which as another bad dkms thing, has been found to apparently break several critically essential things: apt , linux kernel , initramfs , live boot .
 	_getMost_backend apt-get -y remove langford-dkms
+	_getMost_backend apt-get -y purge langford-dkms
 
 	_chroot sudo -n -u user bash -c 'cd /home/user/core/installations/gr-pipe ; mkdir -p ./build ; cd ./build ; cmake .. ; make ; sudo -n make install'
 
@@ -62139,6 +62145,9 @@ _create_ubDistBuild-rotten_install-core() {
 
 
 	_getMost_backend_aptGetInstall hamradio-sdr
+	#_getMost_backend env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --no-install-recommends -y hamradio-sdr
+	_getMost_backend apt-get -y remove langford-dkms
+	_getMost_backend apt-get -y purge langford-dkms
 
 	_getMost_backend_aptGetInstall airspy
 	_getMost_backend_aptGetInstall bladerf
@@ -62169,6 +62178,9 @@ _create_ubDistBuild-rotten_install-core() {
 	_getMost_backend_aptGetInstall libhackrf-dev
 	_getMost_backend_aptGetInstall hackrf-doc
 	_getMost_backend_aptGetInstall librtlsdr-dev
+	
+	_getMost_backend apt-get -y remove langford-dkms
+	_getMost_backend apt-get -y purge langford-dkms
 	
 
 	_getMost_backend apt-get remove -y xtrx-dkms
@@ -62227,6 +62239,9 @@ _create_ubDistBuild-rotten_install-core() {
 	
 	
 	_getMost_backend_aptGetInstall sloccount
+	
+	_getMost_backend apt-get -y remove langford-dkms
+	_getMost_backend apt-get -y purge langford-dkms
 	
 	
 	# May not be usable with VirtualBox compatible kernel .
@@ -62686,6 +62701,7 @@ CZXWXcRMTo8EmM8i4d
 
 	# Have been known to apparently break several critically essential things: apt , linux kernel , initramfs , live boot . Redundant remove commands are placed here.
 	_getMost_backend apt-get -y remove langford-dkms
+	_getMost_backend apt-get -y purge langford-dkms
 	
 	_getMost_backend apt-get -y clean
 	
