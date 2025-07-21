@@ -39,7 +39,7 @@ _ub_cksum_special_derivativeScripts_contents() {
 #export ub_setScriptChecksum_disable='true'
 ( [[ -e "$0".nck ]] || [[ "${BASH_SOURCE[0]}" != "${0}" ]] || [[ "$1" == '--profile' ]] || [[ "$1" == '--script' ]] || [[ "$1" == '--call' ]] || [[ "$1" == '--return' ]] || [[ "$1" == '--devenv' ]] || [[ "$1" == '--shell' ]] || [[ "$1" == '--bypass' ]] || [[ "$1" == '--parent' ]] || [[ "$1" == '--embed' ]] || [[ "$1" == '--compressed' ]] || [[ "$0" == "/bin/bash" ]] || [[ "$0" == "-bash" ]] || [[ "$0" == "/usr/bin/bash" ]] || [[ "$0" == "bash" ]] ) && export ub_setScriptChecksum_disable='true'
 export ub_setScriptChecksum_header='3620520443'
-export ub_setScriptChecksum_contents='3459954274'
+export ub_setScriptChecksum_contents='412840977'
 
 # CAUTION: Symlinks may cause problems. Disable this test for such cases if necessary.
 # WARNING: Performance may be crucial here.
@@ -13385,6 +13385,43 @@ APT::AutoRemove::SuggestsImportant "true";' | tee /etc/apt/apt.conf.d/99autoremo
 
 
 
+# ATTENTION
+# NOTICE
+# May be able to automatically respond to nix package manager file conflicts.
+# WARNING: May be untested.
+# ATTRIBUTION-AI: Suggested by CLI Codex (ie. _codexAuto) 2025-07-20 .
+#
+#_nixInstallRetry() {
+	#local -a cmd=( "$@" ) out status file
+	#if out=$( "${cmd[@]}" 2>&1 ); then
+		#printf '%s\n' "$out"
+		#return 0
+	#else
+		#status=$?
+		#if printf '%s\n' "$out" | grep -q "file conflict over '"; then
+			#file=$(printf '%s\n' "$out" | sed -n "s/.*file conflict over '\([^']*\)'.*/\1/p")
+			#_getMost_backend sudo -n -u "$currentUser" /bin/bash -l -c 'rm -f "$HOME/.nix-profile/'"$file"'"'
+			#"${cmd[@]}"
+			#return $?
+		#else
+			#printf '%s\n' "$out" >&2
+			#return $status
+		#fi
+	#fi
+#}
+#export -f _nixInstallRetry
+#
+#_nixInstallRetry _getMost_backend sudo -n -u "$currentUser" /bin/bash -l -c 'cd ; export NIXPKGS_ALLOW_INSECURE=1 ; nix-env -iA pcb -f https://github.com/NixOS/nixpkgs/archive/00a3a62a70f6c2ca919befeda4b8a7319ce8be2b.tar.gz'
+
+
+
+
+
+
+
+
+
+
 # NOTICE
 # https://lazamar.co.uk/nix-versions/?channel=nixpkgs-unstable&package=geda
 # https://lazamar.co.uk/nix-versions/?package=geda&version=1.10.2&fullName=geda-1.10.2&keyName=geda&revision=9957cd48326fe8dbd52fdc50dd2502307f188b0d&channel=nixpkgs-unstable#instructions
@@ -13479,8 +13516,8 @@ _get_from_nix-user() {
 	#  export LANG=C
 	#  https://bbs.archlinux.org/viewtopic.php?id=23505
 
-	#nix-env --uninstall geda
-	#nix-env --uninstall pcb
+	nix-env --uninstall 'geda.*' || true
+	nix-env --uninstall 'pcb.*'  || true
 	
 	
 	
@@ -13493,6 +13530,9 @@ _get_from_nix-user() {
 	#  CAUTION: Be wary if this file has changed recently.
 	
 	# ###
+	# Remove previous geda and pcb to prevent overlapping file conflicts (e.g. gnet-pcbfwd.scm).
+	_getMost_backend sudo -n -u "$currentUser" /bin/bash -l -c 'cd ; nix-env --uninstall geda.* || true'
+	_getMost_backend sudo -n -u "$currentUser" /bin/bash -l -c 'cd ; nix-env --uninstall pcb.*  || true'
 	# Seems to have removed xorn, python2.7 . May not have been tested through ubdist/WSL . May be accepted for now due to some apparently successful testing expected to match this specific version.
 	_getMost_backend sudo -n -u "$currentUser" /bin/bash -l -c 'cd ; export NIXPKGS_ALLOW_INSECURE=1 ; nix-env -iA geda -f https://github.com/NixOS/nixpkgs/archive/773a8314ef05364d856e46299722a9d849aacf8b.tar.gz'
 	
@@ -13508,7 +13548,10 @@ _get_from_nix-user() {
 	_getMost_backend sudo -n -u "$currentUser" /bin/bash -l -c 'cd ; xdg-desktop-menu install "$HOME"/.nix-profile/share/applications/geda-gattrib.desktop'
 	_getMost_backend sudo -n -u "$currentUser" cp -a /home/"$currentUser"/.nix-profile/share/icons /home/"$currentUser"/.local/share/
 
-	#nixpkgs.pcb
+	# nixpkgs.pcb
+	# Remove conflicting shared scheme file before installing pcb
+	#_getMost_backend sudo -n -u "$currentUser" /bin/bash -l -c 'cd; rm -f "$HOME"/.nix-profile/share/gEDA/gnet-pcbfwd.scm'
+
 	_getMost_backend sudo -n -u "$currentUser" /bin/bash -l -c 'cd ; export NIXPKGS_ALLOW_INSECURE=1 ; nix-env -iA pcb -f https://github.com/NixOS/nixpkgs/archive/00a3a62a70f6c2ca919befeda4b8a7319ce8be2b.tar.gz'
 
 	
@@ -18214,13 +18257,19 @@ _test_msw_python() {
 
 # EXAMPLE. Override or implement alternative with 'core.sh', 'ops.sh', or similar.
 _prepare_msw_python() {
+    mkdir -p "$scriptLocal"
+
     _prepare_msw_python_3
 }
 _prepare_msw_python_3() {
+    mkdir -p "$scriptLocal"
+    
     _prepare_msw_python_3_10
 }
 # EXAMPLE. Override or implement alternative (discouraged) with 'core.sh', 'ops.sh', or similar, if necessary.
 _prepare_msw_python_3_10() {
+    mkdir -p "$scriptLocal"
+    
     _set_msw_python_3_10
 
     # ATTENTION: implies sequence
@@ -18871,9 +18920,13 @@ _set_msw_python_procedure() {
 }
 
 _set_msw_python() {
+    mkdir -p "$scriptLocal"
+
     _set_msw_python_3_10 "$@"
 }
 _set_msw_python_3_10() {
+    mkdir -p "$scriptLocal"
+
     _override_msw_path_python_3_10 "$@"
 
     _set_msw_python_procedure "$@"
@@ -18988,10 +19041,14 @@ _test_nix_python() {
 
 # EXAMPLE. Override or implement alternative with 'core.sh', 'ops.sh', or similar.
 _prepare_nix_python() {
+    mkdir -p "$scriptLocal"
+
     _prepare_nix_python_3
 }
 # EXAMPLE. Override or implement alternative (discouraged) with 'core.sh', 'ops.sh', or similar, if necessary.
 _prepare_nix_python_3() {
+    mkdir -p "$scriptLocal"
+    
     _set_nix_python_3
 
     # ATTENTION: implies sequence
@@ -19530,6 +19587,7 @@ _prepare_nix_python_procedure() {
 
 # CAUTION: May be called by _setupUbiquitous_accessories_here-python_hook .
 _set_nix_python_procedure() {
+    mkdir -p "$scriptLocal"
 
     #export PATH="$VIRTUAL_ENV/"bin":$PATH"
 
@@ -19547,9 +19605,15 @@ _set_nix_python_procedure() {
 }
 
 _set_nix_python() {
+    mkdir -p "$scriptLocal"
+    
+
     _set_nix_python_3 "$@"
 }
 _set_nix_python_3() {
+    mkdir -p "$scriptLocal"
+    
+    
     python() {
         #python3.11 "$@"
         python3 "$@"
