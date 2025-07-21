@@ -98,6 +98,19 @@ cd ~/core/infrastructure/ubiquitous_bash
 [[ ! -e /workspace/ubiquitous_bash ]] && cp -a ~/core/infrastructure/ubiquitous_bash /workspace/ubiquitous_bash
 
 
+
+
+(
+    cd
+    cd /workspace/ubDistBuild
+    ~/core/infrastructure/ubiquitous_bash/ubiquitous_bash.sh _gitBest submodule update --init --depth 1 --recursive
+)
+
+
+
+
+
+
 # Certificates installation by '_setupUbiquitous' may otherwise cause dpkg lock multi-threading/concurrency collision.
 sleep 1
 wait
