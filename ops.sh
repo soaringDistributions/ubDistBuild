@@ -168,7 +168,7 @@ _gh_release_upload_parts-multiple_sequence() {
 
   while [[ $(jobs | wc -l) -ge 1 ]]; do
     echo; jobs; echo
-    sleep 2
+    sleep 3
     true
   done
   wait  # reap
