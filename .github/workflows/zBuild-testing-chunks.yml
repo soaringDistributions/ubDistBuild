@@ -100,6 +100,20 @@ jobs:
           ls -l ./ubiquitous_bash.sh || { echo "script missing"; exit 1; }
           head -n1 ./ubiquitous_bash.sh || true
 
+      - name: Ensure GitHub release exists (idempotent)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          export GH_REPO="${GITHUB_REPOSITORY}"   # Be explicit for gh
+          if ! gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
+            gh release create "${RELEASE_TAG}" \
+              --title "${RELEASE_TAG}" \
+              --notes "Automated test chunk upload from zBuild-testing-chunks.yml" \
+              --latest=false
+          fi
+
       - name: Upload parts via ubiquitous_bash
         shell: bash
         env:
