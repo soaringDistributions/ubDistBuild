@@ -7,14 +7,14 @@ jobs:
   chunks_make:
     runs-on: ubuntu-24.04
 
-    # Make these available to every step (prevents "unbound variable" with set -u)
+    # one source of truth for label/filenames used by both upload & download
     env:
-      RELEASE_TAG: build-${{ github.run_id }}-${{ github.run_number }}
+      RELEASE_TAG: build-${{ github.run_id }}-${{ github.run_attempt }}
       BASENAME: package_image_beforeBoot.tar.flx
       BASE: ./_local/package_image_beforeBoot.tar.flx
 
     steps:
-      # IMPORTANT: run this BEFORE checkout; it mounts over $GITHUB_WORKSPACE
+      # IMPORTANT: run BEFORE checkout; mounts over $GITHUB_WORKSPACE
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
         with:
@@ -36,13 +36,9 @@ jobs:
       - name: Quick system info
         shell: bash
         run: |
-          echo "Memory and swap:"
-          sudo free -h
-          echo
-          sudo swapon --show || true
-          echo
-          echo "Available storage:"
-          sudo df -h
+          echo "Memory and swap:"; sudo free -h; echo
+          sudo swapon --show || true; echo
+          echo "Available storage:"; sudo df -h
 
       - name: Prep workspace
         shell: bash
@@ -56,25 +52,18 @@ jobs:
         run: |
           set -euo pipefail
           BYTES=30000000000
-          # Fast pseudo-random stream: /dev/zero piped into AES-CTR
-          head -c "${BYTES}" /dev/zero \
-            | openssl enc -aes-256-ctr -pass pass:16918050001 -nosalt \
-            > "${BASE}"
-          ls -lh "${BASE}"
-          stat -c 'size=%s' "${BASE}"
-
-      - name: Hash original (before split)
-        shell: bash
-        run: |
-          set -euo pipefail
-          sha256sum "${BASE}" | tee ./._orig.sha256
+          OUT="${BASE}"
+          head -c "${BYTES}" /dev/zero | \
+            openssl enc -aes-256-ctr -pass pass:16918050001 -nosalt > "${OUT}"
+          ls -lh "${OUT}"
+          sha256sum "${OUT}" | tee ./_local/original.sha256
 
       - name: Split into ~1.86 GiB parts (tail+truncate style)
         shell: bash
         run: |
           set -euo pipefail
           F="${BASE}"
-          CHUNK=1997537280   # ~1.86 GiB (ubDistBuild convention)
+          CHUNK=1997537280   # ~1.86 GiB
           for i in $(seq -w 0 63); do
             [[ -s "$F" ]] || break
             tail -c "$CHUNK" "$F" > "$F".part"$i"
@@ -96,23 +85,8 @@ jobs:
         run: |
           set -euo pipefail
           pwd
-          df -h .
-          ls -l ./ubiquitous_bash.sh || { echo "script missing"; exit 1; }
+          ls -l ./ubiquitous_bash.sh
           head -n1 ./ubiquitous_bash.sh || true
-
-      - name: Ensure GitHub release exists (idempotent)
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          export GH_REPO="${GITHUB_REPOSITORY}"   # Be explicit for gh
-          if ! gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
-            gh release create "${RELEASE_TAG}" \
-              --title "${RELEASE_TAG}" \
-              --notes "Automated test chunk upload from zBuild-testing-chunks.yml" \
-              --latest=false
-          fi
 
       - name: Upload parts via ubiquitous_bash
         shell: bash
@@ -122,9 +96,11 @@ jobs:
           set -euo pipefail
           bash ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence \
             "${RELEASE_TAG}" \
-            "${BASE}.part"*
+            "${BASE}.part*"
 
-      # === DOWNLOAD + REASSEMBLE (stream-join like build.yml) ===
+      # ---------- DOWNLOAD & REASSEMBLE (exactly like build.yml logic) ----------
+
+      # A) Join to a single stream using the stdout variant, then redirect to file.
       - name: Download & reassemble via ubiquitous_bash (join-stdout)
         shell: bash
         env:
@@ -132,80 +108,64 @@ jobs:
         run: |
           set -euo pipefail
           OUT="./_local/rejoined_stream.tar.flx"
-          # Use ubiquitous_bash helper:
-          # _wget_githubRelease_join-stdout <owner/repo> <releaseLabel> <baseFilename> -O <outfile>
+          # NOTE: stdout variant -> DO NOT pass -O; redirect instead
           bash ./ubiquitous_bash.sh _wget_githubRelease_join-stdout \
-            "${{ github.repository }}" \
+            "soaringDistributions/ubDistBuild" \
             "${RELEASE_TAG}" \
-            "${BASENAME}" \
-            -O "${OUT}"
+            "${BASENAME}" > "${OUT}"
           ls -lh "${OUT}"
-          sha256sum "${OUT}" | tee ./._rejoined_stream.sha256
+          sha256sum "${OUT}" | tee ./_local/rejoined_stream.sha256
 
       - name: Compare hash (original vs rejoined_stream)
         shell: bash
         run: |
           set -euo pipefail
-          ORIG=$(cut -d' ' -f1 ./._orig.sha256)
-          JOIN=$(cut -d' ' -f1 ./._rejoined_stream.sha256)
-          echo "ORIG=${ORIG}"
-          echo "JOIN=${JOIN}"
-          if [[ "${ORIG}" == "${JOIN}" ]]; then
-            echo "success match (stream join)"
-          else
-            echo "failure mismatch (stream join)"
-            exit 1
-          fi
+          diff -u <(cut -d' ' -f1 ./_local/original.sha256) \
+                 <(cut -d' ' -f1 ./_local/rejoined_stream.sha256)
 
-      # === OPTIONAL: DOWNLOAD EVERY PART & REJOIN LOCALLY ===
-      - name: Download individual .part files (GitHub CLI)
+      # B) Download the individual parts with the same helper used in build.yml,
+      #    then reassemble by reverse-order append (to match tail+truncate split).
+      - name: Download individual .part files (ubiquitous_bash helper)
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          gh --version
-          mkdir -p ./_local/dl_parts
-          gh release download \
-            --repo "${{ github.repository }}" \
-            --tag  "${RELEASE_TAG}" \
-            --dir  ./_local/dl_parts \
-            --pattern "${BASENAME}.part*" \
-            --clobber
-          echo "Downloaded parts:"
-          ls -lh ./_local/dl_parts
+          DL="./_local/parts_dl"
+          mkdir -p "${DL}"
+          bash ./ubiquitous_bash.sh _wget_githubRelease_multiparts \
+            "soaringDistributions/ubDistBuild" \
+            "${RELEASE_TAG}" \
+            "${BASENAME}" \
+            "${DL}"
+          ls -lh "${DL}"
 
       - name: Reassemble from downloaded parts (reverse order append)
         shell: bash
         run: |
           set -euo pipefail
-          OUT2="./_local/rejoined_from_parts.tar.flx"
-          rm -f "${OUT2}"
-          # ubDistBuild parts are named so part00 is the last chunk; join in reverse order
-          ( cd ./_local/dl_parts && ls -1 "${BASENAME}.part"* | sort -r ) | while read -r p; do
-            dd if="./_local/dl_parts/$p" bs=1M status=none >> "${OUT2}"
+          OUT="./_local/rejoined_parts.tar.flx"
+          : > "${OUT}"
+          # reverse order because split wrote part00 = last chunk
+          for f in $(ls -1 ./_local/parts_dl/"${BASENAME}".part* | sort -V | tac); do
+            cat "$f" >> "${OUT}"
           done
-          ls -lh "${OUT2}"
-          sha256sum "${OUT2}" | tee ./._rejoined_parts.sha256
+          ls -lh "${OUT}"
+          sha256sum "${OUT}" | tee ./_local/rejoined_parts.sha256
 
       - name: Compare hash (original vs rejoined_parts)
         shell: bash
         run: |
           set -euo pipefail
-          ORIG=$(cut -d' ' -f1 ./._orig.sha256)
-          JOIN=$(cut -d' ' -f1 ./._rejoined_parts.sha256)
-          echo "ORIG=${ORIG}"
-          echo "JOIN=${JOIN}"
-          if [[ "${ORIG}" == "${JOIN}" ]]; then
-            echo "success match (parts join)"
-          else
-            echo "failure mismatch (parts join)"
-            exit 1
-          fi
+          diff -u <(cut -d' ' -f1 ./_local/original.sha256) \
+                 <(cut -d' ' -f1 ./_local/rejoined_parts.sha256)
 
-      # Belt-and-suspenders: both joined images should be identical
       - name: Cross-check both joined images
         shell: bash
         run: |
           set -euo pipefail
-          diff -q ./_local/rejoined_stream.tar.flx ./_local/rejoined_from_parts.tar.flx && echo "joined images identical"
+          sha256sum ./_local/rejoined_stream.tar.flx ./_local/rejoined_parts.tar.flx | tee ./_local/both.sha256
+          # both hashes must match each other (and the original, already checked)
+          h1=$(awk 'NR==1{print $1}' ./_local/both.sha256)
+          h2=$(awk 'NR==2{print $1}' ./_local/both.sha256)
+          [[ "$h1" = "$h2" ]]
