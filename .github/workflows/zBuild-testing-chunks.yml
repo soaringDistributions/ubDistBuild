@@ -1,0 +1,127 @@
+# zBuild-testing-chunks.yml
+# Purpose: exercise ubDistBuild split/upload/join paths with a ~30GB dummy image.
+# Produces at least 15 .partNN files (chunk size ~1.9975 GiB), uploads them to a
+# throwaway release, then re-joins from GH and verifies byte count.
+
+name: zBuild-testing-chunks
+
+permissions:
+  contents: write  # needed for creating/uploading release assets
+  actions: write
+  checks: read
+  deployments: read
+  packages: read
+  pull-requests: read
+  repository-projects: read
+  statuses: read
+
+on:
+  workflow_dispatch: {}
+
+concurrency:
+  group: zbuild-chunks-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create empty test release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create "build-${{ github.run_id }}-9999" --title "chunks test" --notes "" || gh release view "build-${{ github.run_id }}-9999" >/dev/null
+
+  chunks_make:
+    needs: [build_release]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          submodules: 'recursive'
+
+      # Free up disk so a 30GB file + parts fit comfortably.
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 4125
+          temp-reserve-mb: 1950
+          swap-size-mb: 2
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+          remove-docker-images: 'true'
+
+      - name: Prepare workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ./_local
+          df -h
+          echo "Using ubiquitous_bash.sh at: $(readlink -f ./ubiquitous_bash.sh)"
+
+      - name: Make ~30GB random test image (name triggers split logic)
+        shell: bash
+        run: |
+          set -euo pipefail
+          BYTES=30000000000
+          OUT=./_local/package_image_beforeBoot.tar.flx
+          # Fast pseudorandom stream: /dev/zero piped into AES-CTR
+          head -c "${BYTES}" /dev/zero \
+            | openssl enc -aes-256-ctr -pass pass:${{ github.run_id }} -nosalt \
+            > "${OUT}"
+          ls -lh "${OUT}"
+          stat -c 'size=%s' "${OUT}"
+
+      - name: Split into .partNN chunks with ubDistBuild splitter
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./ubiquitous_bash.sh _ubDistBuild_split_procedure ./_local/package_image_beforeBoot.tar.flx
+          echo "Generated parts:"
+          ls -lh ./_local/package_image_beforeBoot.tar.flx.part* || { echo "No parts produced"; exit 1; }
+          parts_count=$(ls -1 ./_local/package_image_beforeBoot.tar.flx.part* | wc -l)
+          echo "parts_count=${parts_count}"
+          # Expect >= 15 parts from a 30,000,000,000-byte file with ~1.9975 GiB chunks.
+          [[ "${parts_count}" -ge 15 ]]
+
+      - name: Upload parts to the test release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence \
+            "build-${{ github.run_id }}-9999" \
+            ./_local/package_image_beforeBoot.tar.flx.part*
+
+  chunks_verify:
+    needs: [chunks_make]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          submodules: 'recursive'
+
+      - name: Join from GH and verify byte count (streamed)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="build-${{ github.run_id }}-9999"
+          EXPECT=30000000000
+          echo "Rejoining package_image_beforeBoot.tar.flx from release ${TAG}…"
+          got_bytes=$(
+            ./ubiquitous_bash.sh _wget_githubRelease-fromTag_join-stdout \
+              "${{ github.repository }}" "${TAG}" "package_image_beforeBoot.tar.flx" \
+            | wc -c
+          )
+          echo "Expected bytes: ${EXPECT}"
+          echo "Got bytes:      ${got_bytes}"
+          [[ "${got_bytes}" -eq "${EXPECT}" ]]
