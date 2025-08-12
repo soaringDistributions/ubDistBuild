@@ -218,7 +218,7 @@ jobs:
           echo "stream=${a}"; echo "parts=${b}"
           [[ "$a" == "$b" ]]
 
-      - name: Post: Checkout (after mount)
+      - name: Checkout (after mount)
         if: always()
         uses: actions/checkout@v3
         with:
