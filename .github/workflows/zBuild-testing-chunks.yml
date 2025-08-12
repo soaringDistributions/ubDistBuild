@@ -1,7 +1,6 @@
 # zBuild-testing-chunks.yml
-# Purpose: exercise ubDistBuild split/upload/join paths with a ~30GB dummy image.
-# Produces >=15 .partNN files, uploads them to a throwaway release, then re-joins
-# from GH and verifies byte count.
+# Purpose: end-to-end test of split → upload → join using a ~30GB dummy image.
+# We split tail-first into .partNN files so join order matches ubDistBuild.
 
 name: zBuild-testing-chunks
 
@@ -63,17 +62,17 @@ jobs:
           remove-codeql: 'true'
           remove-docker-images: 'true'
 
-      - name: Bring in ubiquitous_bash.sh (so local ops.sh overrides load)
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p ~/core/infrastructure
-          cd ~/core/infrastructure
-          git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
-          cd ubiquitous_bash
-          cp ubiquitous_bash.sh "$GITHUB_WORKSPACE/ubiquitous_bash.sh"
-          chmod +x "$GITHUB_WORKSPACE/ubiquitous_bash.sh"
-          echo "ub path: $(readlink -f "$GITHUB_WORKSPACE/ubiquitous_bash.sh")"
+      # - name: Bring in upstream ubiquitous_bash.sh (upload/join helpers)
+      #   shell: bash
+      #   run: |
+      #     set -euo pipefail
+      #     mkdir -p ~/core/infrastructure
+      #     cd ~/core/infrastructure
+      #     git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
+      #     cd ubiquitous_bash
+      #     cp ubiquitous_bash.sh "$GITHUB_WORKSPACE/ubiquitous_bash.sh"
+      #     chmod +x "$GITHUB_WORKSPACE/ubiquitous_bash.sh"
+      #     echo "ub path: $(readlink -f "$GITHUB_WORKSPACE/ubiquitous_bash.sh")"
 
       - name: Prepare workspace
         shell: bash
@@ -88,24 +87,36 @@ jobs:
           set -euo pipefail
           BYTES=30000000000
           OUT=./_local/package_image_beforeBoot.tar.flx
+          # Fast pseudorandom stream: /dev/zero piped into AES-CTR
           head -c "${BYTES}" /dev/zero \
             | openssl enc -aes-256-ctr -pass pass:${{ github.run_id }} -nosalt \
             > "${OUT}"
           ls -lh "${OUT}"
           stat -c 'size=%s' "${OUT}"
 
-      - name: Split into .partNN chunks with ubDistBuild splitter
+      - name: Split into .partNN chunks (tail-first; ub-compatible)
         shell: bash
         run: |
           set -euo pipefail
-          ./ubiquitous_bash.sh _ubDistBuild_split_procedure ./_local/package_image_beforeBoot.tar.flx
+          F=./_local/package_image_beforeBoot.tar.flx
+          CHUNK=1997537280   # ~1.86 GiB
+          for i in $(seq -w 0 63); do
+            [[ -s "$F" ]] || break
+            tail -c "$CHUNK" "$F" > "$F".part"$i"
+            size=$(stat -c%s "$F")
+            if (( size > CHUNK )); then
+              truncate -s -$CHUNK "$F"
+            else
+              truncate -s 0 "$F"
+            fi
+          done
           echo "Generated parts:"
           ls -lh ./_local/package_image_beforeBoot.tar.flx.part* || { echo "No parts produced"; exit 1; }
           parts_count=$(ls -1 ./_local/package_image_beforeBoot.tar.flx.part* | wc -l)
           echo "parts_count=${parts_count}"
           [[ "${parts_count}" -ge 15 ]]
 
-      - name: Upload parts to the test release (uses ops.sh overrides)
+      - name: Upload parts to the test release
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -124,16 +135,16 @@ jobs:
           fetch-depth: 1
           submodules: 'recursive'
 
-      - name: Bring in ubiquitous_bash.sh (for join helper)
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p ~/core/infrastructure
-          cd ~/core/infrastructure
-          git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
-          cd ubiquitous_bash
-          cp ubiquitous_bash.sh "$GITHUB_WORKSPACE/ubiquitous_bash.sh"
-          chmod +x "$GITHUB_WORKSPACE/ubiquitous_bash.sh"
+      # - name: Bring in upstream ubiquitous_bash.sh (for join helper)
+      #   shell: bash
+      #   run: |
+      #     set -euo pipefail
+      #     mkdir -p ~/core/infrastructure
+      #     cd ~/core/infrastructure
+      #     git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
+      #     cd ubiquitous_bash
+      #     cp ubiquitous_bash.sh "$GITHUB_WORKSPACE/ubiquitous_bash.sh"
+      #     chmod +x "$GITHUB_WORKSPACE/ubiquitous_bash.sh"
 
       - name: Join from GH and verify byte count (streamed)
         shell: bash
