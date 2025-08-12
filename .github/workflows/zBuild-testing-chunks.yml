@@ -98,3 +98,88 @@ jobs:
           bash ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence \
             "build-16918050001-9999" \
             ./_local/package_image_beforeBoot.tar.flx.part*
+
+ # === DOWNLOAD + REASSEMBLE (stream-join like build.yml) ===
+      - name: Download & reassemble via ubiquitous_bash (join-stdout)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          OUT="./_local/rejoined_stream.tar.flx"
+          # Use the same helper that build uses under the hood:
+          # _wget_githubRelease_join-stdout <owner/repo> <releaseLabel> <baseFilename>
+          bash ./ubiquitous_bash.sh _wget_githubRelease_join-stdout \
+            "${{ github.repository }}" \
+            "${RELEASE_TAG}" \
+            "${BASENAME}" > "${OUT}"
+          ls -lh "${OUT}"
+          sha256sum "${OUT}" | tee ./._rejoined_stream.sha256
+
+      - name: Compare hash (original vs rejoined_stream)
+        shell: bash
+        run: |
+          set -euo pipefail
+          ORIG=$(cut -d' ' -f1 ./._orig.sha256)
+          JOIN=$(cut -d' ' -f1 ./._rejoined_stream.sha256)
+          echo "ORIG=${ORIG}"
+          echo "JOIN=${JOIN}"
+          if [[ "${ORIG}" == "${JOIN}" ]]; then
+            echo "success match (stream join)"
+          else
+            echo "failure mismatch (stream join)"
+            exit 1
+          fi
+
+      # === OPTIONAL: DOWNLOAD EVERY PART & REJOIN LOCALLY ===
+      - name: Download individual .part files (GitHub CLI)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh --version
+          mkdir -p ./_local/dl_parts
+          gh release download \
+            --repo "${{ github.repository }}" \
+            --tag  "${RELEASE_TAG}" \
+            --dir  ./_local/dl_parts \
+            --pattern "${BASENAME}.part*" \
+            --clobber
+          echo "Downloaded parts:"
+          ls -lh ./_local/dl_parts
+
+      - name: Reassemble from downloaded parts (reverse order append)
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT2="./_local/rejoined_from_parts.tar.flx"
+          rm -f "${OUT2}"
+          # ubDistBuild parts are named so part00 is the last chunk; join in reverse order
+          ( cd ./_local/dl_parts && ls -1 "${BASENAME}.part"* | sort -r ) | while read -r p; do
+            dd if="./_local/dl_parts/$p" bs=1M status=none >> "${OUT2}"
+          done
+          ls -lh "${OUT2}"
+          sha256sum "${OUT2}" | tee ./._rejoined_parts.sha256
+
+      - name: Compare hash (original vs rejoined_parts)
+        shell: bash
+        run: |
+          set -euo pipefail
+          ORIG=$(cut -d' ' -f1 ./._orig.sha256)
+          JOIN=$(cut -d' ' -f1 ./._rejoined_parts.sha256)
+          echo "ORIG=${ORIG}"
+          echo "JOIN=${JOIN}"
+          if [[ "${ORIG}" == "${JOIN}" ]]; then
+            echo "success match (parts join)"
+          else
+            echo "failure mismatch (parts join)"
+            exit 1
+          fi
+
+      # Final belt-and-suspenders check: both joins should match each other
+      - name: Cross-check both joined images
+        shell: bash
+        run: |
+          set -euo pipefail
+          diff -q ./_local/rejoined_stream.tar.flx ./_local/rejoined_from_parts.tar.flx && echo "joined images identical"

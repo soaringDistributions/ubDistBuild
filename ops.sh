@@ -20,6 +20,7 @@ _timeout_strict() {
   fi
 
   _messagePlain_probe "_timeout_strict: fallback path"
+  # path not dynamically tested due to coreutils being present 
   (
     set +b
     local secs rc krc
