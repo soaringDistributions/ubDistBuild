@@ -90,11 +90,12 @@ _gh_release_upload_part-single_sequence() {
   local currentFile="$2"
 
   local currentIteration=0
+  local maxIterations=30
   local rc=1
   local assetName
   assetName=$(basename -- "$currentFile")
 
-  while [[ "$currentIteration" -le 30 ]]; do
+  while [[ "$currentIteration" -le "$maxIterations" ]]; do
     if "$scriptAbsoluteLocation" _stopwatch \
          _timeout_strict 600 \
          gh release upload --clobber "$currentTag" "$currentFile"
@@ -116,7 +117,7 @@ _gh_release_upload_part-single_sequence() {
         _messageWARN "==rmh== ** gh exited 0 but asset not listed yet; retrying: $assetName"
       fi
     else
-      _messageWARN "==rmh== ** upload attempt $((currentIteration+1)) failed: $assetName"
+      _messageWARN "==rmh== ** upload attempt $((currentIteration+1)) of $maxIterations failed: $assetName"
     fi
     sleep 7
     let currentIteration++
