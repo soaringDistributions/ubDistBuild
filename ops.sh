@@ -85,7 +85,7 @@ _gh_release_asset_present() {
 
 # --- override: single file uploader with real retries and status ---
 _gh_release_upload_part-single_sequence() {
-  _messagePlain_nominal '==rmh==_gh_release_upload: '"$1"' '"$2"
+  _messagePlain_nominal '==rmh== _gh_release_upload: '"$1"' '"$2"
   local currentTag="$1"
   local currentFile="$2"
 
@@ -110,27 +110,27 @@ _gh_release_upload_part-single_sequence() {
         let vtries++
       done
       if [[ $rc -eq 0 ]]; then
-        _messagePlain_probe "uploaded ✓ $assetName"
+        _messagePlain_probe "==rmh== uploaded ✓ $assetName"
         break
       else
-        _messageWARN "gh exited 0 but asset not listed yet; retrying: $assetName"
+        _messageWARN "==rmh== ** gh exited 0 but asset not listed yet; retrying: $assetName"
       fi
     else
-      _messageWARN "upload attempt $((currentIteration+1)) failed: $assetName"
+      _messageWARN "==rmh== ** upload attempt $((currentIteration+1)) failed: $assetName"
     fi
     sleep 7
     let currentIteration++
   done
 
   if [[ $rc -ne 0 ]]; then
-    _messageFAIL "upload failed after retries: $assetName → $currentTag"
+    _messageFAIL "==rmh== ** upload failed after retries: $assetName → $currentTag"
   fi
   return "$rc"
 }
 
 # --- optional override: verify all parts after the fan-out completes ---
 _gh_release_upload_parts-multiple_sequence() {
-  _messageNormal '==rmh==_gh_release_upload_parts: '"$@"
+  _messageNormal '==rmh== _gh_release_upload_parts: '"$@"
   local currentTag="$1"; shift
 
   local currentStream_max=12
@@ -153,9 +153,9 @@ _gh_release_upload_parts-multiple_sequence() {
 
   local currentStreamPause
   for currentStreamPause in $(seq "1" "$currentStreamNum"); do
-    _messagePlain_probe currentStream_${currentStreamPause}_PID= $(eval "echo \$currentStream_${currentStreamPause}_PID")
+    _messagePlain_probe "==rmh==currentStream_${currentStreamPause}_PID= $(eval "echo \$currentStream_${currentStreamPause}_PID")"
     if eval "[[ \$currentStream_${currentStreamPause}_PID != '' ]]"; then
-      _messagePlain_probe _pauseForProcess $(eval "echo \$currentStream_${currentStreamPause}_PID")
+      _messagePlain_probe "==rmh== _pauseForProcess $(eval "echo \$currentStream_${currentStreamPause}_PID")"
       _pauseForProcess        $(eval "echo \$currentStream_${currentStreamPause}_PID")
     fi
   done
@@ -176,9 +176,17 @@ _gh_release_upload_parts-multiple_sequence() {
   for f in "${__files[@]}"; do
     local name="$(basename -- "$f")"
     if ! printf '%s' "$assets_json" | grep -F "\"name\":\"$name\"" >/dev/null; then
-      _messageFAIL "missing asset on release: $name"
+      _messageFAIL "==rmh== ** missing asset on release: $name"
       rc=1
+    else
+      _messagePlain_probe "==rmh== asset verified: $name"
     fi
+
   done
+  if [[ $rc -ne 0 ]]; then
+    _messageFAIL "==rmh== ** some assets were not uploaded successfully"
+  else
+    _messagePlain_probe "==rmh== all assets verified successfully"
+  fi
   return "$rc"
 }
