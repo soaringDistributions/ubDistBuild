@@ -1,7 +1,7 @@
 # zBuild-testing-chunks.yml
 # Purpose: exercise ubDistBuild split/upload/join paths with a ~30GB dummy image.
-# Produces >=15 .partNN files (chunk size ~1.9975 GiB), uploads them to a
-# throwaway release, then re-joins from GH and verifies byte count.
+# Produces >=15 .partNN files, uploads them to a throwaway release, then re-joins
+# from GH and verifies byte count.
 
 name: zBuild-testing-chunks
 
@@ -51,7 +51,6 @@ jobs:
           fetch-depth: 1
           submodules: 'recursive'
 
-      # Free up disk so a 30GB file + parts fit.
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
         with:
@@ -63,6 +62,18 @@ jobs:
           remove-haskell: 'true'
           remove-codeql: 'true'
           remove-docker-images: 'true'
+
+      - name: Bring in ubiquitous_bash.sh (so local ops.sh overrides load)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ~/core/infrastructure
+          cd ~/core/infrastructure
+          git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
+          cd ubiquitous_bash
+          cp ubiquitous_bash.sh "$GITHUB_WORKSPACE/ubiquitous_bash.sh"
+          chmod +x "$GITHUB_WORKSPACE/ubiquitous_bash.sh"
+          echo "ub path: $(readlink -f "$GITHUB_WORKSPACE/ubiquitous_bash.sh")"
 
       - name: Prepare workspace
         shell: bash
@@ -77,7 +88,6 @@ jobs:
           set -euo pipefail
           BYTES=30000000000
           OUT=./_local/package_image_beforeBoot.tar.flx
-          # Fast pseudorandom stream: /dev/zero piped into AES-CTR
           head -c "${BYTES}" /dev/zero \
             | openssl enc -aes-256-ctr -pass pass:${{ github.run_id }} -nosalt \
             > "${OUT}"
@@ -95,7 +105,7 @@ jobs:
           echo "parts_count=${parts_count}"
           [[ "${parts_count}" -ge 15 ]]
 
-      - name: Upload parts to the test release
+      - name: Upload parts to the test release (uses ops.sh overrides)
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -113,6 +123,17 @@ jobs:
         with:
           fetch-depth: 1
           submodules: 'recursive'
+
+      - name: Bring in ubiquitous_bash.sh (for join helper)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ~/core/infrastructure
+          cd ~/core/infrastructure
+          git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
+          cd ubiquitous_bash
+          cp ubiquitous_bash.sh "$GITHUB_WORKSPACE/ubiquitous_bash.sh"
+          chmod +x "$GITHUB_WORKSPACE/ubiquitous_bash.sh"
 
       - name: Join from GH and verify byte count (streamed)
         shell: bash
