@@ -1,12 +1,12 @@
 # zBuild-testing-chunks.yml
 # Purpose: exercise ubDistBuild split/upload/join paths with a ~30GB dummy image.
-# Produces at least 15 .partNN files (chunk size ~1.9975 GiB), uploads them to a
+# Produces >=15 .partNN files (chunk size ~1.9975 GiB), uploads them to a
 # throwaway release, then re-joins from GH and verifies byte count.
 
 name: zBuild-testing-chunks
 
 permissions:
-  contents: write  # needed for creating/uploading release assets
+  contents: write
   actions: write
   checks: read
   deployments: read
@@ -26,13 +26,21 @@ jobs:
   build_release:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          submodules: 'recursive'
       - name: Create empty test release
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          gh release create "build-${{ github.run_id }}-9999" --title "chunks test" --notes "" || gh release view "build-${{ github.run_id }}-9999" >/dev/null
+          gh release create "build-${{ github.run_id }}-9999" \
+            --repo "${{ github.repository }}" \
+            --title "chunks test" --notes "" \
+          || gh release view "build-${{ github.run_id }}-9999" \
+               --repo "${{ github.repository }}" >/dev/null
 
   chunks_make:
     needs: [build_release]
@@ -43,7 +51,7 @@ jobs:
           fetch-depth: 1
           submodules: 'recursive'
 
-      # Free up disk so a 30GB file + parts fit comfortably.
+      # Free up disk so a 30GB file + parts fit.
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
         with:
@@ -62,7 +70,6 @@ jobs:
           set -euo pipefail
           mkdir -p ./_local
           df -h
-          echo "Using ubiquitous_bash.sh at: $(readlink -f ./ubiquitous_bash.sh)"
 
       - name: Make ~30GB random test image (name triggers split logic)
         shell: bash
@@ -86,7 +93,6 @@ jobs:
           ls -lh ./_local/package_image_beforeBoot.tar.flx.part* || { echo "No parts produced"; exit 1; }
           parts_count=$(ls -1 ./_local/package_image_beforeBoot.tar.flx.part* | wc -l)
           echo "parts_count=${parts_count}"
-          # Expect >= 15 parts from a 30,000,000,000-byte file with ~1.9975 GiB chunks.
           [[ "${parts_count}" -ge 15 ]]
 
       - name: Upload parts to the test release
@@ -111,7 +117,7 @@ jobs:
       - name: Join from GH and verify byte count (streamed)
         shell: bash
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           TAG="build-${{ github.run_id }}-9999"
