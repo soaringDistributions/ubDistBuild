@@ -6,14 +6,13 @@ on:
 jobs:
   chunks_make:
     runs-on: ubuntu-24.04
-    # Keep a stable release tag across the whole job
+
     env:
       BASENAME: package_image_beforeBoot.tar.flx
       BASE: ./_local/package_image_beforeBoot.tar.flx
       RELEASE_TAG: build-${{ github.run_id }}-${{ github.run_attempt }}
 
     steps:
-      # IMPORTANT: run this BEFORE checkout; it mounts over $GITHUB_WORKSPACE
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
         with:
@@ -35,13 +34,9 @@ jobs:
       - name: Quick system info
         shell: bash
         run: |
-          echo "Memory and swap:"
-          sudo free -h
-          echo
-          sudo swapon --show || true
-          echo
-          echo "Available storage:"
-          sudo df -h
+          echo "Memory and swap:"; sudo free -h; echo
+          sudo swapon --show || true; echo
+          echo "Available storage:"; sudo df -h
 
       - name: Prep workspace
         shell: bash
@@ -55,29 +50,23 @@ jobs:
         run: |
           set -euo pipefail
           BYTES=30000000000
-          OUT="${BASE}"
-          # Fast pseudo-random stream: /dev/zero piped into AES-CTR
           head -c "${BYTES}" /dev/zero \
             | openssl enc -aes-256-ctr -pass pass:16918050001 -nosalt \
-            > "${OUT}"
-          ls -lh "${OUT}"
-          stat -c 'size=%s' "${OUT}"
+            > "${BASE}"
+          ls -lh "${BASE}"
+          sha256sum "${BASE}" | tee ./_local/original.sha256
 
       - name: Split into ~1.86 GiB parts (tail+truncate style)
         shell: bash
         run: |
           set -euo pipefail
           F="${BASE}"
-          CHUNK=1997537280   # ~1.86 GiB
+          CHUNK=1997537280
           for i in $(seq -w 0 63); do
             [[ -s "$F" ]] || break
             tail -c "$CHUNK" "$F" > "$F".part"$i"
             size=$(stat -c%s "$F")
-            if (( size > CHUNK )); then
-              truncate -s -$CHUNK "$F"
-            else
-              truncate -s 0 "$F"
-            fi
+            if (( size > CHUNK )); then truncate -s -$CHUNK "$F"; else truncate -s 0 "$F"; fi
           done
           echo "Generated parts:"
           ls -lh "${BASE}".part* || { echo "No parts produced"; exit 1; }
@@ -94,14 +83,13 @@ jobs:
           ls -l ./ubiquitous_bash.sh || { echo "script missing"; exit 1; }
           head -n1 ./ubiquitous_bash.sh || true
 
-      # ----- NEW: make sure the release exists before we try to upload -----
       - name: Create (or confirm) GitHub Release
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          export GH_REPO="${GITHUB_REPOSITORY}"   # be explicit for gh
+          export GH_REPO="${GITHUB_REPOSITORY}"
           if ! gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
             gh release create "${RELEASE_TAG}" \
               --title "${RELEASE_TAG}" \
@@ -110,18 +98,17 @@ jobs:
           fi
           gh release view "${RELEASE_TAG}" --json name,url
 
-      - name: Upload parts via ubiquitous_bash (expanded file list)
+      - name: Upload parts via ubiquitous_bash
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          # Important: do NOT quote the glob so the shell expands to many files
+          # Don't quote the glob; let the shell expand to individual files
           bash ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence \
             "${RELEASE_TAG}" \
             ${BASE}.part*
 
-      # Hard fail if any asset is still missing; makes flaky uploads obvious
       - name: Assert all .part assets are present on the release
         shell: bash
         env:
@@ -131,24 +118,17 @@ jobs:
           mapfile -t parts < <(ls -1 ${BASE}.part*)
           expected=${#parts[@]}
           [[ $expected -gt 0 ]] || { echo "No local parts to assert"; exit 1; }
-          echo "Expecting $expected assets on ${RELEASE_TAG}"
-          # Fetch asset names for the release
           mapfile -t remote_names < <(gh release view "${RELEASE_TAG}" --json assets --jq '.assets[].name')
           missing=0
           for f in "${parts[@]}"; do
             bn=$(basename "$f")
             if ! printf '%s\n' "${remote_names[@]}" | grep -Fxq "$bn"; then
-              echo "MISSING: $bn"
-              ((missing++))
+              echo "MISSING: $bn"; ((missing++))
             fi
           done
-          if (( missing > 0 )); then
-            echo "ERROR: $missing assets missing on release ${RELEASE_TAG}"
-            exit 1
-          fi
+          (( missing == 0 )) || { echo "ERROR: $missing assets missing"; exit 1; }
           echo "All assets present on release."
 
-      # ----- Download & reassemble using the same helper that build.yml uses -----
       - name: Download & reassemble via ubiquitous_bash (join-stdout)
         shell: bash
         env:
@@ -156,25 +136,15 @@ jobs:
         run: |
           set -euo pipefail
           OUT="./_local/rejoined_stream.tar.flx"
-          # NOTE: _wget_githubRelease_join-stdout must write to STDOUT; redirect it.
           bash ./ubiquitous_bash.sh _wget_githubRelease_join-stdout \
             "${GITHUB_REPOSITORY}" \
             "${RELEASE_TAG}" \
-            "${BASENAME}" \
-            > "${OUT}"
+            "${BASENAME}" > "${OUT}"
           ls -lh "${OUT}"
           sha256sum "${OUT}" | tee ./_local/rejoined_stream.sha256
+          diff -u <(cut -d' ' -f1 ./_local/original.sha256) \
+                 <(cut -d' ' -f1 ./_local/rejoined_stream.sha256)
 
-      - name: Compare hash (original vs rejoined_stream)
-        shell: bash
-        run: |
-          set -euo pipefail
-          h1=$(sha256sum "${BASE}" | awk '{print $1}')
-          h2=$(sha256sum ./_local/rejoined_stream.tar.flx | awk '{print $1}')
-          echo "original=${h1}"; echo "rejoined_stream=${h2}"
-          [[ "$h1" == "$h2" ]]
-
-      # ----- Also prove we can reassemble from individually downloaded parts -----
       - name: Download individual .part files (GitHub CLI)
         shell: bash
         env:
@@ -185,7 +155,7 @@ jobs:
           gh release download "${RELEASE_TAG}" \
             --pattern "${BASENAME}.part*" \
             --dir ./_local/downloaded_parts
-          ls -lh ./_local/downloaded_parts | sed -n '1,120p'
+          ls -lh ./_local/downloaded_parts | sed -n '1,200p'
 
       - name: Reassemble from downloaded parts (reverse order append)
         shell: bash
@@ -193,21 +163,13 @@ jobs:
           set -euo pipefail
           OUT=./_local/rejoined_parts.tar.flx
           rm -f "$OUT"
-          # Our split method was tail+truncate, so join must be reverse-order append
           for p in $(ls ./_local/downloaded_parts/${BASENAME}.part* | sort -r); do
             cat "$p" >> "$OUT"
           done
           ls -lh "$OUT"
           sha256sum "$OUT" | tee ./_local/rejoined_parts.sha256
-
-      - name: Compare hash (original vs rejoined_parts)
-        shell: bash
-        run: |
-          set -euo pipefail
-          h1=$(sha256sum "${BASE}" | awk '{print $1}')
-          h2=$(sha256sum ./_local/rejoined_parts.tar.flx | awk '{print $1}')
-          echo "original=${h1}"; echo "rejoined_parts=${h2}"
-          [[ "$h1" == "$h2" ]]
+          diff -u <(cut -d' ' -f1 ./_local/original.sha256) \
+                 <(cut -d' ' -f1 ./_local/rejoined_parts.sha256)
 
       - name: Cross-check both joined images
         shell: bash
@@ -217,10 +179,3 @@ jobs:
           b=$(sha256sum ./_local/rejoined_parts.tar.flx | awk '{print $1}')
           echo "stream=${a}"; echo "parts=${b}"
           [[ "$a" == "$b" ]]
-
-      - name: Checkout (after mount)
-        if: always()
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-          submodules: recursive
