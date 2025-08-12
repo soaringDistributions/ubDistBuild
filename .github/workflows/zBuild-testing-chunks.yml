@@ -7,6 +7,12 @@ jobs:
   chunks_make:
     runs-on: ubuntu-24.04
 
+    # Make these available to every step (prevents "unbound variable" with set -u)
+    env:
+      RELEASE_TAG: build-${{ github.run_id }}-${{ github.run_number }}
+      BASENAME: package_image_beforeBoot.tar.flx
+      BASE: ./_local/package_image_beforeBoot.tar.flx
+
     steps:
       # IMPORTANT: run this BEFORE checkout; it mounts over $GITHUB_WORKSPACE
       - name: Maximize build space
@@ -50,20 +56,25 @@ jobs:
         run: |
           set -euo pipefail
           BYTES=30000000000
-          OUT=./_local/package_image_beforeBoot.tar.flx
           # Fast pseudo-random stream: /dev/zero piped into AES-CTR
           head -c "${BYTES}" /dev/zero \
             | openssl enc -aes-256-ctr -pass pass:16918050001 -nosalt \
-            > "${OUT}"
-          ls -lh "${OUT}"
-          stat -c 'size=%s' "${OUT}"
+            > "${BASE}"
+          ls -lh "${BASE}"
+          stat -c 'size=%s' "${BASE}"
+
+      - name: Hash original (before split)
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum "${BASE}" | tee ./._orig.sha256
 
       - name: Split into ~1.86 GiB parts (tail+truncate style)
         shell: bash
         run: |
           set -euo pipefail
-          F=./_local/package_image_beforeBoot.tar.flx
-          CHUNK=1997537280   # ~1.86 GiB
+          F="${BASE}"
+          CHUNK=1997537280   # ~1.86 GiB (ubDistBuild convention)
           for i in $(seq -w 0 63); do
             [[ -s "$F" ]] || break
             tail -c "$CHUNK" "$F" > "$F".part"$i"
@@ -75,8 +86,8 @@ jobs:
             fi
           done
           echo "Generated parts:"
-          ls -lh ./_local/package_image_beforeBoot.tar.flx.part* || { echo "No parts produced"; exit 1; }
-          parts_count=$(ls -1 ./_local/package_image_beforeBoot.tar.flx.part* | wc -l)
+          ls -lh "${BASE}".part* || { echo "No parts produced"; exit 1; }
+          parts_count=$(ls -1 "${BASE}".part* | wc -l)
           echo "parts_count=${parts_count}"
           [[ "${parts_count}" -ge 15 ]]
 
@@ -96,10 +107,10 @@ jobs:
         run: |
           set -euo pipefail
           bash ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence \
-            "build-16918050001-9999" \
-            ./_local/package_image_beforeBoot.tar.flx.part*
+            "${RELEASE_TAG}" \
+            "${BASE}.part"*
 
- # === DOWNLOAD + REASSEMBLE (stream-join like build.yml) ===
+      # === DOWNLOAD + REASSEMBLE (stream-join like build.yml) ===
       - name: Download & reassemble via ubiquitous_bash (join-stdout)
         shell: bash
         env:
@@ -107,12 +118,13 @@ jobs:
         run: |
           set -euo pipefail
           OUT="./_local/rejoined_stream.tar.flx"
-          # Use the same helper that build uses under the hood:
-          # _wget_githubRelease_join-stdout <owner/repo> <releaseLabel> <baseFilename>
+          # Use ubiquitous_bash helper:
+          # _wget_githubRelease_join-stdout <owner/repo> <releaseLabel> <baseFilename> -O <outfile>
           bash ./ubiquitous_bash.sh _wget_githubRelease_join-stdout \
             "${{ github.repository }}" \
             "${RELEASE_TAG}" \
-            "${BASENAME}" > "${OUT}"
+            "${BASENAME}" \
+            -O "${OUT}"
           ls -lh "${OUT}"
           sha256sum "${OUT}" | tee ./._rejoined_stream.sha256
 
@@ -177,7 +189,7 @@ jobs:
             exit 1
           fi
 
-      # Final belt-and-suspenders check: both joins should match each other
+      # Belt-and-suspenders: both joined images should be identical
       - name: Cross-check both joined images
         shell: bash
         run: |
