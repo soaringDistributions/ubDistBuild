@@ -128,16 +128,19 @@ _gh_release_upload_part-single_sequence() {
   return "$rc"
 }
 
-# --- optional override: verify all parts after the fan-out completes ---
 _gh_release_upload_parts-multiple_sequence() {
   _messageNormal '==rmh== _gh_release_upload_parts: '"$@"
   local currentTag="$1"; shift
 
-  local currentStream_max=12
-  local currentStreamNum=0
   # keep a copy of the file list for verification later
   local -a __files=( "$@" )
 
+  # parallelism (default 12, can override via UB_GH_UPLOAD_PARALLEL)
+  local currentStream_max="${UB_GH_UPLOAD_PARALLEL:-12}"
+  local currentStreamNum=0
+
+  # kick off uploads
+  local currentFile
   for currentFile in "${__files[@]}"; do
     let currentStreamNum++
     "$scriptAbsoluteLocation" _gh_release_upload_part-single_sequence "$currentTag" "$currentFile" &
@@ -151,6 +154,7 @@ _gh_release_upload_parts-multiple_sequence() {
     done
   done
 
+  # wait for all background uploads to finish
   local currentStreamPause
   for currentStreamPause in $(seq "1" "$currentStreamNum"); do
     _messagePlain_probe "==rmh==currentStream_${currentStreamPause}_PID= $(eval "echo \$currentStream_${currentStreamPause}_PID")"
@@ -167,22 +171,74 @@ _gh_release_upload_parts-multiple_sequence() {
   done
   wait  # reap
 
-  # Post-verify: ensure every asset exists; fail if any missing
-  local rc=0
-  local assets_json
-  assets_json=$("$scriptAbsoluteLocation" _timeout_strict 180 gh release view "$currentTag" --json assets 2>/dev/null || true)
+  # -------------------------------
+  # Settle + verification 
+  # -------------------------------
 
+  # expected asset names (basenames only)
+  local -a expected_names=()
   local f
   for f in "${__files[@]}"; do
-    local name="$(basename -- "$f")"
-    if ! printf '%s' "$assets_json" | grep -F "\"name\":\"$name\"" >/dev/null; then
-      _messageFAIL "==rmh== ** missing asset on release: $name"
-      rc=1
-    else
-      _messagePlain_probe "==rmh== asset verified: $name"
+    expected_names+=( "$(basename -- "$f")" )
+  done
+
+  # settle: wait until all expected assets become visible on the release
+  # tunables: UB_GH_VERIFY_ATTEMPTS (default 15), UB_GH_VERIFY_SLEEP (default 8s)
+  local max_attempts="${UB_GH_VERIFY_ATTEMPTS:-15}"
+  local sleep_s="${UB_GH_VERIFY_SLEEP:-8}"
+  local assets_json attempt=1
+  while :; do
+    assets_json=$("$scriptAbsoluteLocation" _timeout_strict 180 gh release view "$currentTag" --json assets 2>/dev/null || true)
+
+    # count missing
+    local missing_count=0
+    local name
+    for name in "${expected_names[@]}"; do
+      if ! printf '%s' "$assets_json" | grep -F "\"name\":\"$name\"" >/dev/null; then
+        missing_count=$((missing_count+1))
+      fi
+    done
+
+    if [[ $missing_count -eq 0 ]]; then
+      _messagePlain_probe "==rmh== all assets visible after attempt $attempt"
+      break
+    fi
+    if [[ $attempt -ge $max_attempts ]]; then
+      _messagePlain_probe "==rmh== assets still missing after ${attempt} attempts; proceeding to per-asset retries"
+      break
     fi
 
+    _messagePlain_probe "==rmh== waiting for assets to appear (attempt $attempt/${max_attempts}); missing=${missing_count}"
+    sleep "$sleep_s"
+    attempt=$((attempt+1))
   done
+
+  # per-asset verification with short retries (handles stragglers)
+  # tunables: UB_GH_VERIFY_PER_ASSET_ATTEMPTS (default 6), UB_GH_VERIFY_PER_ASSET_SLEEP (default 5s)
+  local rc=0
+  local per_attempts="${UB_GH_VERIFY_PER_ASSET_ATTEMPTS:-6}"
+  local per_sleep="${UB_GH_VERIFY_PER_ASSET_SLEEP:-5}"
+
+  local name ok a
+  for name in "${expected_names[@]}"; do
+    ok=""
+    for a in $(seq 1 "$per_attempts"); do
+      assets_json=$("$scriptAbsoluteLocation" _timeout_strict 180 gh release view "$currentTag" --json assets 2>/dev/null || true)
+      if printf '%s' "$assets_json" | grep -F "\"name\":\"$name\"" >/dev/null; then
+        _messagePlain_probe "==rmh== asset verified: $name"
+        ok="true"
+        break
+      fi
+      _messagePlain_probe "==rmh== asset not yet visible ($name), retry ${a}/${per_attempts}"
+      sleep "$per_sleep"
+    done
+
+    if [[ -z "$ok" ]]; then
+      _messageFAIL "==rmh== ** missing asset on release: $name"
+      rc=1
+    fi
+  done
+
   if [[ $rc -ne 0 ]]; then
     _messageFAIL "==rmh== ** some assets were not uploaded successfully"
   else
@@ -190,6 +246,7 @@ _gh_release_upload_parts-multiple_sequence() {
   fi
   return "$rc"
 }
+
 
 # Override message functions to reduce multi-threaded mess 
 #Cyan. Harmless status messages.
