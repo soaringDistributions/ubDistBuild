@@ -129,7 +129,7 @@ _gh_release_upload_part-single_sequence() {
 }
 
 _gh_release_upload_parts-multiple_sequence() {
-  _messageNormal '==rmh== _gh_release_upload_parts: '"$@"
+  _messagePlain_nominal '==rmh== _gh_release_upload_parts: '"$@"
   local currentTag="$1"; shift
 
   # keep a copy of the file list for verification later
