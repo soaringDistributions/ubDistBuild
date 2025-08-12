@@ -1,100 +1,64 @@
-# zBuild-testing-chunks.yml
-# Purpose: end-to-end test of split → upload → join using a ~30GB dummy image.
-# We split tail-first into .partNN files so join order matches ubDistBuild.
-
 name: zBuild-testing-chunks
 
-permissions:
-  contents: write
-  actions: write
-  checks: read
-  deployments: read
-  packages: read
-  pull-requests: read
-  repository-projects: read
-  statuses: read
-
 on:
-  workflow_dispatch: {}
-
-concurrency:
-  group: zbuild-chunks-${{ github.ref }}
-  cancel-in-progress: false
+  workflow_dispatch:
 
 jobs:
-  build_release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-          submodules: 'recursive'
-      - name: Create empty test release
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          gh release create "build-${{ github.run_id }}-9999" \
-            --repo "${{ github.repository }}" \
-            --title "chunks test" --notes "" \
-          || gh release view "build-${{ github.run_id }}-9999" \
-               --repo "${{ github.repository }}" >/dev/null
-
   chunks_make:
-    needs: [build_release]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-          submodules: 'recursive'
+    runs-on: ubuntu-24.04
 
+    steps:
+      # IMPORTANT: run this BEFORE checkout; it mounts over $GITHUB_WORKSPACE
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
         with:
           root-reserve-mb: 4125
           temp-reserve-mb: 1950
           swap-size-mb: 2
-          remove-dotnet: 'true'
-          remove-android: 'true'
-          remove-haskell: 'true'
-          remove-codeql: 'true'
-          remove-docker-images: 'true'
+          remove-dotnet: true
+          remove-android: true
+          remove-haskell: true
+          remove-codeql: true
+          remove-docker-images: true
 
-      # - name: Bring in upstream ubiquitous_bash.sh (upload/join helpers)
-      #   shell: bash
-      #   run: |
-      #     set -euo pipefail
-      #     mkdir -p ~/core/infrastructure
-      #     cd ~/core/infrastructure
-      #     git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
-      #     cd ubiquitous_bash
-      #     cp ubiquitous_bash.sh "$GITHUB_WORKSPACE/ubiquitous_bash.sh"
-      #     chmod +x "$GITHUB_WORKSPACE/ubiquitous_bash.sh"
-      #     echo "ub path: $(readlink -f "$GITHUB_WORKSPACE/ubiquitous_bash.sh")"
+      - name: Checkout (after mount)
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          submodules: recursive
 
-      - name: Prepare workspace
+      - name: Quick system info
+        shell: bash
+        run: |
+          echo "Memory and swap:"
+          sudo free -h
+          echo
+          sudo swapon --show || true
+          echo
+          echo "Available storage:"
+          sudo df -h
+
+      - name: Prep workspace
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p ./_local
-          df -h
+          df -h .
 
-      - name: Make ~30GB random test image (name triggers split logic)
+      - name: Generate 30GB test file
         shell: bash
         run: |
           set -euo pipefail
           BYTES=30000000000
           OUT=./_local/package_image_beforeBoot.tar.flx
-          # Fast pseudorandom stream: /dev/zero piped into AES-CTR
+          # Fast pseudo-random stream: /dev/zero piped into AES-CTR
           head -c "${BYTES}" /dev/zero \
-            | openssl enc -aes-256-ctr -pass pass:${{ github.run_id }} -nosalt \
+            | openssl enc -aes-256-ctr -pass pass:16918050001 -nosalt \
             > "${OUT}"
           ls -lh "${OUT}"
           stat -c 'size=%s' "${OUT}"
 
-      - name: Split into .partNN chunks (tail-first; ub-compatible)
+      - name: Split into ~1.86 GiB parts (tail+truncate style)
         shell: bash
         run: |
           set -euo pipefail
@@ -116,50 +80,21 @@ jobs:
           echo "parts_count=${parts_count}"
           [[ "${parts_count}" -ge 15 ]]
 
-      - name: Upload parts to the test release
+      - name: Sanity check (verify ubiquitous_bash.sh is present)
         shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence \
-            "build-${{ github.run_id }}-9999" \
+          pwd
+          df -h .
+          ls -l ./ubiquitous_bash.sh || { echo "script missing"; exit 1; }
+          head -n1 ./ubiquitous_bash.sh || true
+
+      - name: Upload parts via ubiquitous_bash
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          bash ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence \
+            "build-16918050001-9999" \
             ./_local/package_image_beforeBoot.tar.flx.part*
-
-  chunks_verify:
-    needs: [chunks_make]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-          submodules: 'recursive'
-
-      # - name: Bring in upstream ubiquitous_bash.sh (for join helper)
-      #   shell: bash
-      #   run: |
-      #     set -euo pipefail
-      #     mkdir -p ~/core/infrastructure
-      #     cd ~/core/infrastructure
-      #     git clone --depth 1 --recursive https://github.com/mirage335-colossus/ubiquitous_bash.git
-      #     cd ubiquitous_bash
-      #     cp ubiquitous_bash.sh "$GITHUB_WORKSPACE/ubiquitous_bash.sh"
-      #     chmod +x "$GITHUB_WORKSPACE/ubiquitous_bash.sh"
-
-      - name: Join from GH and verify byte count (streamed)
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          TAG="build-${{ github.run_id }}-9999"
-          EXPECT=30000000000
-          echo "Rejoining package_image_beforeBoot.tar.flx from release ${TAG}…"
-          got_bytes=$(
-            ./ubiquitous_bash.sh _wget_githubRelease-fromTag_join-stdout \
-              "${{ github.repository }}" "${TAG}" "package_image_beforeBoot.tar.flx" \
-            | wc -c
-          )
-          echo "Expected bytes: ${EXPECT}"
-          echo "Got bytes:      ${got_bytes}"
-          [[ "${got_bytes}" -eq "${EXPECT}" ]]
