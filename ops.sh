@@ -190,3 +190,74 @@ _gh_release_upload_parts-multiple_sequence() {
   fi
   return "$rc"
 }
+
+# Override message functions to reduce multi-threaded mess 
+#Cyan. Harmless status messages.
+_messagePlain_nominal() {
+    local color_start='\E[0;36m'  # Cyan
+    local color_end='\E[0m'      # Reset
+    echo -e "${color_start} $@ ${color_end}"
+    return 0
+}
+
+#Blue. Diagnostic instrumentation.
+_messagePlain_probe() {
+    local color_start='\E[0;34m'  # Blue
+    local color_end='\E[0m'      # Reset
+    echo -e "${color_start} $@ ${color_end}"
+    return 0
+}
+
+#Blue. Diagnostic instrumentation.
+_messagePlain_probe_expr() {
+    local color_start='\E[0;34m'  # Blue
+    local color_end='\E[0m'      # Reset
+    echo -e "${color_start} $@ ${color_end}"
+    return 0
+}
+
+#Blue. Diagnostic instrumentation.
+_messagePlain_probe_var() {
+    local color_start='\E[0;34m'  # Blue
+    local color_end='\E[0m'      # Reset
+    local var_value=""           # To store the evaluated variable value
+
+    # Check if a variable name is provided
+    if [ -n "$1" ]; then
+        # Evaluate the variable's value and store it
+        eval "var_value=\$$1"
+        echo -e "${color_start} $1= ${var_value} ${color_end}"
+    else
+        echo -e "${color_start} ${color_end}" # Print color without variable if none provided
+    fi
+    return 0
+}
+
+_messageVar() {
+    _messagePlain_probe_var "$@"
+}
+
+
+#Green. Working as expected.
+_messagePlain_good() {
+    local color_start='\E[0;32m'  # Green
+    local color_end='\E[0m'      # Reset
+    echo -e "${color_start} $@ ${color_end}"
+    return 0
+}
+
+#Yellow. May or may not be a problem.
+_messagePlain_warn() {
+    local color_start='\E[1;33m'  # Yellow (Bold)
+    local color_end='\E[0m'      # Reset
+    echo -e "${color_start} $@ ${color_end}"
+    return 0
+}
+
+#Red. Will result in missing functionality, reduced performance, etc, but not necessarily program failure overall.
+_messagePlain_bad() {
+    local color_start='\E[0;31m'  # Red
+    local color_end='\E[0m'      # Reset
+    echo -e "${color_start} $@ ${color_end}"
+    return 0
+}
