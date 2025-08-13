@@ -190,7 +190,7 @@ jobs:
                  <(cut -d' ' -f1 ./_local/rejoined_parts.sha256)
 
       # optional final cleanup to keep workspace tiny
-      - name: Free space: remove downloaded parts
+      - name: Free space - remove downloaded parts
         if: always()
         shell: bash
         run: |
