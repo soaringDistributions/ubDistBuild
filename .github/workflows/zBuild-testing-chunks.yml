@@ -130,7 +130,7 @@ jobs:
           echo "All assets present on release."
 
       # --- FREE SPACE #1: drop local parts now that they are uploaded ---
-      - name: Free space: remove local .part files
+      - name: Free space - remove local .part files
         shell: bash
         run: |
           set -euo pipefail
@@ -154,7 +154,7 @@ jobs:
                  <(cut -d' ' -f1 ./_local/rejoined_stream.sha256)
 
       # --- FREE SPACE #2: drop the stream-joined image before the parts path ---
-      - name: Free space: remove stream-joined image
+      - name: Free space - remove stream-joined image
         shell: bash
         run: |
           set -euo pipefail
