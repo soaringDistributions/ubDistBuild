@@ -98,13 +98,13 @@ jobs:
           fi
           gh release view "${RELEASE_TAG}" --json name,url
 
+      # ##################################################################
       - name: Upload parts via ubiquitous_bash
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          # Don't quote the glob; let the shell expand to individual files
           bash ./ubiquitous_bash.sh _gh_release_upload_parts-multiple_sequence \
             "${RELEASE_TAG}" \
             ${BASE}.part*
@@ -129,6 +129,14 @@ jobs:
           (( missing == 0 )) || { echo "ERROR: $missing assets missing"; exit 1; }
           echo "All assets present on release."
 
+      # --- FREE SPACE #1: drop local parts now that they are uploaded ---
+      - name: Free space: remove local .part files
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f ${BASE}.part*
+          echo "After removing local parts:"; df -h .
+
       - name: Download & reassemble via ubiquitous_bash (join-stdout)
         shell: bash
         env:
@@ -145,6 +153,14 @@ jobs:
           diff -u <(cut -d' ' -f1 ./_local/original.sha256) \
                  <(cut -d' ' -f1 ./_local/rejoined_stream.sha256)
 
+      # --- FREE SPACE #2: drop the stream-joined image before the parts path ---
+      - name: Free space: remove stream-joined image
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f ./_local/rejoined_stream.tar.flx
+          echo "After removing stream-joined image:"; df -h .
+
       - name: Download individual .part files (GitHub CLI)
         shell: bash
         env:
@@ -156,6 +172,7 @@ jobs:
             --pattern "${BASENAME}.part*" \
             --dir ./_local/downloaded_parts
           ls -lh ./_local/downloaded_parts | sed -n '1,200p'
+          echo "After downloading parts:"; df -h .
 
       - name: Reassemble from downloaded parts (reverse order append)
         shell: bash
@@ -163,6 +180,7 @@ jobs:
           set -euo pipefail
           OUT=./_local/rejoined_parts.tar.flx
           rm -f "$OUT"
+          # reverse order because we split with tail+truncate
           for p in $(ls ./_local/downloaded_parts/${BASENAME}.part* | sort -r); do
             cat "$p" >> "$OUT"
           done
@@ -171,6 +189,16 @@ jobs:
           diff -u <(cut -d' ' -f1 ./_local/original.sha256) \
                  <(cut -d' ' -f1 ./_local/rejoined_parts.sha256)
 
+      # optional final cleanup to keep workspace tiny
+      - name: Free space: remove downloaded parts
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f ./_local/downloaded_parts/${BASENAME}.part*
+          echo "After removing downloaded parts:"; df -h .
+  
+      # ############################################################################
       - name: Cross-check both joined images
         shell: bash
         run: |
