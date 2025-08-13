@@ -190,13 +190,13 @@ jobs:
                  <(cut -d' ' -f1 ./_local/rejoined_parts.sha256)
 
       # optional final cleanup to keep workspace tiny
-      - name: Free space - remove downloaded parts
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -f ./_local/downloaded_parts/${BASENAME}.part*
-          echo "After removing downloaded parts:"; df -h .
+      # - name: Free space - remove downloaded parts
+      #   if: always()
+      #   shell: bash
+      #   run: |
+      #     set -euo pipefail
+      #     rm -f ./_local/downloaded_parts/${BASENAME}.part*
+      #     echo "After removing downloaded parts:"; df -h .
   
       # ############################################################################
       - name: Cross-check both joined images
