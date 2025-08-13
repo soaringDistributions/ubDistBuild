@@ -219,3 +219,12 @@ jobs:
           echo "parts=${b}"
           [[ "$a" == "$b" ]] || { echo "ERROR: digests differ"; exit 1; }
 
+      
+      - name: Final system info
+        shell: bash
+        run: |
+          echo "Memory and swap:"; sudo free -h; echo
+          sudo swapon --show || true; echo
+          echo "Available storage:"; sudo df -h
+
+
