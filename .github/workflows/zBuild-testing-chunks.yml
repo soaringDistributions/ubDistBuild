@@ -199,11 +199,23 @@ jobs:
       #     echo "After removing downloaded parts:"; df -h .
   
       # ############################################################################
+      # - name: Cross-check both joined images
+      #   shell: bash
+      #   run: |
+      #     set -euo pipefail
+      #     a=$(sha256sum ./_local/rejoined_stream.tar.flx | awk '{print $1}')
+      #     b=$(sha256sum ./_local/rejoined_parts.tar.flx | awk '{print $1}')
+      #     echo "stream=${a}"; echo "parts=${b}"
+      #     [[ "$a" == "$b" ]]
+
+      # check the stored digests (do not try to re-hash the files) 
       - name: Cross-check both joined images
         shell: bash
         run: |
           set -euo pipefail
-          a=$(sha256sum ./_local/rejoined_stream.tar.flx | awk '{print $1}')
-          b=$(sha256sum ./_local/rejoined_parts.tar.flx | awk '{print $1}')
-          echo "stream=${a}"; echo "parts=${b}"
-          [[ "$a" == "$b" ]]
+          a=$(cut -d' ' -f1 ./_local/rejoined_stream.sha256)
+          b=$(cut -d' ' -f1 ./_local/rejoined_parts.sha256)
+          echo "stream=${a}"
+          echo "parts=${b}"
+          [[ "$a" == "$b" ]] || { echo "ERROR: digests differ"; exit 1; }
+
