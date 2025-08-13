@@ -37,6 +37,7 @@ jobs:
           echo "Memory and swap:"; sudo free -h; echo
           sudo swapon --show || true; echo
           echo "Available storage:"; sudo df -h
+          echo "Uptime:"; sudo uptime 
 
       - name: Prep workspace
         shell: bash
@@ -226,5 +227,6 @@ jobs:
           echo "Memory and swap:"; sudo free -h; echo
           sudo swapon --show || true; echo
           echo "Available storage:"; sudo df -h
+          echo "Uptime:"; sudo uptime 
 
 
