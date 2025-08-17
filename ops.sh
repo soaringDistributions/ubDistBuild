@@ -1,24 +1,25 @@
+#!/usr/bin/env bash
 # 2025.08.11 rmh Address occasional build failures due to missing part file asset
 
-#!/usr/bin/env bash
 # ops.sh — runtime overrides loaded by ubiquitous_bash.sh
 
 # --- Strict timeout: non-zero on timeout, prefer coreutils 'timeout' ---
 _timeout_strict() {
   _messagePlain_probe "_timeout_strict → $(printf '%q ' "$@")"
-  if command -v timeout >/dev/null 2>&1; then
-    # Expected exits:
-    #  0: success
-    #  124: command timeout
-    #  125: timeout command failed 
-    #  126/7: command could not run
-    #  Other: command exit code 
-    _messagePlain_probe "_timeout_strict: coreutils timeout path"
-    timeout -k 5 "$@"; local rc=$?
-    _messagePlain_probe "_timeout_strict: coreutils rc=$rc"
-    return "$rc"
-  fi
+  # if command -v timeout >/dev/null 2>&1; then
+  #   # Expected exits:
+  #   #  0: success
+  #   #  124: command timeout
+  #   #  125: timeout command failed 
+  #   #  126/7: command could not run
+  #   #  Other: command exit code 
+  #   _messagePlain_probe "_timeout_strict: coreutils timeout path"
+  #   timeout -k 5 "$@"; local rc=$?
+  #   _messagePlain_probe "_timeout_strict: coreutils rc=$rc"
+  #   return "$rc"
+  # fi
 
+  _messagePlain_warn "==rmh== **** TEMP _timeout_strict() PATH ***"
   _messagePlain_probe "_timeout_strict: fallback path"
   # path not dynamically tested due to coreutils being present 
   (
