@@ -1,8 +1,130 @@
 #!/usr/bin/env bash
-# 2025.08.11 rmh Address occasional build failures due to missing part file asset
-
 # ops.sh — runtime overrides loaded by ubiquitous_bash.sh
 
+# 2025.08.11 rmh Address occasional build failures due to missing part file asset
+# 2025.08.19 rmh Add VM-specific GRUB option 
+
+# #### GRUBB Option 
+# #### rmh #### Below functions for branch feature/VmReliableBoot ####
+# --- new: late-loader unit content ---
+_here_vboxguest_defer_service() {
+cat <<'EOF'
+[Unit]
+Description=Defer vboxguest module until after KDE session is up (only if requested)
+After=sddm.service graphical.target
+Wants=graphical.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/vboxguest-defer-load.sh
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
+EOF
+}
+
+# --- new: late-loader script (runs only when vboxguest.defer=1 present) ---
+_here_vboxguest_defer_script() {
+cat <<'EOF'
+#!/bin/sh
+set -eu
+
+# Only on VMs
+if ! systemd-detect-virt --quiet --vm ; then
+  exit 0
+fi
+
+# Act only when requested via GRUB flag + blacklist
+if ! grep -qw 'vboxguest.defer=1' /proc/cmdline ; then
+  exit 0
+fi
+
+# Already loaded? then nothing to do.
+if lsmod | awk '{print $1}' | grep -qx vboxguest ; then
+  exit 0
+fi
+
+# Wait up to 90s for KDE session (best-effort)
+i=90
+while [ $i -gt 0 ]; do
+  if pgrep -x plasmashell >/dev/null 2>&1 || pgrep -x startplasma-x11 >/dev/null 2>&1 ; then
+    break
+  fi
+  sleep 1
+  i=$((i-1))
+done
+
+# Load modules (order matters a bit); ignore if missing
+modprobe -v vboxguest   || true
+modprobe -v vboxsf      || true
+modprobe -v vboxvideo   || true
+
+udevadm settle || true
+systemctl restart vboxservice || true
+
+# Nudge per-user helpers if present
+for uid in $(loginctl list-users --no-legend | awk '{print $1}'); do
+  user="$(id -un "$uid" 2>/dev/null || true)"
+  [ -n "$user" ] || continue
+  su -l "$user" -c 'command -v VBoxClient-all >/dev/null && VBoxClient-all >/dev/null 2>&1 || true' || true
+done
+
+exit 0
+EOF
+}
+
+# --- new: installer that writes files into the live root and enables the unit ---
+_install_vboxguest_defer() {
+  _messageNormal 'init: install vboxguest-defer (late loader)'
+  # script
+  _here_vboxguest_defer_script | sudo -n tee "$globalVirtFS"/usr/local/sbin/vboxguest-defer-load.sh > /dev/null
+  _chroot chown root:root /usr/local/sbin/vboxguest-defer-load.sh
+  _chroot chmod 0755 /usr/local/sbin/vboxguest-defer-load.sh
+  # unit
+  _here_vboxguest_defer_service | sudo -n tee "$globalVirtFS"/etc/systemd/system/vboxguest-defer-load.service > /dev/null
+  _chroot chown root:root /etc/systemd/system/vboxguest-defer-load.service
+  _chroot chmod 0644 /etc/systemd/system/vboxguest-defer-load.service
+  _chroot systemctl enable vboxguest-defer-load.service
+}
+
+# --- wrap the top-level live build to inject our installer at the right time ---
+# keep original sequence calls and cleanup, but add our step in between
+_live() {
+  if ! "$scriptAbsoluteLocation" _live_sequence_in "$@"; then
+    _stop 1
+  fi
+
+  # our addition: install the late-loader files inside the live rootfs
+  _install_vboxguest_defer
+
+  if ! "$scriptAbsoluteLocation" _live_sequence_out "$@"; then
+    _stop 1
+  fi
+
+  export safeToDeleteGit="true"
+  _safeRMR "$scriptLocal"/livefs
+}
+
+# --- extend grub.cfg generator to add a dedicated "defer" entry ---
+# capture original, then append our extra menuentry
+eval "$(declare -f _live_grub_here | sed '1s/_live_grub_here/_live_grub_here__orig/')"
+_live_grub_here() {
+  _live_grub_here__orig
+  cat <<'EOF'
+
+menuentry "Live (VBoxGuest deferred)" {
+    linux /vmlinuz boot=live config debug=1 noeject nopersistence selinux=0 mem=3712M resume=/dev/sda5 module_blacklist=vboxguest modprobe.blacklist=vboxguest vboxguest.defer=1
+    initrd /initrd
+    linux /vmlinuz-lts boot=live config debug=1 noeject nopersistence selinux=0 mem=3712M resume=/dev/sda5 module_blacklist=vboxguest modprobe.blacklist=vboxguest vboxguest.defer=1
+    initrd /initrd-lts
+}
+EOF
+}
+
+
+
+# #### Build Failure items 
 # --- Strict timeout: non-zero on timeout, prefer coreutils 'timeout' ---
 _timeout_strict() {
   _messagePlain_probe "_timeout_strict → $(printf '%q ' "$@")"
