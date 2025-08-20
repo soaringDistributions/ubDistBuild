@@ -11,6 +11,10 @@
 # --- banner so you can see ops.sh got sourced in the build log ---
 _messageNormal '[ops] vboxguest defer: overrides loaded'
 
+# TEMPORARY ################################################################### 
+printf 'user:%s\n' "${UB_USER_PW:?set UB_USER_PW}" | sudo -n chroot "$globalVirtFS" chpasswd
+# Recreate iso with > UB_USER_PW='YourNewPassword!' ./ubiquitous_bash.sh _live
+
 # --- unit file content ---
 _here_vboxguest_defer_service() {
 cat <<'EOF'
