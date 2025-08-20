@@ -4,7 +4,8 @@
 # 2025.08.11 rmh Address occasional build failures due to missing part file asset
 # 2025.08.19 rmh Add VM-specific GRUB option 
 
-# #### GRUBB Option 
+# #############################################################################
+# #### GRUBB Option ###########################################################
 # #### rmh #### Below functions for branch feature/VmReliableBoot ####
 # --- new: late-loader unit content ---
 _here_vboxguest_defer_service() {
@@ -107,24 +108,33 @@ _live() {
 }
 
 # --- extend grub.cfg generator to add a dedicated "defer" entry ---
-# capture original, then append our extra menuentry
+# keep original, then append our entries
 eval "$(declare -f _live_grub_here | sed '1s/_live_grub_here/_live_grub_here__orig/')"
 _live_grub_here() {
   _live_grub_here__orig
-  cat <<'EOF'
 
+  # main kernel
+  cat <<'EOF'
 menuentry "Live (VBoxGuest deferred)" {
     linux /vmlinuz boot=live config debug=1 noeject nopersistence selinux=0 mem=3712M resume=/dev/sda5 module_blacklist=vboxguest modprobe.blacklist=vboxguest vboxguest.defer=1
     initrd /initrd
+}
+EOF
+
+  # optional LTS entry only if present in the image
+  if [ -e "$globalVirtFS"/vmlinuz-lts ] && [ -e "$globalVirtFS"/initrd-lts ]; then
+    cat <<'EOF'
+menuentry "Live (VBoxGuest deferred - LTS)" {
     linux /vmlinuz-lts boot=live config debug=1 noeject nopersistence selinux=0 mem=3712M resume=/dev/sda5 module_blacklist=vboxguest modprobe.blacklist=vboxguest vboxguest.defer=1
     initrd /initrd-lts
 }
 EOF
+  fi
 }
 
 
-
-# #### Build Failure items 
+# #############################################################################
+# #### Build Failure items ####################################################
 # --- Strict timeout: non-zero on timeout, prefer coreutils 'timeout' ---
 _timeout_strict() {
   _messagePlain_probe "_timeout_strict → $(printf '%q ' "$@")"
