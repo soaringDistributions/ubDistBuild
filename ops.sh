@@ -7,11 +7,15 @@
 # #############################################################################
 # #### GRUBB Option ###########################################################
 # #### rmh #### Below functions for branch feature/VmReliableBoot ####
-# --- new: late-loader unit content ---
+
+# --- banner so you can see ops.sh got sourced in the build log ---
+_messageNormal '[ops] vboxguest defer: overrides loaded'
+
+# --- unit file content ---
 _here_vboxguest_defer_service() {
 cat <<'EOF'
 [Unit]
-Description=Defer vboxguest module until after KDE session is up (only if requested)
+Description=Defer vboxguest until after KDE session is up (only if requested)
 After=sddm.service graphical.target
 Wants=graphical.target
 
@@ -25,38 +29,30 @@ WantedBy=multi-user.target
 EOF
 }
 
-# --- new: late-loader script (runs only when vboxguest.defer=1 present) ---
+# --- loader script (only runs when vboxguest.defer=1 is on cmdline) ---
 _here_vboxguest_defer_script() {
 cat <<'EOF'
 #!/bin/sh
 set -eu
 
 # Only on VMs
-if ! systemd-detect-virt --quiet --vm ; then
-  exit 0
-fi
+systemd-detect-virt --quiet --vm || exit 0
 
-# Act only when requested via GRUB flag + blacklist
-if ! grep -qw 'vboxguest.defer=1' /proc/cmdline ; then
-  exit 0
-fi
+# Only when requested via GRUB flag + blacklist
+grep -qw 'vboxguest.defer=1' /proc/cmdline || exit 0
 
-# Already loaded? then nothing to do.
-if lsmod | awk '{print $1}' | grep -qx vboxguest ; then
-  exit 0
-fi
+# Already loaded? nothing to do
+lsmod | awk '{print $1}' | grep -qx vboxguest && exit 0
 
 # Wait up to 90s for KDE session (best-effort)
 i=90
 while [ $i -gt 0 ]; do
-  if pgrep -x plasmashell >/dev/null 2>&1 || pgrep -x startplasma-x11 >/dev/null 2>&1 ; then
-    break
-  fi
-  sleep 1
-  i=$((i-1))
+  pgrep -x plasmashell >/dev/null 2>&1 && break
+  pgrep -x startplasma-x11 >/dev/null 2>&1 && break
+  sleep 1; i=$((i-1))
 done
 
-# Load modules (order matters a bit); ignore if missing
+# Load kernel bits; ignore if not present
 modprobe -v vboxguest   || true
 modprobe -v vboxsf      || true
 modprobe -v vboxvideo   || true
@@ -64,73 +60,68 @@ modprobe -v vboxvideo   || true
 udevadm settle || true
 systemctl restart vboxservice || true
 
-# Nudge per-user helpers if present
+# Nudge per-user helpers (usually autostart anyway)
 for uid in $(loginctl list-users --no-legend | awk '{print $1}'); do
-  user="$(id -un "$uid" 2>/dev/null || true)"
-  [ -n "$user" ] || continue
+  user="$(id -un "$uid" 2>/dev/null || true)"; [ -n "$user" ] || continue
   su -l "$user" -c 'command -v VBoxClient-all >/dev/null && VBoxClient-all >/dev/null 2>&1 || true' || true
 done
-
-exit 0
 EOF
 }
 
-# --- new: installer that writes files into the live root and enables the unit ---
+# --- installer: creates dirs, writes files, enables unit (symlink) ---
 _install_vboxguest_defer() {
-  _messageNormal 'init: install vboxguest-defer (late loader)'
-  # script
-  _here_vboxguest_defer_script | sudo -n tee "$globalVirtFS"/usr/local/sbin/vboxguest-defer-load.sh > /dev/null
+  _messageNormal '[ops] vboxguest defer: installing (late loader)'
+
+  # Make sure target dirs exist in the live root
+  sudo -n mkdir -p "$globalVirtFS"/usr/local/sbin
+  sudo -n mkdir -p "$globalVirtFS"/etc/systemd/system
+  sudo -n mkdir -p "$globalVirtFS"/etc/systemd/system/multi-user.target.wants
+
+  # Script
+  _here_vboxguest_defer_script | sudo -n tee "$globalVirtFS"/usr/local/sbin/vboxguest-defer-load.sh >/dev/null
   _chroot chown root:root /usr/local/sbin/vboxguest-defer-load.sh
   _chroot chmod 0755 /usr/local/sbin/vboxguest-defer-load.sh
-  # unit
-  _here_vboxguest_defer_service | sudo -n tee "$globalVirtFS"/etc/systemd/system/vboxguest-defer-load.service > /dev/null
+
+  # Unit
+  _here_vboxguest_defer_service | sudo -n tee "$globalVirtFS"/etc/systemd/system/vboxguest-defer-load.service >/dev/null
   _chroot chown root:root /etc/systemd/system/vboxguest-defer-load.service
   _chroot chmod 0644 /etc/systemd/system/vboxguest-defer-load.service
-  _chroot systemctl enable vboxguest-defer-load.service
+
+  # Enable without depending on systemctl inside chroot
+  _chroot ln -sf /etc/systemd/system/vboxguest-defer-load.service \
+                /etc/systemd/system/multi-user.target.wants/vboxguest-defer-load.service
+
+  # Breadcrumb to prove inclusion in the running live system
+  echo 'ok' | sudo -n tee "$globalVirtFS"/DEFER_MARKER >/dev/null
+
+  # Debug evidence in build log
+  _messagePlain_probe_cmd ls -l "$globalVirtFS"/usr/local/sbin/vboxguest-defer-load.sh
+  _messagePlain_probe_cmd ls -l "$globalVirtFS"/etc/systemd/system/vboxguest-defer-load.service
+  _messagePlain_probe_cmd ls -l "$globalVirtFS"/etc/systemd/system/multi-user.target.wants/vboxguest-defer-load.service
 }
 
-# --- wrap the top-level live build to inject our installer at the right time ---
-# keep original sequence calls and cleanup, but add our step in between
+# --- inject our installer into the standard live build ---
+eval "$(declare -f _live | sed '1s/_live/_live__orig/')"
 _live() {
-  if ! "$scriptAbsoluteLocation" _live_sequence_in "$@"; then
-    _stop 1
-  fi
-
-  # our addition: install the late-loader files inside the live rootfs
+  if ! "$scriptAbsoluteLocation" _live_sequence_in "$@"; then _stop 1; fi
   _install_vboxguest_defer
-
-  if ! "$scriptAbsoluteLocation" _live_sequence_out "$@"; then
-    _stop 1
-  fi
-
-  export safeToDeleteGit="true"
-  _safeRMR "$scriptLocal"/livefs
+  if ! "$scriptAbsoluteLocation" _live_sequence_out "$@"; then _stop 1; fi
+  export safeToDeleteGit="true"; _safeRMR "$scriptLocal"/livefs
 }
 
-# --- extend grub.cfg generator to add a dedicated "defer" entry ---
-# keep original, then append our entries
+# --- append a single deferred GRUB entry (no -lts double-kernel) ---
 eval "$(declare -f _live_grub_here | sed '1s/_live_grub_here/_live_grub_here__orig/')"
 _live_grub_here() {
   _live_grub_here__orig
-
-  # main kernel
   cat <<'EOF'
+
 menuentry "Live (VBoxGuest deferred)" {
     linux /vmlinuz boot=live config debug=1 noeject nopersistence selinux=0 mem=3712M resume=/dev/sda5 module_blacklist=vboxguest modprobe.blacklist=vboxguest vboxguest.defer=1
     initrd /initrd
 }
 EOF
+}
 
-  # optional LTS entry only if present in the image
-  if [ -e "$globalVirtFS"/vmlinuz-lts ] && [ -e "$globalVirtFS"/initrd-lts ]; then
-    cat <<'EOF'
-menuentry "Live (VBoxGuest deferred - LTS)" {
-    linux /vmlinuz-lts boot=live config debug=1 noeject nopersistence selinux=0 mem=3712M resume=/dev/sda5 module_blacklist=vboxguest modprobe.blacklist=vboxguest vboxguest.defer=1
-    initrd /initrd-lts
-}
-EOF
-  fi
-}
 
 
 # #############################################################################
