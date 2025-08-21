@@ -12,8 +12,101 @@
 _messageNormal '[ops] vboxguest defer: overrides loaded'
 
 # TEMPORARY ################################################################### 
-printf 'user:%s\n' "${UB_USER_PW:?set UB_USER_PW}" | sudo -n chroot "$globalVirtFS" chpasswd
 # Recreate iso with > UB_USER_PW='YourNewPassword!' ./ubiquitous_bash.sh _live
+# --- set live user password after chroot is open ---
+_ops_set_live_user_pw() {
+  # only run if you provided UB_USER_PW
+  if [ -z "${UB_USER_PW:-}" ]; then
+    _messageNormal '[ops] skip: UB_USER_PW not set'
+    return 0
+  fi
+
+  _messageNormal '[ops] setting live user password'
+  # hide secret if shell tracing is on
+  { set +x; } 2>/dev/null
+
+  printf 'user:%s\n' "$UB_USER_PW" | _chroot chpasswd
+
+  { set -x; } 2>/dev/null || true
+
+  # breadcrumb so you can prove inclusion inside the VM
+  echo 'pw:ok' | sudo -n tee "$globalVirtFS"/OPS_MARKER_PW >/dev/null
+}
+# ---- debug wrapper around _openChRoot (logs, then passes through) ----
+eval "$(declare -f _openChRoot | sed '1s/_openChRoot/_openChRoot__orig/')"
+_openChRoot() {
+  _messageNormal '[ops] debug: entering _openChRoot'
+  {
+    echo "----- $(date -Is) (_openChRoot debug) -----"
+    echo "whoami: $(whoami)"
+    echo "scriptLocal: $scriptLocal"
+    echo "globalVirtFS: $globalVirtFS"
+    echo "ubVirtPlatform: $ubVirtPlatform"
+    echo "mounts before:"
+    mount | sed 's/^/  /'
+    echo
+  } >> "$scriptLocal/_openChRoot.debug" 2>&1
+
+  set -o pipefail
+  ( set -x; _openChRoot__orig "$@" ) >> "$scriptLocal/_openChRoot.debug" 2>&1
+  local rc=$?
+
+  echo "rc=${rc}" >> "$scriptLocal/_openChRoot.debug"
+  _messageNormal "[ops] debug: _openChRoot rc=${rc}"
+  return $rc
+}
+
+# Eliminate hold-over mounts if last _live exection was terminiated or otherwise didn't close cleanly 
+_ops_preflight_chroot_clean() {
+  _messageNormal '[ops] preflight: cleanup stale chroot (deep)'
+
+  # try the built-ins first
+  "$scriptAbsoluteLocation" _closeChRoot --force >/dev/null 2>&1 || true
+  "$scriptAbsoluteLocation" _removeChRoot           >/dev/null 2>&1 || true
+
+  # 1) anything under our normal live root(s)
+  local root="$scriptLocal"/v/fs
+  awk -v r="$scriptLocal" '$2 ~ "^"r"/v(/|$)" {print length($2),$2}' /proc/mounts |
+    sort -nr | awk '{print $2}' |
+    while read -r m; do
+      sudo umount "$m" 2>/dev/null || sudo umount -l "$m" 2>/dev/null || true
+    done
+
+  # 2) collect this project’s loop devices
+  mapfile -t _ops_loops < <(sudo losetup -a | awk -F: -v r="$(pwd)" '$0 ~ r {print $1}')
+
+  # 3) unmount *anywhere* those loops are mounted (incl. ~/.ubtmp/.../root*)
+  if ((${#_ops_loops[@]})); then
+    # by device
+    awk -v devs="$(printf "|%s" "${_ops_loops[@]}")" '
+      BEGIN{split(devs,a,"|")}
+      { for(i in a) if(a[i]!="" && $1==a[i]) print length($2),$2 }' /proc/mounts |
+      sort -nr | awk '{print $2}' |
+      while read -r m; do
+        sudo umount "$m" 2>/dev/null || sudo umount -l "$m" 2>/dev/null || true
+      done
+  fi
+
+  # 4) extra guard: anything under ~/.ubtmp/*/root*
+  awk '$2 ~ "/\\.ubtmp/.*/root.*"' /proc/mounts |
+    sort -k2,2r -s | awk '{print $2}' |
+    while read -r m; do
+      sudo umount "$m" 2>/dev/null || sudo umount -l "$m" 2>/dev/null || true
+    done
+
+  # 5) now detach the loops
+  for L in "${_ops_loops[@]}"; do
+    sudo losetup -d "$L" 2>/dev/null || true
+  done
+
+  # 6) remove stale breadcrumb that misleads mountimage
+  rm -f "$scriptLocal"/imagedev
+
+  # (optional) quick visibility
+  _messagePlain_probe_cmd 'mount | grep -E "_local/(v/fs|v/.*/fs)|\\.ubtmp/.*/root" || echo "no project mounts"'
+  _messagePlain_probe_cmd 'sudo losetup -a | grep "$(pwd)" || echo "no project loop devices"'
+}
+
 
 # --- unit file content ---
 _here_vboxguest_defer_service() {
@@ -107,8 +200,15 @@ _install_vboxguest_defer() {
 # --- inject our installer into the standard live build ---
 eval "$(declare -f _live | sed '1s/_live/_live__orig/')"
 _live() {
+  _messagePlain_nominal "==rmh== Live (modified)"
+  _ops_preflight_chroot_clean
+
   if ! "$scriptAbsoluteLocation" _live_sequence_in "$@"; then _stop 1; fi
+
   _install_vboxguest_defer
+  _ops_set_live_user_pw         # <-- set the password here
+
+  
   if ! "$scriptAbsoluteLocation" _live_sequence_out "$@"; then _stop 1; fi
   export safeToDeleteGit="true"; _safeRMR "$scriptLocal"/livefs
 }
