@@ -183,6 +183,7 @@ _here_vboxguest_defer_service() {
 cat <<'EOF'
 [Unit]
 Description=Defer vboxguest until after KDE session is up (only if requested)
+ConditionKernelCommandLine=vboxguest.defer=1
 After=sddm.service graphical.target
 Wants=graphical.target
 
