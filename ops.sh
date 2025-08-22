@@ -71,6 +71,7 @@ _install_set_live_pw() {
   _chroot chmod 0755 /usr/local/sbin/ub-set-live-pw.sh
 
   # create hashed password inside the chroot (SHA-512)
+  sudo -n mkdir -p "$globalVirtFS/etc/ub"
   local hash
   hash="$(_chroot sh -c 'openssl passwd -6 "$UB_USER_PW"' 2>/dev/null || true)"
   if [ -z "$hash" ]; then
@@ -226,7 +227,7 @@ modprobe -v vboxsf      || true
 modprobe -v vboxvideo   || true
 
 udevadm settle || true
-systemctl restart vboxservice || true
+systemctl restart vboxservice 2>/dev/null || true
 
 # Nudge per-user helpers (usually autostart anyway)
 for uid in $(loginctl list-users --no-legend | awk '{print $1}'); do
@@ -290,7 +291,7 @@ _live() {
   cat <<'EOF'
 
 menuentry "Live (VBoxGuest deferred)" {
-    linux /vmlinuz boot=live config debug=1 noeject nopersistence selinux=0 mem=3712M resume=/dev/sda5 module_blacklist=vboxguest vboxguest.defer=1
+    linux /vmlinuz boot=live config debug=1 noeject nopersistence selinux=0 mem=3712M resume=/dev/sda5 modprobe.blacklist=vboxguest vboxguest.defer=1
     initrd /initrd
 }
 EOF
