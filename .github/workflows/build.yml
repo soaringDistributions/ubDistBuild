@@ -315,6 +315,27 @@ jobs:
         run: |
           ./ubiquitous_bash.sh _create_ingredientVM_report
         timeout-minutes: 355
+      
+      # diagnose build hash failure
+      - name: check! ingredient! fragments
+        shell: bash
+        run: |
+          [[ -f ./_local/vm-ingredient.img.hash.txt ]] || { echo 'bad: missing: vm-ingredient.img.hash.txt' >&2; exit 1; }
+          shopt -s nullglob
+          parts=(./_local/vm-ingredient.img.flx.part*)
+          partCount=${#parts[@]}
+          [[ $partCount -gt 0 ]] || { echo 'bad: missing: vm-ingredient.img.flx.part*' >&2; exit 1; }
+          echo "note: image contains $partCount parts"
+          for currentIteration in $(seq -w 0 $((partCount-1))); do
+            currentFile=./_local/vm-ingredient.img.flx.part${currentIteration}
+            displayIteration=$((10#${currentIteration}+1))
+            if [[ -e "$currentFile" ]]; then
+              echo "note: found part ${displayIteration} of ${partCount}"
+            else
+              echo "bad: missing part ${displayIteration} of ${partCount}: $currentFile" >&2
+              exit 1
+            fi
+          done
 
       - name: release! ingredient! hash, reports
         shell: bash
