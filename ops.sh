@@ -19,8 +19,8 @@ _here_set_live_pw_service() {
 cat <<'EOF'
 [Unit]
 Description=Set live user's password (first boot)
-After=systemd-user-sessions.service
-Before=multi-user.target
+After=live-config.service graphical.target
+Wants=graphical.target
 ConditionPathExists=/etc/ub/userpw.sha512
 
 [Service]
@@ -50,7 +50,11 @@ fi
 [ -n "${user:-}" ] || exit 0
 
 hash="$(cat "$hash_file")"
-usermod -p "$hash" "$user" || true
+if command -v chpasswd >/dev/null 2>&1; then
+  printf '%s:%s\n' "$user" "$hash" | chpasswd -e
+else
+  usermod -p "$hash" "$user" || true
+fi
 rm -f "$hash_file" || true
 exit 0
 EOF
@@ -85,6 +89,12 @@ _install_set_live_pw() {
   _here_set_live_pw_service | sudo -n tee "$globalVirtFS"/etc/systemd/system/ub-set-live-pw.service >/dev/null
   _chroot chown root:root /etc/systemd/system/ub-set-live-pw.service
   _chroot chmod 0644 /etc/systemd/system/ub-set-live-pw.service
+
+  # Force-enable the unit in the image (create the symlink outside the chroot)
+  sudo -n mkdir -p "$globalVirtFS"/etc/systemd/system/multi-user.target.wants
+  sudo -n ln -sf /etc/systemd/system/ub-set-live-pw.service \
+    "$globalVirtFS"/etc/systemd/system/multi-user.target.wants/ub-set-live-pw.service
+
   _chroot ln -sf /etc/systemd/system/ub-set-live-pw.service \
                 /etc/systemd/system/multi-user.target.wants/ub-set-live-pw.service
 
