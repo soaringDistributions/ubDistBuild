@@ -19,7 +19,8 @@ _here_set_live_pw_service() {
 cat <<'EOF'
 [Unit]
 Description=Set live user's password (first boot)
-After=live-config.service graphical.target
+After=systemd-user-sessions.service live-config.service
+Wants=live-config.service
 Wants=graphical.target
 ConditionPathExists=/etc/ub/userpw.sha512
 
@@ -75,7 +76,7 @@ _install_set_live_pw() {
   _chroot chmod 0755 /usr/local/sbin/ub-set-live-pw.sh
 
   # create hashed password inside the chroot (SHA-512)
-  sudo -n mkdir -p "$globalVirtFS/etc/ub"
+  sudo -n mkdir -p "$globalVirtFS"/etc/ub
   local hash
   hash="$(_chroot sh -c 'openssl passwd -6 "$UB_USER_PW"' 2>/dev/null || true)"
   if [ -z "$hash" ]; then
@@ -188,6 +189,18 @@ _ops_preflight_chroot_clean() {
   _messagePlain_probe_cmd 'sudo losetup -a | grep "$(pwd)" || echo "no project loop devices"'
 }
 
+# ---- patch the final mksquashfs call to close off /home duplication ----
+# We only change the "globalVirtFS" pass: sudo -n mksquashfs "$globalVirtFS" ...
+eval "$(declare -f _messagePlain_probe_cmd | sed '1s/_messagePlain_probe_cmd/_messagePlain_probe_cmd__orig/')"
+_messagePlain_probe_cmd() {
+  # Detect: sudo -n mksquashfs <SRC> <DEST> ...  where <SRC> == "$globalVirtFS"
+  if [ "$1" = "sudo" ] && [ "$2" = "-n" ] && [ "$3" = "mksquashfs" ] && [ "$4" = "$globalVirtFS" ]; then
+    # Keep original args and *append* stronger excludes for /home
+    _messagePlain_probe_cmd__orig "$@" -wildcards -e 'home/*'
+    return $?
+  fi
+  _messagePlain_probe_cmd__orig "$@"
+}
 
 # --- unit file content ---
 _here_vboxguest_defer_service() {
@@ -284,6 +297,10 @@ eval "$(declare -f _live | sed '1s/_live/_live__orig/')"
 _live() {
   _messagePlain_nominal "==rmh== Live (modified)"
   _ops_preflight_chroot_clean
+
+  if printf %s "$PWD" | grep -qE '^/mnt/[a-z]/'; then
+    _messagePlain_warn '[ops] building from DrvFs (/mnt/*). If /home duplication recurs, run from ext4 (e.g., ~/projects).'
+  fi
 
   if ! "$scriptAbsoluteLocation" _live_sequence_in "$@"; then _stop 1; fi
 
