@@ -38,6 +38,7 @@ _here_set_live_pw_script() {
 cat <<'EOF'
 #!/bin/sh
 set -eu
+sleep 20 
 hash_file=/etc/ub/userpw.sha512
 [ -f "$hash_file" ] || exit 0
 

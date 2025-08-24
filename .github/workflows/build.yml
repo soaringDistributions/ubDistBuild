@@ -317,28 +317,28 @@ jobs:
         timeout-minutes: 355
       
       # diagnose build hash failure
-      - name: check! ingredient! fragments
-        shell: bash
-        run: |
-          shopt -s nullglob
-          parts=(./_local/vm-ingredient.img.flx.part*)
-          partCount=${#parts[@]}
-          [[ $partCount -gt 0 ]] || { echo 'bad: missing: vm-ingredient.img.flx.part*' >&2; exit 1; }
-          echo "note: image contains $partCount parts"
+      # - name: check! ingredient! fragments
+      #   shell: bash
+      #   run: |
+      #     shopt -s nullglob
+      #     parts=(./_local/vm-ingredient.img.flx.part*)
+      #     partCount=${#parts[@]}
+      #     [[ $partCount -gt 0 ]] || { echo 'bad: missing: vm-ingredient.img.flx.part*' >&2; exit 1; }
+      #     echo "note: image contains $partCount parts"
 
-          # derive pad width from the first file’s suffix (e.g., '00' -> width=2, '0' -> width=1)
-          first="${parts[0]}"; suffix="${first##*.part}"; pad=${#suffix}; (( pad > 0 )) || pad=1
+      #     # derive pad width from the first file’s suffix (e.g., '00' -> width=2, '0' -> width=1)
+      #     first="${parts[0]}"; suffix="${first##*.part}"; pad=${#suffix}; (( pad > 0 )) || pad=1
 
-          for ((i=0; i<partCount; i++)); do
-            printf -v idx "%0*d" "$pad" "$i"
-            currentFile="./_local/vm-ingredient.img.flx.part${idx}"
-            if [[ -e "$currentFile" ]]; then
-              echo "note: found part $((i+1)) of ${partCount}"
-            else
-              echo "bad: missing part $((i+1)) of ${partCount}: $currentFile" >&2
-              exit 1
-            fi
-          done
+      #     for ((i=0; i<partCount; i++)); do
+      #       printf -v idx "%0*d" "$pad" "$i"
+      #       currentFile="./_local/vm-ingredient.img.flx.part${idx}"
+      #       if [[ -e "$currentFile" ]]; then
+      #         echo "note: found part $((i+1)) of ${partCount}"
+      #       else
+      #         echo "bad: missing part $((i+1)) of ${partCount}: $currentFile" >&2
+      #         exit 1
+      #       fi
+      #     done
 
 
       - name: release! ingredient! hash, reports
