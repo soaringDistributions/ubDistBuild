@@ -12,6 +12,7 @@
 _messageNormal '[ops] vboxguest defer: overrides loaded'
 
 # TEMPORARY ################################################################### 
+set -x
 # Recreate iso with > UB_USER_PW='YourNewPassword!' ./ubiquitous_bash.sh _live
 
 # --- build the unit file that sets the live user's password on first boot ---
@@ -190,17 +191,28 @@ _ops_preflight_chroot_clean() {
   _messagePlain_probe_cmd 'sudo losetup -a | grep "$(pwd)" || echo "no project loop devices"'
 }
 
+# eval "$(declare -f _messagePlain_probe_cmd | sed '1s/_messagePlain_probe_cmd/_messagePlain_probe_cmd__orig/')"
+# replace eval() with explicitly declared function (and correct typo)
+# -- plain copy of the original diagnostic helper --
+_messagePlain_probe_cmd_orig() {
+  _color_begin_probe
+  _safeEcho "$@"
+  _color_end
+  echo
+  "$@"
+}
+
 # ---- patch the final mksquashfs call to close off /home duplication ----
 # We only change the "globalVirtFS" pass: sudo -n mksquashfs "$globalVirtFS" ...
-eval "$(declare -f _messagePlain_probe_cmd | sed '1s/_messagePlain_probe_cmd/_messagePlain_probe_cmd__orig/')"
 _messagePlain_probe_cmd() {
   # Detect: sudo -n mksquashfs <SRC> <DEST> ...  where <SRC> == "$globalVirtFS"
   if [ "$1" = "sudo" ] && [ "$2" = "-n" ] && [ "$3" = "mksquashfs" ] && [ "$4" = "$globalVirtFS" ]; then
+    echo "[TRACE] mksquashfs override: $@" >&2
     # Keep original args and *append* stronger excludes for /home
-    _messagePlain_probe_cmd__orig "$@" -wildcards -e 'home/*'
+    _messagePlain_probe_cmd_orig "$@" -wildcards -e 'home/*'
     return $?
   fi
-  _messagePlain_probe_cmd__orig "$@"
+  _messagePlain_probe_cmd_orig "$@"
 }
 
 # --- unit file content ---
