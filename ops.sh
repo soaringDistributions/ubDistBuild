@@ -11,95 +11,22 @@
 # --- banner so you can see ops.sh got sourced in the build log ---
 _messageNormal '[ops] vboxguest defer: overrides loaded'
 
-# TEMPORARY ################################################################### 
+# TEMPORARY PW HANDLING #######################################################
 # Recreate iso with > UB_USER_PW='YourNewPassword!' ./ubiquitous_bash.sh _live
 
-# --- install a fresh first-boot password setter into the live root ---
-_ops_install_live_password() {
-  _messageNormal '[ops] live pw: installing first-boot setter'
-
-  # live user (override by exporting UB_LIVE_USER=foo if you don't want "user")
-  local live_user="${UB_LIVE_USER:-user}"
-
-  # target paths inside the image
-  sudo -n mkdir -p "$globalVirtFS"/usr/local/sbin
-  sudo -n mkdir -p "$globalVirtFS"/etc/ub
-  sudo -n mkdir -p "$globalVirtFS"/etc/systemd/system
-  sudo -n mkdir -p "$globalVirtFS"/etc/systemd/system/multi-user.target.wants
-
-  # remove any stale artifacts from previous builds
-  _chroot rm -f /usr/local/sbin/ub-set-live-pw.sh || true
-  _chroot rm -f /etc/systemd/system/ub-set-live-pw.service || true
-  _chroot rm -f /etc/systemd/system/multi-user.target.wants/ub-set-live-pw.service || true
-  _chroot rm -f /etc/ub/userpw.txt /etc/ub/userpw.sha256 || true
-
-  # if no password provided at build time, do nothing
+_ops_set_live_user_pw_offline() {
   if [ -z "${UB_USER_PW:-}" ]; then
-    _messageNormal '[ops] live pw: UB_USER_PW not set; skipping embed'
+    _messageNormal '[ops] skip: UB_USER_PW not set'
     return 0
   fi
+  [ -f "$globalVirtFS/etc/shadow" ] || { _messageNormal "[ops] ERROR: missing $globalVirtFS/etc/shadow"; return 1; }
 
-  # write the password source into the image (no echoing to logs)
-  { set +x; } 2>/dev/null
-  printf '%s' "$UB_USER_PW" | sudo -n tee "$globalVirtFS"/etc/ub/userpw.txt >/dev/null
-  { set -x; } 2>/dev/null || true
+  _messageNormal '[ops] live pw: setting via chpasswd -R (offline)'
+  # Set just 'user'; uncomment root if you want it too.
+  printf 'user:%s\n' "$UB_USER_PW" | sudo -n chpasswd -R "$globalVirtFS"
+  # printf 'root:%s\n' "$UB_USER_PW" | sudo -n chpasswd -R "$globalVirtFS"
 
-  # record a non-secret checksum so you can prove what value was used
-  _chroot sh -ceu 'printf %s "$(cat /etc/ub/userpw.txt)" | sha256sum | awk "{print \$1}" > /etc/ub/userpw.sha256'
-
-  # first-boot script (runs once, logs length + sha256 only)
-  sudo -n tee "$globalVirtFS"/usr/local/sbin/ub-set-live-pw.sh >/dev/null <<'EOS'
-#!/bin/sh
-set -eu
-exec >> /var/log/ub-set-live-pw.log 2>&1
-echo "=== $(date -Is) start ==="
-
-LIVE_USER="${UB_LIVE_USER:-user}"
-PW_FILE=/etc/ub/userpw.txt
-[ -s "$PW_FILE" ] || { echo "no $PW_FILE; exit 0"; exit 0; }
-
-pw=$(cat "$PW_FILE")
-printf %s "$pw" | sha256sum | awk '{print "pw_sha256=" $1}'
-echo "user=$LIVE_USER"
-
-# set the password for the live user
-printf '%s:%s\n' "$LIVE_USER" "$pw" | chpasswd
-
-# breadcrumb for quick confirmation
-echo pw-unit:ok > /OPS_MARKER_PW
-
-# remove secret source
-shred -u "$PW_FILE" 2>/dev/null || rm -f "$PW_FILE"
-
-echo "=== $(date -Is) done ==="
-EOS
-  _chroot chown root:root /usr/local/sbin/ub-set-live-pw.sh
-  _chroot chmod 0755 /usr/local/sbin/ub-set-live-pw.sh
-
-  # systemd unit: run after live-config so nothing overwrites our change
-  sudo -n tee "$globalVirtFS"/etc/systemd/system/ub-set-live-pw.service >/dev/null <<'EOS'
-[Unit]
-Description=Set live user's password (first boot)
-After=systemd-user-sessions.service live-config.service
-Wants=live-config.service
-ConditionPathExists=/etc/ub/userpw.sha256
-
-[Service]
-Type=oneshot
-ExecStart=/usr/local/sbin/ub-set-live-pw.sh
-
-[Install]
-WantedBy=multi-user.target
-EOS
-  _chroot chown root:root /etc/systemd/system/ub-set-live-pw.service
-  _chroot chmod 0644 /etc/systemd/system/ub-set-live-pw.service
-  _chroot ln -sf /etc/systemd/system/ub-set-live-pw.service \
-                /etc/systemd/system/multi-user.target.wants/ub-set-live-pw.service
-
-  # quick visibility in the build log
-  _messagePlain_probe_cmd 'ls -l /etc/systemd/system/ub-set-live-pw.service'
-  _messagePlain_probe_cmd 'ls -l /usr/local/sbin/ub-set-live-pw.sh'
-  _messagePlain_probe_cmd 'test -f /etc/ub/userpw.txt && echo "/etc/ub/userpw.txt present" || echo "no /etc/ub/userpw.txt"'
+  echo 'pw:offline:ok' | sudo -n tee "$globalVirtFS/OPS_MARKER_PW" >/dev/null
 }
 
 
@@ -119,7 +46,8 @@ _openChRoot() {
   } >> "$scriptLocal/_openChRoot.debug" 2>&1
 
   set -o pipefail
-  ( set -x; _openChRoot__orig "$@" ) >> "$scriptLocal/_openChRoot.debug" 2>&1
+  # comment next line if debugging not needed 
+  # ( set -x; _openChRoot__orig "$@" ) >> "$scriptLocal/_openChRoot.debug" 2>&1
   local rc=$?
   echo "rc=${rc}" >> "$scriptLocal/_openChRoot.debug"
   _messageNormal "[ops] debug: _openChRoot rc=${rc}"
@@ -128,7 +56,6 @@ _openChRoot() {
   if [ $rc -eq 0 ] && [ -n "${globalVirtFS:-}" ] && [ -d "$globalVirtFS" ]; then
     if [ ! -e "$globalVirtFS/.ops_installed" ]; then
       _install_vboxguest_defer || true
-      #_install_set_live_pw     || true
       _install_liveconfig_pw_hook || true
       sudo -n touch "$globalVirtFS/.ops_installed" || true
     fi
@@ -190,13 +117,15 @@ _ops_preflight_chroot_clean() {
 
 # --- prevent accidental mksquashfs append by removing stale outputs ---
 _ops_clear_stale_squashfs() {
-  local fs="$scriptLocal/livefs/image/live/filesystem.squashfs"
-  if [ -e "$fs" ]; then
-    _messageNormal "[ops] squashfs: removing stale $(basename "$fs") to avoid append"
-    rm -f "$fs"
-  fi
-  # clean up any previous recovery files from aborted runs
+  local liveDir="$scriptLocal/livefs/image/live"
+  local fs="$liveDir/filesystem.squashfs"
+
+  # remove any old squashfs + recovery files
+  [ -e "$fs" ] && rm -f "$fs"
   sudo rm -f /root/squashfs_recovery_filesystem.squashfs_* 2>/dev/null || true
+
+  # blow away the target "live" dir to avoid duplicate entries like 'home_1'
+  [ -d "$liveDir" ] && rm -rf "$liveDir"
 }
 
 
@@ -209,8 +138,11 @@ _messagePlain_probe_cmd_orig() {
   _safeEcho "$@"
   _color_end
   echo
-  # rmh Restore eval()
-  eval "$@"
+  if [ $# -eq 1 ]; then
+    eval "$1"        # supports pipelines
+  else
+    "$@"             # preserves argument quoting (e.g. home/*)
+  fi
 }
 
 # ---- patch the final mksquashfs call to close off /home duplication ----
@@ -312,9 +244,9 @@ _install_vboxguest_defer() {
   echo 'ok' | sudo -n tee "$globalVirtFS"/DEFER_MARKER >/dev/null
 
   # Debug evidence in build log
-  _messagePlain_probe_cmd ls -l "$globalVirtFS"/usr/local/sbin/vboxguest-defer-load.sh
-  _messagePlain_probe_cmd ls -l "$globalVirtFS"/etc/systemd/system/vboxguest-defer-load.service
-  _messagePlain_probe_cmd ls -l "$globalVirtFS"/etc/systemd/system/multi-user.target.wants/vboxguest-defer-load.service
+  # _messagePlain_probe_cmd ls -l "$globalVirtFS"/usr/local/sbin/vboxguest-defer-load.sh
+  # _messagePlain_probe_cmd ls -l "$globalVirtFS"/etc/systemd/system/vboxguest-defer-load.service
+  # _messagePlain_probe_cmd ls -l "$globalVirtFS"/etc/systemd/system/multi-user.target.wants/vboxguest-defer-load.service
 }
 
 # --- inject our installer into the standard live build ---
@@ -325,8 +257,8 @@ _live() {
 
   if ! "$scriptAbsoluteLocation" _live_sequence_in "$@"; then _stop 1; fi
 
+  _ops_set_live_user_pw_offline
   _install_vboxguest_defer
-  _ops_install_live_password
   _ops_clear_stale_squashfs
 
 
