@@ -209,7 +209,8 @@ _messagePlain_probe_cmd_orig() {
   _safeEcho "$@"
   _color_end
   echo
-  "$@"
+  # rmh Restore eval()
+  eval "$@"
 }
 
 # ---- patch the final mksquashfs call to close off /home duplication ----
