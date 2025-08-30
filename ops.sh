@@ -12,102 +12,139 @@
 _messageNormal '[ops] vboxguest defer: overrides loaded'
 
 # TEMPORARY ################################################################### 
-set -x
 # Recreate iso with > UB_USER_PW='YourNewPassword!' ./ubiquitous_bash.sh _live
-
-# --- build the unit file that sets the live user's password on first boot ---
-_here_set_live_pw_service() {
-cat <<'EOF'
-[Unit]
-Description=Set live user's password (first boot)
-After=systemd-user-sessions.service live-config.service
-Wants=live-config.service
-Wants=graphical.target
-ConditionPathExists=/etc/ub/userpw.sha512
-
-[Service]
-Type=oneshot
-ExecStart=/usr/local/sbin/ub-set-live-pw.sh
-
-[Install]
-WantedBy=multi-user.target
-EOF
-}
-
-# --- runtime script: find the live user (uid 1000) and apply the hash ---
-_here_set_live_pw_script() {
-cat <<'EOF'
-#!/bin/sh
-set -eu
-sleep 20 
-hash_file=/etc/ub/userpw.sha512
-[ -f "$hash_file" ] || exit 0
-
-# prefer uid 1000; fall back to common live usernames
-user="$(getent passwd 1000 | cut -d: -f1 || true)"
-if [ -z "${user:-}" ] || ! getent passwd "$user" >/dev/null 2>&1; then
-  for u in user ubuntu liveuser kubuntu xubuntu lubuntu; do
-    if getent passwd "$u" >/dev/null 2>&1; then user="$u"; break; fi
-  done
-fi
-[ -n "${user:-}" ] || exit 0
-
-hash="$(cat "$hash_file")"
-if command -v chpasswd >/dev/null 2>&1; then
-  printf '%s:%s\n' "$user" "$hash" | chpasswd -e
-else
-  usermod -p "$hash" "$user" || true
-fi
-rm -f "$hash_file" || true
-exit 0
-EOF
-}
-
-# --- installer that drops the script, unit, hash, and enables it ---
-_install_set_live_pw() {
+# Set live user's password inside the chroot immediately (no first-boot unit)
+_ops_set_pw_now() {
   if [ -z "${UB_USER_PW:-}" ]; then
     _messageNormal '[ops] skip: UB_USER_PW not set'
     return 0
   fi
-  _messageNormal '[ops] installing first-boot password unit'
 
-  _chroot mkdir -p /etc/ub /usr/local/sbin /etc/systemd/system/multi-user.target.wants
+  _messageNormal '[ops] setting live user password (post-ingredient, in-chroot)'
 
-  _here_set_live_pw_script | sudo -n tee "$globalVirtFS"/usr/local/sbin/ub-set-live-pw.sh >/dev/null
-  _chroot chown root:root /usr/local/sbin/ub-set-live-pw.sh
-  _chroot chmod 0755 /usr/local/sbin/ub-set-live-pw.sh
-
-  # create hashed password inside the chroot (SHA-512)
-  sudo -n mkdir -p "$globalVirtFS"/etc/ub
-  local hash
-  hash="$(_chroot sh -c 'openssl passwd -6 "$UB_USER_PW"' 2>/dev/null || true)"
-  if [ -z "$hash" ]; then
-    # fallback if openssl missing in chroot
-    hash="$(openssl passwd -6 "$UB_USER_PW")"
+  # Open chroot if not already open
+  local _opened=0
+  if ! _chroot true >/dev/null 2>&1; then
+    "$scriptAbsoluteLocation" _openChRoot || _stop 1
+    _opened=1
   fi
-  printf '%s\n' "$hash" | sudo -n tee "$globalVirtFS"/etc/ub/userpw.sha512 >/dev/null
-  _chroot chown root:root /etc/ub/userpw.sha512
-  _chroot chmod 0600 /etc/ub/userpw.sha512
 
-  _here_set_live_pw_service | sudo -n tee "$globalVirtFS"/etc/systemd/system/ub-set-live-pw.service >/dev/null
-  _chroot chown root:root /etc/systemd/system/ub-set-live-pw.service
-  _chroot chmod 0644 /etc/systemd/system/ub-set-live-pw.service
+  # Only if the user exists
+  if _chroot getent passwd user >/dev/null 2>&1; then
+    { set +x; } 2>/dev/null   # hide secret if tracing
+    printf 'user:%s\n' "$UB_USER_PW" | _chroot chpasswd
+    { set -x; } 2>/dev/null || true
+    echo 'pw:set-post-ingredient' | sudo -n tee "$globalVirtFS"/OPS_MARKER_PW >/dev/null
+  else
+    _messageNormal "[ops] warn: user 'user' not found in chroot; skipping password set"
+  fi
 
-  # Force-enable the unit in the image (create the symlink outside the chroot)
-  sudo -n mkdir -p "$globalVirtFS"/etc/systemd/system/multi-user.target.wants
-  sudo -n ln -sf /etc/systemd/system/ub-set-live-pw.service \
-    "$globalVirtFS"/etc/systemd/system/multi-user.target.wants/ub-set-live-pw.service
-
-  _chroot ln -sf /etc/systemd/system/ub-set-live-pw.service \
-                /etc/systemd/system/multi-user.target.wants/ub-set-live-pw.service
-
-  echo 'pw-unit:ok' | sudo -n tee "$globalVirtFS"/OPS_MARKER_PW >/dev/null
-
-  _messagePlain_probe_cmd ls -l "$globalVirtFS"/usr/local/sbin/ub-set-live-pw.sh
-  _messagePlain_probe_cmd ls -l "$globalVirtFS"/etc/ub/userpw.sha512
-  _messagePlain_probe_cmd ls -l "$globalVirtFS"/etc/systemd/system/ub-set-live-pw.service
-  _messagePlain_probe_cmd ls -l "$globalVirtFS"/etc/systemd/system/multi-user.target.wants/ub-set-live-pw.service
+  # Close chroot if we opened it
+  if [ "$_opened" = 1 ]; then
+    "$scriptAbsoluteLocation" _closeChRoot || true
+  fi
 }
+
+# Run password set immediately after the ingredient VM image is created
+eval "$(declare -f _create_ingredientVM_image | sed '1s/_create_ingredientVM_image/_create_ingredientVM_image__orig/')"
+_create_ingredientVM_image() {
+  _create_ingredientVM_image__orig "$@"
+  _ops_set_pw_now
+}
+
+# --- build the unit file that sets the live user's password on first boot ---
+# _here_set_live_pw_service() {
+# cat <<'EOF'
+# [Unit]
+# Description=Set live user's password (first boot)
+# After=systemd-user-sessions.service live-config.service
+# Wants=live-config.service
+# Wants=graphical.target
+# ConditionPathExists=/etc/ub/userpw.sha512
+
+# [Service]
+# Type=oneshot
+# ExecStart=/usr/local/sbin/ub-set-live-pw.sh
+
+# [Install]
+# WantedBy=multi-user.target
+# EOF
+# }
+
+# # --- runtime script: find the live user (uid 1000) and apply the hash ---
+# _here_set_live_pw_script() {
+# cat <<'EOF'
+# #!/bin/sh
+# set -eu
+# sleep 20 
+# hash_file=/etc/ub/userpw.sha512
+# [ -f "$hash_file" ] || exit 0
+
+# # prefer uid 1000; fall back to common live usernames
+# user="$(getent passwd 1000 | cut -d: -f1 || true)"
+# if [ -z "${user:-}" ] || ! getent passwd "$user" >/dev/null 2>&1; then
+#   for u in user ubuntu liveuser kubuntu xubuntu lubuntu; do
+#     if getent passwd "$u" >/dev/null 2>&1; then user="$u"; break; fi
+#   done
+# fi
+# [ -n "${user:-}" ] || exit 0
+
+# hash="$(cat "$hash_file")"
+# if command -v chpasswd >/dev/null 2>&1; then
+#   printf '%s:%s\n' "$user" "$hash" | chpasswd -e
+# else
+#   usermod -p "$hash" "$user" || true
+# fi
+# rm -f "$hash_file" || true
+# exit 0
+# EOF
+# }
+
+# # --- installer that drops the script, unit, hash, and enables it ---
+# _install_set_live_pw() {
+#   if [ -z "${UB_USER_PW:-}" ]; then
+#     _messageNormal '[ops] skip: UB_USER_PW not set'
+#     return 0
+#   fi
+#   _messageNormal '[ops] installing first-boot password unit'
+
+#   _chroot mkdir -p /etc/ub /usr/local/sbin /etc/systemd/system/multi-user.target.wants
+
+#   _here_set_live_pw_script | sudo -n tee "$globalVirtFS"/usr/local/sbin/ub-set-live-pw.sh >/dev/null
+#   _chroot chown root:root /usr/local/sbin/ub-set-live-pw.sh
+#   _chroot chmod 0755 /usr/local/sbin/ub-set-live-pw.sh
+
+#   # create hashed password inside the chroot (SHA-512)
+#   sudo -n mkdir -p "$globalVirtFS"/etc/ub
+#   local hash
+#   hash="$(_chroot sh -c 'openssl passwd -6 "$UB_USER_PW"' 2>/dev/null || true)"
+#   if [ -z "$hash" ]; then
+#     # fallback if openssl missing in chroot
+#     hash="$(openssl passwd -6 "$UB_USER_PW")"
+#   fi
+#   printf '%s\n' "$hash" | sudo -n tee "$globalVirtFS"/etc/ub/userpw.sha512 >/dev/null
+#   _chroot chown root:root /etc/ub/userpw.sha512
+#   _chroot chmod 0600 /etc/ub/userpw.sha512
+
+#   _here_set_live_pw_service | sudo -n tee "$globalVirtFS"/etc/systemd/system/ub-set-live-pw.service >/dev/null
+#   _chroot chown root:root /etc/systemd/system/ub-set-live-pw.service
+#   _chroot chmod 0644 /etc/systemd/system/ub-set-live-pw.service
+
+#   # Force-enable the unit in the image (create the symlink outside the chroot)
+#   sudo -n mkdir -p "$globalVirtFS"/etc/systemd/system/multi-user.target.wants
+#   sudo -n ln -sf /etc/systemd/system/ub-set-live-pw.service \
+#     "$globalVirtFS"/etc/systemd/system/multi-user.target.wants/ub-set-live-pw.service
+
+#   _chroot ln -sf /etc/systemd/system/ub-set-live-pw.service \
+#                 /etc/systemd/system/multi-user.target.wants/ub-set-live-pw.service
+
+#   echo 'pw-unit:ok' | sudo -n tee "$globalVirtFS"/OPS_MARKER_PW >/dev/null
+
+#   _messagePlain_probe_cmd ls -l "$globalVirtFS"/usr/local/sbin/ub-set-live-pw.sh
+#   _messagePlain_probe_cmd ls -l "$globalVirtFS"/etc/ub/userpw.sha512
+#   _messagePlain_probe_cmd ls -l "$globalVirtFS"/etc/systemd/system/ub-set-live-pw.service
+#   _messagePlain_probe_cmd ls -l "$globalVirtFS"/etc/systemd/system/multi-user.target.wants/ub-set-live-pw.service
+# }
 
 # ---- debug wrapper around _openChRoot (logs, then passes through) ----
 eval "$(declare -f _openChRoot | sed '1s/_openChRoot/_openChRoot__orig/')"
