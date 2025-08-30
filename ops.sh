@@ -52,6 +52,71 @@ _create_ingredientVM_image() {
   _ops_set_pw_now
 }
 
+# --- live-config hook: set the live user's password once (no systemd) ---
+_here_liveconfig_pw_script() {
+cat <<'EOF'
+#!/bin/sh
+# /lib/live/config/9999-ub-set-live-pw
+# Runs very late in live-config; applies a prebuilt SHA512 hash to the live user.
+
+set -eu
+
+hash_file=/etc/ub/userpw.sha512
+[ -f "$hash_file" ] || exit 0
+
+# pick the live user: prefer uid 1000; fall back to common names
+user="$(getent passwd 1000 | cut -d: -f1 || true)"
+if [ -z "${user:-}" ] || ! getent passwd "$user" >/dev/null 2>&1; then
+  for u in user ubuntu liveuser kubuntu xubuntu lubuntu; do
+    if getent passwd "$u" >/dev/null 2>&1; then user="$u"; break; fi
+  done
+fi
+[ -n "${user:-}" ] || exit 0
+
+logger -t ub-set-live-pw "setting password for '$user'"
+usermod -p "$(cat "$hash_file")" "$user" || true
+rm -f "$hash_file" || true
+logger -t ub-set-live-pw "done"
+exit 0
+EOF
+}
+
+_install_liveconfig_pw_hook() {
+  # only if UB_USER_PW was provided at build time
+  if [ -z "${UB_USER_PW:-}" ]; then
+    _messageNormal '[ops] skip: UB_USER_PW not set (no live-config pw hook)'
+    return 0
+  fi
+
+  _messageNormal '[ops] installing live-config password hook (no systemd)'
+
+  # write the live-config hook into the image
+  sudo -n mkdir -p "$globalVirtFS"/lib/live/config
+  _here_liveconfig_pw_script | sudo -n tee "$globalVirtFS"/lib/live/config/9999-ub-set-live-pw >/dev/null
+  _chroot chown root:root /lib/live/config/9999-ub-set-live-pw
+  _chroot chmod 0755      /lib/live/config/9999-ub-set-live-pw
+
+  # store the password hash the hook will consume on first boot
+  sudo -n mkdir -p "$globalVirtFS"/etc/ub
+  if command -v openssl >/dev/null 2>&1; then
+    hash="$(openssl passwd -6 "$UB_USER_PW")"
+  else
+    # very portable fallback (uses python3 on the *host* to hash)
+    hash="$(PW="$UB_USER_PW" python3 - <<'PY'
+import os,crypt
+print(crypt.crypt(os.environ["PW"], crypt.mksalt(crypt.METHOD_SHA512)))
+PY
+)"
+  fi
+  printf '%s\n' "$hash" | sudo -n tee "$globalVirtFS"/etc/ub/userpw.sha512 >/dev/null
+
+  # breadcrumbs for build log
+  _messagePlain_probe_cmd ls -l "$globalVirtFS"/lib/live/config/9999-ub-set-live-pw
+  _messagePlain_probe_cmd ls -l "$globalVirtFS"/etc/ub/userpw.sha512
+}
+
+
+
 # --- build the unit file that sets the live user's password on first boot ---
 # _here_set_live_pw_service() {
 # cat <<'EOF'
@@ -348,18 +413,16 @@ _live() {
   _messagePlain_nominal "==rmh== Live (modified)"
   _ops_preflight_chroot_clean
 
-  if printf %s "$PWD" | grep -qE '^/mnt/[a-z]/'; then
-    _messagePlain_warn '[ops] building from DrvFs (/mnt/*). If /home duplication recurs, run from ext4 (e.g., ~/projects).'
-  fi
-
   if ! "$scriptAbsoluteLocation" _live_sequence_in "$@"; then _stop 1; fi
 
   _install_vboxguest_defer
-  _install_set_live_pw 
-  
+  _install_liveconfig_pw_hook    # <-- add this line
+  # _ops_set_live_user_pw        # (leave commented/removed; user doesn't exist yet in chroot)
+
   if ! "$scriptAbsoluteLocation" _live_sequence_out "$@"; then _stop 1; fi
   export safeToDeleteGit="true"; _safeRMR "$scriptLocal"/livefs
 }
+
 
   # --- append a single deferred GRUB entry (no -lts double-kernel) ---
   eval "$(declare -f _live_grub_here | sed '1s/_live_grub_here/_live_grub_here__orig/')"
