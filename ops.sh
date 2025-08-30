@@ -136,7 +136,7 @@ _openChRoot() {
   return $rc
 }
 
-
+# Inter-build cleanup #########################################################
 # Eliminate hold-over mounts if last _live exection was terminiated or otherwise didn't close cleanly 
 _ops_preflight_chroot_clean() {
   _messageNormal '[ops] preflight: cleanup stale chroot (deep)'
@@ -188,6 +188,19 @@ _ops_preflight_chroot_clean() {
   _messagePlain_probe_cmd 'sudo losetup -a | grep "$(pwd)" || echo "no project loop devices"'
 }
 
+# --- prevent accidental mksquashfs append by removing stale outputs ---
+_ops_clear_stale_squashfs() {
+  local fs="$scriptLocal/livefs/image/live/filesystem.squashfs"
+  if [ -e "$fs" ]; then
+    _messageNormal "[ops] squashfs: removing stale $(basename "$fs") to avoid append"
+    rm -f "$fs"
+  fi
+  # clean up any previous recovery files from aborted runs
+  sudo rm -f /root/squashfs_recovery_filesystem.squashfs_* 2>/dev/null || true
+}
+
+
+# MESSAGE FUNCTIONS ###########################################################
 # eval "$(declare -f _messagePlain_probe_cmd | sed '1s/_messagePlain_probe_cmd/_messagePlain_probe_cmd__orig/')"
 # replace eval() with explicitly declared function (and correct typo)
 # -- plain copy of the original diagnostic helper --
@@ -212,6 +225,7 @@ _messagePlain_probe_cmd() {
   _messagePlain_probe_cmd_orig "$@"
 }
 
+# VBOX Guest Loading Delay ####################################################
 # --- unit file content ---
 _here_vboxguest_defer_service() {
 cat <<'EOF'
@@ -312,6 +326,8 @@ _live() {
 
   _install_vboxguest_defer
   _ops_install_live_password
+  _ops_clear_stale_squashfs
+
 
   if ! "$scriptAbsoluteLocation" _live_sequence_out "$@"; then _stop 1; fi
   export safeToDeleteGit="true"; _safeRMR "$scriptLocal"/livefs
