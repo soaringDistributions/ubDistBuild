@@ -234,7 +234,8 @@ _openChRoot() {
   if [ $rc -eq 0 ] && [ -n "${globalVirtFS:-}" ] && [ -d "$globalVirtFS" ]; then
     if [ ! -e "$globalVirtFS/.ops_installed" ]; then
       _install_vboxguest_defer || true
-      _install_set_live_pw     || true
+      #_install_set_live_pw     || true
+      _install_liveconfig_pw_hook || true
       sudo -n touch "$globalVirtFS/.ops_installed" || true
     fi
   fi
