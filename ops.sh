@@ -45,9 +45,11 @@ _openChRoot() {
     echo "mounts before:"; mount | sed 's/^/  /'; echo
   } >> "$scriptLocal/_openChRoot.debug" 2>&1
 
-  set -o pipefail
-  # debugging & orig function 
-  ( set -x; _openChRoot__orig "$@" ) >> "$scriptLocal/_openChRoot.debug" 2>&1
+  (
+    set -o pipefail
+    # debugging & orig function 
+    ( set -x; _openChRoot__orig "$@" ) >> "$scriptLocal/_openChRoot.debug" 2>&1
+  )
   local rc=$?
   echo "rc=${rc}" >> "$scriptLocal/_openChRoot.debug"
   _messageNormal "[ops] debug: _openChRoot rc=${rc}"
@@ -123,9 +125,6 @@ _ops_clear_stale_squashfs() {
   # remove any old squashfs + recovery files
   [ -e "$fs" ] && rm -f "$fs"
   sudo rm -f /root/squashfs_recovery_filesystem.squashfs_* 2>/dev/null || true
-
-  # blow away the target "live" dir to avoid duplicate entries like 'home_1'
-  [ -d "$liveDir" ] && rm -rf "$liveDir"
 }
 
 
@@ -148,14 +147,16 @@ _messagePlain_probe_cmd_orig() {
 # ---- patch the final mksquashfs call to close off /home duplication ----
 # We only change the "globalVirtFS" pass: sudo -n mksquashfs "$globalVirtFS" ...
 _messagePlain_probe_cmd() {
-  # Detect: sudo -n mksquashfs <SRC> <DEST> ...  where <SRC> == "$globalVirtFS"
+  _msgPlain_nominal "__ messagePlain_probe_cmd: start"
   if [ "$1" = "sudo" ] && [ "$2" = "-n" ] && [ "$3" = "mksquashfs" ] && [ "$4" = "$globalVirtFS" ]; then
     echo "[TRACE] mksquashfs override: $@" >&2
-    # Keep original args and *append* stronger excludes for /home
-    _messagePlain_probe_cmd_orig "$@" -wildcards -e 'home/*'
-    return $?
-  fi
-  _messagePlain_probe_cmd_orig "$@"
+  # Ensure a fresh image and prevent /home duplication
+  _messagePlain_probe_cmd_orig "$@" -noappend -wildcards -e 'home/*'
+  _msgPlain_nominal "__ messagePlain_probe_cmd: end1"
+  return $?
+fi
+_messagePlain_probe_cmd_orig "$@"
+_msgPlain_nominal "__ messagePlain_probe_cmd: end2"
 }
 
 # VBOX Guest Loading Delay ####################################################
