@@ -147,16 +147,16 @@ _messagePlain_probe_cmd_orig() {
 # ---- patch the final mksquashfs call to close off /home duplication ----
 # We only change the "globalVirtFS" pass: sudo -n mksquashfs "$globalVirtFS" ...
 _messagePlain_probe_cmd() {
-  _msgPlain_nominal "__ messagePlain_probe_cmd: start"
+  _messagePlain_nominal "__ ==rmh== messagePlain_probe_cmd: start"
   if [ "$1" = "sudo" ] && [ "$2" = "-n" ] && [ "$3" = "mksquashfs" ] && [ "$4" = "$globalVirtFS" ]; then
     echo "[TRACE] mksquashfs override: $@" >&2
   # Ensure a fresh image and prevent /home duplication
   _messagePlain_probe_cmd_orig "$@" -noappend -wildcards -e 'home/*'
-  _msgPlain_nominal "__ messagePlain_probe_cmd: end1"
+  _messagePlain_nominal "__ ==rmh== messagePlain_probe_cmd: end1"
   return $?
 fi
 _messagePlain_probe_cmd_orig "$@"
-_msgPlain_nominal "__ messagePlain_probe_cmd: end2"
+_messagePlain_nominal "__ ==rmh== messagePlain_probe_cmd: end2"
 }
 
 # VBOX Guest Loading Delay ####################################################
