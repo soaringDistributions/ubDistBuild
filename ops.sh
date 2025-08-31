@@ -46,8 +46,8 @@ _openChRoot() {
   } >> "$scriptLocal/_openChRoot.debug" 2>&1
 
   set -o pipefail
-  # comment next line if debugging not needed 
-  # ( set -x; _openChRoot__orig "$@" ) >> "$scriptLocal/_openChRoot.debug" 2>&1
+  # debugging & orig function 
+  ( set -x; _openChRoot__orig "$@" ) >> "$scriptLocal/_openChRoot.debug" 2>&1
   local rc=$?
   echo "rc=${rc}" >> "$scriptLocal/_openChRoot.debug"
   _messageNormal "[ops] debug: _openChRoot rc=${rc}"
