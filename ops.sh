@@ -4,38 +4,44 @@
 # 2025.08.11 rmh Address occasional build failures due to missing part file asset
 # 2025.08.19 rmh Add VM-specific GRUB option 
 
-# #############################################################################
-# #### GRUBB Option ###########################################################
-# #### rmh #### Below functions for branch feature/VmReliableBoot ####
 
-# --- banner so you can see ops.sh got sourced in the build log ---
+#!/usr/bin/env bash
+# ops.sh — runtime overrides loaded by ubiquitous_bash.sh
+
+# #############################################################################
+# #### GRUB/VBox Defer banner #################################################
 _messageNormal '[ops] vboxguest defer: overrides loaded'
 
-# TEMPORARY PW HANDLING #######################################################
-# Recreate iso with > UB_USER_PW='YourNewPassword!' ./ubiquitous_bash.sh _live
-
+# #############################################################################
+# #### Offline password (no units; no first-boot anything) ####################
+# Use:
+#   UB_USER_PW='YourNewPassword!' ./ubiquitous_bash.sh _live
+#
+# This sets the *live* user's password directly in the rootfs with chpasswd -R.
+# If UB_USER_PW is unset or /etc/shadow is not present yet, it’s a no-op.
 _ops_set_live_user_pw_offline() {
   if [ -z "${UB_USER_PW:-}" ]; then
-    _messageNormal '[ops] skip: UB_USER_PW not set'
+    _messageNormal '[ops] live pw: skip (UB_USER_PW not set)'
     return 0
   fi
-  [ -f "$globalVirtFS/etc/shadow" ] || { _messageNormal "[ops] ERROR: missing $globalVirtFS/etc/shadow"; return 1; }
+  if [ ! -e "$globalVirtFS/etc/shadow" ]; then
+    _messageNormal "[ops] live pw: skip (/etc/shadow not present yet in $globalVirtFS)"
+    return 0
+  fi
 
   _messageNormal '[ops] live pw: setting via chpasswd -R (offline)'
-  # Set just 'user'; uncomment root if you want it too.
+  # set just the 'user' account; uncomment root if you want it too
   printf 'user:%s\n' "$UB_USER_PW" | sudo -n chpasswd -R "$globalVirtFS"
   # printf 'root:%s\n' "$UB_USER_PW" | sudo -n chpasswd -R "$globalVirtFS"
 
+  # breadcrumb (visible inside the VM at /OPS_MARKER_PW)
   echo 'pw:offline:ok' | sudo -n tee "$globalVirtFS/OPS_MARKER_PW" >/dev/null
 }
 
-
-
 # #############################################################################
-# ---- debug wrapper around _openChRoot (logs, then passes through) ----
+# #### Chroot wrapper (quiet; logs only to _openChRoot.debug) #################
 eval "$(declare -f _openChRoot | sed '1s/_openChRoot/_openChRoot__orig/')"
 _openChRoot() {
-  _messageNormal '[ops] debug: entering _openChRoot'
   {
     echo "----- $(date -Is) (_openChRoot debug) -----"
     echo "whoami: $(whoami)"
@@ -45,49 +51,33 @@ _openChRoot() {
     echo "mounts before:"; mount | sed 's/^/  /'; echo
   } >> "$scriptLocal/_openChRoot.debug" 2>&1
 
-  (
-    set -o pipefail
-    # debugging & orig function 
-    ( set -x; _openChRoot__orig "$@" ) >> "$scriptLocal/_openChRoot.debug" 2>&1
-  )
+  # call the original, but keep any verbosity out of the console
+  _openChRoot__orig "$@" >> "$scriptLocal/_openChRoot.debug" 2>&1
   local rc=$?
   echo "rc=${rc}" >> "$scriptLocal/_openChRoot.debug"
-  _messageNormal "[ops] debug: _openChRoot rc=${rc}"
-
-  # If chroot is up, perform idempotent installs once
-  if [ $rc -eq 0 ] && [ -n "${globalVirtFS:-}" ] && [ -d "$globalVirtFS" ]; then
-    if [ ! -e "$globalVirtFS/.ops_installed" ]; then
-      _install_vboxguest_defer || true
-      _install_liveconfig_pw_hook || true
-      sudo -n touch "$globalVirtFS/.ops_installed" || true
-    fi
-  fi
   return $rc
 }
 
-# Inter-build cleanup #########################################################
-# Eliminate hold-over mounts if last _live exection was terminiated or otherwise didn't close cleanly 
+# #############################################################################
+# #### Inter-build cleanup (stale mounts/loops) ###############################
 _ops_preflight_chroot_clean() {
   _messageNormal '[ops] preflight: cleanup stale chroot (deep)'
 
-  # try the built-ins first
   "$scriptAbsoluteLocation" _closeChRoot --force >/dev/null 2>&1 || true
   "$scriptAbsoluteLocation" _removeChRoot           >/dev/null 2>&1 || true
 
-  # 1) anything under our normal live root(s)
-  local root="$scriptLocal"/v/fs
+  # 1) anything under our normal live roots
   awk -v r="$scriptLocal" '$2 ~ "^"r"/v(/|$)" {print length($2),$2}' /proc/mounts |
     sort -nr | awk '{print $2}' |
     while read -r m; do
       sudo umount "$m" 2>/dev/null || sudo umount -l "$m" 2>/dev/null || true
     done
 
-  # 2) collect this project’s loop devices
+  # 2) loops from this project
   mapfile -t _ops_loops < <(sudo losetup -a | awk -F: -v r="$(pwd)" '$0 ~ r {print $1}')
 
-  # 3) unmount *anywhere* those loops are mounted (incl. ~/.ubtmp/.../root*)
+  # 3) unmount anywhere those loops are mounted
   if ((${#_ops_loops[@]})); then
-    # by device
     awk -v devs="$(printf "|%s" "${_ops_loops[@]}")" '
       BEGIN{split(devs,a,"|")}
       { for(i in a) if(a[i]!="" && $1==a[i]) print length($2),$2 }' /proc/mounts |
@@ -104,63 +94,54 @@ _ops_preflight_chroot_clean() {
       sudo umount "$m" 2>/dev/null || sudo umount -l "$m" 2>/dev/null || true
     done
 
-  # 5) now detach the loops
+  # 5) detach loops
   for L in "${_ops_loops[@]}"; do
     sudo losetup -d "$L" 2>/dev/null || true
   done
 
-  # 6) remove stale breadcrumb that misleads mountimage
+  # 6) remove stale imagedev breadcrumb
   rm -f "$scriptLocal"/imagedev
 
-  # (optional) quick visibility
+  # quick visibility (quiet if nothing to show)
   _messagePlain_probe_cmd 'mount | grep -E "_local/(v/fs|v/.*/fs)|\\.ubtmp/.*/root" || echo "no project mounts"'
   _messagePlain_probe_cmd 'sudo losetup -a | grep "$(pwd)" || echo "no project loop devices"'
 }
 
-# --- prevent accidental mksquashfs append by removing stale outputs ---
+# #############################################################################
+# #### Avoid accidental squashfs appends & home_1 duplication #################
 _ops_clear_stale_squashfs() {
   local liveDir="$scriptLocal/livefs/image/live"
   local fs="$liveDir/filesystem.squashfs"
-
-  # remove any old squashfs + recovery files
   [ -e "$fs" ] && rm -f "$fs"
   sudo rm -f /root/squashfs_recovery_filesystem.squashfs_* 2>/dev/null || true
 }
 
-
-# MESSAGE FUNCTIONS ###########################################################
-# eval "$(declare -f _messagePlain_probe_cmd | sed '1s/_messagePlain_probe_cmd/_messagePlain_probe_cmd__orig/')"
-# replace eval() with explicitly declared function (and correct typo)
-# -- plain copy of the original diagnostic helper --
+# A clean copy of the original probe helper (so we can wrap mksquashfs calls)
 _messagePlain_probe_cmd_orig() {
   _color_begin_probe
   _safeEcho "$@"
   _color_end
   echo
   if [ $# -eq 1 ]; then
-    eval "$1"        # supports pipelines
+    eval "$1"
   else
-    "$@"             # preserves argument quoting (e.g. home/*)
+    "$@"
   fi
 }
 
-# ---- patch the final mksquashfs call to close off /home duplication ----
-# We only change the "globalVirtFS" pass: sudo -n mksquashfs "$globalVirtFS" ...
+# Intercept the final "sudo -n mksquashfs $globalVirtFS ..." and force:
+#   -noappend   → stops “Appending to existing …” and prevents home_1
+#   -wildcards -e 'home/*' → exclude live /home content duplication
 _messagePlain_probe_cmd() {
-  _messagePlain_nominal "__ ==rmh== messagePlain_probe_cmd: start"
   if [ "$1" = "sudo" ] && [ "$2" = "-n" ] && [ "$3" = "mksquashfs" ] && [ "$4" = "$globalVirtFS" ]; then
-    echo "[TRACE] mksquashfs override: $@" >&2
-  # Ensure a fresh image and prevent /home duplication
-  _messagePlain_probe_cmd_orig "$@" -noappend -wildcards -e 'home/*'
-  _messagePlain_nominal "__ ==rmh== messagePlain_probe_cmd: end1"
-  return $?
-fi
-_messagePlain_probe_cmd_orig "$@"
-_messagePlain_nominal "__ ==rmh== messagePlain_probe_cmd: end2"
+    _messagePlain_probe_cmd_orig "$@" -noappend -wildcards -e 'home/*'
+    return $?
+  fi
+  _messagePlain_probe_cmd_orig "$@"
 }
 
-# VBOX Guest Loading Delay ####################################################
-# --- unit file content ---
+# #############################################################################
+# #### VBoxGuest deferral (unchanged behavior) ################################
 _here_vboxguest_defer_service() {
 cat <<'EOF'
 [Unit]
@@ -179,22 +160,14 @@ WantedBy=multi-user.target
 EOF
 }
 
-# --- loader script (only runs when vboxguest.defer=1 is on cmdline) ---
 _here_vboxguest_defer_script() {
 cat <<'EOF'
 #!/bin/sh
 set -eu
-
-# Only on VMs
 systemd-detect-virt --quiet --vm || exit 0
-
-# Only when requested via GRUB flag + blacklist
 grep -qw 'vboxguest.defer=1' /proc/cmdline || exit 0
-
-# Already loaded? nothing to do
 lsmod | awk '{print $1}' | grep -qx vboxguest && exit 0
 
-# Wait up to 90s for KDE session (best-effort)
 i=90
 while [ $i -gt 0 ]; do
   pgrep -x plasmashell >/dev/null 2>&1 && break
@@ -202,15 +175,12 @@ while [ $i -gt 0 ]; do
   sleep 1; i=$((i-1))
 done
 
-# Load kernel bits; ignore if not present
-modprobe -v vboxguest   || true
-modprobe -v vboxsf      || true
-modprobe -v vboxvideo   || true
-
+modprobe -v vboxguest || true
+modprobe -v vboxsf    || true
+modprobe -v vboxvideo || true
 udevadm settle || true
 systemctl restart vboxservice 2>/dev/null || true
 
-# Nudge per-user helpers (usually autostart anyway)
 for uid in $(loginctl list-users --no-legend | awk '{print $1}'); do
   user="$(id -un "$uid" 2>/dev/null || true)"; [ -n "$user" ] || continue
   su -l "$user" -c 'command -v VBoxClient-all >/dev/null && VBoxClient-all >/dev/null 2>&1 || true' || true
@@ -218,39 +188,28 @@ done
 EOF
 }
 
-# --- installer: creates dirs, writes files, enables unit (symlink) ---
 _install_vboxguest_defer() {
   _messageNormal '[ops] vboxguest defer: installing (late loader)'
-
-  # Make sure target dirs exist in the live root
   sudo -n mkdir -p "$globalVirtFS"/usr/local/sbin
   sudo -n mkdir -p "$globalVirtFS"/etc/systemd/system
   sudo -n mkdir -p "$globalVirtFS"/etc/systemd/system/multi-user.target.wants
 
-  # Script
-  _here_vboxguest_defer_script | sudo -n tee "$globalVirtFS"/usr/local/sbin/vboxguest-defer-load.sh >/dev/null
+  _here_vboxguest_defer_script  | sudo -n tee "$globalVirtFS"/usr/local/sbin/vboxguest-defer-load.sh >/dev/null
   _chroot chown root:root /usr/local/sbin/vboxguest-defer-load.sh
-  _chroot chmod 0755 /usr/local/sbin/vboxguest-defer-load.sh
+  _chroot chmod 0755      /usr/local/sbin/vboxguest-defer-load.sh
 
-  # Unit
   _here_vboxguest_defer_service | sudo -n tee "$globalVirtFS"/etc/systemd/system/vboxguest-defer-load.service >/dev/null
   _chroot chown root:root /etc/systemd/system/vboxguest-defer-load.service
-  _chroot chmod 0644 /etc/systemd/system/vboxguest-defer-load.service
+  _chroot chmod 0644      /etc/systemd/system/vboxguest-defer-load.service
 
-  # Enable without depending on systemctl inside chroot
   _chroot ln -sf /etc/systemd/system/vboxguest-defer-load.service \
                 /etc/systemd/system/multi-user.target.wants/vboxguest-defer-load.service
 
-  # Breadcrumb to prove inclusion in the running live system
   echo 'ok' | sudo -n tee "$globalVirtFS"/DEFER_MARKER >/dev/null
-
-  # Debug evidence in build log
-  # _messagePlain_probe_cmd ls -l "$globalVirtFS"/usr/local/sbin/vboxguest-defer-load.sh
-  # _messagePlain_probe_cmd ls -l "$globalVirtFS"/etc/systemd/system/vboxguest-defer-load.service
-  # _messagePlain_probe_cmd ls -l "$globalVirtFS"/etc/systemd/system/multi-user.target.wants/vboxguest-defer-load.service
 }
 
-# --- inject our installer into the standard live build ---
+# #############################################################################
+# #### Inject into _live() and GRUB entry #####################################
 eval "$(declare -f _live | sed '1s/_live/_live__orig/')"
 _live() {
   _messagePlain_nominal "==rmh== Live (modified)"
@@ -258,19 +217,16 @@ _live() {
 
   if ! "$scriptAbsoluteLocation" _live_sequence_in "$@"; then _stop 1; fi
 
-  _ops_set_live_user_pw_offline
-  _install_vboxguest_defer
-  _ops_clear_stale_squashfs
-
+  _ops_set_live_user_pw_offline      # ← set password directly into rootfs
+  _install_vboxguest_defer           # ← add defer unit/script
+  _ops_clear_stale_squashfs          # ← ensure fresh squashfs (no append)
 
   if ! "$scriptAbsoluteLocation" _live_sequence_out "$@"; then _stop 1; fi
   export safeToDeleteGit="true"; _safeRMR "$scriptLocal"/livefs
 }
 
-
-  # --- append a single deferred GRUB entry (no -lts double-kernel) ---
-  eval "$(declare -f _live_grub_here | sed '1s/_live_grub_here/_live_grub_here__orig/')"
-  _live_grub_here() {
+eval "$(declare -f _live_grub_here | sed '1s/_live_grub_here/_live_grub_here__orig/')"
+_live_grub_here() {
   _live_grub_here__orig
   cat <<'EOF'
 
@@ -281,20 +237,12 @@ menuentry "Live (VBoxGuest deferred)" {
 EOF
 }
 
-
-
 # #############################################################################
-# #### Build Failure items ####################################################
-# --- Strict timeout: non-zero on timeout, prefer coreutils 'timeout' ---
+# #### Keep your existing reliability helpers (unchanged) #####################
+# --- Strict timeout (as in your working version) ---
 _timeout_strict() {
   _messagePlain_probe "_timeout_strict → $(printf '%q ' "$@")"
   if command -v timeout >/dev/null 2>&1; then
-    # Expected exits:
-    #  0: success
-    #  124: command timeout
-    #  125: timeout command failed 
-    #  126/7: command could not run
-    #  Other: command exit code 
     _messagePlain_probe "_timeout_strict: coreutils timeout path"
     timeout -k 5 "$@"; local rc=$?
     _messagePlain_probe "_timeout_strict: coreutils rc=$rc"
@@ -303,7 +251,6 @@ _timeout_strict() {
 
   _messagePlain_warn "==rmh== **** TEMP _timeout_strict() PATH ***"
   _messagePlain_probe "_timeout_strict: fallback path"
-  # path not dynamically tested due to coreutils being present 
   (
     set +b
     local secs rc krc
@@ -313,7 +260,6 @@ _timeout_strict() {
     _messagePlain_probe "_timeout_strict(fb): cmd pid=$cmd"
     (
       sleep "$secs"
-      # Process should have completed. If not, try to Term/Kill
       if kill -0 "$cmd" 2>/dev/null; then
         _messageWARN "_timeout_strict(fb): timeout fired → TERM pid $cmd"
         kill -TERM "$cmd" 2>/dev/null
@@ -322,7 +268,7 @@ _timeout_strict() {
           _messageWARN "_timeout_strict(fb): escalation → KILL $cmd"
           kill -KILL "$cmd" 2>/dev/null
         fi
-        exit 124      # value for subprocess - not exposed to function
+        exit 124
       fi
       exit 0
     ) & local killer=$!
@@ -331,7 +277,6 @@ _timeout_strict() {
     wait "$cmd"; rc=$?
     _messagePlain_probe "_timeout_strict(fb): cmd exited rc=$rc"
 
-    # learn what the timer did
     if kill -0 "$killer" 2>/dev/null; then
       _messagePlain_probe "_timeout_strict(fb): cancel timer pid=$killer"
       kill -TERM "$killer" 2>/dev/null
@@ -349,16 +294,10 @@ _timeout_strict() {
 
     _messagePlain_probe "_timeout_strict(fb): returning rc=$rc"
     exit "$rc"
-    # Expected return values
-    #  0: success of command 
-    #  143: TERMinated
-    #  137: KILLed 
-    #  Other: command value 
   )
 }
 
-
-# --- helper: check if an asset name exists on a tag ---
+# --- gh upload helpers (unchanged from your working copy) ---
 _gh_release_asset_present() {
   local currentTag="$1"
   local assetName="$2"
@@ -367,7 +306,6 @@ _gh_release_asset_present() {
     | grep -F "\"name\":\"$assetName\"" >/dev/null
 }
 
-# --- override: single file uploader with real retries and status ---
 _gh_release_upload_part-single_sequence() {
   _messagePlain_nominal '==rmh== _gh_release_upload: '"$1"' '"$2"
   local currentTag="$1"
@@ -384,15 +322,12 @@ _gh_release_upload_part-single_sequence() {
          _timeout_strict 600 \
          gh release upload --clobber "$currentTag" "$currentFile"
     then
-      # Verify asset is visible (eventual consistency guard)
       local vtries=0
       while [[ $vtries -lt 5 ]]; do
         if _gh_release_asset_present "$currentTag" "$assetName"; then
-          rc=0
-          break
+          rc=0; break
         fi
-        sleep 2
-        let vtries++
+        sleep 2; let vtries++
       done
       if [[ $rc -eq 0 ]]; then
         _messagePlain_probe "==rmh== uploaded ✓ $assetName"
@@ -403,8 +338,7 @@ _gh_release_upload_part-single_sequence() {
     else
       _messageWARN "==rmh== ** upload attempt $((currentIteration+1)) of $maxIterations failed: $assetName"
     fi
-    sleep 7
-    let currentIteration++
+    sleep 7; let currentIteration++
   done
 
   if [[ $rc -ne 0 ]]; then
@@ -416,15 +350,10 @@ _gh_release_upload_part-single_sequence() {
 _gh_release_upload_parts-multiple_sequence() {
   _messagePlain_nominal '==rmh== _gh_release_upload_parts: '"$@"
   local currentTag="$1"; shift
-
-  # keep a copy of the file list for verification later
   local -a __files=( "$@" )
-
-  # parallelism (default 12, can override via UB_GH_UPLOAD_PARALLEL)
   local currentStream_max="${UB_GH_UPLOAD_PARALLEL:-12}"
   local currentStreamNum=0
 
-  # kick off uploads
   local currentFile
   for currentFile in "${__files[@]}"; do
     let currentStreamNum++
@@ -435,11 +364,9 @@ _gh_release_upload_parts-multiple_sequence() {
     while [[ $(jobs | wc -l) -ge "$currentStream_max" ]]; do
       echo; jobs; echo
       sleep 2
-      true
     done
   done
 
-  # wait for all background uploads to finish
   local currentStreamPause
   for currentStreamPause in $(seq "1" "$currentStreamNum"); do
     _messagePlain_probe "==rmh==currentStream_${currentStreamPause}_PID= $(eval "echo \$currentStream_${currentStreamPause}_PID")"
@@ -452,30 +379,18 @@ _gh_release_upload_parts-multiple_sequence() {
   while [[ $(jobs | wc -l) -ge 1 ]]; do
     echo; jobs; echo
     sleep 3
-    true
   done
-  wait  # reap
+  wait
 
-  # -------------------------------
-  # Settle + verification 
-  # -------------------------------
-
-  # expected asset names (basenames only)
   local -a expected_names=()
-  local f
-  for f in "${__files[@]}"; do
-    expected_names+=( "$(basename -- "$f")" )
-  done
+  local f; for f in "${__files[@]}"; do expected_names+=( "$(basename -- "$f")" ); done
 
-  # settle: wait until all expected assets become visible on the release
-  # tunables: UB_GH_VERIFY_ATTEMPTS (default 15), UB_GH_VERIFY_SLEEP (default 8s)
   local max_attempts="${UB_GH_VERIFY_ATTEMPTS:-15}"
   local sleep_s="${UB_GH_VERIFY_SLEEP:-8}"
   local assets_json attempt=1
   while :; do
     assets_json=$("$scriptAbsoluteLocation" _timeout_strict 180 gh release view "$currentTag" --json assets 2>/dev/null || true)
 
-    # count missing
     local missing_count=0
     local name
     for name in "${expected_names[@]}"; do
@@ -498,8 +413,6 @@ _gh_release_upload_parts-multiple_sequence() {
     attempt=$((attempt+1))
   done
 
-  # per-asset verification with short retries (handles stragglers)
-  # tunables: UB_GH_VERIFY_PER_ASSET_ATTEMPTS (default 6), UB_GH_VERIFY_PER_ASSET_SLEEP (default 5s)
   local rc=0
   local per_attempts="${UB_GH_VERIFY_PER_ASSET_ATTEMPTS:-6}"
   local per_sleep="${UB_GH_VERIFY_PER_ASSET_SLEEP:-5}"
@@ -510,17 +423,13 @@ _gh_release_upload_parts-multiple_sequence() {
     for a in $(seq 1 "$per_attempts"); do
       assets_json=$("$scriptAbsoluteLocation" _timeout_strict 180 gh release view "$currentTag" --json assets 2>/dev/null || true)
       if printf '%s' "$assets_json" | grep -F "\"name\":\"$name\"" >/dev/null; then
-        _messagePlain_probe "==rmh== asset verified: $name"
-        ok="true"
-        break
+        _messagePlain_probe "==rmh== asset verified: $name"; ok="true"; break
       fi
       _messagePlain_probe "==rmh== asset not yet visible ($name), retry ${a}/${per_attempts}"
       sleep "$per_sleep"
     done
-
     if [[ -z "$ok" ]]; then
-      _messageFAIL "==rmh== ** missing asset on release: $name"
-      rc=1
+      _messageFAIL "==rmh== ** missing asset on release: $name"; rc=1
     fi
   done
 
@@ -532,74 +441,16 @@ _gh_release_upload_parts-multiple_sequence() {
   return "$rc"
 }
 
-
-# Override message functions to reduce multi-threaded mess 
-#Cyan. Harmless status messages.
-_messagePlain_nominal() {
-    local color_start='\E[0;36m'  # Cyan
-    local color_end='\E[0m'      # Reset
-    echo -e "${color_start} $@ ${color_end}"
-    return 0
+# #############################################################################
+# #### Message overrides (unchanged from your working copy) ###################
+_messagePlain_nominal() { local c='\E[0;36m'; local r='\E[0m'; echo -e "${c} $@ ${r}"; }
+_messagePlain_probe()   { local c='\E[0;34m'; local r='\E[0m'; echo -e "${c} $@ ${r}"; }
+_messagePlain_probe_expr(){ local c='\E[0;34m'; local r='\E[0m'; echo -e "${c} $@ ${r}"; }
+_messagePlain_probe_var(){
+  local c='\E[0;34m'; local r='\E[0m'; local v=""; if [ -n "$1" ]; then eval "v=\$$1"; echo -e "${c} $1= ${v} ${r}";
+  else echo -e "${c} ${r}"; fi
 }
-
-#Blue. Diagnostic instrumentation.
-_messagePlain_probe() {
-    local color_start='\E[0;34m'  # Blue
-    local color_end='\E[0m'      # Reset
-    echo -e "${color_start} $@ ${color_end}"
-    return 0
-}
-
-#Blue. Diagnostic instrumentation.
-_messagePlain_probe_expr() {
-    local color_start='\E[0;34m'  # Blue
-    local color_end='\E[0m'      # Reset
-    echo -e "${color_start} $@ ${color_end}"
-    return 0
-}
-
-#Blue. Diagnostic instrumentation.
-_messagePlain_probe_var() {
-    local color_start='\E[0;34m'  # Blue
-    local color_end='\E[0m'      # Reset
-    local var_value=""           # To store the evaluated variable value
-
-    # Check if a variable name is provided
-    if [ -n "$1" ]; then
-        # Evaluate the variable's value and store it
-        eval "var_value=\$$1"
-        echo -e "${color_start} $1= ${var_value} ${color_end}"
-    else
-        echo -e "${color_start} ${color_end}" # Print color without variable if none provided
-    fi
-    return 0
-}
-
-_messageVar() {
-    _messagePlain_probe_var "$@"
-}
-
-
-#Green. Working as expected.
-_messagePlain_good() {
-    local color_start='\E[0;32m'  # Green
-    local color_end='\E[0m'      # Reset
-    echo -e "${color_start} $@ ${color_end}"
-    return 0
-}
-
-#Yellow. May or may not be a problem.
-_messagePlain_warn() {
-    local color_start='\E[1;33m'  # Yellow (Bold)
-    local color_end='\E[0m'      # Reset
-    echo -e "${color_start} $@ ${color_end}"
-    return 0
-}
-
-#Red. Will result in missing functionality, reduced performance, etc, but not necessarily program failure overall.
-_messagePlain_bad() {
-    local color_start='\E[0;31m'  # Red
-    local color_end='\E[0m'      # Reset
-    echo -e "${color_start} $@ ${color_end}"
-    return 0
-}
+_messageVar(){ _messagePlain_probe_var "$@"; }
+_messagePlain_good()   { local c='\E[0;32m';  local r='\E[0m'; echo -e "${c} $@ ${r}"; }
+_messagePlain_warn()   { local c='\E[1;33m';  local r='\E[0m'; echo -e "${c} $@ ${r}"; }
+_messagePlain_bad()    { local c='\E[0;31m';  local r='\E[0m'; echo -e "${c} $@ ${r}"; }
