@@ -62,17 +62,14 @@ _here_vboxguest_defer_service() {
 cat <<'EOF'
 [Unit]
 Description=Defer VirtualBox guest until KDE is ready (opt-in)
-# Only on VirtualBox
 ConditionVirtualization=oracle
-# Line up after the display stack is live
-After=display-manager.service graphical.target sddm.service
+After=display-manager.service sddm.service
 Wants=display-manager.service
 
 [Service]
 Type=oneshot
 ExecStart=/usr/local/sbin/vboxguest-defer-load.sh
 RemainAfterExit=true
-# Make sure we see script output in logs
 StandardOutput=journal
 StandardError=journal
 
@@ -89,19 +86,28 @@ set -eu
 
 log(){ logger -t vboxguest-defer "$*"; echo "vboxguest-defer: $*"; }
 
-# Only on VMs (systemd also gates this via ConditionVirtualization)
-systemd-detect-virt --quiet --vm || exit 0
+log "start pid=$$"
 
-# Only when requested
-grep -qw 'vboxguest.defer=1' /proc/cmdline || exit 0
-
-# Already loaded?
-if lsmod | awk '{print $1}' | grep -qx vboxguest; then
-  log "vboxguest already loaded; exiting"
+# Only on VMs (unit is also gated)
+if ! systemd-detect-virt --quiet --vm; then
+  log "not a VM; exit"
   exit 0
 fi
 
-# Wait up to 90s for KDE session (best-effort; X11 or Wayland)
+# Accept either "vboxguest.defer=1" or the split token ".defer=1"
+if ! grep -qFw 'vboxguest.defer=1' /proc/cmdline && ! grep -qFw '.defer=1' /proc/cmdline; then
+  log "defer flag not present; exit"
+  exit 0
+fi
+log "defer flag detected"
+
+# Already loaded?
+if lsmod | awk '{print $1}' | grep -qx vboxguest; then
+  log "vboxguest already loaded; exit"
+  exit 0
+fi
+
+# Wait up to 90s for KDE (X11/Wayland)
 i=90
 while [ $i -gt 0 ]; do
   pgrep -x plasmashell >/dev/null 2>&1 && break
@@ -111,27 +117,30 @@ while [ $i -gt 0 ]; do
   pgrep -x startplasma-wayland >/dev/null 2>&1 && break
   sleep 1; i=$((i-1))
 done
-[ $i -gt 0 ] && log "saw KDE session; proceeding" || log "timed out; proceeding anyway"
+[ $i -gt 0 ] && log "KDE detected; proceeding" || log "timeout waiting for KDE; proceeding"
 
-# Try modprobe first, then insmod if blacklisted
+# Try modprobe first; if blacklisted, fall back to insmod
 maybe_load() {
   n="$1"
-  if modprobe -v "$n" 2>/dev/null; then return 0; fi
+  if modprobe -v "$n" 2>/dev/null; then log "modprobe $n ok"; return 0; fi
   k="$(uname -r)"
   f="$(find "/lib/modules/$k" -type f -name "${n}.ko*" -print -quit 2>/dev/null || true)"
-  [ -n "${f:-}" ] && insmod "$f" 2>/dev/null || true
+  if [ -n "${f:-}" ] && insmod "$f" 2>/dev/null; then log "insmod $n ok ($f)"; return 0; fi
+  log "could not load $n"
+  return 1
 }
 
-maybe_load vboxguest
-maybe_load vboxsf
-maybe_load vboxvideo
+maybe_load vboxguest || true
+maybe_load vboxsf    || true
+maybe_load vboxvideo || true
 
 udevadm settle --timeout=10 || true
 
-# Restart any matching VBox service unit name used by the distro
-for unit in vboxservice.service vboxservice VBoxService.service; do
+# Restart whichever unit exists (distro packages or Oracle GA)
+for unit in vboxservice.service vboxservice VBoxService.service vboxadd-service.service vboxadd.service; do
   if systemctl list-unit-files --no-legend | awk '{print $1}' | grep -qx "$unit"; then
     systemctl try-restart "$unit" || systemctl start "$unit" || true
+    log "nudged $unit"
   fi
 done
 
@@ -144,6 +153,7 @@ if command -v loginctl >/dev/null 2>&1; then
 fi
 
 log "loaded modules: $(lsmod | awk '\''$1 ~ /^vbox/ {printf $1" "}'\'')"
+log "done"
 EOF
 }
 
