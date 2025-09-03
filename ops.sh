@@ -88,13 +88,13 @@ log(){ logger -t vboxguest-defer "$*"; echo "vboxguest-defer: $*"; }
 
 log "start pid=$$"
 
-# Only on VMs (unit is also gated)
+# Only on VMs (the unit also has ConditionVirtualization)
 if ! systemd-detect-virt --quiet --vm; then
   log "not a VM; exit"
   exit 0
 fi
 
-# Accept either "vboxguest.defer=1" or the split token ".defer=1"
+# Accept either "vboxguest.defer=1" or a split ".defer=1"
 if ! grep -qFw 'vboxguest.defer=1' /proc/cmdline && ! grep -qFw '.defer=1' /proc/cmdline; then
   log "defer flag not present; exit"
   exit 0
@@ -119,7 +119,6 @@ while [ $i -gt 0 ]; do
 done
 [ $i -gt 0 ] && log "KDE detected; proceeding" || log "timeout waiting for KDE; proceeding"
 
-# Try modprobe first; if blacklisted, fall back to insmod
 maybe_load() {
   n="$1"
   if modprobe -v "$n" 2>/dev/null; then log "modprobe $n ok"; return 0; fi
@@ -136,7 +135,7 @@ maybe_load vboxvideo || true
 
 udevadm settle --timeout=10 || true
 
-# Restart whichever unit exists (distro packages or Oracle GA)
+# Nudge whatever VBox service name this distro uses
 for unit in vboxservice.service vboxservice VBoxService.service vboxadd-service.service vboxadd.service; do
   if systemctl list-unit-files --no-legend | awk '{print $1}' | grep -qx "$unit"; then
     systemctl try-restart "$unit" || systemctl start "$unit" || true
@@ -161,9 +160,7 @@ _install_vboxguest_defer() {
   _messageNormal '[ops] vboxguest defer: installing (late loader)'
 
   sudo -n mkdir -p "$globalVirtFS"/usr/local/sbin
-  sudo -n mkdir -p "$globalVirtFS"/etc/systemd/system
-  sudo -n mkdir -p "$globalVirtFS"/etc/systemd/system/multi-user.target.wants
-  sudo -n mkdir -p "$globalVirtFS"/etc/systemd/system/graphical.target.wants
+  sudo -n mkdir -p "$globalVirtFS"/etc/systemd/system/{multi-user.target.wants,graphical.target.wants}
 
   _here_vboxguest_defer_script  | sudo -n tee "$globalVirtFS"/usr/local/sbin/vboxguest-defer-load.sh >/dev/null
   _chroot chown root:root /usr/local/sbin/vboxguest-defer-load.sh
@@ -173,26 +170,10 @@ _install_vboxguest_defer() {
   _chroot chown root:root /etc/systemd/system/vboxguest-defer-load.service
   _chroot chmod 0644      /etc/systemd/system/vboxguest-defer-load.service
 
-  # Enable without systemctl inside the chroot
   _chroot ln -sf /etc/systemd/system/vboxguest-defer-load.service \
                 /etc/systemd/system/multi-user.target.wants/vboxguest-defer-load.service || true
   _chroot ln -sf /etc/systemd/system/vboxguest-defer-load.service \
                 /etc/systemd/system/graphical.target.wants/vboxguest-defer-load.service   || true
-
-  echo 'ok' | sudo -n tee "$globalVirtFS"/DEFER_MARKER >/dev/null || true
-}
-
-# Append a single deferred GRUB entry (no -lts double-kernel changes)
-eval "$(declare -f _live_grub_here | sed '1s/_live_grub_here/_live_grub_here__orig/')"
-_live_grub_here() {
-  _live_grub_here__orig
-  cat <<'EOF'
-
-menuentry "Live (VBoxGuest deferred)" {
-    linux /vmlinuz boot=live config debug=1 noeject nopersistence selinux=0 mem=3712M resume=/dev/sda5 module_blacklist=vboxguest vboxguest.defer=1
-    initrd /initrd
-}
-EOF
 }
 
 ###############################################################################
