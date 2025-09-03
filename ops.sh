@@ -198,6 +198,31 @@ _ops_set_pw_offline() {
 }
 
 ###############################################################################
+# GRUB: append VBoxGuest deferred entry (uses modprobe.blacklist + defer flag)
+###############################################################################
+# copy the upstream function body to a new name we can call
+if declare -f _live_grub_here >/dev/null 2>&1 && ! declare -f _live_grub_here__orig >/dev/null 2>&1; then
+  eval "$(declare -f _live_grub_here | sed '1s/_live_grub_here/_live_grub_here__orig/')"
+fi
+
+# now override and append our extra entries
+_live_grub_here() {
+  _live_grub_here__orig
+  cat <<'EOF'
+
+menuentry "Live (VBoxGuest deferred)" {
+    linux /vmlinuz boot=live config debug=1 noeject nopersistence selinux=0 modprobe.blacklist=vboxguest vboxguest.defer=1
+    initrd /initrd
+}
+
+menuentry "Live -lts (VBoxGuest deferred)" {
+    linux /vmlinuz-lts boot=live config debug=1 noeject nopersistence selinux=0 modprobe.blacklist=vboxguest vboxguest.defer=1
+    initrd /initrd-lts
+}
+EOF
+}
+
+###############################################################################
 # Hook into the live ISO build to install defer + set password
 ###############################################################################
 eval "$(declare -f _live | sed '1s/_live/_live__orig/')"
