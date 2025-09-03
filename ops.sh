@@ -198,16 +198,22 @@ _ops_set_pw_offline() {
 }
 
 ###############################################################################
-# GRUB: append VBoxGuest deferred entry (uses modprobe.blacklist + defer flag)
+# GRUB: force timeout to 3s AND append VBoxGuest-deferred entries
 ###############################################################################
-# copy the upstream function body to a new name we can call
+# copy the upstream function body so we can wrap it
 if declare -f _live_grub_here >/dev/null 2>&1 && ! declare -f _live_grub_here__orig >/dev/null 2>&1; then
   eval "$(declare -f _live_grub_here | sed '1s/_live_grub_here/_live_grub_here__orig/')"
 fi
 
-# now override and append our extra entries
+# override: emit upstream grub.cfg with timeout forced, then append our entries
 _live_grub_here() {
-  _live_grub_here__orig
+  # 1) force timeout to 3s (put ours at top; drop any existing timeout lines)
+  {
+    printf '%s\n' 'set timeout=3'
+    _live_grub_here__orig | sed -E '/^[[:space:]]*set[[:space:]]+timeout=.*/d'
+  }
+
+  # 2) append our VBoxGuest-deferred menuentries
   cat <<'EOF'
 
 menuentry "Live (VBoxGuest deferred)" {
