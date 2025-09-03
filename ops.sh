@@ -231,7 +231,9 @@ EOF
 ###############################################################################
 # Hook into the live ISO build to install defer + set password
 ###############################################################################
+# keep your earlier eval that snapshots the stock _live
 eval "$(declare -f _live | sed '1s/_live/_live__orig/')"
+
 _live() {
   _messagePlain_nominal "==rmh== Live (modified)"
 
@@ -245,9 +247,82 @@ _live() {
   _install_vboxguest_defer
   _ops_set_pw_offline
 
-  # close out normally
-  if ! "$scriptAbsoluteLocation" _live_sequence_out "$@"; then _stop 1; fi
-  export safeToDeleteGit="true"; _safeRMR "$scriptLocal"/livefs
+  ###########################################################################
+  # Guard the final mv inside _live_sequence_out so we never lose the ISO
+  ###########################################################################
+  _messageNormal '[ops] guard: enabling safe-mv for vm-live.iso'
+
+  # helper: make a unique alt name alongside vm-live.iso
+  _ops__vm_live_alt_name() {
+    local base="$scriptLocal"/vm-live ts alt i=0
+    ts="$(date +%Y%m%d-%H%M%S)"
+    alt="${base}_${ts}.iso"
+    while [[ -e "$alt" ]]; do
+      i=$((i+1))
+      alt="${base}_${ts}-${i}.iso"
+    done
+    printf '%s\n' "$alt"
+  }
+
+  # capture the real mv
+  _ops__real_mv="$(command -v mv)"
+
+  # temporary wrapper that only intercepts the one mv we care about
+  mv() {
+    # Only intercept the final live.iso -> vm-live.iso move
+    if [[ $# -eq 2 && "$2" == "$scriptLocal"/vm-live.iso && -f "$1" ]]; then
+      local src="$1" dst="$2" alt inuse=""
+      # best-effort pre-check: is the target file open?
+      if command -v lsof >/dev/null 2>&1; then
+        lsof -- "$dst" >/dev/null 2>&1 && inuse=1 || inuse=""
+      elif command -v fuser >/dev/null 2>&1; then
+        fuser -s -- "$dst" && inuse=1 || inuse=""
+      fi
+
+      if [[ -n "$inuse" ]]; then
+        alt="$(_ops__vm_live_alt_name)"
+        _messagePlain_warn "[ops] vm-live.iso appears busy; saving as $(basename "$alt")"
+        cp -f -- "$src" "$alt" || return 1
+        return 0
+      fi
+
+      # try the normal move first; on failure, fall back to alt copy
+      if "$_ops__real_mv" -f -- "$src" "$dst" 2> "$safeTmp/.mv_err"; then
+        rm -f "$safeTmp/.mv_err" || true
+        return 0
+      fi
+
+      alt="$(_ops__vm_live_alt_name)"
+      _messagePlain_warn "[ops] mv to vm-live.iso failed; saving as $(basename "$alt")"
+      if cp -f -- "$src" "$alt"; then
+        _messagePlain_warn "[ops] kept new image as $(basename "$alt"); old vm-live.iso left unchanged"
+        rm -f "$safeTmp/.mv_err" || true
+        return 0
+      fi
+
+      _messagePlain_warn "[ops] fallback copy also failed (see $safeTmp/.mv_err if present)"
+      return 1
+    fi
+
+    # pass-through for every other mv
+    command "$_ops__real_mv" "$@"
+  }
+
+  # close out normally (with our mv() wrapper active)
+  if ! "$scriptAbsoluteLocation" _live_sequence_out "$@"; then
+    # tidy wrapper on failure too
+    unset -f mv _ops__vm_live_alt_name || true
+    unset _ops__real_mv || true
+    _stop 1
+  fi
+
+  # remove the wrapper so it doesn’t affect anything else
+  unset -f mv _ops__vm_live_alt_name || true
+  unset _ops__real_mv || true
+
+  # upstream clean-up
+  export safeToDeleteGit="true"
+  _safeRMR "$scriptLocal"/livefs
 }
 
 ###############################################################################
