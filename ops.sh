@@ -231,9 +231,6 @@ EOF
 ###############################################################################
 # Hook into the live ISO build to install defer + set password
 ###############################################################################
-# keep your earlier eval that snapshots the stock _live
-eval "$(declare -f _live | sed '1s/_live/_live__orig/')"
-
 _live() {
   _messagePlain_nominal "==rmh== Live (modified)"
 
@@ -323,6 +320,129 @@ _live() {
   # upstream clean-up
   export safeToDeleteGit="true"
   _safeRMR "$scriptLocal"/livefs
+}
+
+###############################################################################
+# Replace upstream _live_sequence_in with a single-pass squashfs build
+###############################################################################
+_live_sequence_in() {
+  _messageNormal 'init: _live (ops override single-pass)'
+
+  _mustGetSudo || return 0
+
+  _start
+  cd "$safeTmp"
+
+  # Open chroot to regenerate initramfs and capture forensic copies
+  _messagePlain_nominal 'Attempt: _openChRoot'
+  ! "$scriptAbsoluteLocation" _openChRoot && _messagePlain_bad 'fail: _openChRoot' && _messageFAIL
+
+  _live_preload_here | sudo -n tee "$globalVirtFS"/usr/share/initramfs-tools/scripts/init-bottom/preload_run > /dev/null
+  _chroot chown root:root /usr/share/initramfs-tools/scripts/init-bottom/preload_run
+  _chroot chmod 755 /usr/share/initramfs-tools/scripts/init-bottom/preload_run
+
+  _chroot update-initramfs -u -k all
+  _chroot apt-get -y clean
+
+  # For offline revert info in ISO
+  mkdir -p "$safeTmp"/root002
+  sudo -n rsync -a --progress --exclude "lost+found" "$globalVirtFS"/boot "$safeTmp"/root002/boot-copy
+  sudo -n cp -a "$globalVirtFS"/etc/fstab  "$safeTmp"/root002/fstab-copy
+
+  _messagePlain_nominal 'Attempt: _closeChRoot'
+  ! "$scriptAbsoluteLocation" _closeChRoot && _messagePlain_bad 'fail: _closeChRoot' && _messageFAIL
+
+  # Fresh livefs workspace
+  export safeToDeleteGit="true"
+  [[ -e "$scriptLocal"/livefs ]] && _safeRMR "$scriptLocal"/livefs
+  [[ -e "$scriptLocal"/livefs ]] && _messageFAIL
+  mkdir -p "$scriptLocal"/livefs/partial
+  mkdir -p "$scriptLocal"/livefs/image/live
+
+  # Mount image partitions for access to kernels and EFI bits
+  _messagePlain_nominal 'Attempt: _openImage'
+  ! _openImage && _messageFAIL && _stop 1
+  imagedev=$(cat "$scriptLocal"/imagedev)
+  if [[ "$ubVirtImageBoot" != "" ]]; then
+    sudo -n mkdir -p "$globalVirtFS"/boot
+    sudo -n mount "$imagedev""$ubVirtImageBoot" "$globalVirtFS"/boot
+  fi
+  if [[ "$ubVirtImageEFI" != "" ]]; then
+    sudo -n mkdir -p "$globalVirtFS"/boot/efi
+    sudo -n mount "$imagedev""$ubVirtImageEFI" "$globalVirtFS"/boot/efi
+  fi
+
+  # Stage a complete filesystem tree, then run mksquashfs once
+  local STAGE
+  STAGE="$safeTmp/live_stage"
+  export safeToDeleteGit="true"
+  [[ -e "$STAGE" ]] && _safeRMR "$STAGE"
+  mkdir -p "$STAGE"
+
+  # Copy everything except boot and fstab; we’ll add forensic copies separately
+  sudo -n rsync -a \
+    --exclude 'boot' \
+    --exclude 'etc/fstab' \
+    "$globalVirtFS"/ "$STAGE"/
+
+  # Add forensic helpers (boot-copy, fstab-copy) at top-level
+  if [[ -d "$safeTmp"/root002 ]]; then
+    sudo -n cp -a "$safeTmp"/root002/boot-copy "$STAGE"/ 2>/dev/null || true
+    sudo -n cp -a "$safeTmp"/root002/fstab-copy "$STAGE"/ 2>/dev/null || true
+  fi
+
+  _messagePlain_nominal 'mksquashfs: single-pass from staged root'
+  _messagePlain_probe_cmd df -h
+  if ! _messagePlain_probe_cmd sudo -n mksquashfs "$STAGE" "$scriptLocal"/livefs/image/live/filesystem.squashfs -b 262144 -no-xattrs -noI -noX -comp lzo -Xalgorithm lzo1x_1; then
+    _messageFAIL
+    _stop 1
+    return 1
+  fi
+  du -sh "$scriptLocal"/livefs/image/live/filesystem.squashfs
+
+  # Copy kernel and initrd into the ISO tree
+  local currentFilesList
+  currentFilesList=$(ls -A -1 "$globalVirtFS"/boot/vmlinuz-* | sort -r -V | tail -n+1 | head -n1)
+  cp "${currentFilesList[0]}" "$scriptLocal"/livefs/image/vmlinuz
+  currentFilesList=$(ls -A -1 "$globalVirtFS"/boot/vmlinuz-* | sort -r -V | tail -n+2 | head -n1)
+  cp "${currentFilesList[0]}" "$scriptLocal"/livefs/image/vmlinuz-lts
+
+  currentFilesList=$(ls -A -1 "$globalVirtFS"/boot/initrd.img-* | sort -r -V | tail -n+1 | head -n1)
+  cp "${currentFilesList[0]}" "$scriptLocal"/livefs/image/initrd
+  currentFilesList=$(ls -A -1 "$globalVirtFS"/boot/initrd.img-* | sort -r -V | tail -n+2 | head -n1)
+  cp "${currentFilesList[0]}" "$scriptLocal"/livefs/image/initrd-lts
+
+  cp "$globalVirtFS"/boot/tboot* "$scriptLocal"/livefs/image/ 2>/dev/null || true
+  cp "$globalVirtFS"/boot/*.bin "$scriptLocal"/livefs/image/  2>/dev/null || true
+
+  _live_grub_here > "$scriptLocal"/livefs/partial/grub.cfg
+  touch "$scriptLocal"/livefs/image/ROOT_TEXT
+
+  _messagePlain_nominal 'Attempt: _closeImage'
+  sudo -n umount "$globalVirtFS"/boot/efi > /dev/null 2>&1 || true
+  sudo -n umount "$globalVirtFS"/boot     > /dev/null 2>&1 || true
+  ! _closeImage && _messageFAIL && _stop 1
+
+  # Revert helper and GRUB images
+  _write_revert_live
+
+  grub-mkstandalone --format=x86_64-efi --output="$scriptLocal"/livefs/partial/bootx64.efi --locales="" --fonts="" "boot/grub/grub.cfg=$scriptLocal/livefs/partial/grub.cfg"
+  cd "$scriptLocal"/livefs/partial
+  dd if=/dev/zero of="$scriptLocal"/livefs/partial/efiboot.img bs=1M count=10
+  "$(sudo -n bash -c 'type -p mkfs.vfat' || echo /sbin/mkfs.vfat)" "$scriptLocal"/livefs/partial/efiboot.img
+  mmd   -i "$scriptLocal"/livefs/partial/efiboot.img efi efi/boot
+  mcopy -i "$scriptLocal"/livefs/partial/efiboot.img "$scriptLocal"/livefs/partial/bootx64.efi ::efi/boot/
+  cd "$scriptLocal"/livefs
+
+  grub-mkstandalone --format=i386-pc --output="$scriptLocal"/livefs/partial/core.img --install-modules="linux normal iso9660 biosdisk memdisk search tar ls" --modules="linux normal iso9660 biosdisk search" --locales="" --fonts="" "boot/grub/grub.cfg=$scriptLocal/livefs/partial/grub.cfg"
+  cat /usr/lib/grub/i386-pc/cdboot.img "$scriptLocal"/livefs/partial/core.img > "$scriptLocal"/livefs/partial/bios.img
+
+  # Cleanup staging
+  export safeToDeleteGit="true"
+  _safeRMR "$STAGE"
+  _safeRMR "$safeTmp"/root002
+
+  _stop 0
 }
 
 ###############################################################################
