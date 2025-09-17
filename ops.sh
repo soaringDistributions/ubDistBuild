@@ -205,6 +205,9 @@ if declare -f _live_grub_here >/dev/null 2>&1 && ! declare -f _live_grub_here__o
   eval "$(declare -f _live_grub_here | sed '1s/_live_grub_here/_live_grub_here__orig/')"
 fi
 
+# Track whether we staged a secondary kernel/initrd pair
+ub_ops_live_has_lts_kernel=false
+
 # override: emit upstream grub.cfg with timeout forced, then append our entries
 _live_grub_here() {
   # 1) force timeout to 3s (put ours at top; drop any existing timeout lines)
@@ -220,12 +223,17 @@ menuentry "Live (VBoxGuest deferred)" {
     linux /vmlinuz boot=live config debug=1 noeject nopersistence selinux=0 modprobe.blacklist=vboxguest vboxguest.defer=1
     initrd /initrd
 }
+EOF
+
+  if [[ "${ub_ops_live_has_lts_kernel:-false}" == "true" ]]; then
+    cat <<'EOF'
 
 menuentry "Live -lts (VBoxGuest deferred)" {
     linux /vmlinuz-lts boot=live config debug=1 noeject nopersistence selinux=0 modprobe.blacklist=vboxguest vboxguest.defer=1
     initrd /initrd-lts
 }
 EOF
+  fi
 }
 
 ###############################################################################
@@ -333,16 +341,88 @@ _live_sequence_in() {
   du -sh "$scriptLocal"/livefs/image/live/filesystem.squashfs
 
   # Copy kernel and initrd into the ISO tree
-  local currentFilesList
-  currentFilesList=$(ls -A -1 "$globalVirtFS"/boot/vmlinuz-* | sort -r -V | tail -n+1 | head -n1)
-  cp "${currentFilesList[0]}" "$scriptLocal"/livefs/image/vmlinuz
-  currentFilesList=$(ls -A -1 "$globalVirtFS"/boot/vmlinuz-* | sort -r -V | tail -n+2 | head -n1)
-  cp "${currentFilesList[0]}" "$scriptLocal"/livefs/image/vmlinuz-lts
+  ub_ops_live_has_lts_kernel=false
+  local -a _kernels _initrds _kernel_candidates _initrd_candidates
+  local _have_lts_kernel=false _have_lts_initrd=false
 
-  currentFilesList=$(ls -A -1 "$globalVirtFS"/boot/initrd.img-* | sort -r -V | tail -n+1 | head -n1)
-  cp "${currentFilesList[0]}" "$scriptLocal"/livefs/image/initrd
-  currentFilesList=$(ls -A -1 "$globalVirtFS"/boot/initrd.img-* | sort -r -V | tail -n+2 | head -n1)
-  cp "${currentFilesList[0]}" "$scriptLocal"/livefs/image/initrd-lts
+  shopt -s nullglob
+  _kernel_candidates=("$globalVirtFS"/boot/vmlinuz-*)
+  _initrd_candidates=("$globalVirtFS"/boot/initrd.img-*)
+  shopt -u nullglob
+
+  if ((${#_kernel_candidates[@]})); then
+    mapfile -t _kernels < <(printf '%s\n' "${_kernel_candidates[@]}" | sort -r -V)
+  else
+    _kernels=()
+  fi
+  if ((${#_initrd_candidates[@]})); then
+    mapfile -t _initrds < <(printf '%s\n' "${_initrd_candidates[@]}" | sort -r -V)
+  else
+    _initrds=()
+  fi
+
+  if ((${#_kernels[@]} >= 1)); then
+    if ! cp "${_kernels[0]}" "$scriptLocal/livefs/image/vmlinuz"; then
+      _messagePlain_bad 'fail: copy primary kernel into ISO tree'
+      _messageFAIL
+      _stop 1
+      return 1
+    fi
+  else
+    _messagePlain_bad 'no kernel images found under /boot'
+    _messageFAIL
+    _stop 1
+    return 1
+  fi
+
+  if ((${#_kernels[@]} >= 2)); then
+    if cp "${_kernels[1]}" "$scriptLocal/livefs/image/vmlinuz-lts"; then
+      _have_lts_kernel=true
+    else
+      _messagePlain_bad 'fail: copy secondary kernel into ISO tree'
+      _messageFAIL
+      _stop 1
+      return 1
+    fi
+  else
+    rm -f "$scriptLocal/livefs/image/vmlinuz-lts"
+    _messageNormal 'live: secondary kernel missing; skipping vmlinuz-lts'
+  fi
+
+  if ((${#_initrds[@]} >= 1)); then
+    if ! cp "${_initrds[0]}" "$scriptLocal/livefs/image/initrd"; then
+      _messagePlain_bad 'fail: copy primary initrd into ISO tree'
+      _messageFAIL
+      _stop 1
+      return 1
+    fi
+  else
+    _messagePlain_bad 'no initrd images found under /boot'
+    _messageFAIL
+    _stop 1
+    return 1
+  fi
+
+  if ((${#_initrds[@]} >= 2)); then
+    if cp "${_initrds[1]}" "$scriptLocal/livefs/image/initrd-lts"; then
+      _have_lts_initrd=true
+    else
+      _messagePlain_bad 'fail: copy secondary initrd into ISO tree'
+      _messageFAIL
+      _stop 1
+      return 1
+    fi
+  else
+    rm -f "$scriptLocal/livefs/image/initrd-lts"
+    _messageNormal 'live: secondary initrd missing; skipping initrd-lts'
+  fi
+
+  if [[ "$_have_lts_kernel" == "true" && "$_have_lts_initrd" == "true" ]]; then
+    ub_ops_live_has_lts_kernel=true
+  else
+    ub_ops_live_has_lts_kernel=false
+    rm -f "$scriptLocal/livefs/image/vmlinuz-lts" "$scriptLocal/livefs/image/initrd-lts"
+  fi
 
   cp "$globalVirtFS"/boot/tboot* "$scriptLocal"/livefs/image/ 2>/dev/null || true
   cp "$globalVirtFS"/boot/*.bin "$scriptLocal"/livefs/image/  2>/dev/null || true
