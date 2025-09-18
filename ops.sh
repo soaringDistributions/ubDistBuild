@@ -379,10 +379,10 @@ _live_sequence_in() {
     if cp "${_kernels[1]}" "$scriptLocal/livefs/image/vmlinuz-lts"; then
       _have_lts_kernel=true
     else
-      _messagePlain_bad 'fail: copy secondary kernel into ISO tree'
-      _messageFAIL
-      _stop 1
-      return 1
+      _messagePlain_warn 'live: failed to copy secondary kernel; removing vmlinuz-lts'
+      rm -f "$scriptLocal/livefs/image/vmlinuz-lts"
+      _have_lts_kernel=false
+      ub_ops_live_has_lts_kernel=false
     fi
   else
     _messageNormal 'live: secondary kernel missing; skipping vmlinuz-lts'
@@ -406,10 +406,10 @@ _live_sequence_in() {
     if cp "${_initrds[1]}" "$scriptLocal/livefs/image/initrd-lts"; then
       _have_lts_initrd=true
     else
-      _messagePlain_bad 'fail: copy secondary initrd into ISO tree'
-      _messageFAIL
-      _stop 1
-      return 1
+      _messagePlain_warn 'live: failed to copy secondary initrd; removing initrd-lts'
+      rm -f "$scriptLocal/livefs/image/initrd-lts"
+      _have_lts_initrd=false
+      ub_ops_live_has_lts_kernel=false
     fi
   else
     _messageNormal 'live: secondary initrd missing; skipping initrd-lts'
