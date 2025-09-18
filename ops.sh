@@ -5,9 +5,6 @@
 # 2025.08.19 rmh Add VM-specific GRUB option 
 # 2025.08.22 rmh Fix setting of user PW, fix build action we broke 
 
-# --- banner so you can see ops.sh got sourced in the build log ---
-_messageNormal '[ops] vboxguest defer: overrides loaded'
-
 ###############################################################################
 # Preflight: tear down any stale project mounts/loops so a fresh chroot opens
 ###############################################################################
