@@ -257,6 +257,89 @@ _gh_release_upload_parts-multiple_sequence() {
   return "$rc"
 }
 
+###############################################################################
+# Split helpers: ensure chunk files are produced for release uploads
+###############################################################################
+if declare -f _ubDistBuild_split-tail_procedure >/dev/null 2>&1 \
+  && ! declare -f _ubDistBuild_split-tail_procedure__orig >/dev/null 2>&1; then
+  eval "$(declare -f _ubDistBuild_split-tail_procedure \
+    | sed '1s/_ubDistBuild_split-tail_procedure/_ubDistBuild_split-tail_procedure__orig/')"
+fi
+
+_ubDistBuild_split-tail_procedure() {
+  local inputPath="$1"
+  local chunkSize=1997537280
+  local chunkCount=0
+
+  if [[ -z "$inputPath" ]]; then
+    _messageFAIL "==rmh== split: no input path provided"
+    return 1
+  fi
+
+  if [[ ! -e "$inputPath" ]]; then
+    _messageFAIL "==rmh== split: missing source $inputPath"
+    return 1
+  fi
+
+  if [[ ! -s "$inputPath" ]]; then
+    _messageFAIL "==rmh== split: source is empty $inputPath"
+    return 1
+  fi
+
+  local iteration size suffix partPath
+  for iteration in $(seq 0 50); do
+    if [[ ! -e "$inputPath" ]]; then
+      break
+    fi
+
+    size=$(stat -c%s -- "$inputPath" 2>/dev/null) || {
+      _messageFAIL "==rmh== split: unable to stat $inputPath"
+      return 1
+    }
+
+    if (( size == 0 )); then
+      break
+    fi
+
+    printf -v suffix "%02d" "$iteration"
+    partPath="${inputPath}.part${suffix}"
+
+    rm -f -- "$partPath"
+
+    if (( size <= chunkSize )); then
+      if ! mv -f -- "$inputPath" "$partPath"; then
+        _messageFAIL "==rmh== split: failed to move final chunk → $partPath"
+        return 1
+      fi
+      ((chunkCount++))
+      break
+    fi
+
+    if ! tail -c "$chunkSize" -- "$inputPath" > "$partPath"; then
+      _messageFAIL "==rmh== split: failed to write chunk → $partPath"
+      return 1
+    fi
+
+    if ! truncate -s -"$chunkSize" -- "$inputPath"; then
+      _messageFAIL "==rmh== split: failed to truncate source $inputPath"
+      return 1
+    fi
+
+    ((chunkCount++))
+  done
+
+  if [[ -e "$inputPath" && ! -s "$inputPath" ]]; then
+    rm -f -- "$inputPath" || true
+  fi
+
+  if (( chunkCount == 0 )); then
+    _messageFAIL "==rmh== split: no chunks were produced for $inputPath"
+    return 1
+  fi
+
+  return 0
+}
+
 
 
 ###############################################################################
