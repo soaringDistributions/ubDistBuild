@@ -1,7 +1,7 @@
 [submodule "_lib/ubiquitous_bash"]
-	path = _lib/ubiquitous_bash
-	url = git@github.com:mirage335-colossus/ubiquitous_bash.git
+        path = _lib/ubiquitous_bash
+        url = https://github.com/mirage335-colossus/ubiquitous_bash.git
 	shallow = true
 [submodule "_lib/flipKey"]
-	path = _lib/flipKey
-	url = git@github.com:mirage335/flipKey.git
+        path = _lib/flipKey
+        url = https://github.com/mirage335/flipKey.git
