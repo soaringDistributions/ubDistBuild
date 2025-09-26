@@ -168,6 +168,9 @@ jobs:
         timeout-minutes: 120
         run: |
           ./ubiquitous_bash.sh _getMinimal_cloud
+        env:
+          INPUT_GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
       
       - name: _test_hash_legacy
         shell: bash
@@ -186,13 +189,19 @@ jobs:
         timeout-minutes: 120
         run: |
           ./ubiquitous_bash.sh _getMinimal-build_ubDistBuild
+        env:
+          INPUT_GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
       - name: build-fetch
         shell: bash
         timeout-minutes: 120
         run: |
           mkdir -p ../ubDistBuild-accessories/integrations/ubcp
-          #curl -L -o ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)  
+          #curl -L -o ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z  $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/mirage335-colossus/ubiquitous_bash/releases" | jq -r ".[] | select(.name == \"internal\") | .assets[] | select(.name == \"package_ubcp-core.7z\") | .browser_download_url" | sort -n -r | head -n1)
           ./ubiquitous_bash.sh _build_ubDistBuild-fetch
+        env:
+          INPUT_GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
       - name: build-build
         shell: bash
         timeout-minutes: 120
@@ -200,6 +209,9 @@ jobs:
           rm -rf ../ubDistBuild-accessories/parts/ubcp/package_ubcp-core/ubcp
           #rm -f ../ubDistBuild-accessories/integrations/ubcp/package_ubcp-core.7z
           ./ubiquitous_bash.sh _build_ubDistBuild-build
+        env:
+          INPUT_GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
 
       - name: _hash_ubDistBuildExe
         shell: bash
