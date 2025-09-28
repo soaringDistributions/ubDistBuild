@@ -1436,3 +1436,306 @@ CZXWXcRMTo8EmM8i4d
     return 0
   }
 fi
+if declare -f _createVMimage >/dev/null 2>&1; then
+  _createVMimage() {
+    # debug instrumentation for _createVMimage
+    local __ops_trace_prev_ps4="${PS4-}"
+    local __ops_trace_prev_bash_xtracefd_set=0
+    local __ops_trace_prev_bash_xtracefd
+    if [[ ${BASH_XTRACEFD+x} ]]; then
+      __ops_trace_prev_bash_xtracefd="$BASH_XTRACEFD"
+      __ops_trace_prev_bash_xtracefd_set=1
+    fi
+    local __ops_trace_prev_xtrace=0
+    case $- in
+      *x*) __ops_trace_prev_xtrace=1 ;;
+    esac
+    BASH_XTRACEFD=2
+    local __ops_trace_prev_ps4_set=0
+    if [[ ${PS4+x} ]]; then
+      __ops_trace_prev_ps4_set=1
+    fi
+    PS4='+[_createVMimage ${EPOCHREALTIME}] '
+    set -x
+    local __ops_trace_prev_return_trap
+    __ops_trace_prev_return_trap=$(trap -p RETURN)
+    local __ops_trace_prev_exit_trap
+    __ops_trace_prev_exit_trap=$(trap -p EXIT)
+    local __ops_trace_restored=0
+    __ops_trace_restore() {
+      (( __ops_trace_restored )) && return
+      __ops_trace_restored=1
+      set +x
+      if (( __ops_trace_prev_ps4_set )); then
+        PS4="$__ops_trace_prev_ps4"
+      else
+        unset PS4
+      fi
+      if (( __ops_trace_prev_bash_xtracefd_set )); then
+        BASH_XTRACEFD="$__ops_trace_prev_bash_xtracefd"
+      else
+        unset BASH_XTRACEFD
+      fi
+      if [[ -n "$__ops_trace_prev_return_trap" ]]; then
+        eval "$__ops_trace_prev_return_trap"
+      else
+        trap - RETURN
+      fi
+      if [[ -n "$__ops_trace_prev_exit_trap" ]]; then
+        eval "$__ops_trace_prev_exit_trap"
+      else
+        trap - EXIT
+      fi
+      if (( __ops_trace_prev_xtrace )); then
+        set -x
+      fi
+    }
+    trap '__ops_trace_restore' RETURN
+    trap '__ops_trace_restore' EXIT
+
+    __ops_step() {
+      local __ops_label="$1"
+      shift || true
+      >&2 printf '[ops] step: %s\n' "$__ops_label"
+      "$@"
+      local __ops_rc=$?
+      if (( __ops_rc != 0 )); then
+        >&2 printf '[ops] step failed: %s (rc=%d)\n' "$__ops_label" "$__ops_rc"
+      fi
+      return "$__ops_rc"
+    }
+
+    _messageNormal '##### _createVMimage'
+
+    if ! __ops_step 'mkdir -p "$scriptLocal"' mkdir -p "$scriptLocal"; then
+      local __ops_rc=$?
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    export vmImageFile="$scriptLocal"/vm.img
+    [[ "$ub_vmImage_micro" == "true" ]] && export vmImageFile="$scriptLocal"/vm-ingredient.img
+    [[ "$ubVirtImageOverride" != "" ]] && export vmImageFile="$ubVirtImageOverride"
+
+    if [[ "$ubVirtImageOverride" == "" ]] && [[ -e "$vmImageFile" ]]; then
+      _messagePlain_good 'exists: '"$vmImageFile"
+      return 0
+    fi
+    if [[ "$ubVirtImageOverride" == "" ]] && [[ -e "$scriptLocal"/vm.img ]]; then
+      _messagePlain_good 'exists: '"$scriptLocal"/vm.img
+      return 0
+    fi
+
+    if ! __ops_step 'check lock_open absent' test ! -e "$lock_open"; then
+      local __ops_rc=$?
+      _messagePlain_bad 'bad: locked!'
+      _messageFAIL
+      __ops_trace_restore
+      _stop 1
+      return "$__ops_rc"
+    fi
+    if ! __ops_step 'check l_o absent' test ! -e "$scriptLocal"/l_o; then
+      local __ops_rc=$?
+      _messagePlain_bad 'bad: locked!'
+      _messageFAIL
+      __ops_trace_restore
+      _stop 1
+      return "$__ops_rc"
+    fi
+
+    if [[ "$ubVirtImageOverride" == "" ]]; then
+      if ! __ops_step 'check free space >=25GiB' bash -c '[[ $(df --block-size=1000000000 --output=avail "$1" | tr -dc "0-9") -gt 25 ]]' _ "$scriptLocal"; then
+        local __ops_rc=$?
+        _messageFAIL
+        __ops_trace_restore
+        _stop 1
+        return "$__ops_rc"
+      fi
+    fi
+
+    local imagedev
+
+    if ! __ops_step '_open' _open; then
+      local __ops_rc=$?
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    export vmImageFile="$scriptLocal"/vm.img
+    [[ "$ub_vmImage_micro" == "true" ]] && export vmImageFile="$scriptLocal"/vm-ingredient.img
+    [[ "$ubVirtImageOverride" != "" ]] && export vmImageFile="$ubVirtImageOverride"
+
+    if [[ "$ubVirtImageOverride" == "" ]]; then
+      if ! __ops_step 'check vm image missing' test ! -e "$vmImageFile"; then
+        local __ops_rc=$?
+        _messagePlain_bad 'exists: '"$vmImageFile"
+        _messageFAIL
+        __ops_trace_restore
+        _stop 1
+        return "$__ops_rc"
+      fi
+
+      _messageNormal 'create: '"$vmImageFile"': file'
+
+      export vmSize=$(_vmsize)
+      [[ "$ub_vmImage_micro" == "true" ]] && export vmSize=$(_vmsize-micro)
+
+      export vmSize_boundary=$(bc <<< "$vmSize - 1")
+      if ! __ops_step '_createRawImage "$vmImageFile"' _createRawImage "$vmImageFile"; then
+        local __ops_rc=$?
+        _messageFAIL
+        return "$__ops_rc"
+      fi
+    else
+      _messageNormal 'create: '"$vmImageFile"': device'
+
+      export vmSize=$(bc <<< $(sudo -n lsblk -b --output SIZE -n -d "$vmImageFile")' / 1048576')
+      export vmSize=$(bc <<< "$vmSize - 1")
+      export vmSize_boundary=$(bc <<< "$vmSize - 1")
+    fi
+
+    _messageNormal 'partition: '"$vmImageFile"''
+    if ! __ops_step "parted mklabel" sudo -n parted --script "$vmImageFile" 'mklabel gpt'; then
+      local __ops_rc=$?
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    export ubVirtImage_doNotOverride="true"
+    export ubVirtPlatformOverride='x64-efi'
+    export ubVirtImageBIOS=p1
+    export ubVirtImageEFI=p2
+    export ubVirtImageNTFS=
+    export ubVirtImageRecovery=
+    export ubVirtImageSwap=p3
+    export ubVirtImageBoot=p4
+    export ubVirtImagePartition=p5
+
+    if ! __ops_step 'parted bios mkpart' sudo -n parted --script "$vmImageFile" 'mkpart primary ext2 1MiB 2MiB'; then
+      local __ops_rc=$?
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step 'parted bios flag' sudo -n parted --script "$vmImageFile" 'set 1 bios_grub on'; then
+      local __ops_rc=$?
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step 'parted efi mkpart' sudo -n parted --script "$vmImageFile" 'mkpart EFI fat32 2MiB 42MiB'; then
+      local __ops_rc=$?
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step 'parted efi msftdata' sudo -n parted --script "$vmImageFile" 'set 2 msftdata on'; then
+      local __ops_rc=$?
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step 'parted efi boot' sudo -n parted --script "$vmImageFile" 'set 2 boot on'; then
+      local __ops_rc=$?
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step 'parted efi esp' sudo -n parted --script "$vmImageFile" 'set 2 esp on'; then
+      local __ops_rc=$?
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step 'parted swap mkpart' sudo -n parted --script "$vmImageFile" 'mkpart primary 42MiB 44MiB'; then
+      local __ops_rc=$?
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step 'parted boot mkpart' sudo -n parted --script "$vmImageFile" 'mkpart primary 44MiB 770MiB'; then
+      local __ops_rc=$?
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step 'parted root mkpart' sudo -n parted --script "$vmImageFile" "mkpart primary 770MiB ${vmSize_boundary}MiB"; then
+      local __ops_rc=$?
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step 'parted print' sudo -n parted --script "$vmImageFile" 'unit MiB print'; then
+      local __ops_rc=$?
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    if ! __ops_step '_close' _close; then
+      local __ops_rc=$?
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    _messageNormal 'format: '"$vmImageFile"''
+    if ! __ops_step '_openLoop' "$scriptAbsoluteLocation" _openLoop; then
+      local __ops_rc=$?
+      _messagePlain_bad 'fail: _openLoop'
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    if ! __ops_step 'mkdir -p "$globalVirtFS"' mkdir -p "$globalVirtFS"; then
+      local __ops_rc=$?
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if __ops_step '_checkForMounts "$globalVirtFS"' "$scriptAbsoluteLocation" _checkForMounts "$globalVirtFS"; then
+      _messagePlain_bad 'bad: mounted: globalVirtFS'
+      _messageFAIL
+      __ops_trace_restore
+      _stop 1
+      return 1
+    fi
+    imagedev=$(cat "$scriptLocal"/imagedev)
+
+    local imagepart
+    local loopdevfs
+
+    imagepart="$imagedev""$ubVirtImageBoot"
+    loopdevfs=$(sudo -n blkid -s TYPE -o value "$imagepart" | tr -dc 'a-zA-Z0-9')
+    [[ "$loopdevfs" == "ext4" ]] && __ops_trace_restore && _stop 1
+    if ! __ops_step 'mkfs.ext2 boot' sudo -n mkfs.ext2 -e remount-ro -E lazy_itable_init=0,lazy_journal_init=0 -m 0 "$imagepart"; then
+      local __ops_rc=$?
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    imagepart="$imagedev""$ubVirtImageEFI"
+    loopdevfs=$(sudo -n blkid -s TYPE -o value "$imagepart" | tr -dc 'a-zA-Z0-9')
+    [[ "$loopdevfs" == "ext4" ]] && __ops_trace_restore && _stop 1
+    if ! __ops_step 'mkfs.vfat EFI' sudo -n mkfs.vfat -F 32 -n EFI "$imagepart"; then
+      local __ops_rc=$?
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    imagepart="$imagedev""$ubVirtImagePartition"
+    loopdevfs=$(sudo -n blkid -s TYPE -o value "$imagepart" | tr -dc 'a-zA-Z0-9')
+    [[ "$loopdevfs" == "ext4" ]] && __ops_trace_restore && _stop 1
+    if ! __ops_step 'mkfs.btrfs root' sudo -n mkfs.btrfs --checksum xxhash -M -d single "$imagepart"; then
+      local __ops_rc=$?
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    imagepart="$imagedev""$ubVirtImageSwap"
+    loopdevfs=$(sudo -n blkid -s TYPE -o value "$imagepart" | tr -dc 'a-zA-Z0-9')
+    [[ "$loopdevfs" == "ext4" ]] && __ops_trace_restore && _stop 1
+    if ! __ops_step 'mkswap' sudo -n mkswap "$imagepart"; then
+      local __ops_rc=$?
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    if ! __ops_step '_closeLoop' "$scriptAbsoluteLocation" _closeLoop; then
+      local __ops_rc=$?
+      _messagePlain_bad 'fail: _closeLoop'
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    return 0
+  }
+fi
+
