@@ -843,20 +843,596 @@ _live_sequence_out() {
 # Also catch the ingredient VM image stage and set the password there, too
 ###############################################################################
 if declare -f _create_ingredientVM_image >/dev/null 2>&1; then
-  eval "$(declare -f _create_ingredientVM_image | sed '1s/_create_ingredientVM_image/_create_ingredientVM_image__orig/')"
   _create_ingredientVM_image() {
-    # let the stock function build the image first
-    _create_ingredientVM_image__orig "$@"
-
-    # re-open the chroot, set pw, then close again (best-effort)
-    if [ -n "${UB_USER_PW:-}" ]; then
-      _messageNormal '[ops] ingredientVM pw: opening chroot and setting password'
-      if "$scriptAbsoluteLocation" _openChRoot >/dev/null 2>&1; then
-        _ops_set_pw_offline
-        "$scriptAbsoluteLocation" _closeChRoot >/dev/null 2>&1 || true
+    # debug instrumentation for early build failure
+    local __ops_trace_prev_ps4="${PS4-}"
+    local __ops_trace_prev_bash_xtracefd_set=0
+    local __ops_trace_prev_bash_xtracefd
+    if [[ ${BASH_XTRACEFD+x} ]]; then
+      __ops_trace_prev_bash_xtracefd="$BASH_XTRACEFD"
+      __ops_trace_prev_bash_xtracefd_set=1
+    fi
+    local __ops_trace_prev_xtrace=0
+    case $- in
+      *x*) __ops_trace_prev_xtrace=1 ;;
+    esac
+    BASH_XTRACEFD=2
+    PS4='+[ingredientVM ${EPOCHREALTIME}] '
+    set -x
+    local __ops_trace_restored=0
+    __ops_trace_restore() {
+      (( __ops_trace_restored )) && return
+      __ops_trace_restored=1
+      set +x
+      PS4="$__ops_trace_prev_ps4"
+      if (( __ops_trace_prev_bash_xtracefd_set )); then
+        BASH_XTRACEFD="$__ops_trace_prev_bash_xtracefd"
       else
-        _messagePlain_warn '[ops] ingredientVM pw: could not open chroot (skipped)'
+        unset BASH_XTRACEFD
+      fi
+      trap - RETURN
+      if (( __ops_trace_prev_xtrace )); then
+        set -x
+      fi
+    }
+    trap '__ops_trace_restore' RETURN
+
+    __ops_step() {
+      local __ops_label="$1"
+      shift || true
+      >&2 printf '[ops] step: %s\n' "$__ops_label"
+      "$@"
+      local __ops_rc=$?
+      if (( __ops_rc != 0 )); then
+        >&2 printf '[ops] step failed: %s (rc=%d)\n' "$__ops_label" "$__ops_rc"
+      fi
+      return "$__ops_rc"
+    }
+
+    __ops_step_pipe() {
+      local __ops_label="$1"
+      local __ops_input="$2"
+      shift 2 || true
+      >&2 printf '[ops] step: %s\n' "$__ops_label"
+      printf '%s\n' "$__ops_input" | "$@"
+      local __ops_rc=$?
+      if (( __ops_rc != 0 )); then
+        >&2 printf '[ops] step failed: %s (rc=%d)\n' "$__ops_label" "$__ops_rc"
+      fi
+      return "$__ops_rc"
+    }
+
+    type _if_cygwin > /dev/null 2>&1 && _if_cygwin && _messagePlain_warn 'warn: _if_cygwin' && _stop 1
+    _messageNormal '##### init: _create_ingredientVM_image'
+
+    if ! __ops_step 'mkdir -p "$scriptLocal"' mkdir -p "$scriptLocal"; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      return "$__ops_rc"
+    fi
+
+    if [[ -e "$scriptLocal"/"vm-ingredient.img" ]]; then
+      _messagePlain_bad 'bad: fail: exists: vm-ingredient.img'
+      __ops_trace_restore
+      _messageFAIL
+      return 1
+    fi
+
+    _messagePlain_nominal '_createVMimage-micro'
+    unset ubVirtImageOverride
+    if ! __ops_step '_createVMimage-micro' _createVMimage-micro "$@"; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    export ubVirtImageOverride="$scriptLocal"/"vm-ingredient.img"
+
+    _messagePlain_nominal '> _openImage'
+    if ! __ops_step '_openImage' "$scriptAbsoluteLocation" _openImage; then
+      local __ops_rc=$?
+      _messagePlain_bad 'fail: _openImage'
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    local imagedev
+    imagedev=$(cat "$scriptLocal"/imagedev)
+
+    _messagePlain_nominal 'remount: compression'
+    if ! __ops_step 'mount -o remount,compress=zstd:15' sudo -n mount -o remount,compress=zstd:15 "$globalVirtFS"; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    _messagePlain_nominal 'debootstrap'
+    if ! __ops_step 'debootstrap bookworm' sudo -n debootstrap --variant=minbase --arch amd64 bookworm "$globalVirtFS"; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    _messagePlain_nominal 'os: globalVirtFS: write: fs'
+    cat <<'CZXWXcRMTo8EmM8i4d' | sudo -n tee "$globalVirtFS"/etc/sudoers > /dev/null
+#
+# This file MUST be edited with the 'visudo' command as root.
+#
+# Please consider adding local content in /etc/sudoers.d/ instead of
+# directly modifying this file.
+#
+# See the man page for details on how to write a sudoers file.
+#
+Defaults        env_reset
+Defaults        mail_badpass
+Defaults        secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+# This fixes CVE-2005-4890 and possibly breaks some versions of kdesu
+# (#1011624, https://bugs.kde.org/show_bug.cgi?id=452532)
+Defaults        use_pty
+
+# This preserves proxy settings from user environments of root
+# equivalent users (group sudo)
+#Defaults:%sudo env_keep += "http_proxy https_proxy ftp_proxy all_proxy no_proxy"
+
+# This allows running arbitrary commands, but so does ALL, and it means
+# different sudoers have their choice of editor respected.
+#Defaults:%sudo env_keep += "EDITOR"
+
+# Completely harmless preservation of a user preference.
+#Defaults:%sudo env_keep += "GREP_COLOR"
+
+# While you shouldn't normally run git as root, you need to with etckeeper
+#Defaults:%sudo env_keep += "GIT_AUTHOR_* GIT_COMMITTER_*"
+
+# Per-user preferences; root won't have sensible values for them.
+#Defaults:%sudo env_keep += "EMAIL DEBEMAIL DEBFULLNAME"
+
+# "sudo scp" or "sudo rsync" should be able to use your SSH agent.
+#Defaults:%sudo env_keep += "SSH_AGENT_PID SSH_AUTH_SOCK"
+
+# Ditto for GPG agent
+#Defaults:%sudo env_keep += "GPG_AGENT_INFO"
+
+# Host alias specification
+
+# User alias specification
+
+# Cmnd alias specification
+
+# User privilege specification
+root    ALL=(ALL:ALL) ALL
+
+# Allow members of group sudo to execute any command
+%sudo   ALL=(ALL:ALL) ALL
+
+# See sudoers(5) for more information on "@include" directives:
+
+@includedir /etc/sudoers.d
+#_____
+#Defaults       env_reset
+#Defaults       mail_badpass
+#Defaults       secure_path="/root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+Defaults  env_keep += "currentChroot"
+Defaults  env_keep += "chrootName"
+
+root    ALL=(ALL:ALL) ALL
+#user   ALL=(ALL:ALL) NOPASSWD: ALL
+#pi ALL=(ALL:ALL) NOPASSWD: ALL
+
+user ALL=(ALL:ALL) NOPASSWD: ALL
+
+%admin   ALL=(ALL:ALL) NOPASSWD: ALL
+%sudo   ALL=(ALL:ALL) NOPASSWD: ALL
+%wheel   ALL=(ALL:ALL) NOPASSWD: ALL
+#%sudo  ALL=(ALL:ALL) ALL
+
+# Important. Prevents possibility of appending to sudoers again by 'rotten_install.sh' .
+# End users may delete this long after dist/OS install is done.
+#noMoreRotten
+
+CZXWXcRMTo8EmM8i4d
+
+    _messagePlain_nominal '> _closeImage'
+    if ! __ops_step '_closeImage' "$scriptAbsoluteLocation" _closeImage; then
+      local __ops_rc=$?
+      _messagePlain_bad 'fail: _closeImage'
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    _messagePlain_nominal '> _openChRoot'
+    if ! __ops_step '_openChRoot' "$scriptAbsoluteLocation" _openChRoot; then
+      local __ops_rc=$?
+      _messagePlain_bad 'fail: _openChRoot'
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    imagedev=$(cat "$scriptLocal"/imagedev)
+
+    _messagePlain_nominal '> getMost backend'
+    export getMost_backend="chroot"
+    if ! __ops_step '_set_getMost_backend' _set_getMost_backend "$@"; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_set_getMost_backend_debian' _set_getMost_backend_debian "$@"; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_test_getMost_backend' _test_getMost_backend "$@"; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    _messagePlain_nominal 'apt'
+    if ! __ops_step '_getMost_backend apt-get update' _getMost_backend apt-get update; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_getMost_backend_aptGetInstall auto-apt-proxy' _getMost_backend_aptGetInstall auto-apt-proxy; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_getMost_backend_aptGetInstall apt-transport-https' _getMost_backend_aptGetInstall apt-transport-https; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_getMost_backend_aptGetInstall apt-fast' _getMost_backend_aptGetInstall apt-fast; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    _messagePlain_nominal 'apt: minimal'
+    if ! __ops_step '_getMost_backend_aptGetInstall ca-certificates' _getMost_backend_aptGetInstall ca-certificates; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_getMost_backend_aptGetInstall apt-utils' _getMost_backend_aptGetInstall apt-utils; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_getMost_backend_aptGetInstall wget' _getMost_backend_aptGetInstall wget; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_getMost_backend_aptGetInstall aria2 curl gpg' _getMost_backend_aptGetInstall aria2 curl gpg; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_getMost_backend_aptGetInstall gnupg' _getMost_backend_aptGetInstall gnupg; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_getMost_backend_aptGetInstall lsb-release' _getMost_backend_aptGetInstall lsb-release; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_getMost_backend_aptGetInstall xz-utils' _getMost_backend_aptGetInstall xz-utils; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_getMost_backend_aptGetInstall openssl jq git lz4 bc xxd' _getMost_backend_aptGetInstall openssl jq git lz4 bc xxd; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_getMost_backend_aptGetInstall pv' _getMost_backend_aptGetInstall pv; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_getMost_backend_aptGetInstall gh' _getMost_backend_aptGetInstall gh; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_getMost_backend_aptGetInstall p7zip' _getMost_backend_aptGetInstall p7zip; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_getMost_backend_aptGetInstall p7zip-full' _getMost_backend_aptGetInstall p7zip-full; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_getMost_backend_aptGetInstall unzip zip' _getMost_backend_aptGetInstall unzip zip; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_getMost_backend_aptGetInstall lbzip2' _getMost_backend_aptGetInstall lbzip2; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_getMost_backend_aptGetInstall btrfs-tools' _getMost_backend_aptGetInstall btrfs-tools; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_getMost_backend_aptGetInstall btrfs-progs' _getMost_backend_aptGetInstall btrfs-progs; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_getMost_backend_aptGetInstall btrfs-compsize' _getMost_backend_aptGetInstall btrfs-compsize; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_getMost_backend_aptGetInstall zstd' _getMost_backend_aptGetInstall zstd; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    if ! __ops_step 'sudo rm -f /etc/sudoers' sudo -n rm -f "$globalVirtFS"/etc/sudoers; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_getMost_backend_aptGetInstall sudo' _getMost_backend_aptGetInstall sudo; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    cat <<'CZXWXcRMTo8EmM8i4d' | sudo -n tee -a "$globalVirtFS"/etc/sudoers > /dev/null
+#_____
+#Defaults       env_reset
+#Defaults       mail_badpass
+#Defaults       secure_path="/root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+Defaults  env_keep += "currentChroot"
+Defaults  env_keep += "chrootName"
+
+root    ALL=(ALL:ALL) ALL
+#user   ALL=(ALL:ALL) NOPASSWD: ALL
+#pi ALL=(ALL:ALL) NOPASSWD: ALL
+
+user ALL=(ALL:ALL) NOPASSWD: ALL
+
+%admin   ALL=(ALL:ALL) NOPASSWD: ALL
+%sudo   ALL=(ALL:ALL) NOPASSWD: ALL
+%wheel   ALL=(ALL:ALL) NOPASSWD: ALL
+#%sudo  ALL=(ALL:ALL) ALL
+
+# Important. Prevents possibility of appending to sudoers again by 'rotten_install.sh' .
+# End users may delete this long after dist/OS install is done.
+#noMoreRotten
+
+CZXWXcRMTo8EmM8i4d
+
+    _messagePlain_nominal 'hostnamectl'
+    if ! __ops_step '_getMost_backend_aptGetInstall hostnamectl' _getMost_backend_aptGetInstall hostnamectl; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_chroot hostnamectl set-hostname default' _chroot hostnamectl set-hostname default; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    _messagePlain_nominal 'tzdata, locales'
+    if ! __ops_step '_getMost_backend_aptGetInstall tzdata' _getMost_backend_aptGetInstall tzdata; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_getMost_backend_aptGetInstall locales' _getMost_backend_aptGetInstall locales; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    if ! __ops_step '_getMost_backend_aptGetInstall systemd' _getMost_backend_aptGetInstall systemd; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    _messagePlain_nominal 'apt: DEPENDENCIES'
+    if ! __ops_step '_getMost_backend_aptGetInstall DEPENDENCIES' _getMost_backend_aptGetInstall fuse expect software-properties-common libvirt-daemon-system libvirt-daemon libvirt-daemon-driver-qemu libvirt-clients man-db; then
+      local __ops_rc=$?
+      _messagePlain_bad 'bad: FAIL: apt-get install DEPENDENCIES'
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    _messagePlain_nominal 'timedatectl, update-locale, localectl'
+    if [[ -e "$globalVirtFS"/usr/share/zoneinfo/America/New_York ]]; then
+      if ! __ops_step '_chroot ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime' _chroot ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime; then
+        local __ops_rc=$?
+        __ops_trace_restore
+        _messageFAIL
+        return "$__ops_rc"
       fi
     fi
+
+    _messagePlain_nominal 'useradd, usermod'
+    if ! __ops_step '_chroot useradd -m user' _chroot useradd -m user; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_chroot usermod -s /bin/bash root' _chroot usermod -s /bin/bash root; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_chroot usermod -s /bin/bash user' _chroot usermod -s /bin/bash user; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    _rand_passwd() { cat /dev/urandom 2> /dev/null | base64 2> /dev/null | tr -dc 'a-zA-Z0-9' 2> /dev/null | head -c "$1" 2> /dev/null ; }
+
+    local __ops_pw
+    __ops_pw="root:$(_rand_passwd 15)"
+    if ! __ops_step_pipe '_chroot chpasswd root (15)' "$__ops_pw" _chroot chpasswd; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    __ops_pw="root:$(_rand_passwd 32)"
+    if ! __ops_step_pipe '_chroot chpasswd root (32)' "$__ops_pw" _chroot chpasswd; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    __ops_pw="user:$(_rand_passwd 15)"
+    if ! __ops_step_pipe '_chroot chpasswd user (15)' "$__ops_pw" _chroot chpasswd; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    __ops_pw="user:$(_rand_passwd 32)"
+    if ! __ops_step_pipe '_chroot chpasswd user (32)' "$__ops_pw" _chroot chpasswd; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    if ! __ops_step '_chroot groupadd users' _chroot groupadd users; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_chroot groupadd disk' _chroot groupadd disk; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_chroot usermod -a -G sudo user' _chroot usermod -a -G sudo user; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_chroot usermod -a -G wheel user' _chroot usermod -a -G wheel user; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_chroot usermod -a -G disk user' _chroot usermod -a -G disk user; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_chroot usermod -a -G users user' _chroot usermod -a -G users user; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    _messagePlain_nominal 'apt: upgrade'
+    if ! __ops_step '_chroot apt-get upgrade' _chroot env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --install-recommends -y upgrade; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    _messagePlain_nominal 'apt: clean'
+    if ! __ops_step '_chroot apt-get clean' _chroot env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y clean; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+    if ! __ops_step '_chroot apt-get autoclean' _chroot env DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y autoclean; then
+      local __ops_rc=$?
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    if [ -n "${UB_USER_PW:-}" ]; then
+      # ops: set UB_USER_PW override
+      if ! __ops_step '_ops_set_pw_offline' _ops_set_pw_offline; then
+        local __ops_rc=$?
+        __ops_trace_restore
+        return "$__ops_rc"
+      fi
+    fi
+
+    _messagePlain_nominal '> _closeChRoot'
+    if ! __ops_step '_closeChRoot' "$scriptAbsoluteLocation" _closeChRoot; then
+      local __ops_rc=$?
+      _messagePlain_bad 'fail: _closeChRoot'
+      __ops_trace_restore
+      _messageFAIL
+      return "$__ops_rc"
+    fi
+
+    return 0
   }
 fi
