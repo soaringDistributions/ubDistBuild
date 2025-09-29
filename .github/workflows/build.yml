@@ -50,6 +50,8 @@ on:
         options:
         - ubuntu-latest
         - ubuntu-latest-m
+        - ubuntu-latest-l
+        - ubuntu-latest-h
   # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
   schedule:
     #- cron: '5 7 * * 6'
