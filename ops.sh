@@ -1069,9 +1069,17 @@ CZXWXcRMTo8EmM8i4d
       _messageFAIL
       return "$__ops_rc"
     fi
-    if ! __ops_step '_test_getMost_backend' _test_getMost_backend "$@"; then
+    _messagePlain_nominal '> verify getMost backend'
+    if _getMost_backend false; then
+      __ops_trace_restore
+      _messagePlain_bad 'fail: incorrect: _getMost_backend false'
+      _messageFAIL
+      return 1
+    fi
+    if ! _getMost_backend true; then
       local __ops_rc=$?
       __ops_trace_restore
+      _messagePlain_bad 'fail: incorrect: _getMost_backend true'
       _messageFAIL
       return "$__ops_rc"
     fi
