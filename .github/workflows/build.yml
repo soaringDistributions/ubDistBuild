@@ -124,12 +124,22 @@ jobs:
       - name: relocate _local onto /mnt
         shell: bash
         run: |
+            set -euo pipefail
             target=/mnt/ubdistbuild-${GITHUB_RUN_ID}-${GITHUB_JOB}
             sudo rm -rf "$target"
             sudo mkdir -p "$target"
             sudo chown "$USER:$USER" "$target"
+            if mountpoint -q _local 2>/dev/null; then
+              sudo umount _local
+            fi
             rm -rf _local
-            ln -s "$target" _local
+            mkdir -p _local
+            if sudo mount --bind "$target" _local; then
+              sudo chown "$USER:$USER" _local
+            else
+              rmdir _local
+              ln -s "$target" _local
+            fi
       # - name: mkdir _local
       #   shell: bash
       #   run: |
@@ -175,12 +185,22 @@ jobs:
       - name: relocate _local onto /mnt
         shell: bash
         run: |
+            set -euo pipefail
             target=/mnt/ubdistbuild-${GITHUB_RUN_ID}-${GITHUB_JOB}
             sudo rm -rf "$target"
             sudo mkdir -p "$target"
             sudo chown "$USER:$USER" "$target"
+            if mountpoint -q _local 2>/dev/null; then
+              sudo umount _local
+            fi
             rm -rf _local
-            ln -s "$target" _local
+            mkdir -p _local
+            if sudo mount --bind "$target" _local; then
+              sudo chown "$USER:$USER" _local
+            else
+              rmdir _local
+              ln -s "$target" _local
+            fi
       # - name: mkdir _local
       #   shell: bash
       #   run: |
