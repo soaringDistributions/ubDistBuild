@@ -1550,6 +1550,10 @@ if declare -f _createVMimage >/dev/null 2>&1; then
         _messagePlain_bad "bad: need >=25GiB free space"
         df --block-size=1000000000 "."
         df --block-size=1000000000 "$scriptLocal"
+        lscpu
+        free -h
+        df -h /
+        df -h 
         _messageFAIL
         __ops_trace_restore
         _stop 1
