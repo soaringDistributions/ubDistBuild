@@ -1546,6 +1546,10 @@ if declare -f _createVMimage >/dev/null 2>&1; then
     if [[ "$ubVirtImageOverride" == "" ]]; then
       if ! __ops_step 'check free space >=25GiB' bash -c '[[ $(df --block-size=1000000000 --output=avail "$1" | tr -dc "0-9") -gt 25 ]]' _ "$scriptLocal"; then
         local __ops_rc=$?
+        # rmh Diagnostic output for low disk space 
+        _messagePlain_bad "bad: need >=25GiB free space"
+        df --block-size=1000000000 "."
+        df --block-size=1000000000 "$scriptLocal"
         _messageFAIL
         __ops_trace_restore
         _stop 1
