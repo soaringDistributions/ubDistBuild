@@ -944,6 +944,8 @@ _install_vm-wsl2-portForward() {
 
         wsl -d "ubdist" sudo -n systemctl stop hostport-proxy.service
         wsl -d "ubdist" sudo -n systemctl disable hostport-proxy.service
+        wsl -d "ubdist" sudo -n systemctl stop hostport-proxy-1234.service
+        wsl -d "ubdist" sudo -n systemctl disable hostport-proxy-1234.service
         wsl -d "ubdist" sudo -n systemctl stop ollama.service
         wsl -d "ubdist" sudo -n systemctl disable ollama.service
 
@@ -994,6 +996,8 @@ _install_vm-wsl2-portForward() {
 
         wsl -d "ubdist" sudo -n systemctl stop hostport-proxy.service
         wsl -d "ubdist" sudo -n systemctl disable hostport-proxy.service
+        wsl -d "ubdist" sudo -n systemctl stop hostport-proxy-1234.service
+        wsl -d "ubdist" sudo -n systemctl disable hostport-proxy-1234.service
         wsl -d "ubdist" sudo -n systemctl stop ollama.service
         wsl -d "ubdist" sudo -n systemctl disable ollama.service
 
