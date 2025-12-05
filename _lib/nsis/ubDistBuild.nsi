@@ -77,7 +77,8 @@ Section "Install"
   ;SetOutPath "C:\core\infrastructure\ubDistBuild\_lib\7zip"
   ;File "..\..\..\ubDistBuild-accessories\integrations\7zip\7zr.exe"
   #nsExec::ExecToLog '"C:\core\infrastructure\ubDistBuild\_lib\7zip\7zr.exe" x "C:\core\infrastructure\ubDistBuild\_local\package_ubcp-core.7z" -o"C:\core\infrastructure\ubDistBuild\_local\ubcp" -y'
-  nsExec::ExecToLog '"$TEMP\ubDistBuild_bundle\7zip\7zr.exe" x "C:\core\infrastructure\ubDistBuild\_local\package_ubcp-core.7z" -o"C:\core\infrastructure\ubDistBuild\_local\ubcp" -y'
+  ; Extract to _local so the archive's top-level ubcp directory lands at the expected path
+  nsExec::ExecToLog '"$TEMP\ubDistBuild_bundle\7zip\7zr.exe" x "C:\core\infrastructure\ubDistBuild\_local\package_ubcp-core.7z" -o"C:\core\infrastructure\ubDistBuild\_local" -y'
   Delete "C:\core\infrastructure\ubDistBuild\_local\package_ubcp-core.7z"
 
   ;ATTENTION
